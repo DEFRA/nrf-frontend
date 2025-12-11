@@ -23,6 +23,9 @@ export function context(request) {
     }
   }
 
+  const isAuthenticated = request?.auth?.isAuthenticated || false
+  const credentials = request?.auth?.credentials || null
+
   return {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
@@ -32,6 +35,16 @@ export function context(request) {
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`
-    }
+    },
+    // Authentication state
+    isAuthenticated,
+    user: credentials
+      ? {
+          id: credentials.id,
+          email: credentials.email,
+          displayName: credentials.claims?.name || credentials.email,
+          enrolmentStatus: credentials.enrolmentStatus
+        }
+      : null
   }
 }

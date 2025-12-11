@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import process from 'node:process'
 
 import { startServer } from './server/common/helpers/start-server.js'

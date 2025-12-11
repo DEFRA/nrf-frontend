@@ -21,7 +21,10 @@ export const sessionCache = {
       password: sessionConfig.cookie.password,
       ttl: sessionConfig.cookie.ttl,
       isSecure: config.get('session.cookie.secure'),
-      clearInvalid: true
+      clearInvalid: true,
+      strictHeader: false,
+      // For identity plugin compatibility (yar uses 'iron' encoding by default):
+      isSameSite: 'Lax' // Required for OAuth/OIDC redirects from B2C
     }
   }
 }
