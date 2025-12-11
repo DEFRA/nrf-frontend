@@ -58,10 +58,17 @@ describe('context and cache', () => {
               current: false,
               text: 'About',
               href: '/about'
+            },
+            {
+              current: false,
+              text: 'Sign in',
+              href: '/login'
             }
           ],
           serviceName: 'nrf-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          isAuthenticated: false,
+          user: null
         })
       })
 
@@ -147,10 +154,17 @@ describe('context and cache', () => {
               current: false,
               text: 'About',
               href: '/about'
+            },
+            {
+              current: false,
+              text: 'Sign in',
+              href: '/login'
             }
           ],
           serviceName: 'nrf-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          isAuthenticated: false,
+          user: null
         })
       })
     })
