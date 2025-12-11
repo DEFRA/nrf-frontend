@@ -4,7 +4,7 @@
 export const profileController = {
   handler(request, h) {
     // Check if user is authenticated
-    if (!request.auth.isAuthenticated) {
+    if (!request.auth.isAuthenticated || !request.auth.credentials) {
       return h.redirect('/login')
     }
 

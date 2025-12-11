@@ -243,6 +243,12 @@ export const config = convict({
       format: String,
       default: 'b2c_1a_cui_cpdev_signupsignin',
       env: 'IDENTITY_B2C_POLICY'
+    },
+    appDomain: {
+      doc: 'Application domain for OAuth redirect URI',
+      format: String,
+      default: '',
+      env: 'APP_DOMAIN'
     }
   },
   aad: {

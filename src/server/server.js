@@ -44,7 +44,9 @@ function getIdentityPluginOptions(config) {
     },
 
     // Application domain for OAuth redirect URI
-    appDomain: `http://localhost:${config.get('port')}`,
+    appDomain:
+      config.get('identityProvider.appDomain') ||
+      `http://localhost:${config.get('port')}`,
 
     // Session/cookie settings
     cookiePassword: config.get('session.cookie.password'),
@@ -133,7 +135,7 @@ export async function createServer() {
       const statusCode = request.response.output.statusCode
 
       if (statusCode === 401 && !request.path.startsWith('/login')) {
-        return h.redirect('/login/out').takeover()
+        return h.redirect('/login').takeover()
       }
     }
 
