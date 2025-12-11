@@ -1,0 +1,46 @@
+{% extends "layouts/page.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">{{ pageTitle }}</h1>
+
+      <dl class="govuk-summary-list">
+        {% if user.firstName or user.lastName %}
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Name</dt>
+            <dd class="govuk-summary-list__value">
+              {{ user.firstName }} {{ user.lastName }}
+            </dd>
+          </div>
+        {% endif %}
+
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Email</dt>
+          <dd class="govuk-summary-list__value">{{ user.email }}</dd>
+        </div>
+
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">User ID</dt>
+          <dd class="govuk-summary-list__value">{{ user.id }}</dd>
+        </div>
+
+        {% if user.enrolmentStatus %}
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Enrolment Status</dt>
+            <dd class="govuk-summary-list__value">
+              <strong class="govuk-tag">{{ user.enrolmentStatus }}</strong>
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+
+      <h2 class="govuk-heading-m">Account Management</h2>
+      <p class="govuk-body">
+        <a href="https://your-account.cpdev.cui.defra.gov.uk/management" class="govuk-link">
+          Manage your DEFRA account
+        </a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

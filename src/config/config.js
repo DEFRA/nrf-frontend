@@ -200,6 +200,92 @@ export const config = convict({
       env: 'REDIS_TLS'
     }
   },
+  identityProvider: {
+    enabled: {
+      doc: 'Enable DEFRA Customer Identity authentication',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_IDENTITY_PLUGIN'
+    },
+    appUrl: {
+      doc: 'Identity Provider application URL',
+      format: String,
+      default: 'https://your-account.cpdev.cui.defra.gov.uk',
+      env: 'IDENTITY_APP_URL'
+    },
+    serviceId: {
+      doc: 'Service ID assigned by DEFRA Customer Identity',
+      format: String,
+      default: '',
+      env: 'IDENTITY_SERVICE_ID'
+    },
+    clientId: {
+      doc: 'OAuth client ID from Azure AD B2C',
+      format: String,
+      default: '',
+      env: 'IDENTITY_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'OAuth client secret from Azure AD B2C',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'IDENTITY_CLIENT_SECRET'
+    },
+    authenticationPath: {
+      doc: 'B2C authentication journey/path name',
+      format: String,
+      default: 'authentication-journey',
+      env: 'IDENTITY_AUTHENTICATION_PATH'
+    },
+    b2cPolicy: {
+      doc: 'B2C policy name for OIDC flow',
+      format: String,
+      default: 'b2c_1a_cui_cpdev_signupsignin',
+      env: 'IDENTITY_B2C_POLICY'
+    }
+  },
+  aad: {
+    authHost: {
+      doc: 'Azure AD authentication host',
+      format: String,
+      default: 'https://login.microsoftonline.com',
+      env: 'AAD_AUTHHOST'
+    },
+    tenantName: {
+      doc: 'Azure AD tenant ID or name',
+      format: String,
+      default: '',
+      env: 'AAD_TENANTNAME'
+    }
+  },
+  dynamics: {
+    endpointBase: {
+      doc: 'Dynamics Web API endpoint base URL',
+      format: String,
+      default: '',
+      env: 'DYNAMICS_ENDPOINTBASE'
+    },
+    clientId: {
+      doc: 'Dynamics AAD client ID',
+      format: String,
+      default: '',
+      env: 'DYNAMICS_AADCLIENTID'
+    },
+    clientSecret: {
+      doc: 'Dynamics AAD client secret',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'DYNAMICS_AADCLIENTSECRET'
+    },
+    resourceUrl: {
+      doc: 'Dynamics resource URL',
+      format: String,
+      default: '',
+      env: 'DYNAMICS_RESOURCEURL'
+    }
+  },
   nunjucks: {
     watch: {
       doc: 'Reload templates when they are changed.',
