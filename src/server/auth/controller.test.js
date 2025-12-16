@@ -4,7 +4,13 @@ import { loginController } from './controller.js'
 describe('Auth Controller', () => {
   describe('loginController', () => {
     it('should render login page', () => {
-      const request = {}
+      const request = {
+        server: {
+          app: {
+            authEnabled: true
+          }
+        }
+      }
       const h = {
         view: (template, context) => ({ template, context })
       }

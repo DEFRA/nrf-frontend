@@ -220,74 +220,70 @@ export const config = convict({
       env: 'TRACING_HEADER'
     }
   },
-  identityProvider: {
+  defraId: {
     enabled: {
       doc: 'Enable DEFRA Customer Identity authentication',
       format: Boolean,
       default: false,
-      env: 'ENABLE_IDENTITY_PLUGIN'
+      env: 'ENABLE_DEFRA_ID'
+    },
+    wellKnownUrl: {
+      doc: 'OIDC well-known configuration URL',
+      format: String,
+      default: '',
+      env: 'DEFRA_ID_WELL_KNOWN_URL'
     },
     clientId: {
-      doc: 'OAuth client ID from Azure AD B2C',
+      doc: 'OAuth client ID',
       format: String,
       default: '',
-      env: 'IDENTITY_CLIENT_ID'
+      env: 'DEFRA_ID_CLIENT_ID'
     },
     clientSecret: {
-      doc: 'OAuth client secret from Azure AD B2C',
+      doc: 'OAuth client secret',
       format: String,
       default: '',
       sensitive: true,
-      env: 'IDENTITY_CLIENT_SECRET'
+      env: 'DEFRA_ID_CLIENT_SECRET'
     },
-    authority: {
-      doc: 'Azure AD B2C authority URL',
+    redirectUrl: {
+      doc: 'OAuth callback URL',
+      format: String,
+      default: 'http://localhost:3000/auth/sign-in-oidc',
+      env: 'DEFRA_ID_REDIRECT_URL'
+    },
+    serviceId: {
+      doc: 'Service ID for DEFRA Identity',
       format: String,
       default: '',
-      env: 'IDENTITY_AUTHORITY'
-    },
-    tenantId: {
-      doc: 'Azure AD tenant ID',
-      format: String,
-      default: '',
-      env: 'IDENTITY_TENANT_ID'
+      env: 'DEFRA_ID_SERVICE_ID'
     },
     policy: {
-      doc: 'B2C policy name',
+      doc: 'Azure AD B2C policy name',
       format: String,
       default: 'b2c_1a_cui_cpdev_signupsignin',
-      env: 'IDENTITY_POLICY'
+      env: 'DEFRA_ID_POLICY'
     },
-    redirectUri: {
-      doc: 'OAuth callback path',
-      format: String,
-      default: '/auth/callback',
-      env: 'IDENTITY_REDIRECT_URI'
-    },
-    scope: {
-      doc: 'OpenID Connect scopes',
-      format: String,
-      default: 'openid profile email',
-      env: 'IDENTITY_SCOPE'
-    },
-    cookieName: {
-      doc: 'Session cookie name',
-      format: String,
-      default: 'auth',
-      env: 'SESSION_COOKIE_NAME'
-    },
-    cookiePassword: {
-      doc: 'Session cookie encryption password (32+ characters)',
+    refreshTokens: {
+      doc: 'Enable automatic token refresh',
+      format: Boolean,
+      default: true,
+      env: 'DEFRA_ID_REFRESH_TOKENS'
+    }
+  },
+  cookie: {
+    password: {
+      doc: 'Cookie encryption password (32+ characters)',
       format: String,
       default: '',
       sensitive: true,
-      env: 'SESSION_COOKIE_PASSWORD'
+      env: 'COOKIE_PASSWORD'
     },
     isSecure: {
       doc: 'Use secure cookies (HTTPS only)',
       format: Boolean,
       default: isProduction,
-      env: 'SESSION_COOKIE_SECURE'
+      env: 'COOKIE_IS_SECURE'
     }
   }
 })

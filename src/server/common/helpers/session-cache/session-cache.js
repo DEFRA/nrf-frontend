@@ -10,7 +10,7 @@ const sessionConfig = config.get('session')
 export const sessionCache = {
   plugin: yar,
   options: {
-    name: sessionConfig.cache.name,
+    name: 'yar-session', // Use different name to avoid conflict with auth scheme
     cache: {
       cache: sessionConfig.cache.name,
       expiresIn: sessionConfig.cache.ttl
