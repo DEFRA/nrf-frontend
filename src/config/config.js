@@ -219,6 +219,76 @@ export const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  identityProvider: {
+    enabled: {
+      doc: 'Enable DEFRA Customer Identity authentication',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_IDENTITY_PLUGIN'
+    },
+    clientId: {
+      doc: 'OAuth client ID from Azure AD B2C',
+      format: String,
+      default: '',
+      env: 'IDENTITY_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'OAuth client secret from Azure AD B2C',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'IDENTITY_CLIENT_SECRET'
+    },
+    authority: {
+      doc: 'Azure AD B2C authority URL',
+      format: String,
+      default: '',
+      env: 'IDENTITY_AUTHORITY'
+    },
+    tenantId: {
+      doc: 'Azure AD tenant ID',
+      format: String,
+      default: '',
+      env: 'IDENTITY_TENANT_ID'
+    },
+    policy: {
+      doc: 'B2C policy name',
+      format: String,
+      default: 'b2c_1a_cui_cpdev_signupsignin',
+      env: 'IDENTITY_POLICY'
+    },
+    redirectUri: {
+      doc: 'OAuth callback path',
+      format: String,
+      default: '/auth/callback',
+      env: 'IDENTITY_REDIRECT_URI'
+    },
+    scope: {
+      doc: 'OpenID Connect scopes',
+      format: String,
+      default: 'openid profile email',
+      env: 'IDENTITY_SCOPE'
+    },
+    cookieName: {
+      doc: 'Session cookie name',
+      format: String,
+      default: 'auth',
+      env: 'SESSION_COOKIE_NAME'
+    },
+    cookiePassword: {
+      doc: 'Session cookie encryption password (32+ characters)',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'SESSION_COOKIE_PASSWORD'
+    },
+    isSecure: {
+      doc: 'Use secure cookies (HTTPS only)',
+      format: Boolean,
+      default: isProduction,
+      env: 'SESSION_COOKIE_SECURE'
+    }
   }
 })
 

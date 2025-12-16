@@ -18,6 +18,11 @@ describe('#buildNavigation', () => {
         current: false,
         text: 'About',
         href: '/about'
+      },
+      {
+        current: false,
+        text: 'Sign in',
+        href: '/login'
       }
     ])
   })
@@ -33,6 +38,11 @@ describe('#buildNavigation', () => {
         current: false,
         text: 'About',
         href: '/about'
+      },
+      {
+        current: false,
+        text: 'Sign in',
+        href: '/login'
       }
     ])
   })
