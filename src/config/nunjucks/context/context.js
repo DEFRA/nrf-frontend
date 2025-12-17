@@ -23,7 +23,7 @@ export function context(request) {
     }
   }
 
-  const isAuthenticated = request?.auth?.isAuthenticated || false
+  const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
   const user = isAuthenticated ? request?.auth?.credentials : null
 
   return {

@@ -1,5 +1,5 @@
 export function buildNavigation(request) {
-  const isAuthenticated = request?.auth?.isAuthenticated || false
+  const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
 
   const baseNav = [
     {
@@ -14,8 +14,13 @@ export function buildNavigation(request) {
     }
   ]
 
-  // Add sign in/out link
+  // Add profile and sign in/out links based on auth state
   if (isAuthenticated) {
+    baseNav.push({
+      text: 'Profile',
+      href: '/profile',
+      current: request?.path === '/profile'
+    })
     baseNav.push({
       text: 'Sign out',
       href: '/auth/sign-out',

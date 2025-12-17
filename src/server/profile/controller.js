@@ -5,20 +5,6 @@ import { config } from '../../config/config.js'
  */
 export const profileController = {
   handler(request, h) {
-    // If authentication is disabled, show placeholder
-    if (!config.get('defraId.enabled')) {
-      return h.view('profile/index', {
-        pageTitle: 'My Profile',
-        user: {
-          email: 'test@example.com',
-          firstName: 'Test',
-          lastName: 'User',
-          crn: 'N/A'
-        },
-        authEnabled: false
-      })
-    }
-
     // Get authenticated user from session
     const { credentials } = request.auth
 
@@ -32,13 +18,12 @@ export const profileController = {
       pageTitle: 'My Profile',
       user: {
         email: profile.email,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
         name: profile.name,
         crn: profile.crn || profile.contactId,
         organisationId: profile.organisationId,
         currentRelationshipId: profile.currentRelationshipId
       },
+      fullProfile: profile,
       authEnabled: true
     })
   },

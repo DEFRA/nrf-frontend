@@ -24,7 +24,7 @@ const contentSecurityPolicy = {
     frameAncestors: ['none'],
     formAction: ['self'],
     manifestSrc: ['self'],
-    generateNonces: false
+    generateNonces: true
   }
 }
 

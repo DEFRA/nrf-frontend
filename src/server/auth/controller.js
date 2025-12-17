@@ -1,5 +1,4 @@
 import { createLogger } from '../common/helpers/logging/logger.js'
-import { getOidcConfig } from './get-oidc-config.js'
 import { getSafeRedirect } from './get-safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
@@ -187,7 +186,7 @@ export const signInOidcController = {
 }
 
 /**
- * Sign out handler - clears session and redirects to DEFRA Identity logout
+ * Sign out handler - clears local session and redirects to home
  */
 export const signOutController = {
   async handler(request, h) {
@@ -206,24 +205,7 @@ export const signOutController = {
 
     logger.info(`User session ${sessionId} signed out`)
 
-    // Get DEFRA Identity logout URL
-    try {
-      const oidcConfig = await getOidcConfig()
-      const logoutUrl = oidcConfig.end_session_endpoint
-
-      if (logoutUrl) {
-        const state = Buffer.from(
-          JSON.stringify({ timestamp: Date.now() })
-        ).toString('base64')
-        const callbackUrl = `${config.get('defraId.redirectUrl').replace('/login/return', '/auth/sign-out-oidc')}?state=${state}`
-        return h.redirect(
-          `${logoutUrl}?post_logout_redirect_uri=${encodeURIComponent(callbackUrl)}`
-        )
-      }
-    } catch (error) {
-      logger.error('Failed to get OIDC logout endpoint:', error)
-    }
-
+    // Just redirect to home - no need to navigate to DEFRA Identity
     return h.redirect('/')
   },
   options: {
