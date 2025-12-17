@@ -35,9 +35,6 @@ export const defraIdentity = {
       // Configure session strategy using our custom Yar-based scheme
       server.auth.strategy('defra-session', 'yar-session')
 
-      // Set defra-session as the default strategy for all routes
-      server.auth.default('defra-session')
-
       logger.info('DEFRA Identity authentication strategies registered')
     }
   }
