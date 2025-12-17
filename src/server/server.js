@@ -95,10 +95,10 @@ export async function createServer() {
       logger.info('DEFRA Identity authentication enabled')
     } catch (error) {
       logger.error('Failed to register DEFRA Identity plugin:', error)
-      logger.error(
-        'Authentication was explicitly enabled but failed to initialize. Aborting server startup.'
+      logger.warn(
+        'Server will start without authentication. Check network connectivity and DEFRA_ID configuration.'
       )
-      throw error
+      // Don't throw - allow server to start without auth for debugging
     }
   }
 
