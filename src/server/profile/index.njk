@@ -1,0 +1,51 @@
+{% extends "layouts/page.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">{{ pageTitle }}</h1>
+
+      <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Email
+          </dt>
+          <dd class="govuk-summary-list__value">
+            {{ user.email or 'Not provided' }}
+          </dd>
+        </div>
+        {% if user.crn %}
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            CRN (Customer Reference Number)
+          </dt>
+          <dd class="govuk-summary-list__value">
+            {{ user.crn }}
+          </dd>
+        </div>
+        {% endif %}
+        {% if user.organisationId %}
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Organisation ID
+          </dt>
+          <dd class="govuk-summary-list__value">
+            {{ user.organisationId }}
+          </dd>
+        </div>
+        {% endif %}
+      </dl>
+
+      {% if authEnabled %}
+      <p class="govuk-body govuk-!-margin-top-6">
+        <a href="/auth/sign-out" class="govuk-link">Sign out</a>
+      </p>
+      {% endif %}
+
+      <p class="govuk-body">
+        <a href="/" class="govuk-link">Return to homepage</a>
+      </p>
+    </div>
+  </div>
+
+{% endblock %}

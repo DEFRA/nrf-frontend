@@ -23,12 +23,17 @@ export function context(request) {
     }
   }
 
+  const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
+  const user = isAuthenticated ? request?.auth?.credentials : null
+
   return {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
     serviceUrl: '/',
     breadcrumbs: [],
     navigation: buildNavigation(request),
+    isAuthenticated,
+    user,
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`

@@ -18,8 +18,8 @@ const nunjucksEnvironment = nunjucks.configure(
   {
     autoescape: true,
     throwOnUndefined: false,
-    trimBlocks: true,
-    lstripBlocks: true,
+    trimBlocks: false,
+    lstripBlocks: false,
     watch: config.get('nunjucks.watch'),
     noCache: config.get('nunjucks.noCache')
   }

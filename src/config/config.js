@@ -219,6 +219,72 @@ export const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  defraId: {
+    enabled: {
+      doc: 'Enable DEFRA Customer Identity authentication',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_DEFRA_ID'
+    },
+    wellKnownUrl: {
+      doc: 'OIDC well-known configuration URL',
+      format: String,
+      default: '',
+      env: 'DEFRA_ID_WELL_KNOWN_URL'
+    },
+    clientId: {
+      doc: 'OAuth client ID',
+      format: String,
+      default: '',
+      env: 'DEFRA_ID_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'OAuth client secret',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'DEFRA_ID_CLIENT_SECRET'
+    },
+    redirectUrl: {
+      doc: 'OAuth callback URL',
+      format: String,
+      default: 'http://localhost:3000/login/return',
+      env: 'DEFRA_ID_REDIRECT_URL'
+    },
+    serviceId: {
+      doc: 'Service ID for DEFRA Identity',
+      format: String,
+      default: '',
+      env: 'DEFRA_ID_SERVICE_ID'
+    },
+    policy: {
+      doc: 'Azure AD B2C policy name',
+      format: String,
+      default: 'b2c_1a_cui_cpdev_signupsignin',
+      env: 'DEFRA_ID_POLICY'
+    },
+    refreshTokens: {
+      doc: 'Enable automatic token refresh',
+      format: Boolean,
+      default: true,
+      env: 'DEFRA_ID_REFRESH_TOKENS'
+    }
+  },
+  cookie: {
+    password: {
+      doc: 'Cookie encryption password (32+ characters)',
+      format: String,
+      default: 'your-secure-cookie-password-at-least-32-characters-long-abc123',
+      sensitive: true,
+      env: 'COOKIE_PASSWORD'
+    },
+    isSecure: {
+      doc: 'Use secure cookies (HTTPS only)',
+      format: Boolean,
+      default: isProduction,
+      env: 'COOKIE_IS_SECURE'
+    }
   }
 })
 

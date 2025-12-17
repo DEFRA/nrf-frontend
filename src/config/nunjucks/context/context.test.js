@@ -48,6 +48,7 @@ describe('context and cache', () => {
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
+          isAuthenticated: false,
           navigation: [
             {
               current: true,
@@ -58,10 +59,16 @@ describe('context and cache', () => {
               current: false,
               text: 'About',
               href: '/about'
+            },
+            {
+              current: false,
+              text: 'Sign in',
+              href: '/login'
             }
           ],
           serviceName: 'nrf-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          user: null
         })
       })
 
@@ -137,6 +144,7 @@ describe('context and cache', () => {
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
+          isAuthenticated: false,
           navigation: [
             {
               current: true,
@@ -147,10 +155,16 @@ describe('context and cache', () => {
               current: false,
               text: 'About',
               href: '/about'
+            },
+            {
+              current: false,
+              text: 'Sign in',
+              href: '/login'
             }
           ],
           serviceName: 'nrf-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          user: null
         })
       })
     })
