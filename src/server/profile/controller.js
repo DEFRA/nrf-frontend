@@ -1,5 +1,3 @@
-import { config } from '../../config/config.js'
-
 /**
  * User profile controller
  */
@@ -26,9 +24,5 @@ export const profileController = {
       fullProfile: profile,
       authEnabled: true
     })
-  },
-  options: {
-    // Conditionally require authentication based on config
-    auth: config.get('defraId.enabled') ? 'defra-session' : false
   }
 }
