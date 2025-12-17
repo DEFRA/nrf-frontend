@@ -249,7 +249,7 @@ export const config = convict({
     redirectUrl: {
       doc: 'OAuth callback URL',
       format: String,
-      default: 'http://localhost:3000/auth/sign-in-oidc',
+      default: 'http://localhost:3000/login/return',
       env: 'DEFRA_ID_REDIRECT_URL'
     },
     serviceId: {
@@ -275,7 +275,7 @@ export const config = convict({
     password: {
       doc: 'Cookie encryption password (32+ characters)',
       format: String,
-      default: '',
+      default: 'your-secure-cookie-password-at-least-32-characters-long-abc123',
       sensitive: true,
       env: 'COOKIE_PASSWORD'
     },

@@ -64,6 +64,7 @@ function yarSessionScheme(sessionCache) {
 
         if (!userSession) {
           logger.debug(`Session ${sessionId} not found in cache`)
+          await sessionCache.drop(sessionId)
           request.yar.clear('sessionId')
           return h.unauthenticated()
         }
@@ -80,6 +81,7 @@ function yarSessionScheme(sessionCache) {
           // Attempt token refresh if enabled
           if (!config.get('defraId.refreshTokens')) {
             logger.debug('Token refresh disabled, invalidating session')
+            await sessionCache.drop(sessionId)
             request.yar.clear('sessionId')
             return h.unauthenticated()
           }
@@ -100,6 +102,7 @@ function yarSessionScheme(sessionCache) {
               `Token refresh failed for session ${sessionId}:`,
               refreshError
             )
+            await sessionCache.drop(sessionId)
             request.yar.clear('sessionId')
             return h.unauthenticated()
           }
@@ -129,44 +132,13 @@ function getBellOptions(oidcConfig) {
       useParamsAuth: true,
       auth: oidcConfig.authorization_endpoint,
       token: oidcConfig.token_endpoint,
-      scope: ['openid', 'offline_access'],
-      profile: function (credentials, _params, _get) {
-        // Decode JWT token to extract user profile
-        logger.debug('Bell profile function called with credentials:', {
-          hasToken: !!credentials.token,
-          hasQuery: !!credentials.query
-        })
-
-        if (!credentials.token) {
-          logger.error('No token in credentials', credentials)
-          throw new Error('No access token received from Azure AD B2C')
-        }
-
-        try {
-          const payload = Jwt.token.decode(credentials.token).decoded.payload
-
-          // Enrich profile with convenience fields
-          credentials.profile = {
-            ...payload,
-            crn: payload.contactId,
-            name: `${payload.firstName || ''} ${payload.lastName || ''}`.trim(),
-            organisationId: payload.currentRelationshipId
-          }
-
-          logger.debug('Profile extracted successfully', {
-            email: credentials.profile.email
-          })
-        } catch (error) {
-          logger.error('Failed to decode JWT token:', error)
-          throw error
-        }
-      }
+      scope: ['openid', 'offline_access']
     },
     clientId: config.get('defraId.clientId'),
     clientSecret: config.get('defraId.clientSecret'),
     password: config.get('cookie.password'),
     isSecure: config.get('cookie.isSecure'),
-    location: 'http://localhost:3000', // Base URL
+    location: new URL(config.get('defraId.redirectUrl')).origin, // Base URL derived from redirect URL
     config: {
       // Explicitly set the callback path to override Bell's default behavior
       redirectUri: config.get('defraId.redirectUrl')

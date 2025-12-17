@@ -6,13 +6,13 @@ import { config } from '../../config/config.js'
 export const profileController = {
   handler(request, h) {
     // Get authenticated user from session
-    const { credentials } = request.auth
+    const auth = request.auth
 
-    if (!credentials || !credentials.profile) {
+    if (!auth || !auth.credentials || !auth.credentials.profile) {
       return h.redirect('/login')
     }
 
-    const { profile } = credentials
+    const { profile } = auth.credentials
 
     return h.view('profile/index', {
       pageTitle: 'My Profile',

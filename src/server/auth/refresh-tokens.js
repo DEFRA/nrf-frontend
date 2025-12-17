@@ -10,19 +10,21 @@ import { config } from '../../config/config.js'
 export async function refreshTokens(refreshToken) {
   const { token_endpoint: url } = await getOidcConfig()
 
-  const query = [
-    `client_id=${config.get('defraId.clientId')}`,
-    `client_secret=${config.get('defraId.clientSecret')}`,
-    'grant_type=refresh_token',
-    `scope=openid offline_access ${config.get('defraId.clientId')}`,
-    `refresh_token=${refreshToken}`,
-    `redirect_uri=${config.get('defraId.redirectUrl')}`
-  ].join('&')
+  const params = new URLSearchParams()
+  params.set('client_id', config.get('defraId.clientId'))
+  params.set('client_secret', config.get('defraId.clientSecret'))
+  params.set('grant_type', 'refresh_token')
+  params.set('scope', `openid offline_access ${config.get('defraId.clientId')}`)
+  params.set('refresh_token', refreshToken)
+  params.set('redirect_uri', config.get('defraId.redirectUrl'))
 
-  const { payload } = await Wreck.post(`${url}?${query}`, {
+  const query = params.toString()
+
+  const { payload } = await Wreck.post(url, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
+    payload: query,
     json: true
   })
 
