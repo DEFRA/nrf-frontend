@@ -1,0 +1,45 @@
+sequenceDiagram
+    participant User
+    participant Browser
+    participant Server as Hapi Server<br/>(server.js)
+    participant LoginCtrl as Login Controller<br/>(auth/controller.js)
+    participant YarSession as Yar Session<br/>(session-cache.js)
+    participant DefraAuth as Defra Identity Plugin<br/>(plugins/defra-identity.js)
+    participant Cache as Redis/Memory Cache<br/>(session-cache.js)
+    participant DefraID as Defra ID Provider<br/>(External OIDC)
+
+    %% Initial Login
+    User->>Browser: Navigate to /login
+    Browser->>LoginCtrl: GET /login
+    LoginCtrl->>Browser: Render login page<br/>(views/auth/login.html)
+
+    %% Start OAuth Flow
+    User->>Browser: Click "Sign in"
+    Browser->>LoginCtrl: GET /auth/sign-in
+    LoginCtrl->>YarSession: Generate & store CSRF state
+    YarSession-->>LoginCtrl: State stored
+    LoginCtrl->>DefraAuth: Build authorization URL
+    DefraAuth-->>LoginCtrl: Authorization URL with:<br/>- client_id<br/>- redirect_uri<br/>- scope (openid offline_access)<br/>- state<br/>- serviceId<br/>- policy
+    LoginCtrl->>Browser: 302 Redirect
+    Browser->>DefraID: GET authorization_endpoint
+
+    %% External Authentication
+    DefraID->>User: Show login form
+    User->>DefraID: Enter credentials
+    DefraID->>DefraID: Authenticate user
+    DefraID->>Browser: 302 Redirect with code & state
+
+    %% OAuth Callback
+    Browser->>LoginCtrl: GET /login/return?code=xxx&state=yyy
+    LoginCtrl->>YarSession: Validate state (CSRF check)
+    YarSession-->>LoginCtrl: State valid
+    LoginCtrl->>DefraID: POST token_endpoint<br/>(exchange code for tokens)<br/>grant_type=authorization_code
+    DefraID-->>LoginCtrl: { access_token, refresh_token,<br/>id_token, expires_in }
+    LoginCtrl->>LoginCtrl: Decode id_token<br/>(extract user profile)
+    LoginCtrl->>DefraAuth: createUserSession(credentials)
+    DefraAuth-->>LoginCtrl: Session object:<br/>{ sessionId, token,<br/>refreshToken, profile,<br/>isAuthenticated: true }
+    LoginCtrl->>Cache: Store session by sessionId<br/>(TTL: 4 hours)
+    Cache-->>LoginCtrl: Session stored
+    LoginCtrl->>YarSession: Store sessionId in cookie
+    YarSession-->>LoginCtrl: Cookie set
+    LoginCtrl->>Browser: 302 Redirect to home/requested URL
