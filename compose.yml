@@ -32,6 +32,29 @@ services:
     networks:
       - cdp-tenant
 
+  defra-id-stub:
+    image: defradigital/cdp-defra-id-stub:latest
+    ports:
+      - '3200:3200'
+    environment:
+      PORT: 3200
+      REDIS_HOST: redis
+      REDIS_PORT: 6380
+      USE_SINGLE_INSTANCE_CACHE: true
+      NODE_ENV: development
+    depends_on:
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3200/health']
+      interval: 5s
+      start_period: 5s
+      retries: 3
+    networks:
+      cdp-tenant:
+        aliases:
+          - localhost
+
   mongodb:
     image: mongo:6.0.13
     networks:
@@ -44,28 +67,28 @@ services:
 
 ################################################################################
 
-  your-frontend:
-    build: ./
-    ports:
-      - '3000:3000'
-    links:
-      - 'localstack:localstack'
-      - 'redis:redis'
-    depends_on:
-      localstack:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    env_file:
-      - 'compose/aws.env'
-    environment:
-      PORT: 3000
-      NODE_ENV: development
-      REDIS_HOST: redis
-      LOCALSTACK_ENDPOINT: http://localstack:4566
-      USE_SINGLE_INSTANCE_CACHE: true
-    networks:
-      - cdp-tenant
+#  your-frontend:
+#    build: ./
+#    ports:
+#      - '3000:3000'
+#    links:
+#      - 'localstack:localstack'
+#      - 'redis:redis'
+#    depends_on:
+#      localstack:
+#        condition: service_healthy
+#      redis:
+#        condition: service_started
+#    env_file:
+#      - 'compose/aws.env'
+#    environment:
+#      PORT: 3000
+#      NODE_ENV: development
+#      REDIS_HOST: redis
+#      LOCALSTACK_ENDPOINT: http://localstack:4566
+#      USE_SINGLE_INSTANCE_CACHE: true
+#    networks:
+#      - cdp-tenant
 
   # your-backend:
   #   image: defradigital/your-backend:${YOUR_BACKEND_VERSION:-latest}

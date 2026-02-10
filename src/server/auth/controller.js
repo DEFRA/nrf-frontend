@@ -1,7 +1,11 @@
+import crypto from 'node:crypto'
+import Wreck from '@hapi/wreck'
+import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { getSafeRedirect } from './get-safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
+import { getOidcConfig } from './get-oidc-config.js'
 
 const logger = createLogger()
 
@@ -34,19 +38,17 @@ export const loginController = {
 export const signInController = {
   async handler(request, h) {
     // Build the OAuth authorization URL manually to include serviceId and policy
-    const { getOidcConfig } = await import('./get-oidc-config.js')
     const oidcConfig = await getOidcConfig()
 
     const authUrl = new URL(oidcConfig.authorization_endpoint)
+    const scope = config.get('defraId.scopes').join(' ')
     authUrl.searchParams.set('client_id', config.get('defraId.clientId'))
     authUrl.searchParams.set('response_type', 'code')
     authUrl.searchParams.set('redirect_uri', config.get('defraId.redirectUrl'))
-    authUrl.searchParams.set('scope', 'openid offline_access')
+    authUrl.searchParams.set('scope', scope)
     authUrl.searchParams.set('serviceId', config.get('defraId.serviceId'))
-    authUrl.searchParams.set('p', config.get('defraId.policy'))
 
     // Generate and store state for CSRF protection
-    const crypto = await import('node:crypto')
     const state = crypto.randomBytes(16).toString('base64url')
     request.yar.set('oauth_state', state)
     authUrl.searchParams.set('state', state)
@@ -101,20 +103,21 @@ export const signInOidcController = {
 
     try {
       // Exchange authorization code for tokens
-      const { getOidcConfig } = await import('./get-oidc-config.js')
       const oidcConfig = await getOidcConfig()
 
-      const { default: Wreck } = await import('@hapi/wreck')
+      const scope = config.get('defraId.scopes').join(' ')
+      const urlParams = {
+        grant_type: 'authorization_code',
+        client_id: config.get('defraId.clientId'),
+        client_secret: config.get('defraId.clientSecret'),
+        code: request.query.code,
+        redirect_uri: config.get('defraId.redirectUrl'),
+        scope
+      }
       const { payload: tokenResponse } = await Wreck.post(
         oidcConfig.token_endpoint,
         {
-          payload: new URLSearchParams({
-            grant_type: 'authorization_code',
-            client_id: config.get('defraId.clientId'),
-            client_secret: config.get('defraId.clientSecret'),
-            code: request.query.code,
-            redirect_uri: config.get('defraId.redirectUrl')
-          }).toString(),
+          payload: new URLSearchParams(urlParams).toString(),
           headers: {
             'content-type': 'application/x-www-form-urlencoded'
           },
@@ -123,7 +126,6 @@ export const signInOidcController = {
       )
 
       // Decode and extract user profile from ID token
-      const { default: Jwt } = await import('@hapi/jwt')
       const decoded = Jwt.token.decode(tokenResponse.id_token)
 
       // Create Bell-compatible credentials structure

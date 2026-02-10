@@ -224,25 +224,26 @@ export const config = convict({
     enabled: {
       doc: 'Enable DEFRA Customer Identity authentication',
       format: Boolean,
-      default: false,
+      default: true,
       env: 'ENABLE_DEFRA_ID'
     },
     wellKnownUrl: {
       doc: 'OIDC well-known configuration URL',
       format: String,
-      default: '',
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
       env: 'DEFRA_ID_WELL_KNOWN_URL'
     },
     clientId: {
       doc: 'OAuth client ID',
       format: String,
-      default: '',
+      default: 'client-test',
       env: 'DEFRA_ID_CLIENT_ID'
     },
     clientSecret: {
       doc: 'OAuth client secret',
       format: String,
-      default: '',
+      default: 'test_value',
       sensitive: true,
       env: 'DEFRA_ID_CLIENT_SECRET'
     },
@@ -255,20 +256,20 @@ export const config = convict({
     serviceId: {
       doc: 'Service ID for DEFRA Identity',
       format: String,
-      default: '',
+      default: 'service-test',
       env: 'DEFRA_ID_SERVICE_ID'
-    },
-    policy: {
-      doc: 'Azure AD B2C policy name',
-      format: String,
-      default: 'b2c_1a_cui_cpdev_signupsignin',
-      env: 'DEFRA_ID_POLICY'
     },
     refreshTokens: {
       doc: 'Enable automatic token refresh',
       format: Boolean,
       default: true,
       env: 'DEFRA_ID_REFRESH_TOKENS'
+    },
+    scopes: {
+      doc: 'Defra ID Scopes',
+      format: Array,
+      env: 'DEFRA_ID_SCOPES',
+      default: ['openid', 'offline_access']
     }
   },
   cookie: {
@@ -284,6 +285,15 @@ export const config = convict({
       format: Boolean,
       default: isProduction,
       env: 'COOKIE_IS_SECURE'
+    }
+  },
+  backend: {
+    apiUrl: {
+      doc: 'Endpoint for the backend API service',
+      format: String,
+      nullable: true,
+      default: 'http://localhost:3001',
+      env: 'NRF_BACKEND_API_URL'
     }
   }
 })
