@@ -6,7 +6,8 @@
   "main": "src/index.js",
   "type": "module",
   "engines": {
-    "node": ">=22.16.0"
+    "node": ">=24",
+    "npm": ">=11"
   },
   "scripts": {
     "build:frontend": "cross-env NODE_ENV=production webpack",
