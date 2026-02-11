@@ -1,13 +1,12 @@
 name: Check Pull Request
 
 on:
-  schedule:
-    - cron: '0 7 * * 1'
   pull_request:
     branches:
       - main
     types:
       - opened
+      - edited
       - reopened
       - synchronize
       - ready_for_review
@@ -38,9 +37,9 @@ jobs:
           docker build --no-cache --tag cdp-node-frontend-template .
           exit $?
 
-#      - name: SonarCloud Scan
-#        if: github.actor != 'dependabot[bot]'
-#        uses: SonarSource/sonarqube-scan-action@v5.3.1 #  (or check latest version on https://github.com/marketplace/actions/official-sonarqube-scan)
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        if: github.actor != 'dependabot[bot]'
+        uses: SonarSource/sonarqube-scan-action@v7 #  (or check latest version on https://github.com/marketplace/actions/official-sonarqube-scan)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
