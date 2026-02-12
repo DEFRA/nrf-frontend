@@ -36,14 +36,18 @@ updates:
       tools:
         patterns:
           - 'husky'
-          - 'vitest'
-          - 'vitest-*'
           - 'nodemon'
           - 'npm-run-all'
           - 'lodash'
           - 'source-map-loader'
           - 'sass-*'
           - 'postcss-*'
+
+      vitest:
+        patterns:
+          - 'vitest'
+          - 'vitest-*'
+          - '@vitest/*'
 
       types:
         patterns:
