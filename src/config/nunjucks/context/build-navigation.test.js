@@ -16,6 +16,11 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
+        text: 'RLB Upload',
+        href: '/rlb-upload'
+      },
+      {
+        current: false,
         text: 'About',
         href: '/about'
       },
@@ -33,6 +38,11 @@ describe('#buildNavigation', () => {
         current: true,
         text: 'Home',
         href: '/'
+      },
+      {
+        current: false,
+        text: 'RLB Upload',
+        href: '/rlb-upload'
       },
       {
         current: false,

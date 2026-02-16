@@ -295,6 +295,26 @@ export const config = convict({
       default: 'http://localhost:3001',
       env: 'NRF_BACKEND_API_URL'
     }
+  },
+  cdpUploader: {
+    url: {
+      doc: 'CDP Uploader service URL',
+      format: String,
+      default: 'http://localhost:7337',
+      env: 'CDP_UPLOADER_URL'
+    },
+    s3Bucket: {
+      doc: 'S3 bucket for uploaded files',
+      format: String,
+      default: 'nrf-uploads',
+      env: 'CDP_UPLOADER_S3_BUCKET'
+    },
+    useMock: {
+      doc: 'Use mock uploader for local development (never enable in production)',
+      format: Boolean,
+      default: isDevelopment,
+      env: 'CDP_UPLOADER_USE_MOCK'
+    }
   }
 })
 

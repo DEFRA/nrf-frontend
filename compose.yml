@@ -1,4 +1,3 @@
-version: '3.4'
 services:
 
   localstack:
@@ -67,33 +66,87 @@ services:
 
 ################################################################################
 
-#  your-frontend:
-#    build: ./
-#    ports:
-#      - '3000:3000'
-#    links:
-#      - 'localstack:localstack'
-#      - 'redis:redis'
-#    depends_on:
-#      localstack:
-#        condition: service_healthy
-#      redis:
-#        condition: service_started
-#    env_file:
-#      - 'compose/aws.env'
-#    environment:
-#      PORT: 3000
-#      NODE_ENV: development
-#      REDIS_HOST: redis
-#      LOCALSTACK_ENDPOINT: http://localstack:4566
-#      USE_SINGLE_INSTANCE_CACHE: true
-#    networks:
-#      - cdp-tenant
+  # Mock nrf-backend service - runs on port 3001
+  # Provides /api/rlb endpoints for RLB record management
+  mock-nrf-backend:
+    build:
+      context: ./
+      target: development
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: development
+      MOCK_BACKEND_PORT: 3001
+      LOG_LEVEL: info
+    command: ['npm', 'run', 'mock:backend']
+    networks:
+      - cdp-tenant
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 5s
+      start_period: 10s
+      retries: 3
 
-  # your-backend:
-  #   image: defradigital/your-backend:${YOUR_BACKEND_VERSION:-latest}
+  # nrf-frontend with built-in mock CDP uploader
+  # The mock CDP uploader is a Hapi plugin that runs inside the frontend
+  # and handles file uploads at /upload-and-scan/{uploadId}
+  nrf-frontend:
+    build:
+      context: ./
+      target: development
+    ports:
+      - '3000:3000'
+      - '9229:9229' # Debug port
+    links:
+      - 'localstack:localstack'
+      - 'redis:redis'
+      - 'defra-id-stub:defra-id-stub'
+      - 'mock-nrf-backend:mock-nrf-backend'
+    depends_on:
+      localstack:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      defra-id-stub:
+        condition: service_healthy
+      mock-nrf-backend:
+        condition: service_healthy
+    env_file:
+      - 'compose/aws.env'
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      REDIS_HOST: redis
+      USE_SINGLE_INSTANCE_CACHE: true
+      # CDP Uploader mock is built into the frontend
+      CDP_UPLOADER_USE_MOCK: true
+      CDP_UPLOADER_S3_BUCKET: nrf-uploads
+      # Point to the mock nrf-backend service
+      NRF_BACKEND_API_URL: http://mock-nrf-backend:3001
+      # DEFRA ID configuration
+      DEFRA_ID_WELL_KNOWN_URL: http://defra-id-stub:3200/cdp-defra-id-stub/.well-known/openid-configuration
+      DEFRA_ID_REDIRECT_URL: http://localhost:3000/login/return
+    volumes:
+      # Mount source code for hot reloading
+      - ./src:/home/node/src:ro
+      - ./package.json:/home/node/package.json:ro
+      - ./.public:/home/node/.public:ro
+    networks:
+      - cdp-tenant
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 10s
+      start_period: 30s
+      retries: 3
+
+################################################################################
+
+  # Uncomment to run the real nrf-backend instead of the mock
+  # When using this, comment out mock-nrf-backend and update NRF_BACKEND_API_URL
+  # nrf-backend:
+  #   image: defradigital/nrf-backend:${NRF_BACKEND_VERSION:-latest}
   #   ports:
-  #     - '3555:3555'
+  #     - '3001:3001'
   #   links:
   #     - 'localstack:localstack'
   #     - 'mongodb:mongodb'
@@ -105,9 +158,10 @@ services:
   #   env_file:
   #     - 'compose/aws.env'
   #   environment:
-  #     PORT: 3555
+  #     PORT: 3001
   #     NODE_ENV: development
   #     LOCALSTACK_ENDPOINT: http://localstack:4566
+  #     MONGODB_URI: mongodb://mongodb:27017/nrf
   #   networks:
   #     - cdp-tenant
 

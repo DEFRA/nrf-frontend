@@ -57,6 +57,11 @@ describe('context and cache', () => {
             },
             {
               current: false,
+              text: 'RLB Upload',
+              href: '/rlb-upload'
+            },
+            {
+              current: false,
               text: 'About',
               href: '/about'
             },
@@ -150,6 +155,11 @@ describe('context and cache', () => {
               current: true,
               text: 'Home',
               href: '/'
+            },
+            {
+              current: false,
+              text: 'RLB Upload',
+              href: '/rlb-upload'
             },
             {
               current: false,

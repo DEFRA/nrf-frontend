@@ -1,0 +1,155 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if error %}
+        {{ govukWarningText({
+          text: error,
+          iconFallbackText: "Warning"
+        }) }}
+
+      {% elif status.status == 'complete' %}
+        {{ govukPanel({
+          titleText: "File uploaded successfully",
+          html: "Your file has been uploaded and validated"
+        }) }}
+
+        {% if status.filename %}
+          <h2 class="govuk-heading-m">File details</h2>
+          {{ govukSummaryList({
+            rows: [
+              {
+                key: { text: "Filename" },
+                value: { text: status.filename }
+              },
+              {
+                key: { text: "Status" },
+                value: { text: "Complete" }
+              }
+            ] | rejectattr('value.text', 'equalto', none)
+          }) }}
+        {% endif %}
+
+      {% elif status.status == 'rejected' %}
+        <h1 class="govuk-heading-l">File rejected</h1>
+        {{ govukWarningText({
+          text: status.reason | default("Your file was rejected. Please check the file and try again."),
+          iconFallbackText: "Warning"
+        }) }}
+
+        {% if status.filename %}
+          <p class="govuk-body">
+            <strong>Filename:</strong> {{ status.filename }}
+          </p>
+        {% endif %}
+
+      {% elif status.status == 'pending' or not status.status %}
+        <div id="status-pending">
+          <h1 class="govuk-heading-l">Uploading and scanning...</h1>
+          <p class="govuk-body">
+            Your file is being scanned for viruses. This page will update automatically.
+          </p>
+          <p class="govuk-body govuk-!-color-secondary">
+            Please do not close this page.
+          </p>
+        </div>
+
+        <div id="status-complete" class="govuk-!-display-none">
+          {{ govukPanel({
+            titleText: "File uploaded successfully",
+            html: "Your file has been uploaded and validated"
+          }) }}
+          <p class="govuk-body">
+            <a href="/rlb-upload/status" class="govuk-link">View full details</a>
+          </p>
+        </div>
+
+        <div id="status-rejected" class="govuk-!-display-none">
+          <h1 class="govuk-heading-l">File rejected</h1>
+          <p id="rejection-reason" class="govuk-body"></p>
+        </div>
+
+      {% else %}
+        <h1 class="govuk-heading-l">Upload status</h1>
+        <p class="govuk-body">
+          Status: {{ status.status | default('Unknown') }}
+        </p>
+      {% endif %}
+
+      <p class="govuk-body govuk-!-margin-top-6">
+        <a href="/rlb-upload" class="govuk-link">Upload another file</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  {% if (status.status == 'pending' or not status.status) and not error %}
+  <script{% if nonce %} nonce="{{ nonce }}"{% endif %}>
+    (function() {
+      var statusPending = document.getElementById('status-pending');
+      var statusComplete = document.getElementById('status-complete');
+      var statusRejected = document.getElementById('status-rejected');
+      var rejectionReason = document.getElementById('rejection-reason');
+
+      var pollInterval = 2000; // 2 seconds
+      var maxPolls = 150; // 5 minutes max (150 * 2 seconds)
+      var pollCount = 0;
+
+      function pollStatus() {
+        pollCount++;
+
+        if (pollCount > maxPolls) {
+          statusPending.innerHTML = '<h1 class="govuk-heading-l">Status check timeout</h1>' +
+            '<p class="govuk-body">The scan is taking longer than expected. ' +
+            '<a href="/rlb-upload/status" class="govuk-link">Refresh the page</a> to check the status.</p>';
+          return;
+        }
+
+        fetch('/rlb-upload/status/poll', {
+          method: 'GET',
+          credentials: 'same-origin'
+        })
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('Failed to fetch status');
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          if (data.status === 'complete') {
+            statusPending.classList.add('govuk-!-display-none');
+            statusComplete.classList.remove('govuk-!-display-none');
+          } else if (data.status === 'rejected') {
+            statusPending.classList.add('govuk-!-display-none');
+            statusRejected.classList.remove('govuk-!-display-none');
+            if (data.reason) {
+              rejectionReason.textContent = data.reason;
+            } else {
+              rejectionReason.textContent = 'Your file was rejected. Please check the file and try again.';
+            }
+          } else {
+            // Still pending, poll again
+            setTimeout(pollStatus, pollInterval);
+          }
+        })
+        .catch(function(error) {
+          console.error('Status poll failed:', error);
+          // Retry on error
+          setTimeout(pollStatus, pollInterval);
+        });
+      }
+
+      // Start polling
+      setTimeout(pollStatus, pollInterval);
+    })();
+  </script>
+  {% endif %}
+{% endblock %}

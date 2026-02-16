@@ -1,0 +1,151 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  {{ appHeading({
+    text: heading,
+    caption: "nrf-frontend"
+  }) }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div id="error-summary" class="govuk-!-display-none">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            {
+              text: "The upload service is currently unavailable. Please try again later.",
+              href: "#file"
+            }
+          ]
+        }) }}
+      </div>
+
+      <p class="govuk-body">
+        Use this form to upload RLB files. Files will be scanned for viruses before being stored.
+      </p>
+
+      <form id="upload-form" action="" method="post" enctype="multipart/form-data" novalidate>
+        {{ govukFileUpload({
+          id: "file",
+          name: "file",
+          label: {
+            text: "Upload a boundary file",
+            classes: "govuk-label--m"
+          },
+          hint: {
+            html: "Allowed file types: GeoJSON (.geojson, .json) or Shapefile (.shp, .shx, .dbf, .prj or .zip)"
+          },
+          attributes: {
+            accept: ".geojson,.json,.shp,.shx,.dbf,.prj,.zip,application/geo+json,application/json,application/zip,application/x-zip-compressed"
+          }
+        }) }}
+        <p id="file-size-info" class="govuk-body govuk-!-margin-top-1 govuk-!-display-none">
+          File size: <span id="file-size"></span>
+        </p>
+        <p id="file-size-warning" class="govuk-error-message govuk-!-display-none">
+          <span class="govuk-visually-hidden">Error:</span> The selected file is too large. Maximum file size is 30MB.
+        </p>
+
+        {{ govukButton({
+          text: "Upload file",
+          attributes: {
+            id: "upload-button"
+          }
+        }) }}
+      </form>
+
+      <div id="upload-progress" class="govuk-!-display-none">
+        <h2 class="govuk-heading-m">Uploading...</h2>
+        <p class="govuk-body">Please wait while your file is being uploaded.</p>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script{% if nonce %} nonce="{{ nonce }}"{% endif %}>
+    (function() {
+      var form = document.getElementById('upload-form');
+      var errorSummary = document.getElementById('error-summary');
+      var uploadProgress = document.getElementById('upload-progress');
+      var uploadButton = document.getElementById('upload-button');
+      var fileInput = document.getElementById('file');
+      var fileSizeInfo = document.getElementById('file-size-info');
+      var fileSizeSpan = document.getElementById('file-size');
+      var fileSizeWarning = document.getElementById('file-size-warning');
+      var maxFileSizeBytes = 30 * 1024 * 1024; // 30MB
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        var k = 1024;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      fileInput.addEventListener('change', function() {
+        if (fileInput.files && fileInput.files.length > 0) {
+          var file = fileInput.files[0];
+          console.log('File selected:', file.name, 'Size:', file.size, 'bytes', '(' + formatFileSize(file.size) + ')');
+          fileSizeSpan.textContent = formatFileSize(file.size);
+          fileSizeInfo.classList.remove('govuk-!-display-none');
+
+          if (file.size > maxFileSizeBytes) {
+            fileSizeWarning.classList.remove('govuk-!-display-none');
+            uploadButton.disabled = true;
+          } else {
+            fileSizeWarning.classList.add('govuk-!-display-none');
+            uploadButton.disabled = false;
+          }
+        } else {
+          fileSizeInfo.classList.add('govuk-!-display-none');
+          fileSizeWarning.classList.add('govuk-!-display-none');
+          uploadButton.disabled = false;
+        }
+      });
+
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Show progress, hide form elements
+        uploadButton.disabled = true;
+        uploadProgress.classList.remove('govuk-!-display-none');
+
+        // Call initiate endpoint to get upload URL
+        fetch('/rlb-upload/initiate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(function(response) {
+          return response.json().then(function(data) {
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to initiate upload');
+            }
+            return data;
+          });
+        })
+        .then(function(data) {
+          // Set the form action to the upload URL and submit
+          form.action = data.uploadUrl;
+          form.removeEventListener('submit', arguments.callee);
+          form.submit();
+        })
+        .catch(function(error) {
+          console.error('Upload initiation failed:', error);
+          uploadProgress.classList.add('govuk-!-display-none');
+          errorSummary.classList.remove('govuk-!-display-none');
+          uploadButton.disabled = false;
+        });
+      });
+    })();
+  </script>
+{% endblock %}

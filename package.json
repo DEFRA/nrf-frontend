@@ -14,6 +14,7 @@
     "dev": "run-p frontend:watch server:watch",
     "dev:debug": "run-p frontend:watch server:debug",
     "docker:dev": "npm run dev",
+    "mock:backend": "node src/mock-nrf-backend/server.js",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
     "format:check": "prettier --check \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
     "frontend:watch": "cross-env NODE_ENV=development webpack --watch",

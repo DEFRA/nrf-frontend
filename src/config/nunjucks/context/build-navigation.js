@@ -8,6 +8,11 @@ export function buildNavigation(request) {
       current: request?.path === '/'
     },
     {
+      text: 'RLB Upload',
+      href: '/rlb-upload',
+      current: request?.path === '/rlb-upload'
+    },
+    {
       text: 'About',
       href: '/about',
       current: request?.path === '/about'

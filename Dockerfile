@@ -8,6 +8,11 @@ LABEL uk.gov.defra.ffc.parent-image=defradigital/node-development:${PARENT_VERSI
 
 ENV TZ="Europe/London"
 
+# Add curl for health checks
+USER root
+RUN apk add --no-cache curl
+USER node
+
 ARG PORT
 ARG PORT_DEBUG
 ENV PORT=${PORT}
