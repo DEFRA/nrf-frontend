@@ -10,3 +10,4 @@ coverage
 .envrc
 tsconfig.tsbuildinfo
 .env
+.claude/settings.local.json
