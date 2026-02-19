@@ -65,7 +65,7 @@ Create a file called `get-view-model.js` in the target folder with a default exp
 
 ## Create a route file
 
-Every page created will require a GET route. Create a file called `routes.js` in the target folder with a default export that is an array of route definitions. Each route should be passed the route ID and the view model function that was created above. See `src/server/quote/start/routes.js` for the pattern to follow.
+Every page created will require a GET route. Create a file called `routes.js` in the target folder with a default export that is an array of route definitions. Each route should be passed the route ID and the view model function that was created above. See `src/server/quote/start/routes.js` for the pattern to follow, except for the routePath format - for new routes it should use the format `/quote/{routeId}`.
 Then, import and spread the routes into `src/server/quote/index.js` (there is an example in there to follow for the start routes)
 
 ## Create a page test

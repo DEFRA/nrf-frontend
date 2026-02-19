@@ -1,6 +1,5 @@
 import inert from '@hapi/inert'
 
-import { home } from './home/index.js'
 import { about } from './about/index.js'
 import { health } from './health/index.js'
 import { auth } from './auth/index.js'
@@ -18,7 +17,7 @@ export const router = {
       await server.register([health])
 
       // Application specific routes, add your own routes here
-      await server.register([home, about, auth, profile, quote])
+      await server.register([about, auth, profile, quote])
 
       // Static assets
       await server.register([serveStaticFiles])
