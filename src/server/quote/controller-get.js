@@ -1,5 +1,5 @@
 export const quoteController = ({ routeId, getViewModel }) => ({
-  handler(request, h) {
+  handler(_request, h) {
     return h.view(`quote/${routeId}/index`, getViewModel())
   }
 })
