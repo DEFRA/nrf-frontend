@@ -1,6 +1,8 @@
+const title = 'Nature Restoration Fund'
+
 export default function () {
   return {
-    pageTitle: 'Nature Restoration Fund - Gov.uk',
-    pageHeading: 'Nature Restoration Fund'
+    pageTitle: `${title} - Gov.uk`,
+    pageHeading: title
   }
 }

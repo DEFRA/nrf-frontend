@@ -28,13 +28,12 @@ The generated `index.njk` must:
 - Extend `layouts/page.njk`
 - Define a `{% block pageTitle %}` containing only a `{{pageTitle}}` variable.
 - If there is a `beforeContent` block in the source page, then create one in the generated page containing the `govukBackLink` macro and set the href to the variable `backLink` (which will be provided in the view model below)
-- Remember the text contents value of the `<h1>` tag (that will be used to set the pageTitle value in the view model later), and replace the `<h1>` contents with `{{pageTitle}}`
+- Remember the text contents value of the `<h1>` tag (that will be used to set the pageTitle value in the view model later), and replace the `<h1>` contents with `{{pageHeading}}`
 - Define a `{% block content %}` containing the converted markup
 - Use GOV.UK Design System Nunjucks macros for recognised components (see Component Mapping below)
 - Keep all other GOV.UK Frontend CSS classes as-is in the HTML (headings, body text, grid classes, lists, etc.)
 - Replace all `href` values in links with `#` (except `mailto:` links which should be kept as-is)
 - For Nunjucks macros import statements, check if already imported in `layouts/page.njk` and if not, add there rather than in the page `index.njk`
-- Add a hidden input inside any opening form elements - <input type="hidden" name="csrfToken" value="{{ csrfToken }}"/>
 - Remove the form action so that it posts to the same URL
 
 ### Example
@@ -60,7 +59,8 @@ For each matched component, fetch the reference URL (without JavaScript) and loc
 This is a simple function that returns the data that will be used to render data placeholders eg `{{pageTitle}}` in the nunjucks view.
 Create a file called `get-view-model.js` in the target folder with a default export that returns an object including the following properties:
 
-- `pageTitle`, which should have the value of the page title that was read from the source page `<h1>`
+- `pageTitle`, which should have the value of the page title that was read from the source page `<h1>`, plus ' - Gov.uk'
+- `pageHeading`, which should have the value of the page title that was read from the source page `<h1>`
 - `backLink` - set this to '#'
 
 ## Create a route file
