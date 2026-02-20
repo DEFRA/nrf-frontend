@@ -3,6 +3,7 @@ import { defineConfig, configDefaults } from 'vitest/config'
 export default defineConfig({
   test: {
     globals: true,
+    setupFiles: ['.vite/setup-files.js'],
     environment: 'node',
     clearMocks: true,
     coverage: {
