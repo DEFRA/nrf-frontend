@@ -1,10 +1,12 @@
 # Authentication
 
+### Authentication (DEFRA Identity)
+
 Defra ID authentication implements OAuth 2.0 / OpenID Connect with:
 
 - Authorization Code Flow
 - Refresh tokens for automatic token renewal
-- Server-side session storage (Redis/Memory)
+- Server-side session storage (Redis in production, in-memory locally)
 - CSRF protection via state parameter
 
 When a new user signs in for the first time they'll be offered to enroll on the service (or the org they're an employee of).
@@ -31,7 +33,8 @@ Mermaid diagrams:
 
 - [Sign in flow](./sign-in-flow.mermaid)
 - [Sign out flow](./sign-out-flow.mermaid)
-- TBC - Authenticated request to backend API
+
+Auth strategies: `defra-id` (Bell OAuth flow), `defra-session` (session validation). Default server auth mode is `'try'` — routes that need auth use `auth: 'defra-session'`, routes that don't use `auth: false`.
 
 ### Signing out
 
