@@ -84,11 +84,11 @@ Create a file called `get-view-model.js` in the target folder with a default exp
 
 Create a file called `form-validation.js` in the target folder with a default export function that returns a Joi schema to validate the request body from the form submission. See `src/server/quote/boundary-type/form-validation.js` for an example. The Joi schema should check for each form input group name that's present in the page form, using the following rules per input type:
 
-- **Radio buttons / selects**: When nothing is selected the field is absent from the payload, so use `joi.string().required()` and handle the `'any.required'` error key
+- **Radio buttons / selects**: When nothing is selected the field is absent from the payload, so use `joi.string().valid(...allowedValues).required()` where `allowedValues` is the list of `value` strings from the radio/select items. Handle both `'any.required'` (field absent) and `'any.only'` (unrecognised value submitted) — use the same error message for both.
+- **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().items(joi.string().valid(...allowedValues)).required()` where `allowedValues` is the list of valid checkbox values. Handle `'any.required'` (nothing checked) and `'any.only'` (unrecognised value submitted) — use the same error message for both. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
 - **Text inputs**: An empty string is submitted when the field is blank, so handle both `'string.empty'` and `'any.required'` error keys
 - **Email inputs** (type="email"): Treat as a text input but also add `.email({ tlds: { allow: false } })` to validate the format. Handle `'string.empty'`, `'any.required'`, and `'string.email'` (invalid format). Use `tlds: { allow: false }` to avoid Joi rejecting valid addresses due to unknown TLDs. The GOV.UK-standard format error message is `'Enter an email address in the correct format, like name@example.com'`.
 - **Number inputs** (type="number"): Hapi validates with `convert: true` by default, so use `joi.number().integer().required()`. Handle `'any.required'` (field absent), `'number.base'` (empty or non-numeric value), and `'number.integer'` (fractional number submitted). Do not use `joi.string()` — Joi will attempt to coerce the submitted string to a number before applying further rules.
-- **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().required()` and handle only the `'any.required'` error key. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
 
 ### Validation error messages
 
@@ -101,6 +101,18 @@ If parameter 3 was provided, look up the real error messages as follows:
 3. Look lower down that section for a 4th level markdown heading `#### Errors`. For each validation error case there will be Description, Error summary and Error message rows. The **Error message** row contains the actual error message string to use in `form-validation.js`. Map each Description to the appropriate Joi error key based on the field type rules above (e.g. "without choosing an option" → `'any.required'` for a radio; "without entering a value" → `'string.empty'` and `'any.required'` for a text input).
 
 Where the same error message string is used more than once in a field's `.messages({})` call, extract it to a named `const` at the top of the file (outside the function) to avoid duplication. See `src/server/quote/boundary-type/form-validation.js` for an example.
+
+### Create a form validation unit test (if the source page has a form)
+
+Create a file called `form-validation.test.js` in the target folder. See `src/server/quote/boundary-type/form-validation.test.js` for the pattern to follow.
+
+For each field in the schema, add tests that:
+
+- Pass for each valid value (one test per allowed value for radios/checkboxes)
+- Fail with the correct error message when the field is absent
+- For radio/checkbox fields: fail with the correct error message when an unrecognised value is submitted
+
+Run the tests and confirm they pass.
 
 ## Create a 'get next page' file (if the source page has a form)
 
@@ -136,6 +148,8 @@ Add a test that submits the form without valid data and asserts that the validat
 
 For fields with format validation (e.g. email inputs), add a second submission test that passes an invalid value in `formData` and asserts the format error message is shown.
 
-Also add a test that submits the form with valid data and asserts that the response contains a redirect (status code 302) with a `location` header. See `src/server/quote/boundary-type/page.test.js` for an example.
+Add the following tests, using `src/server/quote/boundary-type/page.test.js` for examples:
 
-Run the tests and confirm they pass.
+- a test that submits the form with valid data and asserts that the response contains a redirect (status code 302) with a `location` header.
+- a test that confirms the form contains a hidden input to hold a CSRF token.
+- tests checking that a user's previous form selection is remembered.

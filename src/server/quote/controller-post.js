@@ -1,4 +1,5 @@
 import { mapValidationErrorsForDisplay } from '../common/helpers/form-validation.js'
+import { saveQuoteDataToCache } from './session-cache.js'
 
 export const quotePostController = ({
   routeId,
@@ -22,6 +23,8 @@ export const quotePostController = ({
     }
   },
   handler(request, h) {
+    const { payload } = request
+    saveQuoteDataToCache(request, payload)
     const nextPage = getNextPage(request.payload)
     return h.redirect(nextPage)
   }

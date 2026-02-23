@@ -8,7 +8,7 @@ describe('quotePostController', () => {
   const formValidation = () => () => {}
   const getNextPage = () => '/quote/next'
 
-  it('should redirect to /quote/next on successful submission', () => {
+  it('should save the form data to cache and redirect to /quote/next on successful submission', () => {
     const controller = quotePostController({
       routeId,
       formValidation,
@@ -16,9 +16,19 @@ describe('quotePostController', () => {
       getNextPage
     })
     const h = { redirect: (path) => ({ redirectTo: path }) }
-
-    const result = controller.handler({}, h)
-
+    const getExistingSessionCacheValue = vi
+      .fn()
+      .mockReturnValue({ field1: 'value1' })
+    const request = {
+      payload: { field2: 'value2' },
+      yar: { get: getExistingSessionCacheValue, set: vi.fn() }
+    }
+    const result = controller.handler(request, h)
+    expect(getExistingSessionCacheValue).toHaveBeenCalledWith('quote')
+    expect(request.yar.set).toHaveBeenCalledWith('quote', {
+      field1: 'value1',
+      field2: 'value2'
+    })
     expect(result.redirectTo).toBe('/quote/next')
   })
 
