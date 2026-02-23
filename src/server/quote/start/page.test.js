@@ -11,6 +11,7 @@ describe('Start page', () => {
       requestUrl: routePath,
       server: getServer()
     })
+    expect(document.title).toBe('Nature Restoration Fund - Gov.uk')
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Nature Restoration Fund'
     )
