@@ -4,9 +4,22 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
-import { getQuoteDataFromCache } from '../session-cache.js'
+import {
+  getQuoteDataFromCache,
+  getValidationFlashFromCache,
+  saveValidationFlashToCache
+} from '../session-cache.js'
 
-vi.mock('../session-cache.js')
+vi.mock('../session-cache.js', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    getQuoteDataFromCache: vi.fn(),
+    getValidationFlashFromCache: vi.fn(),
+    clearValidationFlashFromCache: vi.fn(),
+    saveValidationFlashToCache: vi.fn()
+  }
+})
 
 describe('Boundary type page', () => {
   const getServer = setupTestServer()
@@ -71,16 +84,62 @@ describe('Boundary type page', () => {
     expect(csrfToken).toBeInTheDocument()
   })
 
-  it('should show a validation error if the form is submitted without a selection', async () => {
-    const { document } = await submitForm({
+  it('should redirect and save validation errors to cache, after an invalid form submission', async () => {
+    const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: {}
     })
-    expectFieldsetError({
-      document,
-      errorMessage: 'Select if you would like to draw a map or upload a file'
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(routePath)
+    expect(saveValidationFlashToCache.mock.calls[0][1]).toEqual({
+      formSubmitData: {},
+      validationErrors: {
+        messagesByFormField: {
+          boundaryEntryType: {
+            field: ['boundaryEntryType'],
+            href: '#boundaryEntryType',
+            text: 'Select if you would like to draw a map or upload a file'
+          }
+        },
+        summary: [
+          {
+            field: ['boundaryEntryType'],
+            href: '#boundaryEntryType',
+            text: 'Select if you would like to draw a map or upload a file'
+          }
+        ]
+      }
     })
+  })
+
+  it('should show a validation error if the page is viewed after an invalid form submission', async () => {
+    const errorMessage =
+      'Select if you would like to draw a map or upload a file'
+    vi.mocked(getValidationFlashFromCache).mockReturnValue({
+      validationErrors: {
+        summary: [
+          {
+            href: '#boundaryEntryType',
+            text: errorMessage,
+            field: ['boundaryEntryType']
+          }
+        ],
+        messagesByFormField: {
+          boundaryEntryType: {
+            href: '#boundaryEntryType',
+            text: errorMessage,
+            field: ['boundaryEntryType']
+          }
+        }
+      },
+      formSubmitData: {}
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer()
+    })
+    expectFieldsetError({ document, errorMessage })
   })
 
   it('should redirect to the next page if the form is submitted with a selection', async () => {
@@ -89,7 +148,7 @@ describe('Boundary type page', () => {
       server: getServer(),
       formData: { boundaryEntryType: 'draw' }
     })
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/next')
   })
 })

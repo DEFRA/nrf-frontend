@@ -139,17 +139,15 @@ The first test should load the page and assert:
 
 See `src/server/quote/boundary-type/page.test.js` for an example of this pattern.
 
-If the source page included a form, add tests for the form submission. See `src/server/quote/boundary-type/page.test.js` for the pattern to follow.
+If the source page included a form, add the following tests. See `src/server/quote/boundary-type/page.test.js` for the pattern to follow:
 
-Add a test that submits the form without valid data and asserts that the validation message from the form validation file is displayed on the page. Use the appropriate helper from `src/test-utils/assertions.js`:
+1. A test that loads the page when validation errors are in the session cache, and asserts that the validation message from the form validation file is displayed on the page. Use the appropriate helper from `src/test-utils/assertions.js`:
 
 - `expectFieldsetError` — for fields wrapped in a `<fieldset>` (radios and checkboxes). Pass `document` and `errorMessage`.
 - `expectInputError` — for individual text/number inputs (not wrapped in a fieldset). Pass `document`, `inputLabel` (the visible label text), and `errorMessage`.
 
-For fields with format validation (e.g. email inputs), add a second submission test that passes an invalid value in `formData` and asserts the format error message is shown.
-
-Add the following tests, using `src/server/quote/boundary-type/page.test.js` for examples:
-
-- a test that submits the form with valid data and asserts that the response contains a redirect (status code 302) with a `location` header.
-- a test that confirms the form contains a hidden input to hold a CSRF token.
-- tests checking that a user's previous form selection is remembered.
+2. For fields with format validation (e.g. email inputs), add a second page load test that mocks the session cache to return an invalid error, plus the invalid value, and asserts the format error message is shown.
+3. A test that submits the form with valid data and asserts that the response contains a redirect with a `location` header.
+4. A test that submits the form with invalid data and asserts that the response is a redirect to the same URL, and that the validation error(s) are saved to session cache.
+5. A test that confirms the form contains a hidden input to hold a CSRF token.
+6. Tests checking that a user's previous form selection is remembered.
