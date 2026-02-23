@@ -26,9 +26,7 @@ export async function createServer() {
     host: config.get('host'),
     port: config.get('port'),
     routes: {
-      auth: {
-        mode: 'try'
-      },
+      auth: false,
       validate: {
         options: {
           abortEarly: false
