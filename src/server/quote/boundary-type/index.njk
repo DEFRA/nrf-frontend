@@ -14,7 +14,7 @@
     <div class="govuk-grid-column-two-thirds">
 
         <form method="post" novalidate>
-
+          {% include "partials/csrf-token.njk" %}
             {% if validationErrors %}
             {{ govukErrorSummary({
                 titleText: "There is a problem",

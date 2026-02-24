@@ -17,6 +17,7 @@ import { contentSecurityPolicy } from './common/helpers/content-security-policy.
 import { defraIdentity } from './plugins/defra-identity.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import Bell from '@hapi/bell'
+import { csrf } from './common/helpers/csrf.js'
 
 const logger = createLogger()
 
@@ -65,6 +66,7 @@ export async function createServer() {
     secureContext,
     pulse,
     sessionCache,
+    csrf,
     nunjucksConfig,
     Scooter,
     contentSecurityPolicy
