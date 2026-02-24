@@ -15,16 +15,26 @@ updates:
           - 'babel-plugin-module-resolver'
           - 'babel-loader'
           - 'babel-plugin-transform-import-meta'
+          - 'cssnano'
+          - 'cssnano-*'
           - 'tsx'
           - 'webpack'
           - 'webpack-*'
           - 'terser-webpack-plugin'
+          - 'clean-webpack-plugin'
+          - 'copy-webpack-plugin'
+          - 'source-map-loader'
+          - 'sass'
+          - 'sass-*'
+          - 'postcss-*'
 
       lint:
         patterns:
           - 'prettier'
           - 'stylelint'
           - 'stylelint-*'
+          - 'neostandard'
+          - 'eslint'
 
       logging:
         patterns:
@@ -32,26 +42,47 @@ updates:
           - '*-pino-format'
           - 'pino'
           - 'pino-*'
+          - '@elastic/ecs-pino-format'
+          - 'aws-embedded-metrics'
 
       tools:
         patterns:
           - 'husky'
+          - 'cross-env'
           - 'nodemon'
           - 'npm-run-all'
-          - 'lodash'
-          - 'source-map-loader'
-          - 'sass-*'
-          - 'postcss-*'
+          - 'semver'
 
-      vitest:
+      testing:
         patterns:
           - 'vitest'
           - 'vitest-*'
           - '@vitest/*'
+          - '@testing-library/*'
+          - 'cheerio'
+          - 'jsdom'
 
-      types:
+      hapi:
         patterns:
-          - '@types/*'
+          - '@hapi/*'
+          - 'hapi-*'
+          - '@defra/hapi-*'
+
+      config:
+        patterns:
+          - 'convict'
+          - 'convict-format-with-validator'
+          - 'dotenv'
+
+      code:
+        patterns:
+          - 'lodash'
+          - 'blankie'
+          - 'date-fns'
+          - 'ioredis'
+          - 'node-fetch'
+          - 'nunjucks'
+          - 'undici'
 
     ignore:
       - dependency-name: 'eslint-*'
