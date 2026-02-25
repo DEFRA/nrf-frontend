@@ -3,10 +3,7 @@
 {% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
-{{ govukBackLink({
-    text: "Back",
-    href: backLink
-}) }}
+  {{  backLink({href: backLinkPath}) }}
 {% endblock %}
 
 {% block content %}
@@ -48,7 +45,6 @@
                     }
                 ]
             }) }}
-
             {{ govukButton({
                 text: "Continue"
             }) }}

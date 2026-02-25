@@ -34,7 +34,7 @@ The generated `index.njk` must:
 
 - Extend `layouts/page.njk`
 - Define a `{% block pageTitle %}` containing only a `{{pageTitle}}` variable.
-- If there is a `beforeContent` block in the source page, then create one in the generated page containing the `govukBackLink` macro and set the href to the variable `backLink` (which will be provided in the view model below)
+- If there is a `beforeContent` block in the source page, then create one in the generated page containing the `backLink` macro and set the href to the variable `backLinkPath` (which will be provided in the view model below)
 - Remember the text contents value of the `<h1>` tag (that will be used to set the pageTitle value in the view model later), and replace the `<h1>` contents with `{{pageHeading}}`
 - Define a `{% block content %}` containing the converted markup
 - Use GOV.UK Design System Nunjucks macros for recognised components (see Component Mapping below)
@@ -80,7 +80,7 @@ Create a file called `get-view-model.js` in the target folder with a default exp
 
 - `pageTitle`, which should have the value of the page title that was read from the source page `<h1>`, plus ' - Gov.uk'
 - `pageHeading`, which should have the value of the page title that was read from the source page `<h1>`
-- `backLink` - set this to '#'
+- `backLinkPath` - set this to '#'
 
 ## Create a form validation file (if the source page has a form)
 
@@ -140,7 +140,7 @@ The first test should load the page and assert:
 
 - the page heading (h1) is correct
 - `document.title` matches the `pageTitle` value from the view model
-- the Back link has the correct `href` (matching the `backLink` value from the view model)
+- the Back link has the correct `href` (matching the `backLinkPath` value from the view model)
 
 See `src/server/quote/boundary-type/page.test.js` for an example of this pattern.
 
