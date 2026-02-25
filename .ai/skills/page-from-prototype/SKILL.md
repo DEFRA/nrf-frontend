@@ -7,7 +7,7 @@ description: Create a new page and associated files by parsing a prototype page
 
 1. **Prototype page sub-path** - the relative path to a prototype page under the source folder (see below), eg `nrf-quote-4/start.html`
 2. **Route ID** e.g. `start`. This will be the last part of the page URL and also the folder name for the files
-3. **Prototype content markdown sub-path** (optional) - the relative path to the prototype content markdown file under `../nrf-prototypes/prompts/implementation`. This will only be used if the source page contains a form. If it's passed as a parameter, don't read the file immediately as it's large. Instructions on which section to focus on are in the form validation section below.
+3. **Prototype content markdown sub-path** (optional) - the filename of the prototype content markdown file under `../nrf-prototypes/prompts/implementation`. This will only be used if the source page contains a form. If it's passed as a parameter, don't read the file immediately as it's large. Instructions on which section to focus on are in the form validation section below.
 
 ## Terms
 
