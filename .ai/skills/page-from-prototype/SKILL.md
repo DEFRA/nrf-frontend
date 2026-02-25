@@ -62,6 +62,8 @@ When the prototype HTML contains elements matching these patterns, convert them 
 
 For each matched component, fetch the reference URL (without JavaScript) and locate the Nunjucks code example to determine the correct import statement and macro call syntax.
 
+If it's a form field component, just pass the `name` attribute in, no need to pass `id` attribute as it will default to re-using the `name` for the `id`.
+
 | CSS class pattern     | Component     | Macro reference                                                                               |
 | --------------------- | ------------- | --------------------------------------------------------------------------------------------- |
 | `govuk-button`        | Button        | https://design-system.service.gov.uk/components/button/#button-example-nunjucks               |
