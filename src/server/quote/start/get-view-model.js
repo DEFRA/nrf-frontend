@@ -1,8 +1,11 @@
-const title = 'Nature Restoration Fund'
+import { getPageTitle } from '../../common/helpers/page-title.js'
+import { config } from '../../../config/config.js'
+
+const serviceName = config.get('serviceName')
 
 export default function () {
   return {
-    pageTitle: `${title} - Gov.uk`,
-    pageHeading: title
+    pageTitle: getPageTitle(),
+    pageHeading: serviceName
   }
 }

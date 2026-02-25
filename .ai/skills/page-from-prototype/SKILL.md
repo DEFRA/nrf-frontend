@@ -7,7 +7,7 @@ description: Create a new page and associated files by parsing a prototype page
 
 1. **Prototype page sub-path** - the relative path to a prototype page under the source folder (see below), eg `nrf-quote-4/start.html`
 2. **Route ID** e.g. `start`. This will be the last part of the page URL and also the folder name for the files
-3. **Prototype content markdown sub-path** (optional) - the relative path to the prototype content markdown file under `../nrf-prototypes/prompts/implementation`. This will only be used if the source page contains a form. If it's passed as a parameter, don't read the file immediately as it's large. Instructions on which section to focus on are in the form validation section below.
+3. **Prototype content markdown sub-path** (optional) - the filename of the prototype content markdown file under `../nrf-prototypes/prompts/implementation`. This will only be used if the source page contains a form. If it's passed as a parameter, don't read the file immediately as it's large. Instructions on which section to focus on are in the form validation section below.
 
 ## Terms
 
@@ -62,6 +62,8 @@ When the prototype HTML contains elements matching these patterns, convert them 
 
 For each matched component, fetch the reference URL (without JavaScript) and locate the Nunjucks code example to determine the correct import statement and macro call syntax.
 
+If it's a form field component, just pass the `name` attribute in, no need to pass `id` attribute as it will default to re-using the `name` for the `id`.
+
 | CSS class pattern     | Component     | Macro reference                                                                               |
 | --------------------- | ------------- | --------------------------------------------------------------------------------------------- |
 | `govuk-button`        | Button        | https://design-system.service.gov.uk/components/button/#button-example-nunjucks               |
@@ -86,7 +88,8 @@ Create a file called `form-validation.js` in the target folder with a default ex
 
 - **Radio buttons / selects**: When nothing is selected the field is absent from the payload, so use `joi.string().valid(...allowedValues).required()` where `allowedValues` is the list of `value` strings from the radio/select items. Handle both `'any.required'` (field absent) and `'any.only'` (unrecognised value submitted) — use the same error message for both.
 - **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().items(joi.string().valid(...allowedValues)).required()` where `allowedValues` is the list of valid checkbox values. Handle `'any.required'` (nothing checked) and `'any.only'` (unrecognised value submitted) — use the same error message for both. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
-- **Text inputs**: An empty string is submitted when the field is blank, so handle both `'string.empty'` and `'any.required'` error keys
+- **Text inputs (required)**: An empty string is submitted when the field is blank, so handle both `'string.empty'` and `'any.required'` error keys
+- **Text inputs (optional)**: Use `joi.string().allow('')` — no error messages needed. Always include optional fields in the schema; omitting them causes Hapi to reject submissions that include them as unknown fields.
 - **Email inputs** (type="email"): Treat as a text input but also add `.email({ tlds: { allow: false } })` to validate the format. Handle `'string.empty'`, `'any.required'`, and `'string.email'` (invalid format). Use `tlds: { allow: false }` to avoid Joi rejecting valid addresses due to unknown TLDs. The GOV.UK-standard format error message is `'Enter an email address in the correct format, like name@example.com'`.
 - **Number inputs** (type="number"): Hapi validates with `convert: true` by default, so use `joi.number().integer().required()`. Handle `'any.required'` (field absent), `'number.base'` (empty or non-numeric value), and `'number.integer'` (fractional number submitted). Do not use `joi.string()` — Joi will attempt to coerce the submitted string to a number before applying further rules.
 
@@ -111,6 +114,8 @@ For each field in the schema, add tests that:
 - Pass for each valid value (one test per allowed value for radios/checkboxes)
 - Fail with the correct error message when the field is absent
 - For radio/checkbox fields: fail with the correct error message when an unrecognised value is submitted
+
+If the form has optional text fields, add an `optional fields` describe block with three tests: passes when all optional fields are absent, passes when all are empty strings, passes when all have values. Extract a `validRequiredData` const at the top of the file for use across tests.
 
 Run the tests and confirm they pass.
 

@@ -7,15 +7,20 @@ import { buildRedisClient } from './redis-client.js'
 
 vi.mock('ioredis', () => ({
   ...vi.importActual('ioredis'),
-  Cluster: vi.fn().mockImplementation(function () {
-    return { on: () => ({}) }
-  }),
-  Redis: vi.fn().mockImplementation(function () {
-    return { on: () => ({}) }
-  })
+  Cluster: vi.fn(),
+  Redis: vi.fn()
 }))
 
 describe('#buildRedisClient', () => {
+  beforeEach(() => {
+    Redis.mockImplementation(function () {
+      return { on: () => ({}) }
+    })
+    Cluster.mockImplementation(function () {
+      return { on: () => ({}) }
+    })
+  })
+
   describe('When Redis Single InstanceCache is requested', () => {
     beforeEach(() => {
       buildRedisClient(config.get('redis'))
