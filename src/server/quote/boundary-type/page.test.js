@@ -10,16 +10,7 @@ import {
   saveValidationFlashToCache
 } from '../session-cache.js'
 
-vi.mock('../session-cache.js', async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    getQuoteDataFromCache: vi.fn(),
-    getValidationFlashFromCache: vi.fn(),
-    clearValidationFlashFromCache: vi.fn(),
-    saveValidationFlashToCache: vi.fn()
-  }
-})
+vi.mock('../session-cache.js')
 
 describe('Boundary type page', () => {
   const getServer = setupTestServer()
