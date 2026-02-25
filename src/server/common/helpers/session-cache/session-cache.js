@@ -22,7 +22,9 @@ export const sessionCache = {
       password: sessionConfig.cookie.password,
       ttl: sessionConfig.cookie.ttl,
       isSecure: config.get('session.cookie.secure'),
-      clearInvalid: true
+      clearInvalid: true,
+      isSameSite: 'Strict',
+      isHttpOnly: true
     }
   }
 }
