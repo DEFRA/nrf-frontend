@@ -2,6 +2,13 @@ import routesStart from './start/routes.js'
 import routesBoundaryType from './boundary-type/routes.js'
 import routesResidential from './residential/routes.js'
 
+// Placeholder route for pages not yet implemented
+const placeholderRoute = {
+  method: 'GET',
+  path: '/quote/next',
+  handler: () => '<h1>Placeholder</h1><p>This page is not yet implemented.</p>'
+}
+
 export const quote = {
   plugin: {
     name: 'quote',
@@ -9,7 +16,8 @@ export const quote = {
       server.route([
         ...routesStart,
         ...routesBoundaryType,
-        ...routesResidential
+        ...routesResidential,
+        placeholderRoute
       ])
     }
   }
