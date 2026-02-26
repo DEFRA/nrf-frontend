@@ -47,16 +47,9 @@ describe('residential form validation', () => {
       })
     })
 
-    describe('zero and negative numbers', () => {
+    describe('zero', () => {
       it('fails when zero', () => {
         const { error } = getSchema().validate({ residentialBuildingCount: 0 })
-        expect(error.details[0].message).toBe(
-          'Enter a whole number greater than zero'
-        )
-      })
-
-      it('fails when negative (-3)', () => {
-        const { error } = getSchema().validate({ residentialBuildingCount: -3 })
         expect(error.details[0].message).toBe(
           'Enter a whole number greater than zero'
         )
@@ -134,6 +127,15 @@ describe('residential form validation', () => {
       it('fails when number with plus sign (+10)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '+10'
+        })
+        expect(error.details[0].message).toBe(
+          'Enter the number of residential units'
+        )
+      })
+
+      it('fails when number with minus sign (-3)', () => {
+        const { error } = getSchema().validate({
+          residentialBuildingCount: '-3'
         })
         expect(error.details[0].message).toBe(
           'Enter the number of residential units'

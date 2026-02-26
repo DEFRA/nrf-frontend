@@ -66,8 +66,8 @@ describe('Residential page', () => {
     })
   })
 
-  describe('valid form submissions', () => {
-    it('should redirect to the next page when entering a valid value (6)', async () => {
+  describe('valid form submission', () => {
+    it('should redirect to the next page when entering a valid value', async () => {
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
@@ -76,22 +76,14 @@ describe('Residential page', () => {
       expect(response.statusCode).toBe(303)
       expect(response.headers.location).toBe('/quote/next')
     })
-
-    it('should redirect to the next page when entering a valid value (12)', async () => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { residentialBuildingCount: '12' }
-      })
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe('/quote/next')
-    })
   })
 
-  describe('invalid form submissions - empty input', () => {
+  // Validation edge cases are tested in form-validation.test.js
+  // This test verifies the page correctly renders validation errors
+  describe('invalid form submission', () => {
     const errorMessage = 'Enter the number of residential units'
 
-    it('should redirect and save validation error when field is empty', async () => {
+    it('should redirect and save validation error when form is invalid', async () => {
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
@@ -120,7 +112,7 @@ describe('Residential page', () => {
       })
     })
 
-    it('should show empty field error on page after invalid submission', async () => {
+    it('should render validation error after redirect', async () => {
       vi.mocked(getValidationFlashFromCache).mockReturnValue({
         validationErrors: {
           summary: [
@@ -139,132 +131,6 @@ describe('Residential page', () => {
           }
         },
         formSubmitData: {}
-      })
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer()
-      })
-      expectInputError({
-        document,
-        inputLabel,
-        errorMessage
-      })
-    })
-  })
-
-  describe('invalid form submissions - zero and negative numbers', () => {
-    const errorMessage = 'Enter a whole number greater than zero'
-
-    it('should redirect with error when entering zero', async () => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { residentialBuildingCount: '0' }
-      })
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(routePath)
-      expect(
-        saveValidationFlashToCache.mock.calls[0][1].validationErrors.summary[0]
-          .text
-      ).toBe(errorMessage)
-    })
-
-    it('should redirect with error when entering negative number (-3)', async () => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { residentialBuildingCount: '-3' }
-      })
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(routePath)
-      expect(
-        saveValidationFlashToCache.mock.calls[0][1].validationErrors.summary[0]
-          .text
-      ).toBe(errorMessage)
-    })
-
-    it('should redirect with error when entering decimal number (3.5)', async () => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { residentialBuildingCount: '3.5' }
-      })
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(routePath)
-      expect(
-        saveValidationFlashToCache.mock.calls[0][1].validationErrors.summary[0]
-          .text
-      ).toBe(errorMessage)
-    })
-
-    it('should show min value error on page after invalid submission', async () => {
-      vi.mocked(getValidationFlashFromCache).mockReturnValue({
-        validationErrors: {
-          summary: [
-            {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          ],
-          messagesByFormField: {
-            residentialBuildingCount: {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          }
-        },
-        formSubmitData: { residentialBuildingCount: 0 }
-      })
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer()
-      })
-      expectInputError({
-        document,
-        inputLabel,
-        errorMessage
-      })
-    })
-  })
-
-  describe('invalid form submissions - extremely large numbers', () => {
-    const errorMessage = 'Enter a smaller whole number within the allowed range'
-
-    it('should redirect with error when entering extremely large number', async () => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { residentialBuildingCount: '1000000' }
-      })
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(routePath)
-      expect(
-        saveValidationFlashToCache.mock.calls[0][1].validationErrors.summary[0]
-          .text
-      ).toBe(errorMessage)
-    })
-
-    it('should show max value error on page after invalid submission', async () => {
-      vi.mocked(getValidationFlashFromCache).mockReturnValue({
-        validationErrors: {
-          summary: [
-            {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          ],
-          messagesByFormField: {
-            residentialBuildingCount: {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          }
-        },
-        formSubmitData: { residentialBuildingCount: 1000000 }
       })
       const document = await loadPage({
         requestUrl: routePath,
