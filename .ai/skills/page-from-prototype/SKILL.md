@@ -157,3 +157,12 @@ If the source page included a form, add the following tests. See `src/server/quo
 4. A test that submits the form with invalid data and asserts that the response is a redirect to the same URL, and that the validation error(s) are saved to session cache.
 5. A test that confirms the form contains a hidden input to hold a CSRF token.
 6. Tests checking that a user's previous form selection is remembered.
+
+### Create an accessibility test
+
+See the following examples -
+
+- Page without a form - `src/server/quote/start/accessibility.test.js`
+- Page with a form - `src/server/quote/boundary-type/accessibility.test.js`
+
+For a page with a form, the test should mock validation error(s) then submit the form, so that a rendered page including validation errors is tested.
