@@ -30,7 +30,7 @@ describe('Residential page', () => {
       )
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',
-        '#'
+        '/quote/development-types'
       )
     })
 
