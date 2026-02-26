@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 
+import { Cluster, Redis } from 'ioredis'
 import { Engine as CatboxRedis } from '@hapi/catbox-redis'
 import { Engine as CatboxMemory } from '@hapi/catbox-memory'
 
@@ -11,12 +12,8 @@ const mockLoggerError = vi.fn()
 
 vi.mock('ioredis', () => ({
   ...vi.importActual('ioredis'),
-  Cluster: vi.fn().mockImplementation(function () {
-    return { on: () => ({}) }
-  }),
-  Redis: vi.fn().mockImplementation(function () {
-    return { on: () => ({}) }
-  })
+  Cluster: vi.fn(),
+  Redis: vi.fn()
 }))
 vi.mock('@hapi/catbox-redis')
 vi.mock('@hapi/catbox-memory')
@@ -28,6 +25,15 @@ vi.mock('../logging/logger.js', () => ({
 }))
 
 describe('#getCacheEngine', () => {
+  beforeEach(() => {
+    Redis.mockImplementation(function () {
+      return { on: () => ({}) }
+    })
+    Cluster.mockImplementation(function () {
+      return { on: () => ({}) }
+    })
+  })
+
   describe('When Redis cache engine has been requested', () => {
     beforeEach(() => {
       getCacheEngine('redis')

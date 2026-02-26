@@ -12,7 +12,7 @@ import {
 
 vi.mock('../session-cache.js')
 
-describe('Boundary type page', () => {
+describe('Development type page', () => {
   const getServer = setupTestServer()
 
   it('should render a page heading, title and back link', async () => {
@@ -21,49 +21,49 @@ describe('Boundary type page', () => {
       server: getServer()
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Choose how you would like to show us the boundary of your development'
+      'What type of development is it?'
     )
     expect(document.title).toBe(
-      'Choose how you would like to show us the boundary of your development - Nature Restoration Fund - Gov.uk'
+      'What type of development is it? - Nature Restoration Fund - Gov.uk'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/'
+      '#'
     )
   })
 
-  it("should not pre-select a radio button if the user didn't previously select one", async () => {
+  it("should not pre-check any checkboxes if the user didn't previously make a selection", async () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({})
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
-    expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()
+    expect(getByLabelText(document, 'Housing')).not.toBeChecked()
+    expect(getByLabelText(document, 'Other residential')).not.toBeChecked()
   })
 
-  it('should remember if the user previously selected draw', async () => {
+  it('should remember if the user previously selected Housing', async () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
-      boundaryEntryType: 'draw'
+      developmentTypes: ['housing']
     })
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    expect(getByLabelText(document, 'Draw on a map')).toBeChecked()
-    expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()
+    expect(getByLabelText(document, 'Housing')).toBeChecked()
+    expect(getByLabelText(document, 'Other residential')).not.toBeChecked()
   })
 
-  it('should remember if the user previously selected upload', async () => {
+  it('should remember if the user previously selected Other residential', async () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
-      boundaryEntryType: 'upload'
+      developmentTypes: ['other-residential']
     })
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    expect(getByLabelText(document, 'Upload a file')).toBeChecked()
-    expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
+    expect(getByLabelText(document, 'Other residential')).toBeChecked()
+    expect(getByLabelText(document, 'Housing')).not.toBeChecked()
   })
 
   it('should include a CSRF token inside the form, to prevent CSRF attacks', async () => {
@@ -87,17 +87,17 @@ describe('Boundary type page', () => {
       formSubmitData: {},
       validationErrors: {
         messagesByFormField: {
-          boundaryEntryType: {
-            field: ['boundaryEntryType'],
-            href: '#boundaryEntryType',
-            text: 'Select if you would like to draw a map or upload a file'
+          developmentTypes: {
+            field: ['developmentTypes'],
+            href: '#developmentTypes',
+            text: 'Select a development type to continue'
           }
         },
         summary: [
           {
-            field: ['boundaryEntryType'],
-            href: '#boundaryEntryType',
-            text: 'Select if you would like to draw a map or upload a file'
+            field: ['developmentTypes'],
+            href: '#developmentTypes',
+            text: 'Select a development type to continue'
           }
         ]
       }
@@ -105,22 +105,21 @@ describe('Boundary type page', () => {
   })
 
   it('should show a validation error if the page is viewed after an invalid form submission', async () => {
-    const errorMessage =
-      'Select if you would like to draw a map or upload a file'
+    const errorMessage = 'Select a development type to continue'
     vi.mocked(getValidationFlashFromCache).mockReturnValue({
       validationErrors: {
         summary: [
           {
-            href: '#boundaryEntryType',
+            href: '#developmentTypes',
             text: errorMessage,
-            field: ['boundaryEntryType']
+            field: ['developmentTypes']
           }
         ],
         messagesByFormField: {
-          boundaryEntryType: {
-            href: '#boundaryEntryType',
+          developmentTypes: {
+            href: '#developmentTypes',
             text: errorMessage,
-            field: ['boundaryEntryType']
+            field: ['developmentTypes']
           }
         }
       },
@@ -133,13 +132,23 @@ describe('Boundary type page', () => {
     expectFieldsetError({ document, errorMessage })
   })
 
-  it('should redirect to the next page if the form is submitted with a selection', async () => {
+  it('should redirect to the next placeholder page if Housing is not selected', async () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { boundaryEntryType: 'draw' }
+      formData: { developmentTypes: ['other-residential'] }
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/next')
+  })
+
+  it('should redirect to the next placeholder page if Housing is selected', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { developmentTypes: ['housing', 'other-residential'] }
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/residential')
   })
 })

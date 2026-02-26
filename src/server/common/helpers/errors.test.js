@@ -46,9 +46,14 @@ describe('#catchAll', () => {
   const mockToolkitView = vi.fn()
   const mockToolkitCode = vi.fn()
   const mockToolkit = {
-    view: mockToolkitView.mockReturnThis(),
-    code: mockToolkitCode.mockReturnThis()
+    view: mockToolkitView,
+    code: mockToolkitCode
   }
+
+  beforeEach(() => {
+    mockToolkitView.mockReturnThis()
+    mockToolkitCode.mockReturnThis()
+  })
 
   test('Should provide expected "Not Found" page', () => {
     catchAll(mockRequest(statusCodes.notFound), mockToolkit)
