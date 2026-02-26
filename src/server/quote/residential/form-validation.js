@@ -31,7 +31,7 @@ const plainIntegerValidator = (value, helpers) => {
     return helpers.error('number.base')
   }
 
-  const num = parseInt(strValue, 10)
+  const num = Number.parseInt(strValue, 10)
 
   if (num < 1) {
     return helpers.error('number.min')
@@ -44,7 +44,7 @@ const plainIntegerValidator = (value, helpers) => {
   return num
 }
 
-export default function () {
+export default function formValidation() {
   return joi.object({
     residentialBuildingCount: joi
       .any()
