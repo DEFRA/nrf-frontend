@@ -7,25 +7,25 @@ import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 
 vi.mock('../session-cache.js')
 
-describe('Residential units page accessibility checks', () => {
+describe('Development types page accessibility checks', () => {
   const getServer = setupTestServer()
 
   it('should have no HTML accessibility issues after an invalid form submission', async () => {
-    const errorMessage = 'Enter the number of residential units'
+    const errorMessage = 'Select a development type to continue'
     vi.mocked(getValidationFlashFromCache).mockReturnValue({
       validationErrors: {
         summary: [
           {
-            href: '#residentialBuildingCount',
+            href: '#developmentTypes',
             text: errorMessage,
-            field: ['residentialBuildingCount']
+            field: ['developmentTypes']
           }
         ],
         messagesByFormField: {
-          residentialBuildingCount: {
-            href: '#residentialBuildingCount',
+          developmentTypes: {
+            href: '#developmentTypes',
             text: errorMessage,
-            field: ['residentialBuildingCount']
+            field: ['developmentTypes']
           }
         }
       },

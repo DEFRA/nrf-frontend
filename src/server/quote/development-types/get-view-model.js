@@ -6,6 +6,6 @@ export default function getViewModel() {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
-    backLink: '#'
+    backLinkPath: '#'
   }
 }
