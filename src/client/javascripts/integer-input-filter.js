@@ -8,7 +8,7 @@
  * Extracts digits from a string, optionally preserving a leading minus
  */
 export function extractDigits(value, allowNegative = false) {
-  const digits = value.replace(/\D/g, '')
+  const digits = value.replaceAll(/\D/g, '')
   if (allowNegative && value.startsWith('-') && digits) {
     return '-' + digits
   }
