@@ -35,6 +35,7 @@ The generated `index.njk` must:
 - Extend `layouts/page.njk`
 - Define a `{% block pageTitle %}` containing only a `{{pageTitle}}` variable.
 - If there is a `beforeContent` block in the source page, then create one in the generated page containing the `backLink` macro and set the href to the variable `backLinkPath` (which will be provided in the view model below)
+- replace any occurrences of the class `govuk-grid-column-two-thirds` with `govuk-grid-column-two-thirds-from-desktop`
 - Remember the text contents value of the `<h1>` tag (that will be used to set the pageTitle value in the view model later), and replace the `<h1>` contents with `{{pageHeading}}`
 - Define a `{% block content %}` containing the converted markup
 - Use GOV.UK Design System Nunjucks macros for recognised components (see Component Mapping below)

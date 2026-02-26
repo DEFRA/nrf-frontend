@@ -10,6 +10,12 @@
 
 For the minimum Node / NPM versions, see package.json `engines`, and also .nvmrc.
 
+To switch to the required version of Node, ensure you have [nvm](https://github.com/nvm-sh/nvm) installed, and then run:
+
+```
+nvm use
+```
+
 ## Local Development
 
 ### Setup
@@ -30,6 +36,7 @@ npm run dev
 
 ### Production
 
+For most cases, using development mode as above is easiest.
 To mimic the application running in `production` mode locally run:
 
 ```bash
