@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest'
-import { extractDigits, isKeyAllowed } from './integer-input-filter.js'
+// @vitest-environment jsdom
+/* global KeyboardEvent */
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import {
+  extractDigits,
+  isKeyAllowed,
+  initAllIntegerFilters
+} from './integer-input-filter.js'
 
 // Helper to create mock event and input for isKeyAllowed tests
 const mockKeyEvent = (ctrlKey = false, metaKey = false) => ({
@@ -148,6 +154,162 @@ describe('integer-input-filter', () => {
         expect(
           isKeyAllowed('-', mockKeyEvent(), mockInput('-5', 0), true)
         ).toBe(false)
+      })
+    })
+  })
+
+  describe('initAllIntegerFilters', () => {
+    let input
+
+    beforeEach(() => {
+      input = document.createElement('input')
+      input.setAttribute('data-integer-filter', 'true')
+      input.setAttribute('data-allow-negative', 'false')
+      document.body.appendChild(input)
+      initAllIntegerFilters()
+    })
+
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    describe('keydown event', () => {
+      it('allows digit keys', () => {
+        const event = new KeyboardEvent('keydown', {
+          key: '5',
+          cancelable: true
+        })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(false)
+      })
+
+      it('blocks letter keys', () => {
+        const event = new KeyboardEvent('keydown', {
+          key: 'a',
+          cancelable: true
+        })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(true)
+      })
+
+      it('allows control keys', () => {
+        const event = new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          cancelable: true
+        })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(false)
+      })
+
+      it('blocks minus when allowNegative is false', () => {
+        const event = new KeyboardEvent('keydown', {
+          key: '-',
+          cancelable: true
+        })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(true)
+      })
+    })
+
+    describe('input event (fallback filter)', () => {
+      it('filters invalid characters from value', () => {
+        input.value = '12abc34'
+        input.selectionStart = 7
+        input.dispatchEvent(new Event('input'))
+        expect(input.value).toBe('1234')
+      })
+
+      it('leaves valid input unchanged', () => {
+        input.value = '123'
+        input.selectionStart = 3
+        input.dispatchEvent(new Event('input'))
+        expect(input.value).toBe('123')
+      })
+
+      it('preserves cursor position relative to valid characters', () => {
+        input.value = '12a34'
+        input.selectionStart = 3 // after 'a'
+        input.dispatchEvent(new Event('input'))
+        expect(input.value).toBe('1234')
+        expect(input.selectionStart).toBe(2) // after '12'
+      })
+    })
+
+    describe('paste event', () => {
+      const createPasteEvent = (text) => {
+        const event = new Event('paste', { cancelable: true, bubbles: true })
+        event.clipboardData = { getData: () => text }
+        return event
+      }
+
+      it('extracts digits from pasted text', () => {
+        input.value = ''
+        input.selectionStart = 0
+        input.selectionEnd = 0
+        input.dispatchEvent(createPasteEvent('abc123def'))
+        expect(input.value).toBe('123')
+      })
+
+      it('inserts pasted digits at cursor position', () => {
+        input.value = '12'
+        input.selectionStart = 1
+        input.selectionEnd = 1
+        input.dispatchEvent(createPasteEvent('99'))
+        expect(input.value).toBe('1992')
+      })
+
+      it('replaces selected text with pasted digits', () => {
+        input.value = '12345'
+        input.selectionStart = 1
+        input.selectionEnd = 4
+        input.dispatchEvent(createPasteEvent('99'))
+        expect(input.value).toBe('1995')
+      })
+
+      it('ignores paste if result would be empty', () => {
+        input.value = ''
+        input.selectionStart = 0
+        input.selectionEnd = 0
+        input.dispatchEvent(createPasteEvent('abc'))
+        expect(input.value).toBe('')
+      })
+
+      it('handles paste with missing clipboardData', () => {
+        input.value = '12'
+        input.selectionStart = 2
+        input.selectionEnd = 2
+        const event = new Event('paste', { cancelable: true, bubbles: true })
+        // No clipboardData property
+        input.dispatchEvent(event)
+        expect(input.value).toBe('12') // unchanged
+      })
+    })
+
+    describe('with allowNegative enabled', () => {
+      beforeEach(() => {
+        document.body.innerHTML = ''
+        input = document.createElement('input')
+        input.setAttribute('data-integer-filter', 'true')
+        input.setAttribute('data-allow-negative', 'true')
+        document.body.appendChild(input)
+        initAllIntegerFilters()
+      })
+
+      it('allows minus key at start', () => {
+        input.selectionStart = 0
+        const event = new KeyboardEvent('keydown', {
+          key: '-',
+          cancelable: true
+        })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(false)
+      })
+
+      it('preserves leading minus in input filter', () => {
+        input.value = '-12abc'
+        input.selectionStart = 6
+        input.dispatchEvent(new Event('input'))
+        expect(input.value).toBe('-12')
       })
     })
   })
