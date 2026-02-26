@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['.vite/setup-files.js'],
     environment: 'node',
-    clearMocks: true,
+    mockReset: true,
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',
