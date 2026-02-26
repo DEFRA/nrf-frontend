@@ -41,7 +41,6 @@ The generated `index.njk` must:
 - Use GOV.UK Design System Nunjucks macros for recognised components (see Component Mapping below)
 - Keep all other GOV.UK Frontend CSS classes as-is in the HTML (headings, body text, grid classes, lists, etc.)
 - Replace all `href` values in links with `#` (except `mailto:` links which should be kept as-is)
-- Preserve any Nunjucks template expressions found in the source page (e.g. `{{ data.nrfReference }}`). Copy them as-is into the generated template — do not rename or strip namespace prefixes such as `data.`
 - For Nunjucks macros import statements, check if already imported in `layouts/page.njk` and if not, add there rather than in the page `index.njk`
 
 ### Forms
@@ -51,6 +50,9 @@ If the source file contains a form element, there are some extra steps:
 - Remove the form action so that it posts to the same URL
 - Keep the `novalidate` attribute
 - if a form group legend is also the page heading, use a `{% set legendHtml %}` statement to set it
+- Preserve any Nunjucks template expressions found in the source page, but rename the `data` object to `formSubmitData` (e.g. `{{ data.nrfReference }}` becomes `{{ formSubmitData.nrfReference }}`).
+- For any property names that were under the `data` object, rename them to camelCase (e.g. `formSubmitData['building-types']` becomes `formSubmitData.buildingTypes`). These new property names will be used in the form validation file.
+- For the value attribute that will be passed to form fields, take the field's text value and lowercase then hyphenate it (e.g. 'Other residential' becomes 'other-residential')
 - In the source file, the `checked` attribute of radio and checkbox elements will be set using a data property eg `data['hasRedlineBoundaryFile']`. For each radio or checkbox macro in the generated page: set `name` to the field name as a plain string (e.g. `name: "boundaryEntryType"`); for radios set `value: formSubmitData.boundaryEntryType`; for checkboxes set `values: formSubmitData.hasRedlineBoundaryFile` (the GOV.UK checkboxes macro expects an array, not a scalar). This ensures the previously submitted value is pre-selected when the form is re-rendered after a validation error.
 - Use the same data property name as a property of `validationErrors.messagesByFormField` to set each form group's errorMessage property
 - For items arrays passed to the radios or checkboxes macro, do not set id attributes for each form group item
@@ -88,7 +90,7 @@ Create a file called `get-view-model.js` in the target folder with a default exp
 Create a file called `form-validation.js` in the target folder with a default export function that returns a Joi schema to validate the request body from the form submission. See `src/server/quote/boundary-type/form-validation.js` for an example. The Joi schema should check for each form input group name that's present in the page form, using the following rules per input type:
 
 - **Radio buttons / selects**: When nothing is selected the field is absent from the payload, so use `joi.string().valid(...allowedValues).required()` where `allowedValues` is the list of `value` strings from the radio/select items. Handle both `'any.required'` (field absent) and `'any.only'` (unrecognised value submitted) — use the same error message for both.
-- **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().items(joi.string().valid(...allowedValues)).required()` where `allowedValues` is the list of valid checkbox values. Handle `'any.required'` (nothing checked) and `'any.only'` (unrecognised value submitted) — use the same error message for both. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
+- **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().items(joi.string().valid(...allowedValues)).single().required()` where `allowedValues` is the list of valid checkbox values. The `.single()` call is required because when only one checkbox is checked the browser submits a plain string rather than an array — `.single()` tells Joi to accept and wrap it. Handle `'any.required'` (nothing checked) and `'any.only'` (unrecognised value submitted) — use the same error message for both. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
 - **Text inputs (required)**: An empty string is submitted when the field is blank, so handle both `'string.empty'` and `'any.required'` error keys
 - **Text inputs (optional)**: Use `joi.string().allow('')` — no error messages needed. Always include optional fields in the schema; omitting them causes Hapi to reject submissions that include them as unknown fields.
 - **Email inputs** (type="email"): Treat as a text input but also add `.email({ tlds: { allow: false } })` to validate the format. Handle `'string.empty'`, `'any.required'`, and `'string.email'` (invalid format). Use `tlds: { allow: false }` to avoid Joi rejecting valid addresses due to unknown TLDs. The GOV.UK-standard format error message is `'Enter an email address in the correct format, like name@example.com'`.
