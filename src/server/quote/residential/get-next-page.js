@@ -1,4 +1,3 @@
-export default function () {
-  // return the next page to redirect to
+export default function getNextPage() {
   return '/quote/next'
 }
