@@ -5,7 +5,7 @@ const formatErrorMessage =
   'Enter an email address in the correct format, like name@example.com'
 const maxLengthErrorMessage = 'Email address must be 256 characters or less'
 
-export default function getSchema() {
+export default function formValidation() {
   return joi.object({
     email: joi
       .string()
