@@ -3,6 +3,7 @@ import routesBoundaryType from './boundary-type/routes.js'
 import routesResidential from './residential/routes.js'
 import routesNoEdp from './no-edp/routes.js'
 import routesDevelopmentType from './development-types/routes.js'
+import routesEmail from './email/routes.js'
 
 // Placeholder route for pages not yet implemented
 const placeholderRoute = {
@@ -21,6 +22,7 @@ export const quote = {
         ...routesResidential,
         ...routesNoEdp,
         ...routesDevelopmentType,
+        ...routesEmail,
         placeholderRoute
       ])
     }

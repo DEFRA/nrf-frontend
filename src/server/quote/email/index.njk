@@ -1,0 +1,47 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList: validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {{ govukInput({
+                label: {
+                    text: pageHeading,
+                    classes: "govuk-label--l",
+                    isPageHeading: true
+                },
+                hint: {
+                    text: "Once your Nature Restoration Fund levy amount is calculated, the quote will be emailed to you."
+                },
+                name: "email",
+                type: "email",
+                autocomplete: "email",
+                spellcheck: false,
+                value: formSubmitData.email,
+                errorMessage: validationErrors.messagesByFormField.email
+            }) }}
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
