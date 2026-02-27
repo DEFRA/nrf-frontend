@@ -5,6 +5,7 @@ import { createPlainIntegerValidator } from '../../common/helpers/number-validat
 const MAX_RESIDENTIAL_UNITS = 999999
 
 const requiredErrorMessage = 'Enter the number of residential units'
+const formatErrorMessage = 'Enter a number using digits only, for example 12'
 const minErrorMessage = 'Enter a whole number greater than zero'
 const maxErrorMessage = 'Enter a smaller whole number within the allowed range'
 
@@ -21,8 +22,7 @@ export default function formValidation() {
       .required()
       .messages({
         'any.required': requiredErrorMessage,
-        'number.base': requiredErrorMessage,
-        'number.integer': minErrorMessage,
+        'number.format': formatErrorMessage,
         'number.min': minErrorMessage,
         'number.max': maxErrorMessage
       })

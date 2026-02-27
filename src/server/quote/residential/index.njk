@@ -20,7 +20,7 @@
             }) }}
             {% endif %}
 
-            {{ appIntegerInput({
+            {{ govukInput({
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",
@@ -29,8 +29,11 @@
                 hint: {
                     text: "A unit is a house, a HMO with 6 or less residents, a flat within a block of flats or a caravan or mobile home on a site."
                 },
+                id: "residentialBuildingCount",
                 name: "residentialBuildingCount",
                 classes: "govuk-input--width-5",
+                inputmode: "numeric",
+                pattern: "[0-9]*",
                 value: formSubmitData.residentialBuildingCount,
                 errorMessage: validationErrors.messagesByFormField.residentialBuildingCount
             }) }}

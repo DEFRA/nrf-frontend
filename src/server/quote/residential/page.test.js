@@ -92,6 +92,8 @@ describe('Residential page', () => {
   // These tests verify the page correctly handles form submissions and renders errors
   describe('invalid form submission', () => {
     const requiredErrorMessage = 'Enter the number of residential units'
+    const formatErrorMessage =
+      'Enter a number using digits only, for example 12'
     const minErrorMessage = 'Enter a whole number greater than zero'
     const maxErrorMessage =
       'Enter a smaller whole number within the allowed range'
@@ -186,7 +188,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
 
@@ -202,7 +204,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(minErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
 
@@ -234,7 +236,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
 
@@ -250,7 +252,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
 
@@ -266,7 +268,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
 
       it('should redirect and show error when entering number with plus sign (+10)', async () => {
@@ -280,7 +282,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
 
@@ -296,7 +298,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(requiredErrorMessage)
+        ).toBe(formatErrorMessage)
       })
     })
   })

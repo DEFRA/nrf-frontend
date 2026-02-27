@@ -17,19 +17,9 @@ export function createPlainIntegerValidator({ min, max }) {
       return helpers.error('any.required')
     }
 
-    // Reject scientific notation, plus signs, and minus signs
-    if (/[eE+-]/.test(strValue)) {
-      return helpers.error('number.base')
-    }
-
-    // Reject decimal numbers (contains a decimal point)
-    if (strValue.includes('.')) {
-      return helpers.error('number.integer')
-    }
-
-    // Must be digits only
+    // Must be digits only (reject letters, scientific notation, plus/minus signs, decimals)
     if (!/^\d+$/.test(strValue)) {
-      return helpers.error('number.base')
+      return helpers.error('number.format')
     }
 
     const num = Number.parseInt(strValue, 10)

@@ -62,7 +62,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: 3.5
         })
         expect(error.details[0].message).toBe(
-          'Enter a whole number greater than zero'
+          'Enter a number using digits only, for example 12'
         )
       })
     })
@@ -93,7 +93,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: 'abc'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
 
@@ -102,7 +102,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '25 units'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
 
@@ -111,7 +111,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '1,000'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
 
@@ -120,7 +120,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '1e3'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
 
@@ -129,7 +129,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '+10'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
 
@@ -138,7 +138,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '-3'
         })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter a number using digits only, for example 12'
         )
       })
     })
