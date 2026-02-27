@@ -51,7 +51,7 @@ describe('Residential page', () => {
         requestUrl: routePath,
         server: getServer()
       })
-      expect(getByLabelText(document, inputLabel)).toHaveValue(null)
+      expect(getByLabelText(document, inputLabel)).toHaveValue('')
     })
 
     it('should remember the previously entered value', async () => {
@@ -62,12 +62,12 @@ describe('Residential page', () => {
         requestUrl: routePath,
         server: getServer()
       })
-      expect(getByLabelText(document, inputLabel)).toHaveValue(25)
+      expect(getByLabelText(document, inputLabel)).toHaveValue('25')
     })
   })
 
   describe('valid form submission', () => {
-    it('should redirect to the next page when entering a valid value', async () => {
+    it('should redirect to the next page when entering a valid value (6)', async () => {
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
@@ -76,70 +76,229 @@ describe('Residential page', () => {
       expect(response.statusCode).toBe(303)
       expect(response.headers.location).toBe('/quote/next')
     })
-  })
 
-  // Validation edge cases are tested in form-validation.test.js
-  // This test verifies the page correctly renders validation errors
-  describe('invalid form submission', () => {
-    const errorMessage = 'Enter the number of residential units'
-
-    it('should redirect and save validation error when form is invalid', async () => {
+    it('should trim spaces and accept value (12 with spaces)', async () => {
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData: {}
+        formData: { residentialBuildingCount: ' 12 ' }
       })
       expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(routePath)
-      expect(saveValidationFlashToCache.mock.calls[0][1]).toEqual({
-        formSubmitData: {},
-        validationErrors: {
-          messagesByFormField: {
-            residentialBuildingCount: {
-              field: ['residentialBuildingCount'],
-              href: '#residentialBuildingCount',
-              text: errorMessage
+      expect(response.headers.location).toBe('/quote/next')
+    })
+  })
+
+  // Validation edge cases are tested in form-validation.test.js
+  // These tests verify the page correctly handles form submissions and renders errors
+  describe('invalid form submission', () => {
+    const requiredErrorMessage = 'Enter the number of residential units'
+    const formatErrorMessage =
+      'Enter a number using digits only, for example 12'
+    const minErrorMessage = 'Enter a whole number greater than zero'
+    const maxErrorMessage =
+      'Enter a smaller whole number within the allowed range'
+
+    describe('empty input', () => {
+      it('should redirect and save validation error when input is empty', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: {}
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(saveValidationFlashToCache.mock.calls[0][1]).toEqual({
+          formSubmitData: {},
+          validationErrors: {
+            messagesByFormField: {
+              residentialBuildingCount: {
+                field: ['residentialBuildingCount'],
+                href: '#residentialBuildingCount',
+                text: requiredErrorMessage
+              }
+            },
+            summary: [
+              {
+                field: ['residentialBuildingCount'],
+                href: '#residentialBuildingCount',
+                text: requiredErrorMessage
+              }
+            ]
+          }
+        })
+      })
+
+      it('should render validation error after redirect', async () => {
+        vi.mocked(getValidationFlashFromCache).mockReturnValue({
+          validationErrors: {
+            summary: [
+              {
+                href: '#residentialBuildingCount',
+                text: requiredErrorMessage,
+                field: ['residentialBuildingCount']
+              }
+            ],
+            messagesByFormField: {
+              residentialBuildingCount: {
+                href: '#residentialBuildingCount',
+                text: requiredErrorMessage,
+                field: ['residentialBuildingCount']
+              }
             }
           },
-          summary: [
-            {
-              field: ['residentialBuildingCount'],
-              href: '#residentialBuildingCount',
-              text: errorMessage
-            }
-          ]
-        }
+          formSubmitData: {}
+        })
+        const document = await loadPage({
+          requestUrl: routePath,
+          server: getServer()
+        })
+        expectInputError({
+          document,
+          inputLabel,
+          errorMessage: requiredErrorMessage
+        })
       })
     })
 
-    it('should render validation error after redirect', async () => {
-      vi.mocked(getValidationFlashFromCache).mockReturnValue({
-        validationErrors: {
-          summary: [
-            {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          ],
-          messagesByFormField: {
-            residentialBuildingCount: {
-              href: '#residentialBuildingCount',
-              text: errorMessage,
-              field: ['residentialBuildingCount']
-            }
-          }
-        },
-        formSubmitData: {}
+    describe('zero value', () => {
+      it('should redirect and show error when entering zero', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '0' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(minErrorMessage)
       })
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer()
+    })
+
+    describe('negative number', () => {
+      it('should redirect and show error when entering a negative number (-3)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '-3' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
       })
-      expectInputError({
-        document,
-        inputLabel,
-        errorMessage
+    })
+
+    describe('decimal number', () => {
+      it('should redirect and show error when entering a decimal number (3.5)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '3.5' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
+      })
+    })
+
+    describe('extremely large number', () => {
+      it('should redirect and show error when entering an extremely large number', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '999999999' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(maxErrorMessage)
+      })
+    })
+
+    describe('non-numeric characters', () => {
+      it('should redirect and show error when entering non-numeric characters (abc)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: 'abc' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
+      })
+    })
+
+    describe('comma separator', () => {
+      it('should redirect and show error when entering number with comma separator (1,000)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '1,000' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
+      })
+    })
+
+    describe('scientific notation', () => {
+      it('should redirect and show error when entering scientific notation (1e3)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '1e3' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
+      })
+
+      it('should redirect and show error when entering number with plus sign (+10)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '+10' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
+      })
+    })
+
+    describe('text with units', () => {
+      it('should redirect and show error when entering text with units (25 units)', async () => {
+        const { response } = await submitForm({
+          requestUrl: routePath,
+          server: getServer(),
+          formData: { residentialBuildingCount: '25 units' }
+        })
+        expect(response.statusCode).toBe(303)
+        expect(response.headers.location).toBe(routePath)
+        expect(
+          saveValidationFlashToCache.mock.calls[0][1].validationErrors
+            .summary[0].text
+        ).toBe(formatErrorMessage)
       })
     })
   })

@@ -6,8 +6,7 @@ describe('createPlainIntegerValidator', () => {
   const validator = createPlainIntegerValidator({ min: 1, max: 100 })
   const schema = joi.any().custom(validator).messages({
     'any.required': 'Field is required',
-    'number.base': 'Enter a valid number',
-    'number.integer': 'Enter a whole number',
+    'number.format': 'Enter a number using digits only',
     'number.min': 'Number too small',
     'number.max': 'Number too large'
   })
@@ -66,44 +65,44 @@ describe('createPlainIntegerValidator', () => {
   describe('decimal numbers', () => {
     it('fails for decimal number', () => {
       const { error } = schema.validate(3.5)
-      expect(error.details[0].message).toBe('Enter a whole number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for string decimal', () => {
       const { error } = schema.validate('3.5')
-      expect(error.details[0].message).toBe('Enter a whole number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
   })
 
   describe('invalid formats', () => {
     it('fails for non-numeric characters', () => {
       const { error } = schema.validate('abc')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for text with units', () => {
       const { error } = schema.validate('25 units')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for comma separator', () => {
       const { error } = schema.validate('1,000')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for scientific notation', () => {
       const { error } = schema.validate('1e3')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for plus sign', () => {
       const { error } = schema.validate('+10')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
     it('fails for minus sign', () => {
       const { error } = schema.validate('-10')
-      expect(error.details[0].message).toBe('Enter a valid number')
+      expect(error.details[0].message).toBe('Enter a number using digits only')
     })
   })
 })
