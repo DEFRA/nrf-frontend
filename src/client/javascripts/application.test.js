@@ -10,17 +10,14 @@ vi.mock('govuk-frontend', () => ({
   Radios: {},
   SkipLink: {}
 }))
-vi.mock('./integer-input-filter.js', () => ({ initAllIntegerFilters: vi.fn() }))
 
 describe('application.js', () => {
   it('initializes components on DOMContentLoaded', async () => {
     const { createAll } = await import('govuk-frontend')
-    const { initAllIntegerFilters } = await import('./integer-input-filter.js')
 
     await import('./application.js')
     document.dispatchEvent(new Event('DOMContentLoaded'))
 
     expect(createAll).toHaveBeenCalled()
-    expect(initAllIntegerFilters).toHaveBeenCalled()
   })
 })
