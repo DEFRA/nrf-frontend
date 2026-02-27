@@ -79,7 +79,7 @@ describe('email form validation', () => {
     it('fails for invalid format - space in email', () => {
       const { error } = getSchema().validate({ email: 'test @domain.com' })
       expect(error.details[0].message).toBe(
-        'Enter an email address in the correct format, like name@example.com'
+        'Email address must not contain spaces'
       )
     })
 
@@ -107,7 +107,7 @@ describe('email form validation', () => {
     it('fails for invalid format - space in domain', () => {
       const { error } = getSchema().validate({ email: 'test@domain com' })
       expect(error.details[0].message).toBe(
-        'Enter an email address in the correct format, like name@example.com'
+        'Email address must not contain spaces'
       )
     })
 
