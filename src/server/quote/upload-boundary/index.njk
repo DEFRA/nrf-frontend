@@ -1,0 +1,44 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" action="{{ uploadUrl }}" enctype="multipart/form-data" novalidate>
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList: validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {{ govukFileUpload({
+                name: "file",
+                label: {
+                    text: pageHeading,
+                    classes: "govuk-label--l",
+                    isPageHeading: true
+                },
+                hint: {
+                    html: "Upload a shapefile (.shp) or GeoJSON file (.geojson).<br>The file must be smaller than 2MB."
+                },
+                errorMessage: validationErrors.messagesByFormField.file,
+                attributes: {
+                    accept: ".shp,.geojson"
+                }
+            }) }}
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
