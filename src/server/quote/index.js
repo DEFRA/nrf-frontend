@@ -4,6 +4,8 @@ import routesResidential from './residential/routes.js'
 import routesNoEdp from './no-edp/routes.js'
 import routesDevelopmentType from './development-types/routes.js'
 import routesEmail from './email/routes.js'
+import routesUploadBoundary from './upload-boundary/routes.js'
+import routesUploadReceived from './upload-received/routes.js'
 
 // Placeholder route for pages not yet implemented
 const placeholderRoute = {
@@ -23,6 +25,8 @@ export const quote = {
         ...routesNoEdp,
         ...routesDevelopmentType,
         ...routesEmail,
+        ...routesUploadBoundary,
+        ...routesUploadReceived,
         placeholderRoute
       ])
     }
