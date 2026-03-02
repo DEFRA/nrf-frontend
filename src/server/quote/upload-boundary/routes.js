@@ -1,10 +1,5 @@
 import { quoteController } from '../controller-get.js'
-import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validation.js'
-import {
-  saveQuoteDataToCache,
-  saveValidationFlashToCache
-} from '../session-cache.js'
-import { statusCodes } from '../../common/constants/status-codes.js'
+import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
@@ -21,34 +16,17 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    options: {
-      payload: {
+    ...quotePostController({
+      routeId,
+      formValidation,
+      getViewModel,
+      getNextPage,
+      payloadOptions: {
         output: 'stream',
         parse: true,
         multipart: true,
         maxBytes: 2 * 1024 * 1024 // 2MB
-      },
-      validate: {
-        payload: formValidation(),
-        failAction: (request, h, err) => {
-          const { payload } = request
-          const validationErrors = mapValidationErrorsForDisplay(err.details)
-          saveValidationFlashToCache(request, {
-            validationErrors,
-            formSubmitData: payload
-          })
-          return h
-            .redirect(request.path)
-            .code(statusCodes.redirectAfterPost)
-            .takeover()
-        }
       }
-    },
-    handler(request, h) {
-      const { payload } = request
-      saveQuoteDataToCache(request, payload)
-      const nextPage = getNextPage(request.payload)
-      return h.redirect(nextPage).code(statusCodes.redirectAfterPost)
-    }
+    })
   }
 ]

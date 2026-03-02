@@ -5,8 +5,13 @@ import {
 } from './session-cache.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 
-export const quotePostController = ({ formValidation, getNextPage }) => ({
+export const quotePostController = ({
+  formValidation,
+  getNextPage,
+  payloadOptions
+}) => ({
   options: {
+    ...(payloadOptions && { payload: payloadOptions }),
     validate: {
       payload: formValidation(),
       failAction: (request, h, err) => {
