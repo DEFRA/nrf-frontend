@@ -14,6 +14,7 @@ export default [
     ...quoteController({ routeId, getViewModel })
   },
   {
+    /* Temporary handler to allow file upload until we integrate with the cdp-uploader */
     method: 'POST',
     path: routePath,
     ...quotePostController({
