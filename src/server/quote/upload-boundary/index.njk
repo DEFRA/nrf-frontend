@@ -28,11 +28,11 @@
                     isPageHeading: true
                 },
                 hint: {
-                    html: "Upload a shapefile (.shp) or GeoJSON file (.geojson).<br>The file must be smaller than 10MB."
+                    html: "Accepted file formats:<ul class=\"govuk-list govuk-list--bullet\"><li>Shapefile (.shp)</li><li>GeoJSON (.geojson)</li><li>KML (.kml)</li></ul>The file must be smaller than 2MB."
                 },
                 errorMessage: validationErrors.messagesByFormField.file,
                 attributes: {
-                    accept: ".shp,.geojson"
+                    accept: ".shp,.geojson,.kml"
                 }
             }) }}
 

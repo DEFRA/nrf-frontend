@@ -3,7 +3,7 @@ import { getPageTitle } from '../common/helpers/page-title.js'
 export function handler(request, h) {
   const viewModel = {
     pageTitle: getPageTitle('File uploaded'),
-    pageHeading: 'File uploaded successfully'
+    pageHeading: 'TODO: implement file upload status page'
   }
 
   return h

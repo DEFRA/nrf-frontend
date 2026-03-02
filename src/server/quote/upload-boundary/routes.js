@@ -26,7 +26,7 @@ export default [
         output: 'stream',
         parse: true,
         multipart: true,
-        maxBytes: 10 * 1024 * 1024 // 10MB
+        maxBytes: 2 * 1024 * 1024 // 2MB
       },
       validate: {
         payload: formValidation(),
