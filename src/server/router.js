@@ -6,6 +6,7 @@ import { auth } from './auth/index.js'
 import { profile } from './profile/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
 import { quote } from './quote/index.js'
+import { cdpUploaderProxy } from './common/helpers/cdp-uploader-proxy.js'
 
 export const router = {
   plugin: {
@@ -18,6 +19,9 @@ export const router = {
 
       // Application specific routes, add your own routes here
       await server.register([about, auth, profile, quote])
+
+      // Proxy for cdp-uploader in local development
+      await server.register([cdpUploaderProxy])
 
       // Static assets
       await server.register([serveStaticFiles])
