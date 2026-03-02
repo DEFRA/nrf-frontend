@@ -1,6 +1,6 @@
 import { getPageTitle } from '../common/helpers/page-title.js'
 
-export function handler(request, h) {
+export function handler(_request, h) {
   const viewModel = {
     pageTitle: getPageTitle('File uploaded'),
     pageHeading: 'TODO: implement file upload status page'
