@@ -12,7 +12,7 @@ describe('upload-received controller', () => {
 
     handler(request, h)
 
-    expect(h.view).toHaveBeenCalledWith('upload-received/index', {
+    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
       pageTitle: 'File uploaded - Nature Restoration Fund - Gov.uk',
       pageHeading: 'TODO: implement file upload status page'
     })

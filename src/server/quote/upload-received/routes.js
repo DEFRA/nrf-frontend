@@ -1,6 +1,6 @@
 import { handler } from './controller.js'
 
-export const routePath = '/upload-received'
+export const routePath = '/quote/upload-received'
 
 export default [
   {

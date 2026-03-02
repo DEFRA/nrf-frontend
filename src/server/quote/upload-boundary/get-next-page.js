@@ -1,3 +1,3 @@
 export default function getNextPage() {
-  return '/upload-received'
+  return '/quote/upload-received'
 }

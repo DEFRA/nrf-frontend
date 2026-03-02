@@ -1,4 +1,4 @@
-import { getPageTitle } from '../common/helpers/page-title.js'
+import { getPageTitle } from '../../common/helpers/page-title.js'
 
 export function handler(_request, h) {
   const viewModel = {
@@ -7,6 +7,6 @@ export function handler(_request, h) {
   }
 
   return h
-    .view('upload-received/index', viewModel)
+    .view('quote/upload-received/index', viewModel)
     .header('Cache-Control', 'no-store, must-revalidate')
 }
