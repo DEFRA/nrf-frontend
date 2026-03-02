@@ -295,6 +295,14 @@ export const config = convict({
       default: 'http://localhost:3001',
       env: 'NRF_BACKEND_API_URL'
     }
+  },
+  cdpUploader: {
+    url: {
+      doc: 'Endpoint for the CDP uploader service',
+      format: String,
+      default: 'http://localhost:7337',
+      env: 'CDP_UPLOADER_URL'
+    }
   }
 })
 

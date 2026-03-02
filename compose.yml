@@ -12,7 +12,7 @@ services:
       DEBUG: ${DEBUG:-1}
       LS_LOG: WARN # Localstack DEBUG Level
       SERVICES: s3,sqs,sns,firehose
-      LOCALSTACK_HOST: 127.0.0.1
+      LOCALSTACK_HOST: localstack
     volumes:
       - '${TMPDIR:-/tmp}/localstack:/var/lib/localstack'
       - ./compose/start-localstack.sh:/etc/localstack/init/ready.d/start-localstack.sh
@@ -64,6 +64,32 @@ services:
     volumes:
       - mongodb-data:/data
     restart: always
+
+  cdp-uploader:
+    image: defradigital/cdp-uploader:latest
+    ports:
+      - '7337:7337'
+    links:
+      - 'localstack:localstack'
+      - 'redis:redis'
+    depends_on:
+      localstack:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - 'compose/aws.env'
+    environment:
+      PORT: 7337
+      NODE_ENV: development
+      REDIS_HOST: redis
+      LOCALSTACK_ENDPOINT: http://localstack:4566
+      SQS_ENDPOINT: http://localstack:4566
+      S3_ENDPOINT: http://localstack:4566
+      AWS_S3_ENDPOINT: http://localstack:4566
+      USE_SINGLE_INSTANCE_CACHE: true
+    networks:
+      - cdp-tenant
 
 ################################################################################
 

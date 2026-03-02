@@ -1,4 +1,4 @@
-import { quoteController } from '../controller-get.js'
+import { handler as getHandler } from './controller-get.js'
 import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
@@ -11,7 +11,7 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...quoteController({ routeId, getViewModel })
+    handler: getHandler
   },
   {
     method: 'POST',

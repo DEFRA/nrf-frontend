@@ -10,8 +10,7 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        <form method="post" enctype="multipart/form-data" novalidate>
-          {% include "partials/csrf-token.njk" %}
+        <form method="post" action="{{ uploadUrl }}" enctype="multipart/form-data" novalidate>
             {% if validationErrors %}
             {{ govukErrorSummary({
                 titleText: "There is a problem",
@@ -20,7 +19,7 @@
             {% endif %}
 
             {{ govukFileUpload({
-                name: "redlineFile",
+                name: "file",
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",
@@ -29,7 +28,7 @@
                 hint: {
                     html: "Upload a shapefile (.shp) or GeoJSON file (.geojson).<br>The file must be smaller than 2MB."
                 },
-                errorMessage: validationErrors.messagesByFormField.redlineFile,
+                errorMessage: validationErrors.messagesByFormField.file,
                 attributes: {
                     accept: ".shp,.geojson"
                 }

@@ -31,13 +31,13 @@ describe('Upload boundary page', () => {
     )
   })
 
-  it('should include a CSRF token inside the form, to prevent CSRF attacks', async () => {
+  it('should have form action pointing to upload-and-scan endpoint', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    const csrfToken = document.querySelector('form input[name="csrfToken"]')
-    expect(csrfToken).toBeInTheDocument()
+    const form = document.querySelector('form')
+    expect(form.getAttribute('action')).toMatch(/^\/upload-and-scan\//)
   })
 
   it('should redirect and save validation errors to cache, after an invalid form submission', async () => {
@@ -52,16 +52,16 @@ describe('Upload boundary page', () => {
       formSubmitData: {},
       validationErrors: {
         messagesByFormField: {
-          redlineFile: {
-            field: ['redlineFile'],
-            href: '#redlineFile',
+          file: {
+            field: ['file'],
+            href: '#file',
             text: 'Select a file'
           }
         },
         summary: [
           {
-            field: ['redlineFile'],
-            href: '#redlineFile',
+            field: ['file'],
+            href: '#file',
             text: 'Select a file'
           }
         ]
@@ -75,16 +75,16 @@ describe('Upload boundary page', () => {
       validationErrors: {
         summary: [
           {
-            href: '#redlineFile',
+            href: '#file',
             text: errorMessage,
-            field: ['redlineFile']
+            field: ['file']
           }
         ],
         messagesByFormField: {
-          redlineFile: {
-            href: '#redlineFile',
+          file: {
+            href: '#file',
             text: errorMessage,
-            field: ['redlineFile']
+            field: ['file']
           }
         }
       },
@@ -105,7 +105,7 @@ describe('Upload boundary page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { redlineFile: { filename: 'test.geojson' } }
+      formData: { file: { filename: 'test.geojson' } }
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/next')

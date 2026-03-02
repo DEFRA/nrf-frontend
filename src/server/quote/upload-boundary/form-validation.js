@@ -4,7 +4,7 @@ const errorMessage = 'Select a file'
 
 export default function () {
   return joi.object({
-    redlineFile: joi.any().required().messages({
+    file: joi.any().required().messages({
       'any.required': errorMessage
     })
   })

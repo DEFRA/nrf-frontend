@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest'
 import getSchema from './form-validation.js'
 
 describe('upload-boundary form validation', () => {
-  describe('redlineFile', () => {
+  describe('file', () => {
     it('passes when a file is provided', () => {
       const { error } = getSchema().validate({
-        redlineFile: { filename: 'test.geojson' }
+        file: { filename: 'test.geojson' }
       })
       expect(error).toBeUndefined()
     })

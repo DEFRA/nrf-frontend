@@ -1,0 +1,32 @@
+{% extends "layouts/page.njk" %}
+
+{% block head %}
+  {{ super() }}
+  {% if refreshInterval %}
+  <meta http-equiv="refresh" content="{{ refreshInterval }}">
+  {% endif %}
+{% endblock %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {% if isProcessing %}
+        <p class="govuk-body">Your file is being processed. This page will update automatically.</p>
+        <p class="govuk-body">Please do not close this page.</p>
+        {% elif errorMessage %}
+        <p class="govuk-body">There was a problem with your upload:</p>
+        <p class="govuk-body govuk-!-font-weight-bold">{{ errorMessage }}</p>
+        {{ govukButton({
+            text: "Try again",
+            href: "/quote/upload-boundary"
+        }) }}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
