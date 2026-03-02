@@ -309,12 +309,6 @@ export const config = convict({
       default: 'cdp-uploader-quarantine',
       env: 'CDP_UPLOADER_BUCKET'
     }
-  },
-  appBaseUrl: {
-    doc: 'Base URL for the application (used for redirects)',
-    format: String,
-    default: 'http://localhost:3000',
-    env: 'APP_BASE_URL'
   }
 })
 

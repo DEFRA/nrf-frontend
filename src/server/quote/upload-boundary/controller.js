@@ -19,8 +19,10 @@ export async function handler(request, h) {
     clearValidationFlashFromCache(request)
   }
 
-  // Initiate upload session with CDP Uploader
-  const redirectUrl = `${config.get('appBaseUrl')}/quote/upload-received`
+  // Build redirect URL from request (works in both dev and prod)
+  const protocol = request.headers['x-forwarded-proto'] ?? 'http'
+  const host = request.info.host
+  const redirectUrl = `${protocol}://${host}/quote/upload-received`
   const uploadSession = await initiateUpload({
     redirect: redirectUrl,
     s3Bucket: config.get('cdpUploader.bucket'),
