@@ -112,10 +112,10 @@ describe('email form validation', () => {
     })
 
     it('fails when email exceeds maximum length', () => {
-      const longEmail = 'a'.repeat(250) + '@test.com'
+      const longEmail = 'a'.repeat(248) + '@test.com'
       const { error } = getSchema().validate({ email: longEmail })
       expect(error.details[0].message).toBe(
-        'Email address must be 256 characters or less'
+        'Email address must be 254 characters or less'
       )
     })
   })
