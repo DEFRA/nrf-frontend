@@ -65,10 +65,21 @@ services:
       - mongodb-data:/data
     restart: always
 
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./compose/Caddyfile:/etc/caddy/Caddyfile:ro
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      - cdp-uploader
+    networks:
+      - cdp-tenant
+
   cdp-uploader:
     image: defradigital/cdp-uploader:${CDP_UPLOADER_VERSION:-latest}
-    ports:
-      - '7337:7337'
     links:
       - 'localstack:localstack'
       - 'redis:redis'
