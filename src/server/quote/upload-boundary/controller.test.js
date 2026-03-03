@@ -43,7 +43,7 @@ describe('upload-boundary controller', () => {
 
     expect(initiateUpload).toHaveBeenCalledWith({
       redirect: 'http://localhost:3000/quote/upload-received',
-      s3Bucket: 'cdp-uploader-quarantine',
+      s3Bucket: 'app-bucket',
       metadata: {}
     })
     expect(request.yar.set).toHaveBeenCalledWith(

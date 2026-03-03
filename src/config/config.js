@@ -306,7 +306,7 @@ export const config = convict({
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,
-      default: 'cdp-uploader-quarantine',
+      default: 'app-bucket',
       env: 'CDP_UPLOADER_BUCKET'
     }
   }
