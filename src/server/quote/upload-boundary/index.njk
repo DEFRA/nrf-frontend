@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if uploadError %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -10,15 +10,16 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        <form method="post" enctype="multipart/form-data" novalidate>
-          {% include "partials/csrf-token.njk" %}
+        {% if uploadError %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: uploadError
+            }]
+        }) }}
+        {% endif %}
 
-            {% if validationErrors %}
-            {{ govukErrorSummary({
-                titleText: "There is a problem",
-                errorList: validationErrors.summary
-            }) }}
-            {% endif %}
+        <form action="{{ uploadUrl }}" method="post" enctype="multipart/form-data" novalidate>
 
             {{ govukFileUpload({
                 name: "file",
@@ -30,7 +31,6 @@
                 hint: {
                     html: "<p>Accepted file formats:</p><ul class=\"govuk-list govuk-list--bullet\"><li>GeoJSON (.geojson, .json)</li><li>KML (.kml)</li><li>Shapefile (.shp)</li></ul>The file must be smaller than 2MB."
                 },
-                errorMessage: validationErrors.messagesByFormField.file,
                 attributes: {
                     accept: ".shp,.geojson,.json,.kml"
                 }
