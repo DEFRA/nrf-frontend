@@ -10,19 +10,29 @@
  */
 export function createPlainIntegerValidator({ min, max }) {
   return function plainIntegerValidator(value, helpers) {
-    const strValue = String(value).trim()
+    const cleanedValue = String(value).trim().replace(/\s+/g, '')
 
     // Reject empty
-    if (strValue === '') {
+    if (cleanedValue === '') {
       return helpers.error('any.required')
     }
 
-    // Must be digits only (reject letters, scientific notation, plus/minus signs, decimals)
-    if (!/^\d+$/.test(strValue)) {
+    // Check for negative numbers (digits preceded by minus sign)
+    if (/^-\d+$/.test(cleanedValue)) {
+      return helpers.error('number.min')
+    }
+
+    // Check for decimal numbers (e.g. 2.4, -3.5)
+    if (/^-?\d+\.\d+$/.test(cleanedValue)) {
+      return helpers.error('number.min')
+    }
+
+    // Must be digits only (reject letters, scientific notation, plus signs)
+    if (!/^\d+$/.test(cleanedValue)) {
       return helpers.error('number.format')
     }
 
-    const num = Number.parseInt(strValue, 10)
+    const num = Number.parseInt(cleanedValue, 10)
 
     if (num < min) {
       return helpers.error('number.min')

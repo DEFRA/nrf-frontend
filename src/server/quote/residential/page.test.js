@@ -188,7 +188,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(formatErrorMessage)
+        ).toBe(minErrorMessage)
       })
     })
 
@@ -204,7 +204,7 @@ describe('Residential page', () => {
         expect(
           saveValidationFlashToCache.mock.calls[0][1].validationErrors
             .summary[0].text
-        ).toBe(formatErrorMessage)
+        ).toBe(minErrorMessage)
       })
     })
 
