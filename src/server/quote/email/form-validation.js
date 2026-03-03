@@ -1,9 +1,10 @@
 import joi from 'joi'
 
+const maxEmailLength = 254
 const requiredErrorMessage = 'Enter an email address'
 const formatErrorMessage =
   'Enter an email address in the correct format, like name@example.com'
-const maxLengthErrorMessage = 'Email address must be 254 characters or less'
+const maxLengthErrorMessage = `Email address must be ${maxEmailLength} characters or less`
 const spacesErrorMessage = 'Email address must not contain spaces'
 
 export default function formValidation() {
@@ -12,7 +13,7 @@ export default function formValidation() {
       email: joi
         .string()
         .trim()
-        .max(254)
+        .max(maxEmailLength)
         .pattern(/^\S*$/)
         .email({ tlds: { allow: false } })
         .required()
