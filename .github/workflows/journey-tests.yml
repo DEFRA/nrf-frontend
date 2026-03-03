@@ -9,4 +9,6 @@ on:
 
 jobs:
   test:
+    permissions:
+      id-token: write
     uses: DEFRA/nrf-journey-tests/.github/workflows/journey-tests.yml@main
