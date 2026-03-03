@@ -80,6 +80,8 @@ services:
 
   cdp-uploader:
     image: defradigital/cdp-uploader:${CDP_UPLOADER_VERSION:-latest}
+    ports:
+      - '7337:7337'
     links:
       - 'localstack:localstack'
       - 'redis:redis'
