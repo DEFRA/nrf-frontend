@@ -47,6 +47,8 @@ jobs:
   journey-tests:
     name: Run Journey Tests
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
