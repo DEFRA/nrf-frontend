@@ -50,7 +50,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
       - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
         with:
