@@ -51,7 +51,7 @@ describe('Upload boundary page', () => {
     })
     expect(initiateUpload).toHaveBeenCalledWith({
       redirect: expect.stringContaining('/quote/upload-received'),
-      s3Bucket: 'app-bucket',
+      s3Bucket: 'boundaries',
       metadata: {}
     })
   })

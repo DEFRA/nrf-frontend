@@ -100,7 +100,7 @@ services:
       MOCK_VIRUS_RESULT_DELAY: 3
       SQS_ENDPOINT: http://localstack:4566
       S3_ENDPOINT: http://localstack:4566
-      CONSUMER_BUCKETS: ${CDP_UPLOADER_BUCKET:-app-bucket}
+      CONSUMER_BUCKETS: ${CDP_UPLOADER_BUCKET:-boundaries}
     networks:
       - cdp-tenant
 

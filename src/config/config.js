@@ -307,7 +307,7 @@ export const config = convict({
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,
-      default: 'app-bucket',
+      default: 'boundaries',
       env: 'CDP_UPLOADER_BUCKET'
     }
   }
