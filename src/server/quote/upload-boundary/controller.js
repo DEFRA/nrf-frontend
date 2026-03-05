@@ -1,0 +1,50 @@
+import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { config } from '../../../config/config.js'
+import getViewModel from './get-view-model.js'
+import {
+  getValidationFlashFromCache,
+  clearValidationFlashFromCache
+} from '../session-cache.js'
+
+const routeId = 'upload-boundary'
+
+export async function handler(request, h) {
+  const viewModel = getViewModel()
+
+  const flash = getValidationFlashFromCache(request)
+  if (flash) {
+    clearValidationFlashFromCache(request)
+  }
+
+  // Build redirect URL from request
+  const protocol = request.headers['x-forwarded-proto'] ?? 'http'
+  const host = request.info.host
+  const redirectUrl = `${protocol}://${host}/quote/upload-received`
+
+  const uploadSession = await initiateUpload({
+    redirect: redirectUrl,
+    s3Bucket: config.get('cdpUploader.bucket'),
+    metadata: {}
+  })
+
+  if (uploadSession.error) {
+    return h
+      .view(`quote/${routeId}/index`, {
+        ...viewModel,
+        uploadError: uploadSession.error
+      })
+      .header('Cache-Control', 'no-store, must-revalidate')
+  }
+
+  request.yar.set('pendingUploadId', uploadSession.uploadId)
+
+  return h
+    .view(`quote/${routeId}/index`, {
+      ...viewModel,
+      uploadUrl: uploadSession.uploadUrl,
+      ...(flash?.validationErrors && {
+        validationErrors: flash.validationErrors
+      })
+    })
+    .header('Cache-Control', 'no-store, must-revalidate')
+}

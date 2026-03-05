@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -10,18 +10,26 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        <form method="post" enctype="multipart/form-data" novalidate>
-          {% include "partials/csrf-token.njk" %}
+        {% if validationErrors %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: validationErrors.summary
+        }) }}
+        {% elif uploadError %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: uploadError,
+                href: "#file"
+            }]
+        }) }}
+        {% endif %}
 
-            {% if validationErrors %}
-            {{ govukErrorSummary({
-                titleText: "There is a problem",
-                errorList: validationErrors.summary
-            }) }}
-            {% endif %}
+        <form action="{{ uploadUrl }}" method="post" enctype="multipart/form-data" novalidate>
 
             {{ govukFileUpload({
                 name: "file",
+                id: "file",
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",
