@@ -11,4 +11,6 @@ jobs:
   test:
     permissions:
       id-token: write
+      checks: write
+      pull-requests: write
     uses: DEFRA/nrf-journey-tests/.github/workflows/journey-tests.yml@main
