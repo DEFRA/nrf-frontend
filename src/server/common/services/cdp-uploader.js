@@ -6,7 +6,6 @@ const logger = createLogger()
 
 /**
  * Get the CDP Uploader base URL
- * Priority: CDP_UPLOADER_URL > derived from CDP_ENVIRONMENT > localhost fallback
  * @returns {string}
  */
 function getCdpUploaderUrl() {
@@ -15,9 +14,9 @@ function getCdpUploaderUrl() {
     return explicitUrl
   }
 
-  const cdpEnvironment = config.get('cdpEnvironment')
-  if (cdpEnvironment) {
-    return `https://cdp-uploader.${cdpEnvironment}.cdp-int.defra.cloud`
+  const environment = process.env.ENVIRONMENT
+  if (environment) {
+    return `https://cdp-uploader.${environment}.cdp-int.defra.cloud`
   }
 
   // Local development fallback

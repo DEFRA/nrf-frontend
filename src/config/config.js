@@ -296,16 +296,9 @@ export const config = convict({
       env: 'NRF_BACKEND_API_URL'
     }
   },
-  cdpEnvironment: {
-    doc: 'CDP environment name (e.g., dev, test, perf-test, prod). Used to construct service URLs.',
-    format: String,
-    nullable: true,
-    default: null,
-    env: 'CDP_ENVIRONMENT'
-  },
   cdpUploader: {
     url: {
-      doc: 'Endpoint for the CDP Uploader service. Auto-derived from CDP_ENVIRONMENT if not set.',
+      doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
       format: String,
       default: null,
       nullable: true,
