@@ -26,6 +26,16 @@ Install application dependencies:
 npm install
 ```
 
+### Docker Compose (LocalStack)
+
+To run the application with local AWS services (S3, SQS), Redis and MongoDB:
+
+```bash
+docker compose up --build -d
+```
+
+The `compose/01-start-localstack.sh` script runs automatically on container startup to create the S3 buckets and SQS queues required by the CDP uploader.
+
 ### Development
 
 To run the application in `development` mode run:
