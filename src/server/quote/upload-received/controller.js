@@ -3,7 +3,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 
 const REFRESH_INTERVAL_SECONDS = 5
 const STATUS_PENDING = 'pending'
-const STATUS_COMPLETE = 'complete'
+const STATUS_READY = 'ready'
 
 export async function handler(request, h) {
   const uploadId = request.yar.get('pendingUploadId')
@@ -14,10 +14,7 @@ export async function handler(request, h) {
   const response = await getUploadStatus(uploadId)
   const uploadStatus = response.uploadStatus
 
-  if (uploadStatus === STATUS_COMPLETE) {
-    return h.redirect('/quote/next')
-  }
-
+  const isReady = uploadStatus === STATUS_READY
   const isProcessing =
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
   const viewModel = {
@@ -26,6 +23,7 @@ export async function handler(request, h) {
     uploadId,
     status: uploadStatus,
     isProcessing,
+    isReady,
     refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
     errorMessage: response.error
   }
@@ -33,4 +31,12 @@ export async function handler(request, h) {
   return h
     .view('quote/upload-received/index', viewModel)
     .header('Cache-Control', 'no-store, must-revalidate')
+}
+
+export function checkBoundaryHandler(request, h) {
+  const { id } = request.params
+
+  // TODO: implement boundary spatial check
+  // return h.redirect('/quote/next')
+  return h.response(`Check boundary: ${id}`).type('text/plain')
 }

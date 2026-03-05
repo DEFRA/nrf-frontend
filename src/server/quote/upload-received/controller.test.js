@@ -33,15 +33,24 @@ describe('upload-received controller', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
   })
 
-  it('should redirect to next page when upload status is complete', async () => {
+  it('should render view with ready state when status is ready', async () => {
     const h = createMockH()
     const request = createMockRequest('test-upload-id')
-    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'complete' })
+    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'ready' })
 
     await handler(request, h)
 
     expect(getUploadStatus).toHaveBeenCalledWith('test-upload-id')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/next')
+    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
+      pageTitle: 'File upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'File upload status',
+      uploadId: 'test-upload-id',
+      status: 'ready',
+      isProcessing: false,
+      isReady: true,
+      refreshInterval: null,
+      errorMessage: undefined
+    })
   })
 
   it('should render view with processing state when status is pending', async () => {
@@ -57,6 +66,7 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'pending',
       isProcessing: true,
+      isReady: false,
       refreshInterval: 5,
       errorMessage: undefined
     })
@@ -75,6 +85,7 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'initiated',
       isProcessing: true,
+      isReady: false,
       refreshInterval: 5,
       errorMessage: undefined
     })
@@ -96,6 +107,7 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'error',
       isProcessing: false,
+      isReady: false,
       refreshInterval: null,
       errorMessage: 'Upload failed'
     })

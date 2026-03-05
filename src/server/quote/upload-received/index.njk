@@ -24,7 +24,16 @@
         }) }}
         {% endif %}
 
-        {% if isProcessing %}
+        {% if isReady %}
+        <p class="govuk-body">Upload and virus scan completed.</p>
+        <p class="govuk-body">Please click continue to check and view the boundary.</p>
+        <form method="post" action="/quote/check-boundary/{{ uploadId }}">
+            {% include "partials/csrf-token.njk" %}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+        </form>
+        {% elseif isProcessing %}
         <p class="govuk-body">Your file is being processed.</p>
         <p class="govuk-body">This page will automatically refresh.</p>
         <p class="govuk-body">
