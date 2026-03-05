@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{% if uploadError %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -10,11 +10,17 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        {% if uploadError %}
+        {% if validationErrors %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: validationErrors.summary
+        }) }}
+        {% elif uploadError %}
         {{ govukErrorSummary({
             titleText: "There is a problem",
             errorList: [{
-                text: uploadError
+                text: uploadError,
+                href: "#file"
             }]
         }) }}
         {% endif %}
@@ -23,6 +29,7 @@
 
             {{ govukFileUpload({
                 name: "file",
+                id: "file",
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",
@@ -31,6 +38,7 @@
                 hint: {
                     html: "<p>Accepted file formats:</p><ul class=\"govuk-list govuk-list--bullet\"><li>GeoJSON (.geojson, .json)</li><li>KML (.kml)</li><li>Shapefile (.shp)</li></ul>The file must be smaller than 2MB."
                 },
+                errorMessage: validationErrors.messagesByFormField.file,
                 attributes: {
                     accept: ".shp,.geojson,.json,.kml"
                 }
