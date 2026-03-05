@@ -18,8 +18,8 @@ export async function handler(request, h) {
   const isProcessing =
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
   const viewModel = {
-    pageTitle: getPageTitle('File upload status'),
-    pageHeading: 'File upload status',
+    pageTitle: getPageTitle('Boundary file upload status'),
+    pageHeading: 'Boundary file upload status',
     uploadId,
     status: uploadStatus,
     isProcessing,
@@ -34,7 +34,8 @@ export async function handler(request, h) {
 export function checkBoundaryHandler(request, h) {
   const { id } = request.params
 
-  // TODO: call nrf-backend to do boundary spatial check
+  // Faciendum: call nrf-backend to do boundary spatial check
+  // then navigate to the boundary check result or map view page.
   // return h.redirect('/quote/next')
   return h
     .response(`Check boundary: ${id} (Not implemented yet)`)

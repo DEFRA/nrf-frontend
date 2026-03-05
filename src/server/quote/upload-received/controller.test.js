@@ -42,8 +42,9 @@ describe('upload-received controller', () => {
 
     expect(getUploadStatus).toHaveBeenCalledWith('test-upload-id')
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle: 'File upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'File upload status',
+      pageTitle:
+        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file upload status',
       uploadId: 'test-upload-id',
       status: 'ready',
       isProcessing: false,
@@ -61,8 +62,9 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle: 'File upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'File upload status',
+      pageTitle:
+        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file upload status',
       uploadId: 'test-upload-id',
       status: 'pending',
       isProcessing: true,
@@ -80,8 +82,9 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle: 'File upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'File upload status',
+      pageTitle:
+        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file upload status',
       uploadId: 'test-upload-id',
       status: 'initiated',
       isProcessing: true,
@@ -102,8 +105,9 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle: 'File upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'File upload status',
+      pageTitle:
+        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file upload status',
       uploadId: 'test-upload-id',
       status: 'error',
       isProcessing: false,
