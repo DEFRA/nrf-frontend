@@ -19,18 +19,14 @@ export async function handler(request, h) {
   })
 
   if (uploadSession.error) {
-    return h
-      .view(`quote/${routeId}/index`, {
-        ...viewModel,
-        uploadError: uploadSession.error
-      })
-      .header('Cache-Control', 'no-store, must-revalidate')
+    return h.view(`quote/${routeId}/index`, {
+      ...viewModel,
+      uploadError: uploadSession.error
+    })
   }
 
-  return h
-    .view(`quote/${routeId}/index`, {
-      ...viewModel,
-      uploadUrl: uploadSession.uploadUrl
-    })
-    .header('Cache-Control', 'no-store, must-revalidate')
+  return h.view(`quote/${routeId}/index`, {
+    ...viewModel,
+    uploadUrl: uploadSession.uploadUrl
+  })
 }
