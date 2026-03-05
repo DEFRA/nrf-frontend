@@ -108,6 +108,16 @@ export async function createServer() {
   // Register routes after auth is configured
   await server.register(router)
 
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request
+    if (response.isBoom) {
+      response.output.headers['cache-control'] = 'no-store, must-revalidate'
+    } else {
+      response.header('Cache-Control', 'no-store, must-revalidate')
+    }
+    return h.continue
+  })
+
   server.ext('onPreResponse', catchAll)
 
   return server

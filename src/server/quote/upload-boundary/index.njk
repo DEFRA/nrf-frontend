@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{% if validationErrors or uploadError %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -10,17 +10,18 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        {% if uploadError %}
-        {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: [{
-                text: uploadError
-            }]
-        }) }}
-        {% elif validationErrors %}
+        {% if validationErrors %}
         {{ govukErrorSummary({
             titleText: "There is a problem",
             errorList: validationErrors.summary
+        }) }}
+        {% elseif uploadError %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: uploadError,
+                href: "#file"
+            }]
         }) }}
         {% endif %}
 
@@ -29,6 +30,7 @@
 
             {{ govukFileUpload({
                 name: "file",
+                id: "file",
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",

@@ -298,15 +298,16 @@ export const config = convict({
   },
   cdpUploader: {
     url: {
-      doc: 'Endpoint for the CDP Uploader service',
+      doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
       format: String,
-      default: 'http://localhost:7337',
+      default: null,
+      nullable: true,
       env: 'CDP_UPLOADER_URL'
     },
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,
-      default: 'app-bucket',
+      default: 'boundaries',
       env: 'CDP_UPLOADER_BUCKET'
     }
   }

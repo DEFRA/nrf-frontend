@@ -24,8 +24,26 @@ describe('createPlainIntegerValidator', () => {
       expect(value).toBe(12)
     })
 
-    it('accepts a string with spaces (trimmed)', () => {
+    it('accepts a string with leading/trailing spaces (trimmed)', () => {
       const { error, value } = schema.validate(' 12 ')
+      expect(error).toBeUndefined()
+      expect(value).toBe(12)
+    })
+
+    it('accepts a string with spaces between digits (1 2)', () => {
+      const { error, value } = schema.validate('1 2')
+      expect(error).toBeUndefined()
+      expect(value).toBe(12)
+    })
+
+    it('accepts a string with multiple spaces between digits (1  4)', () => {
+      const { error, value } = schema.validate('1  4')
+      expect(error).toBeUndefined()
+      expect(value).toBe(14)
+    })
+
+    it('accepts a string with spaces before, after, and between digits', () => {
+      const { error, value } = schema.validate('  1 2  ')
       expect(error).toBeUndefined()
       expect(value).toBe(12)
     })
@@ -65,12 +83,12 @@ describe('createPlainIntegerValidator', () => {
   describe('decimal numbers', () => {
     it('fails for decimal number', () => {
       const { error } = schema.validate(3.5)
-      expect(error.details[0].message).toBe('Enter a number using digits only')
+      expect(error.details[0].message).toBe('Number too small')
     })
 
     it('fails for string decimal', () => {
       const { error } = schema.validate('3.5')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
+      expect(error.details[0].message).toBe('Number too small')
     })
   })
 
@@ -102,7 +120,7 @@ describe('createPlainIntegerValidator', () => {
 
     it('fails for minus sign', () => {
       const { error } = schema.validate('-10')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
+      expect(error.details[0].message).toBe('Number too small')
     })
   })
 })

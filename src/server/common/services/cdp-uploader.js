@@ -5,6 +5,25 @@ import { createLogger } from '../helpers/logging/logger.js'
 const logger = createLogger()
 
 /**
+ * Get the CDP Uploader base URL
+ * @returns {string}
+ */
+function getCdpUploaderUrl() {
+  const explicitUrl = config.get('cdpUploader.url')
+  if (explicitUrl) {
+    return explicitUrl
+  }
+
+  const environment = process.env.ENVIRONMENT
+  if (environment) {
+    return `https://cdp-uploader.${environment}.cdp-int.defra.cloud`
+  }
+
+  // Local development fallback
+  return 'http://localhost:7337'
+}
+
+/**
  * Initiate an upload session with CDP Uploader
  * @param {object} options - Upload options
  * @param {string} options.redirect - URL to redirect to after upload
@@ -14,7 +33,7 @@ const logger = createLogger()
  * @returns {Promise<{uploadId: string, uploadUrl: string} | {error: string}>}
  */
 export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
-  const baseUrl = config.get('cdpUploader.url')
+  const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/initiate`
 
   try {
@@ -54,7 +73,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
  * @returns {Promise<{uploadStatus: string, error?: string}>}
  */
 export async function getUploadStatus(uploadId) {
-  const baseUrl = config.get('cdpUploader.url')
+  const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/status/${uploadId}`
 
   try {

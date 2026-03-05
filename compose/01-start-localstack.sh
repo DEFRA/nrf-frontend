@@ -11,7 +11,7 @@ echo "[INIT SCRIPT] Creating buckets" >&2
 
 # CDP Uploader buckets
 aws --endpoint-url=http://localhost:4566 s3 mb s3://cdp-uploader-quarantine
-aws --endpoint-url=http://localhost:4566 s3 mb s3://app-bucket
+aws --endpoint-url=http://localhost:4566 s3 mb s3://boundaries
 
 # Add your own buckets here
 # aws --endpoint-url=http://localhost:4566 s3 mb s3://your-bucket

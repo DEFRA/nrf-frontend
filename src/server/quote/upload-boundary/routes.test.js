@@ -6,7 +6,7 @@ describe('upload-boundary routes', () => {
     expect(routePath).toBe('/quote/upload-boundary')
   })
 
-  it('should export an array with one route', () => {
+  it('should export an array of routes', () => {
     expect(routes).toHaveLength(1)
   })
 

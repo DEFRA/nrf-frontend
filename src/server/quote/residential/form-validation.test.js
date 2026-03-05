@@ -16,11 +16,19 @@ describe('residential form validation', () => {
         expect(error).toBeUndefined()
       })
 
-      it('passes for a string with spaces that gets trimmed ("12 ")', () => {
+      it('passes for a string with leading/trailing spaces that gets trimmed ("12 ")', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: ' 12 '
         })
         expect(error).toBeUndefined()
+      })
+
+      it('passes for a string with spaces between digits ("3 4  5")', () => {
+        const { error, value } = getSchema().validate({
+          residentialBuildingCount: '3 4  5'
+        })
+        expect(error).toBeUndefined()
+        expect(value.residentialBuildingCount).toBe(345)
       })
 
       it('passes for maximum allowed value (999999)', () => {
@@ -62,7 +70,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: 3.5
         })
         expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
+          'Enter a whole number greater than zero'
         )
       })
     })
@@ -138,7 +146,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: '-3'
         })
         expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
+          'Enter a whole number greater than zero'
         )
       })
     })

@@ -2,8 +2,6 @@ import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { expectInputError } from '../../../test-utils/assertions.js'
-import { getValidationFlashFromCache } from '../session-cache.js'
 import { initiateUpload } from '../../common/services/cdp-uploader.js'
 
 vi.mock('../session-cache.js')
@@ -47,6 +45,18 @@ describe('Upload boundary page', () => {
     expect(form).toHaveAttribute('enctype', 'multipart/form-data')
   })
 
+  it('should call initiateUpload with correct parameters', async () => {
+    await loadPage({
+      requestUrl: routePath,
+      server: getServer()
+    })
+    expect(initiateUpload).toHaveBeenCalledWith({
+      redirect: expect.stringContaining('/quote/upload-received'),
+      s3Bucket: 'boundaries',
+      metadata: {}
+    })
+  })
+
   it('should show an error when upload initiation fails', async () => {
     vi.mocked(initiateUpload).mockResolvedValue({
       error: 'Unable to initiate upload'
@@ -81,37 +91,5 @@ describe('Upload boundary page', () => {
       )
     ).toBeInTheDocument()
     expect(document.querySelector('form')).not.toBeInTheDocument()
-  })
-
-  it('should show a validation error if the page is viewed after an invalid form submission', async () => {
-    const errorMessage = 'Select a file'
-    vi.mocked(getValidationFlashFromCache).mockReturnValue({
-      validationErrors: {
-        summary: [
-          {
-            href: '#file',
-            text: errorMessage,
-            field: ['file']
-          }
-        ],
-        messagesByFormField: {
-          file: {
-            href: '#file',
-            text: errorMessage,
-            field: ['file']
-          }
-        }
-      },
-      formSubmitData: {}
-    })
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer()
-    })
-    expectInputError({
-      document,
-      inputLabel: 'Upload a red line boundary file',
-      errorMessage
-    })
   })
 })

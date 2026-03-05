@@ -1,0 +1,16 @@
+name: Journey Tests
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Publish']
+    types:
+      - completed
+
+jobs:
+  test:
+    permissions:
+      id-token: write
+      checks: write
+      pull-requests: write
+    uses: DEFRA/nrf-journey-tests/.github/workflows/journey-tests.yml@main
