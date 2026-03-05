@@ -9,7 +9,7 @@ import {
 const routeId = 'upload-boundary'
 
 export async function handler(request, h) {
-  const baseViewModel = getViewModel()
+  const viewModel = getViewModel()
 
   // Get validation errors from flash if any
   const flash = getValidationFlashFromCache(request)
@@ -17,7 +17,7 @@ export async function handler(request, h) {
     clearValidationFlashFromCache(request)
   }
 
-  // Build redirect URL from request (works in both dev and prod)
+  // Build redirect URL from request
   const protocol = request.headers['x-forwarded-proto'] ?? 'http'
   const host = request.info.host
   const redirectUrl = `${protocol}://${host}/quote/upload-received`
@@ -29,23 +29,19 @@ export async function handler(request, h) {
   })
 
   if (uploadSession.error) {
-    return h
-      .view(`quote/${routeId}/index`, {
-        ...baseViewModel,
-        uploadError: uploadSession.error
-      })
-      .header('Cache-Control', 'no-store, must-revalidate')
+    return h.view(`quote/${routeId}/index`, {
+      ...viewModel,
+      uploadError: uploadSession.error
+    })
   }
 
   request.yar.set('pendingUploadId', uploadSession.uploadId)
 
-  return h
-    .view(`quote/${routeId}/index`, {
-      ...baseViewModel,
-      uploadUrl: uploadSession.uploadUrl,
-      ...(flash?.validationErrors && {
-        validationErrors: flash.validationErrors
-      })
+  return h.view(`quote/${routeId}/index`, {
+    ...viewModel,
+    uploadUrl: uploadSession.uploadUrl,
+    ...(flash?.validationErrors && {
+      validationErrors: flash.validationErrors
     })
-    .header('Cache-Control', 'no-store, must-revalidate')
+  })
 }

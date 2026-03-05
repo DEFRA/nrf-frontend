@@ -112,17 +112,4 @@ describe('upload-received controller', () => {
       errorMessage: 'Upload failed'
     })
   })
-
-  it('should set Cache-Control header to no-store, must-revalidate', async () => {
-    const h = createMockH()
-    const request = createMockRequest('test-upload-id')
-    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'pending' })
-
-    await handler(request, h)
-
-    expect(h._headerMock).toHaveBeenCalledWith(
-      'Cache-Control',
-      'no-store, must-revalidate'
-    )
-  })
 })

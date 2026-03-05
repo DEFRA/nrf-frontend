@@ -28,15 +28,15 @@ export async function handler(request, h) {
     errorMessage: response.error
   }
 
-  return h
-    .view('quote/upload-received/index', viewModel)
-    .header('Cache-Control', 'no-store, must-revalidate')
+  return h.view('quote/upload-received/index', viewModel)
 }
 
 export function checkBoundaryHandler(request, h) {
   const { id } = request.params
 
-  // TODO: implement boundary spatial check
+  // TODO: call nrf-backend to do boundary spatial check
   // return h.redirect('/quote/next')
-  return h.response(`Check boundary: ${id}`).type('text/plain')
+  return h
+    .response(`Check boundary: ${id} (Not implemented yet)`)
+    .type('text/plain')
 }
