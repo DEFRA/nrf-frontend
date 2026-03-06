@@ -8,7 +8,7 @@ const logger = createLogger()
  * Get the CDP Uploader base URL
  * @returns {string}
  */
-function getCdpUploaderUrl() {
+export function getCdpUploaderUrl() {
   const explicitUrl = config.get('cdpUploader.url')
   if (explicitUrl) {
     return explicitUrl
@@ -60,7 +60,17 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
       uploadUrl
     }
   } catch (error) {
-    logger.error({ error }, 'Error initiating upload')
+    logger.error(
+      {
+        error,
+        url,
+        baseUrl,
+        request: { redirect, s3Bucket, s3Path },
+        statusCode: error?.output?.statusCode,
+        responsePayload: error?.data?.payload
+      },
+      'Error initiating upload'
+    )
     return {
       error: 'Unable to initiate upload'
     }
@@ -83,7 +93,17 @@ export async function getUploadStatus(uploadId) {
       uploadStatus: payload.uploadStatus ?? 'unknown'
     }
   } catch (error) {
-    logger.error({ error, uploadId }, 'Error fetching upload status')
+    logger.error(
+      {
+        error,
+        url,
+        baseUrl,
+        uploadId,
+        statusCode: error?.output?.statusCode,
+        responsePayload: error?.data?.payload
+      },
+      'Error fetching upload status'
+    )
     return {
       uploadStatus: 'error',
       error: 'Unable to check upload status'

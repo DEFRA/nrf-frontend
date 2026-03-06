@@ -11,3 +11,5 @@ coverage
 tsconfig.tsbuildinfo
 .env
 .claude/settings.local.json
+test-data/*
+!test-data/.gitkeep
