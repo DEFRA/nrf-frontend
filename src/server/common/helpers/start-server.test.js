@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 
 import hapi from '@hapi/hapi'
+import Wreck from '@hapi/wreck'
 import { statusCodes } from '../constants/status-codes.js'
 
 describe('#startServer', () => {
@@ -54,5 +55,57 @@ describe('#startServer', () => {
         'Server failed to start'
       )
     })
+  })
+})
+
+describe('#checkCdpUploaderConnectivity', () => {
+  let checkCdpUploaderConnectivity
+  const mockLogger = { info: vi.fn(), error: vi.fn() }
+
+  beforeAll(async () => {
+    const mod = await import('./start-server.js')
+    checkCdpUploaderConnectivity = mod.checkCdpUploaderConnectivity
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('Should log success when cdp-uploader is reachable', async () => {
+    const wreckSpy = vi
+      .spyOn(Wreck, 'get')
+      .mockResolvedValue({ payload: { message: 'success' } })
+
+    await checkCdpUploaderConnectivity(mockLogger)
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('CDP Uploader configuration')
+    )
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('CDP Uploader is reachable')
+    )
+    expect(mockLogger.error).not.toHaveBeenCalled()
+
+    wreckSpy.mockRestore()
+  })
+
+  test('Should log error when cdp-uploader is unreachable', async () => {
+    const wreckSpy = vi
+      .spyOn(Wreck, 'get')
+      .mockRejectedValue(new Error('ECONNREFUSED'))
+
+    await checkCdpUploaderConnectivity(mockLogger)
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('CDP Uploader configuration')
+    )
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('CDP Uploader connectivity check failed')
+    )
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('ECONNREFUSED')
+    )
+
+    wreckSpy.mockRestore()
   })
 })

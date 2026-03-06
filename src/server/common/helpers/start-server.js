@@ -8,7 +8,9 @@ async function checkCdpUploaderConnectivity(logger) {
   const baseUrl = getCdpUploaderUrl()
   const bucket = config.get('cdpUploader.bucket')
 
-  logger.info({ baseUrl, bucket }, 'CDP Uploader configuration')
+  logger.info(
+    `CDP Uploader configuration - baseUrl: ${baseUrl}, bucket: ${bucket}`
+  )
 
   const healthUrl = `${baseUrl}/health`
 
@@ -17,16 +19,12 @@ async function checkCdpUploaderConnectivity(logger) {
       json: true,
       timeout: 5000
     })
-    logger.info({ baseUrl, response: payload }, 'CDP Uploader is reachable')
+    logger.info(
+      `CDP Uploader is reachable - baseUrl: ${baseUrl}, response: ${JSON.stringify(payload)}`
+    )
   } catch (error) {
     logger.error(
-      {
-        baseUrl,
-        healthUrl,
-        statusCode: error?.output?.statusCode,
-        message: error?.message
-      },
-      'CDP Uploader connectivity check failed'
+      `CDP Uploader connectivity check failed - baseUrl: ${baseUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
     )
   }
 }
@@ -46,4 +44,4 @@ async function startServer() {
   return server
 }
 
-export { startServer }
+export { startServer, checkCdpUploaderConnectivity }
