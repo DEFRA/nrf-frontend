@@ -100,20 +100,4 @@ describe('upload-boundary controller', () => {
       })
     )
   })
-
-  it('should set Cache-Control header', async () => {
-    const h = createMockH()
-    const request = createMockRequest()
-    vi.mocked(initiateUpload).mockResolvedValue({
-      uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
-    })
-
-    await handler(request, h)
-
-    expect(h._headerMock).toHaveBeenCalledWith(
-      'Cache-Control',
-      'no-store, must-revalidate'
-    )
-  })
 })

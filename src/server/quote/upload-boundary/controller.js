@@ -11,6 +11,7 @@ const routeId = 'upload-boundary'
 export async function handler(request, h) {
   const viewModel = getViewModel()
 
+  // Get validation errors from flash if any
   const flash = getValidationFlashFromCache(request)
   if (flash) {
     clearValidationFlashFromCache(request)
@@ -28,23 +29,19 @@ export async function handler(request, h) {
   })
 
   if (uploadSession.error) {
-    return h
-      .view(`quote/${routeId}/index`, {
-        ...viewModel,
-        uploadError: uploadSession.error
-      })
-      .header('Cache-Control', 'no-store, must-revalidate')
+    return h.view(`quote/${routeId}/index`, {
+      ...viewModel,
+      uploadError: uploadSession.error
+    })
   }
 
   request.yar.set('pendingUploadId', uploadSession.uploadId)
 
-  return h
-    .view(`quote/${routeId}/index`, {
-      ...viewModel,
-      uploadUrl: uploadSession.uploadUrl,
-      ...(flash?.validationErrors && {
-        validationErrors: flash.validationErrors
-      })
+  return h.view(`quote/${routeId}/index`, {
+    ...viewModel,
+    uploadUrl: uploadSession.uploadUrl,
+    ...(flash?.validationErrors && {
+      validationErrors: flash.validationErrors
     })
-    .header('Cache-Control', 'no-store, must-revalidate')
+  })
 }

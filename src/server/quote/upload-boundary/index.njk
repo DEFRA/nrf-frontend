@@ -15,7 +15,7 @@
             titleText: "There is a problem",
             errorList: validationErrors.summary
         }) }}
-        {% elif uploadError %}
+        {% elseif uploadError %}
         {{ govukErrorSummary({
             titleText: "There is a problem",
             errorList: [{
@@ -25,6 +25,7 @@
         }) }}
         {% endif %}
 
+        {% if uploadUrl %}
         <form action="{{ uploadUrl }}" method="post" enctype="multipart/form-data" novalidate>
 
             {{ govukFileUpload({
@@ -38,7 +39,7 @@
                 hint: {
                     html: "<p>Accepted file formats:</p><ul class=\"govuk-list govuk-list--bullet\"><li>GeoJSON (.geojson, .json)</li><li>KML (.kml)</li><li>Shapefile (.shp)</li></ul>The file must be smaller than 2MB."
                 },
-                errorMessage: validationErrors.messagesByFormField.file,
+                errorMessage: validationErrors.messagesByFormField.file if validationErrors,
                 attributes: {
                     accept: ".shp,.geojson,.json,.kml"
                 }
@@ -49,6 +50,10 @@
             }) }}
 
         </form>
+        {% else %}
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+        <p class="govuk-body">Unable to start file upload. Please try again later.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

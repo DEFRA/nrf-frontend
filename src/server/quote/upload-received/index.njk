@@ -2,14 +2,49 @@
 
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
+{% block head %}
+  {{ super() }}
+  {% if refreshInterval %}
+  <meta http-equiv="refresh" content="{{ refreshInterval }}">
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        {{ govukPanel({
-            titleText: pageHeading,
-            html: ""
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {% if errorMessage %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: errorMessage
+            }]
         }) }}
+        {% endif %}
+
+        {% if isReady %}
+        <p class="govuk-body">Upload and virus scan completed.</p>
+        <p class="govuk-body">Please click continue to check and view the boundary.</p>
+        <form method="post" action="/quote/check-boundary/{{ uploadId }}">
+            {% include "partials/csrf-token.njk" %}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+        </form>
+        {% elseif isProcessing %}
+        <p class="govuk-body">Your file is being processed.</p>
+        <p class="govuk-body">This page will automatically refresh.</p>
+        <p class="govuk-body">
+            <strong>Status:</strong> {{ status }}
+        </p>
+        {% else %}
+        <p class="govuk-body">
+            <strong>Status:</strong> {{ status }}
+        </p>
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}
