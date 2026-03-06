@@ -42,7 +42,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: 'http://localhost:3000/quote/upload-received',
+      redirect: '/quote/upload-received',
       s3Bucket: 'boundaries',
       metadata: {}
     })
