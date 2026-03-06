@@ -10,13 +10,19 @@ async function checkCdpUploaderConnectivity(logger) {
 
   logger.info({ baseUrl, bucket }, 'CDP Uploader configuration')
 
+  const healthUrl = `${baseUrl}/health`
+
   try {
-    await Wreck.get(baseUrl, { timeout: 5000 })
-    logger.info({ baseUrl }, 'CDP Uploader is reachable')
+    const { payload } = await Wreck.get(healthUrl, {
+      json: true,
+      timeout: 5000
+    })
+    logger.info({ baseUrl, response: payload }, 'CDP Uploader is reachable')
   } catch (error) {
     logger.warn(
       {
         baseUrl,
+        healthUrl,
         statusCode: error?.output?.statusCode,
         message: error?.message
       },
