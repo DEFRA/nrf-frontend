@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "BnW_small_under_1_hectare",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::27700" } },
+"features": [
+{ "type": "Feature", "properties": { "Dwellings": 1, "id": "24/00119/F", "Name": "Old White Horse Station Road East Rudham", "Dwel_Cat": "in-system", "Source": "RHK_West Norfolk_System", "Shape_Leng": 64.670604121899999, "Shape_Area": 259.392014469, "Type": "NotClust", "Cluster_ID": -1 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 582814.926799999549985, 328188.88990000076592 ], [ 582808.885800000280142, 328203.729000000283122 ], [ 582824.964900000020862, 328210.167899999767542 ], [ 582830.090400000102818, 328196.995400000363588 ], [ 582814.926799999549985, 328188.88990000076592 ] ] ] } }
+]
+}
