@@ -19,7 +19,7 @@ async function checkCdpUploaderConnectivity(logger) {
     })
     logger.info({ baseUrl, response: payload }, 'CDP Uploader is reachable')
   } catch (error) {
-    logger.warn(
+    logger.error(
       {
         baseUrl,
         healthUrl,
