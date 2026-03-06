@@ -36,6 +36,8 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
   const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/initiate`
 
+  logger.info({ url, s3Bucket, s3Path }, 'Initiating upload')
+
   try {
     const { payload } = await Wreck.post(url, {
       payload: JSON.stringify({
@@ -62,7 +64,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
   } catch (error) {
     logger.error(
       {
-        error,
+        err: error,
         url,
         baseUrl,
         request: { redirect, s3Bucket, s3Path },
@@ -86,6 +88,8 @@ export async function getUploadStatus(uploadId) {
   const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/status/${uploadId}`
 
+  logger.info({ url, uploadId }, 'Fetching upload status')
+
   try {
     const { payload } = await Wreck.get(url, { json: true })
 
@@ -95,7 +99,7 @@ export async function getUploadStatus(uploadId) {
   } catch (error) {
     logger.error(
       {
-        error,
+        err: error,
         url,
         baseUrl,
         uploadId,
