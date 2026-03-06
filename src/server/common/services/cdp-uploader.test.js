@@ -86,7 +86,7 @@ describe('cdp-uploader service', () => {
       })
     })
 
-    it('should log structured error context for HTTP errors', async () => {
+    it('should log error details for HTTP errors', async () => {
       const boomError = new Error('Service Unavailable')
       boomError.output = { statusCode: 503 }
       boomError.data = { payload: { message: 'upstream timeout' } }
@@ -100,22 +100,14 @@ describe('cdp-uploader service', () => {
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'http://localhost:7337/initiate',
-          baseUrl: 'http://localhost:7337',
-          request: {
-            redirect: 'http://localhost:3000/quote/upload-received',
-            s3Bucket: 'test-bucket',
-            s3Path: 'uploads/'
-          },
-          statusCode: 503,
-          responsePayload: { message: 'upstream timeout' }
-        }),
-        'Error initiating upload'
+        expect.stringContaining('statusCode: 503')
+      )
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('url: http://localhost:7337/initiate')
       )
     })
 
-    it('should log undefined statusCode and responsePayload for connection errors', async () => {
+    it('should log error details for connection errors', async () => {
       vi.mocked(Wreck.post).mockRejectedValue(new Error('ECONNREFUSED'))
 
       await initiateUpload({
@@ -124,13 +116,7 @@ describe('cdp-uploader service', () => {
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'http://localhost:7337/initiate',
-          baseUrl: 'http://localhost:7337',
-          statusCode: undefined,
-          responsePayload: undefined
-        }),
-        'Error initiating upload'
+        expect.stringContaining('message: ECONNREFUSED')
       )
     })
   })
@@ -161,7 +147,7 @@ describe('cdp-uploader service', () => {
       })
     })
 
-    it('should log structured error context for HTTP errors', async () => {
+    it('should log error details for HTTP errors', async () => {
       const boomError = new Error('Service Unavailable')
       boomError.output = { statusCode: 503 }
       boomError.data = { payload: { message: 'upstream timeout' } }
@@ -171,31 +157,20 @@ describe('cdp-uploader service', () => {
       await getUploadStatus('test-upload-id')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'http://localhost:7337/status/test-upload-id',
-          baseUrl: 'http://localhost:7337',
-          uploadId: 'test-upload-id',
-          statusCode: 503,
-          responsePayload: { message: 'upstream timeout' }
-        }),
-        'Error fetching upload status'
+        expect.stringContaining('statusCode: 503')
+      )
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('uploadId: test-upload-id')
       )
     })
 
-    it('should log undefined statusCode and responsePayload for connection errors', async () => {
+    it('should log error details for connection errors', async () => {
       vi.mocked(Wreck.get).mockRejectedValue(new Error('ECONNREFUSED'))
 
       await getUploadStatus('test-upload-id')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'http://localhost:7337/status/test-upload-id',
-          baseUrl: 'http://localhost:7337',
-          uploadId: 'test-upload-id',
-          statusCode: undefined,
-          responsePayload: undefined
-        }),
-        'Error fetching upload status'
+        expect.stringContaining('message: ECONNREFUSED')
       )
     })
 

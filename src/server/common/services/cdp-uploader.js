@@ -36,7 +36,9 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
   const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/initiate`
 
-  logger.info({ url, s3Bucket, s3Path }, 'Initiating upload')
+  logger.info(
+    `Initiating upload - url: ${url}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}`
+  )
 
   try {
     const { payload } = await Wreck.post(url, {
@@ -62,16 +64,10 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
       uploadUrl
     }
   } catch (error) {
+    const statusCode = error?.output?.statusCode
+    const responsePayload = error?.data?.payload
     logger.error(
-      {
-        err: error,
-        url,
-        baseUrl,
-        request: { redirect, s3Bucket, s3Path },
-        statusCode: error?.output?.statusCode,
-        responsePayload: error?.data?.payload
-      },
-      'Error initiating upload'
+      `Error initiating upload - url: ${url}, baseUrl: ${baseUrl}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
       error: 'Unable to initiate upload'
@@ -88,7 +84,7 @@ export async function getUploadStatus(uploadId) {
   const baseUrl = getCdpUploaderUrl()
   const url = `${baseUrl}/status/${uploadId}`
 
-  logger.info({ url, uploadId }, 'Fetching upload status')
+  logger.info(`Fetching upload status - url: ${url}, uploadId: ${uploadId}`)
 
   try {
     const { payload } = await Wreck.get(url, { json: true })
@@ -97,16 +93,10 @@ export async function getUploadStatus(uploadId) {
       uploadStatus: payload.uploadStatus ?? 'unknown'
     }
   } catch (error) {
+    const statusCode = error?.output?.statusCode
+    const responsePayload = error?.data?.payload
     logger.error(
-      {
-        err: error,
-        url,
-        baseUrl,
-        uploadId,
-        statusCode: error?.output?.statusCode,
-        responsePayload: error?.data?.payload
-      },
-      'Error fetching upload status'
+      `Error fetching upload status - url: ${url}, baseUrl: ${baseUrl}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
       uploadStatus: 'error',
