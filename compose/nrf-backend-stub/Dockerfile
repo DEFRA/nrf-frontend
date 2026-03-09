@@ -1,10 +1,10 @@
-FROM node:22-alpine
+FROM defradigital/node-development
 
-WORKDIR /app
+ENV TZ="Europe/London"
 
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
+COPY --chown=node:node package*.json ./
+RUN npm install
 
-COPY server.js .
+COPY --chown=node:node server.js .
 
 CMD ["node", "server.js"]
