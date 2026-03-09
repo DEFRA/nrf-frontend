@@ -1,9 +1,0 @@
-{
-  "name": "nrf-backend-stub",
-  "version": "1.0.0",
-  "type": "module",
-  "private": true,
-  "dependencies": {
-    "@hapi/hapi": "^21.3.12"
-  }
-}

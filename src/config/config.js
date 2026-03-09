@@ -292,7 +292,7 @@ export const config = convict({
       doc: 'Endpoint for the backend API service',
       format: String,
       nullable: true,
-      default: 'http://localhost:3098',
+      default: 'http://localhost:3001',
       env: 'NRF_BACKEND_API_URL'
     }
   },

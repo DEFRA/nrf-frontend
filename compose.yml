@@ -44,29 +44,14 @@ services:
   caddy:
     image: caddy:2-alpine
     ports:
-      - '3000:3000'
+      - '4000:4000'
     volumes:
       - ./compose/Caddyfile:/etc/caddy/Caddyfile:ro
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    depends_on:
-      - nrf-backend
     networks:
       - cdp-tenant
 
-  nrf-backend:
-    build: ./compose/nrf-backend-stub
-    ports:
-      - '3098:3098'
-    environment:
-      PORT: 3098
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3098/health']
-      interval: 5s
-      start_period: 5s
-      retries: 3
-    networks:
-      - cdp-tenant
 
 ################################################################################
 

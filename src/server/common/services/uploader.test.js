@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getUploadStatus, initiateUpload } from './uploader.js'
 
-const backendUrl = 'http://localhost:3098'
+const backendUrl = 'http://localhost:3001'
 
 vi.mock('@hapi/wreck')
 
