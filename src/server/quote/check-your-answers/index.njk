@@ -1,0 +1,22 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {{ govukButton({
+                text: "Submit"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
