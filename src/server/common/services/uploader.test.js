@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Wreck from '@hapi/wreck'
-import { getUploadStatus, initiateUpload } from './cdp-uploader.js'
+import { getUploadStatus, initiateUpload } from './uploader.js'
+
+const backendUrl = 'http://localhost:3098'
 
 vi.mock('@hapi/wreck')
 
@@ -14,7 +16,7 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-describe('cdp-uploader service', () => {
+describe('uploader service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -33,21 +35,18 @@ describe('cdp-uploader service', () => {
         s3Bucket: 'test-bucket'
       })
 
-      expect(Wreck.post).toHaveBeenCalledWith(
-        'http://localhost:7337/initiate',
-        {
-          payload: JSON.stringify({
-            redirect: 'http://localhost:3000/quote/upload-received',
-            s3Bucket: 'test-bucket',
-            s3Path: undefined,
-            metadata: undefined
-          }),
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          json: true
-        }
-      )
+      expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/upload/initiate`, {
+        payload: JSON.stringify({
+          redirect: 'http://localhost:3000/quote/upload-received',
+          s3Bucket: 'test-bucket',
+          s3Path: undefined,
+          metadata: undefined
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        json: true
+      })
       expect(result).toEqual({
         uploadId: 'test-upload-id',
         uploadUrl: '/upload-and-scan/test-upload-id'
@@ -103,7 +102,7 @@ describe('cdp-uploader service', () => {
         expect.stringContaining('statusCode: 503')
       )
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('url: http://localhost:7337/initiate')
+        expect.stringContaining(`url: ${backendUrl}/upload/initiate`)
       )
     })
 
@@ -130,7 +129,7 @@ describe('cdp-uploader service', () => {
       const result = await getUploadStatus('test-upload-id')
 
       expect(Wreck.get).toHaveBeenCalledWith(
-        'http://localhost:7337/status/test-upload-id',
+        `${backendUrl}/upload/test-upload-id/status`,
         { json: true }
       )
       expect(result).toEqual({ uploadStatus: 'pending' })

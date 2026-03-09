@@ -2,10 +2,10 @@ import { JSDOM } from 'jsdom'
 import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
-import { getUploadStatus } from '../../common/services/cdp-uploader.js'
+import { getUploadStatus } from '../../common/services/uploader.js'
 
 vi.mock('../session-cache.js')
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 
 /**
  * Loads the upload-received page with a pendingUploadId in the session.

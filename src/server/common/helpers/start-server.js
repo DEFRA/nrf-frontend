@@ -2,17 +2,13 @@ import Wreck from '@hapi/wreck'
 
 import { createServer } from '../../server.js'
 import { config } from '../../../config/config.js'
-import { getCdpUploaderUrl } from '../services/cdp-uploader.js'
 
-async function checkCdpUploaderConnectivity(logger) {
-  const baseUrl = getCdpUploaderUrl()
-  const bucket = config.get('cdpUploader.bucket')
+async function checkBackendConnectivity(logger) {
+  const backendUrl = config.get('backend.apiUrl')
 
-  logger.info(
-    `CDP Uploader configuration - baseUrl: ${baseUrl}, bucket: ${bucket}`
-  )
+  logger.info(`Backend configuration - apiUrl: ${backendUrl}`)
 
-  const healthUrl = `${baseUrl}/health`
+  const healthUrl = `${backendUrl}/health`
 
   try {
     const { payload } = await Wreck.get(healthUrl, {
@@ -20,11 +16,11 @@ async function checkCdpUploaderConnectivity(logger) {
       timeout: 5000
     })
     logger.info(
-      `CDP Uploader is reachable - baseUrl: ${baseUrl}, response: ${JSON.stringify(payload)}`
+      `Backend is reachable - apiUrl: ${backendUrl}, response: ${JSON.stringify(payload)}`
     )
   } catch (error) {
     logger.error(
-      `CDP Uploader connectivity check failed - baseUrl: ${baseUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
+      `Backend connectivity check failed - apiUrl: ${backendUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
     )
   }
 }
@@ -39,9 +35,9 @@ async function startServer() {
   )
 
   // Fire-and-forget connectivity check — does not block startup
-  checkCdpUploaderConnectivity(server.logger)
+  checkBackendConnectivity(server.logger)
 
   return server
 }
 
-export { startServer, checkCdpUploaderConnectivity }
+export { startServer, checkBackendConnectivity }

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler } from './controller.js'
-import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../session-cache.js'
 
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 vi.mock('../session-cache.js')
 
 describe('upload-boundary controller', () => {

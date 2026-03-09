@@ -1,4 +1,4 @@
-import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 import { config } from '../../../config/config.js'
 import getViewModel from './get-view-model.js'
 import {

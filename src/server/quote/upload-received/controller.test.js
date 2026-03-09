@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler } from './controller.js'
-import { getUploadStatus } from '../../common/services/cdp-uploader.js'
+import { getUploadStatus } from '../../common/services/uploader.js'
 
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 
 describe('upload-received controller', () => {
   const createMockH = () => {

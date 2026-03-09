@@ -5,26 +5,7 @@ import { createLogger } from '../helpers/logging/logger.js'
 const logger = createLogger()
 
 /**
- * Get the CDP Uploader base URL
- * @returns {string}
- */
-export function getCdpUploaderUrl() {
-  const explicitUrl = config.get('cdpUploader.url')
-  if (explicitUrl) {
-    return explicitUrl
-  }
-
-  const environment = process.env.ENVIRONMENT
-  if (environment) {
-    return `https://cdp-uploader.${environment}.cdp-int.defra.cloud`
-  }
-
-  // Local development fallback
-  return 'http://localhost:7337'
-}
-
-/**
- * Initiate an upload session with CDP Uploader
+ * Initiate an upload session via the backend
  * @param {object} options - Upload options
  * @param {string} options.redirect - URL to redirect to after upload
  * @param {string} options.s3Bucket - Destination S3 bucket
@@ -33,8 +14,8 @@ export function getCdpUploaderUrl() {
  * @returns {Promise<{uploadId: string, uploadUrl: string} | {error: string}>}
  */
 export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
-  const baseUrl = getCdpUploaderUrl()
-  const url = `${baseUrl}/initiate`
+  const backendUrl = config.get('backend.apiUrl')
+  const url = `${backendUrl}/upload/initiate`
 
   logger.info(
     `Initiating upload - url: ${url}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}`
@@ -54,7 +35,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
       json: true
     })
 
-    // Extract just the path from uploadUrl (cdp-uploader may return full URL)
+    // Extract just the path from uploadUrl (backend may return full URL)
     const uploadUrl = payload.uploadUrl.startsWith('http')
       ? new URL(payload.uploadUrl).pathname
       : payload.uploadUrl
@@ -67,7 +48,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
-      `Error initiating upload - url: ${url}, baseUrl: ${baseUrl}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
+      `Error initiating upload - url: ${url}, backendUrl: ${backendUrl}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
       error: 'Unable to initiate upload'
@@ -76,13 +57,13 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
 }
 
 /**
- * Get the upload status from CDP Uploader
+ * Get the upload status from the backend
  * @param {string} uploadId - The upload ID to check status for
  * @returns {Promise<{uploadStatus: string, error?: string}>}
  */
 export async function getUploadStatus(uploadId) {
-  const baseUrl = getCdpUploaderUrl()
-  const url = `${baseUrl}/status/${uploadId}`
+  const backendUrl = config.get('backend.apiUrl')
+  const url = `${backendUrl}/upload/${uploadId}/status`
 
   logger.info(`Fetching upload status - url: ${url}, uploadId: ${uploadId}`)
 
@@ -96,7 +77,7 @@ export async function getUploadStatus(uploadId) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
-      `Error fetching upload status - url: ${url}, baseUrl: ${baseUrl}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
+      `Error fetching upload status - url: ${url}, backendUrl: ${backendUrl}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
       uploadStatus: 'error',

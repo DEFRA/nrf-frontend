@@ -292,18 +292,11 @@ export const config = convict({
       doc: 'Endpoint for the backend API service',
       format: String,
       nullable: true,
-      default: 'http://localhost:3001',
+      default: 'http://localhost:3098',
       env: 'NRF_BACKEND_API_URL'
     }
   },
   cdpUploader: {
-    url: {
-      doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
-      format: String,
-      default: null,
-      nullable: true,
-      env: 'CDP_UPLOADER_URL'
-    },
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,

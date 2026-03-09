@@ -2,10 +2,10 @@ import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 
 vi.mock('../session-cache.js')
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 
 describe('Upload boundary page', () => {
   const getServer = setupTestServer()
@@ -34,7 +34,7 @@ describe('Upload boundary page', () => {
     )
   })
 
-  it('should render a form with action pointing to cdp-uploader', async () => {
+  it('should render a form with action pointing to upload endpoint', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()

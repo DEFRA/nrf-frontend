@@ -1,7 +1,7 @@
 :3000 {
-    # Route upload requests to cdp-uploader
+    # Route upload requests to nrf-backend
     handle /upload-and-scan/* {
-        reverse_proxy cdp-uploader:7337
+        reverse_proxy nrf-backend:3098
     }
 
     # Route everything else to the node app on host
