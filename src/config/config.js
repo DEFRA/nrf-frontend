@@ -294,6 +294,12 @@ export const config = convict({
       nullable: true,
       default: 'http://localhost:3001',
       env: 'NRF_BACKEND_API_URL'
+    },
+    optional: {
+      doc: 'When true, log backend connectivity failures as warnings instead of blocking startup',
+      format: Boolean,
+      default: false,
+      env: 'NRF_BACKEND_OPTIONAL'
     }
   },
   cdpUploader: {

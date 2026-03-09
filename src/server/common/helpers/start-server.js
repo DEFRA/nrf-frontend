@@ -19,9 +19,17 @@ async function checkBackendConnectivity(logger) {
       `Backend is reachable - apiUrl: ${backendUrl}, response: ${JSON.stringify(payload)}`
     )
   } catch (error) {
+    const ignoreErrors = config.get('backend.optional')
+
     logger.error(
       `Backend connectivity check failed - apiUrl: ${backendUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
     )
+
+    if (ignoreErrors) {
+      logger.warn('NRF_BACKEND_OPTIONAL is set — continuing without backend')
+      return
+    }
+
     throw new Error(
       `Backend is not reachable at ${healthUrl} - ${error?.message}`
     )

@@ -32,6 +32,10 @@ describe('#startServer', () => {
     })
 
     test('Should start up server as expected', async () => {
+      const wreckSpy = vi
+        .spyOn(Wreck, 'get')
+        .mockResolvedValue({ payload: { message: 'success' } })
+
       server = await startServerImport.startServer()
 
       expect(createServerSpy).toHaveBeenCalled()
@@ -44,6 +48,8 @@ describe('#startServer', () => {
 
       expect(result).toEqual({ message: 'success' })
       expect(statusCode).toBe(statusCodes.ok)
+
+      wreckSpy.mockRestore()
     })
   })
 
@@ -60,7 +66,7 @@ describe('#startServer', () => {
 
 describe('#checkBackendConnectivity', () => {
   let checkBackendConnectivity
-  const mockLogger = { info: vi.fn(), error: vi.fn() }
+  const mockLogger = { info: vi.fn(), error: vi.fn(), warn: vi.fn() }
 
   beforeAll(async () => {
     const mod = await import('./start-server.js')
@@ -86,6 +92,27 @@ describe('#checkBackendConnectivity', () => {
     )
     expect(mockLogger.error).not.toHaveBeenCalled()
 
+    wreckSpy.mockRestore()
+  })
+
+  test('Should warn and continue when ignore errors flag is set', async () => {
+    const wreckSpy = vi
+      .spyOn(Wreck, 'get')
+      .mockRejectedValue(new Error('ECONNREFUSED'))
+
+    const { config } = await import('../../../config/config.js')
+    config.set('backend.optional', true)
+
+    await checkBackendConnectivity(mockLogger)
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Backend connectivity check failed')
+    )
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('NRF_BACKEND_OPTIONAL')
+    )
+
+    config.set('backend.optional', false)
     wreckSpy.mockRestore()
   })
 
