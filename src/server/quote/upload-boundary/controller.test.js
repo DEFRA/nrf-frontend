@@ -21,6 +21,7 @@ describe('upload-boundary controller', () => {
   const createMockRequest = () => ({
     headers: {},
     info: { host: 'localhost:3000' },
+    server: { info: { protocol: 'http' } },
     yar: {
       set: vi.fn()
     }
@@ -42,7 +43,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received',
+      redirect: 'http://localhost:3000/quote/upload-received',
       s3Bucket: 'boundaries',
       metadata: {}
     })
