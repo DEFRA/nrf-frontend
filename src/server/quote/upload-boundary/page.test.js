@@ -13,7 +13,7 @@ describe('Upload boundary page', () => {
   beforeEach(() => {
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
   })
 
@@ -40,7 +40,10 @@ describe('Upload boundary page', () => {
       server: getServer()
     })
     const form = document.querySelector('form')
-    expect(form).toHaveAttribute('action', '/upload-and-scan/test-upload-id')
+    expect(form).toHaveAttribute(
+      'action',
+      'http://localhost:4001/upload-and-scan/test-upload-id'
+    )
     expect(form).toHaveAttribute('method', 'post')
     expect(form).toHaveAttribute('enctype', 'multipart/form-data')
   })

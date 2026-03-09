@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getUploadStatus, initiateUpload } from './uploader.js'
 
-const backendUrl = 'http://localhost:3001'
+const backendUrl = 'http://localhost:4001'
 
 vi.mock('@hapi/wreck')
 
@@ -26,7 +26,7 @@ describe('uploader service', () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: {
           uploadId: 'test-upload-id',
-          uploadUrl: '/upload-and-scan/test-upload-id'
+          uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
         }
       })
 
@@ -49,26 +49,7 @@ describe('uploader service', () => {
       })
       expect(result).toEqual({
         uploadId: 'test-upload-id',
-        uploadUrl: '/upload-and-scan/test-upload-id'
-      })
-    })
-
-    it('should extract path from full URL response', async () => {
-      vi.mocked(Wreck.post).mockResolvedValue({
-        payload: {
-          uploadId: 'test-upload-id',
-          uploadUrl: 'http://localhost:7337/upload-and-scan/test-upload-id'
-        }
-      })
-
-      const result = await initiateUpload({
-        redirect: 'http://localhost:3000/quote/upload-received',
-        s3Bucket: 'test-bucket'
-      })
-
-      expect(result).toEqual({
-        uploadId: 'test-upload-id',
-        uploadUrl: '/upload-and-scan/test-upload-id'
+        uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
       })
     })
 

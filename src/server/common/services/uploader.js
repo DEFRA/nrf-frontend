@@ -35,10 +35,9 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
       json: true
     })
 
-    // Extract just the path from uploadUrl (backend may return full URL)
     const uploadUrl = payload.uploadUrl.startsWith('http')
-      ? new URL(payload.uploadUrl).pathname
-      : payload.uploadUrl
+      ? payload.uploadUrl
+      : `${backendUrl}${payload.uploadUrl}`
 
     return {
       uploadId: payload.uploadId,

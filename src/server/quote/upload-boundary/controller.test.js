@@ -37,7 +37,7 @@ describe('upload-boundary controller', () => {
     const request = createMockRequest()
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
 
     await handler(request, h)
@@ -54,7 +54,7 @@ describe('upload-boundary controller', () => {
     expect(h.view).toHaveBeenCalledWith(
       'quote/upload-boundary/index',
       expect.objectContaining({
-        uploadUrl: '/upload-and-scan/test-upload-id'
+        uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
       })
     )
   })
@@ -88,7 +88,7 @@ describe('upload-boundary controller', () => {
     })
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
 
     await handler(request, h)
