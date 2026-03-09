@@ -13,8 +13,9 @@ const getHeaders = () => {
   return headers
 }
 
+const logger = createLogger()
+
 export const postRequestToBackend = async ({ endpointPath, payload }) => {
-  const logger = createLogger()
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
     const response = await Wreck.post(url, {
