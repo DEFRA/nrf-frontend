@@ -89,12 +89,14 @@ describe('#checkBackendConnectivity', () => {
     wreckSpy.mockRestore()
   })
 
-  test('Should log error when backend is unreachable', async () => {
+  test('Should throw when backend is unreachable', async () => {
     const wreckSpy = vi
       .spyOn(Wreck, 'get')
       .mockRejectedValue(new Error('ECONNREFUSED'))
 
-    await checkBackendConnectivity(mockLogger)
+    await expect(checkBackendConnectivity(mockLogger)).rejects.toThrow(
+      'Backend is not reachable'
+    )
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Backend configuration')

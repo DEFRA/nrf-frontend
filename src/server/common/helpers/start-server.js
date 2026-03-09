@@ -22,6 +22,9 @@ async function checkBackendConnectivity(logger) {
     logger.error(
       `Backend connectivity check failed - apiUrl: ${backendUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
     )
+    throw new Error(
+      `Backend is not reachable at ${healthUrl} - ${error?.message}`
+    )
   }
 }
 
@@ -34,8 +37,7 @@ async function startServer() {
     `Access your frontend on http://localhost:${config.get('port')}`
   )
 
-  // Fire-and-forget connectivity check — does not block startup
-  checkBackendConnectivity(server.logger)
+  await checkBackendConnectivity(server.logger)
 
   return server
 }
