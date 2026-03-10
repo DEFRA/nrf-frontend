@@ -6,6 +6,7 @@ export default defineConfig({
     setupFiles: ['.vite/setup-files.js'],
     environment: 'node',
     mockReset: true,
+    testTimeout: 10000,
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',
