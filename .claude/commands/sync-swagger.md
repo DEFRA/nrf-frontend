@@ -1,0 +1,1 @@
+../../.ai/skills/sync-swagger/SKILL.md
