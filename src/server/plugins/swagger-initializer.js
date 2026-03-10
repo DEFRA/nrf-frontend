@@ -14,8 +14,7 @@ window.onload = function () {
         if (xhr.status === HTTP_OK) {
           const token = JSON.parse(xhr.responseText).csrfToken
           if (
-            req.headers['Content-Type'] &&
-            req.headers['Content-Type'].includes(
+            req.headers['Content-Type']?.includes(
               'application/x-www-form-urlencoded'
             )
           ) {
