@@ -1,5 +1,7 @@
 import { getUploadStatus } from '../../common/services/cdp-uploader.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
+import { postRequestToBackend } from '../../common/services/nrf-backend.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 
 const REFRESH_INTERVAL_SECONDS = 5
 const STATUS_PENDING = 'pending'
@@ -31,13 +33,16 @@ export async function handler(request, h) {
   return h.view('quote/upload-received/index', viewModel)
 }
 
-export function checkBoundaryHandler(request, h) {
+export async function checkBoundaryHandler(request, h) {
   const { id } = request.params
 
-  // Faciendum: call nrf-backend to do boundary spatial check
-  // then navigate to the boundary check result or map view page.
-  // return h.redirect('/quote/next')
+  const response = await postRequestToBackend({
+    endpointPath: `/quote/check-boundary/${id}`
+  })
+
+  request.yar.set('boundaryCheckJob', response.payload)
+
   return h
-    .response(`Check boundary: ${id} (Not implemented yet)`)
-    .type('text/plain')
+    .redirect('/quote/boundary-result')
+    .code(statusCodes.redirectAfterPost)
 }

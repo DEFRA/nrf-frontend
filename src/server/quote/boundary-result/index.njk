@@ -1,0 +1,45 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {% if status === "pending" or status === "processing" %}
+        <p class="govuk-body">Your boundary file is being checked. This may take a moment.</p>
+        <p class="govuk-body">
+            <strong>Status:</strong> {{ status }}
+        </p>
+        {% elseif status === "completed" %}
+        <p class="govuk-body">Your boundary file has been checked successfully.</p>
+        {{ govukButton({
+            text: "Continue",
+            href: "/quote/next"
+        }) }}
+        {% elseif status === "failed" %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: "The boundary check found problems with your file. Please upload a new boundary file."
+            }]
+        }) }}
+        {{ govukButton({
+            text: "Upload a new file",
+            href: "/quote/upload-boundary"
+        }) }}
+        {% else %}
+        <p class="govuk-body">
+            <strong>Status:</strong> {{ status }}
+        </p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
