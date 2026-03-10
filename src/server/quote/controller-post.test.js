@@ -1,52 +1,57 @@
 import { describe, it, expect } from 'vitest'
 import { quotePostController } from './controller-post.js'
+import getNextPage from './residential/get-next-page.js'
 
-import { saveValidationFlashToCache } from './session-cache.js'
+import {
+  saveQuoteDataToCache,
+  saveValidationFlashToCache
+} from './session-cache.js'
 
 vi.mock('./session-cache.js', async (importOriginal) => {
   const actual = await importOriginal()
-  return { ...actual, saveValidationFlashToCache: vi.fn() }
+  return {
+    ...actual,
+    saveQuoteDataToCache: vi.fn(),
+    saveValidationFlashToCache: vi.fn()
+  }
 })
 
 describe('quotePostController', () => {
-  const formValidation = () => () => {}
-  const getNextPage = () => '/quote/next'
+  const buildRequest = (payload = {}) => ({
+    payload,
+    path: '/quote/boundary-type',
+    yar: { get: vi.fn(), set: vi.fn() }
+  })
 
-  it('should save the form data to cache and redirect to /quote/next on successful submission', () => {
-    const controller = quotePostController({ formValidation, getNextPage })
-    const h = {
-      redirect: (path) => ({
-        redirectTo: path,
-        code: () => ({ redirectTo: path })
-      })
-    }
-    const getExistingSessionCacheValue = vi
-      .fn()
-      .mockReturnValue({ field1: 'value1' })
-    const request = {
-      payload: { field2: 'value2' },
-      yar: { get: getExistingSessionCacheValue, set: vi.fn() }
-    }
-    const result = controller.handler(request, h)
-    expect(getExistingSessionCacheValue).toHaveBeenCalledWith('quote')
-    expect(request.yar.set).toHaveBeenCalledWith('quote', {
-      field1: 'value1',
-      field2: 'value2'
+  const buildH = () => ({
+    redirect: vi.fn().mockReturnValue({
+      code: vi.fn().mockReturnValue({ takeover: vi.fn() })
     })
-    expect(result.redirectTo).toBe('/quote/next')
+  })
+
+  it('should save the payload to cache and redirect to the next page on successful submission', () => {
+    const mergedQuoteData = { developmentTypes: ['housing'] }
+    vi.mocked(saveQuoteDataToCache).mockReturnValue(mergedQuoteData)
+    const controller = quotePostController({
+      formValidation: () => () => {},
+      getNextPage
+    })
+    const request = buildRequest({ developmentTypes: ['housing'] })
+    const h = buildH()
+
+    controller.handler(request, h)
+
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, request.payload)
+    expect(h.redirect).toHaveBeenCalledWith('/quote/email')
   })
 
   it('should save validation errors to flash and redirect on validation failure', () => {
-    const controller = quotePostController({ formValidation, getNextPage })
-    const redirect = vi.fn().mockReturnValue({
-      code: () => ({ takeover: () => {} })
+    const controller = quotePostController({
+      formValidation: () => () => {},
+      getNextPage: vi.fn()
     })
-    const h = { redirect }
-    const request = {
-      payload: { field1: 'bad value' },
-      path: '/quote/boundary-type',
-      yar: { get: vi.fn().mockReturnValue(null), set: vi.fn() }
-    }
+    const request = buildRequest({ field1: 'bad value' })
+    const h = buildH()
     const err = { details: [{ path: 'field1', message: 'Required' }] }
 
     controller.options.validate.failAction(request, h, err)
@@ -59,6 +64,6 @@ describe('quotePostController', () => {
       }),
       formSubmitData: request.payload
     })
-    expect(redirect).toHaveBeenCalledWith(request.path)
+    expect(h.redirect).toHaveBeenCalledWith(request.path)
   })
 })

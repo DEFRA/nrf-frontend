@@ -1,0 +1,51 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList: validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {{ govukInput({
+                label: {
+                    text: pageHeading,
+                    classes: "govuk-label--l",
+                    isPageHeading: true
+                },
+                hint: {
+                    text: "This should be the maximum capacity allowed for your development."
+                },
+                name: "peopleCount",
+                type: "number",
+                classes: "govuk-input--width-5",
+                inputmode: "numeric",
+                pattern: "[0-9]*",
+                value: formSubmitData.peopleCount,
+                errorMessage: validationErrors.messagesByFormField.peopleCount
+            }) }}
+
+            <p class="govuk-body">
+                <a href="#" class="govuk-link">Find out how to calculate your maximum capacity for your development</a>
+            </p>
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

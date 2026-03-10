@@ -27,13 +27,24 @@ describe('quoteController', () => {
     expect(result.model).toEqual(viewModel)
   })
 
-  it('should remember the users previous selection', () => {
-    vi.mocked(getQuoteDataFromCache).mockReturnValue({
-      boundaryEntryType: 'draw'
+  it('should pass quoteData to getViewModel', () => {
+    const quoteData = { boundaryEntryType: 'draw' }
+    vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
+    const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
+    const controller = quoteController({
+      routeId,
+      getViewModel: mockGetViewModel
     })
+    controller.handler({}, buildH())
+    expect(mockGetViewModel).toHaveBeenCalledWith(quoteData)
+  })
+
+  it('should set formSubmitData from quoteData', () => {
+    const quoteData = { boundaryEntryType: 'draw' }
+    vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const controller = quoteController({ routeId, getViewModel })
     const result = controller.handler({}, buildH())
-    expect(result.model.formSubmitData.boundaryEntryType).toBe('draw')
+    expect(result.model.formSubmitData).toEqual(quoteData)
   })
 
   it('should render form validation errors and formSubmitData if they were stored in flash', () => {

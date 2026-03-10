@@ -8,6 +8,7 @@ import routesUploadBoundary from './upload-boundary/routes.js'
 import routesUploadReceived from './upload-received/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
+import routesPeopleCount from './people-count/routes.js'
 
 /**
  * @openapi
@@ -40,6 +41,7 @@ export const quote = {
         ...routesUploadBoundary,
         ...routesUploadReceived,
         ...routesCheckYourAnswers,
+        ...routesPeopleCount,
         ...routesConfirmation
       ])
     }
