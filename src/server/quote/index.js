@@ -7,6 +7,7 @@ import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
 import routesUploadReceived from './upload-received/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
+import routesConfirmation from './confirmation/routes.js'
 
 /**
  * @openapi
@@ -24,12 +25,6 @@ import routesCheckYourAnswers from './check-your-answers/routes.js'
  *             schema:
  *               type: string
  */
-// Placeholder route for pages not yet implemented
-const placeholderRoute = {
-  method: 'GET',
-  path: '/quote/next',
-  handler: () => '<h1>Placeholder</h1><p>This page is not yet implemented.</p>'
-}
 
 export const quote = {
   plugin: {
@@ -45,7 +40,7 @@ export const quote = {
         ...routesUploadBoundary,
         ...routesUploadReceived,
         ...routesCheckYourAnswers,
-        placeholderRoute
+        ...routesConfirmation
       ])
     }
   }
