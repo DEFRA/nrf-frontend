@@ -11,8 +11,8 @@
   },
   "scripts": {
     "build:frontend": "cross-env NODE_ENV=production webpack",
-    "dev": "cross-env run-p frontend:watch server:watch",
-    "dev:debug": "cross-env run-p frontend:watch server:debug",
+    "dev": "cross-env USE_SWAGGER=true run-p frontend:watch server:watch",
+    "dev:debug": "cross-env USE_SWAGGER=true run-p frontend:watch server:debug",
     "docker:dev": "npm run dev",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
     "format:check": "prettier --check \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",

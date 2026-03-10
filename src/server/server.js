@@ -110,7 +110,9 @@ export async function createServer() {
   await server.register(router)
 
   // Register Swagger documentation (after router so inert is available)
-  await server.register(swagger)
+  if (config.get('useSwagger')) {
+    await server.register(swagger)
+  }
 
   server.ext('onPreResponse', (request, h) => {
     const { response } = request

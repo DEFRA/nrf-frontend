@@ -26,6 +26,24 @@ export const swagger = {
   plugin: {
     name: 'swagger',
     register(server) {
+      // Relax CSP for /docs and /swagger-ui routes so Swagger UI
+      // can apply its inline styles without being blocked.
+      server.ext('onPreResponse', (request, h) => {
+        if (
+          request.path === '/docs' ||
+          request.path.startsWith('/swagger-ui')
+        ) {
+          const { response } = request
+          if (response.isBoom) return h.continue
+
+          response.header(
+            'Content-Security-Policy',
+            "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self' data:"
+          )
+        }
+        return h.continue
+      })
+
       server.route({
         method: 'GET',
         path: '/swagger.json',

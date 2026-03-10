@@ -296,6 +296,12 @@ export const config = convict({
       env: 'NRF_BACKEND_API_URL'
     }
   },
+  useSwagger: {
+    doc: 'Enable Swagger API documentation at /docs',
+    format: Boolean,
+    default: false,
+    env: 'USE_SWAGGER'
+  },
   cdpUploader: {
     url: {
       doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
