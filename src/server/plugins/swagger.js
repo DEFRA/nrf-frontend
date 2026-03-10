@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import swaggerJsdoc from 'swagger-jsdoc'
 
 const options = {
@@ -22,43 +22,38 @@ const options = {
 
 const swaggerSpec = swaggerJsdoc(options)
 
-export const swagger = {
-  plugin: {
-    name: 'swagger',
-    register(server) {
-      // Relax CSP for /docs and /swagger-ui routes so Swagger UI
-      // can apply its inline styles without being blocked.
-      server.ext('onPreResponse', (request, h) => {
-        if (
-          request.path === '/docs' ||
-          request.path.startsWith('/swagger-ui')
-        ) {
-          const { response } = request
-          if (response.isBoom) return h.continue
+const swaggerCsp =
+  "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self' data:"
 
-          response.header(
-            'Content-Security-Policy',
-            "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self' data:"
-          )
-        }
-        return h.continue
-      })
+function relaxCsp(request, h) {
+  if (request.path === '/docs' || request.path.startsWith('/swagger-ui')) {
+    const { response } = request
+    if (response.isBoom) {
+      return h.continue
+    }
 
-      server.route({
-        method: 'GET',
-        path: '/swagger.json',
-        handler: (_request, h) =>
-          h.response(swaggerSpec).type('application/json'),
-        options: { auth: false }
-      })
+    response.header('Content-Security-Policy', swaggerCsp)
+  }
+  return h.continue
+}
 
-      server.route({
-        method: 'GET',
-        path: '/docs',
-        handler: (_request, h) => {
-          return h
-            .response(
-              `<!DOCTYPE html>
+function specRoute() {
+  return {
+    method: 'GET',
+    path: '/swagger.json',
+    handler: (_request, h) => h.response(swaggerSpec).type('application/json'),
+    options: { auth: false }
+  }
+}
+
+function docsRoute() {
+  return {
+    method: 'GET',
+    path: '/docs',
+    handler: (_request, h) => {
+      return h
+        .response(
+          `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -72,43 +67,90 @@ export const swagger = {
   <script src="/swagger-ui/swagger-initializer.js"></script>
 </body>
 </html>`
-            )
-            .type('text/html')
-        },
-        options: { auth: false }
-      })
+        )
+        .type('text/html')
+    },
+    options: { auth: false }
+  }
+}
 
-      server.route({
-        method: 'GET',
-        path: '/swagger-ui/swagger-initializer.js',
-        handler: (_request, h) => {
-          return h
-            .response(
-              `window.onload = function () {
+function csrfTokenRoute() {
+  return {
+    method: 'GET',
+    path: '/docs/csrf-token',
+    handler(request, h) {
+      return h
+        .response({ csrfToken: request.plugins.crumb })
+        .type('application/json')
+    },
+    options: { auth: false }
+  }
+}
+
+function initializerRoute() {
+  return {
+    method: 'GET',
+    path: '/swagger-ui/swagger-initializer.js',
+    handler: (_request, h) => {
+      return h
+        .response(
+          `window.onload = function () {
   SwaggerUIBundle({
     url: '/swagger.json',
     dom_id: '#swagger-ui',
     presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-    layout: 'StandaloneLayout'
+    layout: 'StandaloneLayout',
+    requestInterceptor: function (req) {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', '/docs/csrf-token', false)
+        xhr.send()
+        if (xhr.status === 200) {
+          var token = JSON.parse(xhr.responseText).csrfToken
+          if (req.headers['Content-Type'] && req.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+            req.body = req.body ? req.body + '&csrfToken=' + encodeURIComponent(token) : 'csrfToken=' + encodeURIComponent(token)
+          } else {
+            req.headers['x-csrf-token'] = token
+          }
+        }
+      }
+      return req
+    }
   })
 }`
-            )
-            .type('application/javascript')
-        },
-        options: { auth: false }
-      })
+        )
+        .type('application/javascript')
+    },
+    options: { auth: false }
+  }
+}
 
-      server.route({
-        method: 'GET',
-        path: '/swagger-ui/{param*}',
-        handler: {
-          directory: {
-            path: path.resolve('node_modules/swagger-ui-dist'),
-            listing: false
-          }
-        },
-        options: { auth: false }
-      })
+function staticAssetsRoute() {
+  return {
+    method: 'GET',
+    path: '/swagger-ui/{param*}',
+    handler: {
+      directory: {
+        path: path.resolve('node_modules/swagger-ui-dist'),
+        listing: false
+      }
+    },
+    options: { auth: false }
+  }
+}
+
+export const swagger = {
+  plugin: {
+    name: 'swagger',
+    register(server) {
+      server.ext('onPreResponse', relaxCsp)
+      server.route([
+        specRoute(),
+        docsRoute(),
+        csrfTokenRoute(),
+        initializerRoute(),
+        staticAssetsRoute()
+      ])
     }
   }
 }
