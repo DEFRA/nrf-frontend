@@ -1,8 +1,20 @@
 import { aboutController } from './controller.js'
 
 /**
- * Sets up the routes used in the /about page.
- * These routes are registered in src/server/router.js.
+ * @openapi
+ * /about:
+ *   get:
+ *     tags:
+ *       - About
+ *     summary: About page
+ *     description: Renders the about page
+ *     responses:
+ *       200:
+ *         description: HTML about page
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
  */
 export const about = {
   plugin: {

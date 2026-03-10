@@ -295,6 +295,27 @@ export const config = convict({
       default: 'http://localhost:3001',
       env: 'NRF_BACKEND_API_URL'
     }
+  },
+  useSwagger: {
+    doc: 'Enable Swagger API documentation at /docs',
+    format: Boolean,
+    default: false,
+    env: 'USE_SWAGGER'
+  },
+  cdpUploader: {
+    url: {
+      doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
+      format: String,
+      default: null,
+      nullable: true,
+      env: 'CDP_UPLOADER_URL'
+    },
+    bucket: {
+      doc: 'S3 bucket for file uploads',
+      format: String,
+      default: 'boundaries',
+      env: 'CDP_UPLOADER_BUCKET'
+    }
   }
 })
 

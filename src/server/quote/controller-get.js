@@ -18,8 +18,6 @@ export const quoteController = ({ routeId, getViewModel }) => ({
       formSubmitData = getQuoteDataFromCache(request)
     }
     const viewModel = { ...baseViewModel, formSubmitData, validationErrors }
-    return h
-      .view(`quote/${routeId}/index`, viewModel)
-      .header('Cache-Control', 'no-store, must-revalidate')
+    return h.view(`quote/${routeId}/index`, viewModel)
   }
 })

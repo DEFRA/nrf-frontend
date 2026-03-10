@@ -193,6 +193,6 @@ describe('Email page', () => {
       formData: { email: 'test@example.com' }
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/next')
+    expect(response.headers.location).toBe('/quote/check-your-answers')
   })
 })

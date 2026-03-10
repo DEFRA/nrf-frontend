@@ -26,6 +26,16 @@ Install application dependencies:
 npm install
 ```
 
+### Docker Compose (LocalStack)
+
+To run the application with local AWS services (S3, SQS), Redis and MongoDB:
+
+```bash
+docker compose up --build -d
+```
+
+The `compose/01-start-localstack.sh` script runs automatically on container startup to create the S3 buckets and SQS queues required by the CDP uploader.
+
 ### Development
 
 To run the application in `development` mode run:
@@ -41,6 +51,21 @@ To mimic the application running in `production` mode locally run:
 
 ```bash
 npm start
+```
+
+### API documentation
+
+Swagger UI is available at `/docs` when the server is running.
+The OpenAPI spec is generated from `@openapi` JSDoc annotations in the route and controller files.
+
+### Keeping Swagger docs in sync
+
+An AI (Claude Code) skill is provided to audit and fix the `@openapi` annotations so they match the actual endpoint implementations.
+
+Run it from the project root with:
+
+```shell
+/sync-swagger
 ```
 
 ## Other docs
