@@ -15,14 +15,12 @@ Audit and fix the @openapi JSDoc annotations across all API route and controller
 1. Read the swagger-jsdoc config in `src/server/plugins/swagger.js` to find the file globs that are scanned for annotations (the `apis` array).
 
 2. For every file matched by those globs, read the file and compare:
-
    - The `@openapi` JSDoc block (if present) against the actual route definition below it.
    - Check: HTTP method, path, request body / payload schema, path and query parameters, response status codes and shapes.
    - If a route exists but has no `@openapi` block, add one.
    - If an `@openapi` block is present but incorrect or incomplete, fix it.
 
 3. Specific things to verify for each endpoint:
-
    - **Method and path** match the route's `method` and `path` fields.
    - **Request body**: if the route has `validate.payload` (Joi), the `@openapi` `requestBody` schema should list the same fields, types, required fields, and formats.
    - **Path parameters**: if the route path has `{param}` segments or `validate.params`, the `@openapi` block should have matching `parameters` entries.
