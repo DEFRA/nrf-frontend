@@ -8,6 +8,22 @@ import routesUploadBoundary from './upload-boundary/routes.js'
 import routesUploadReceived from './upload-received/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 
+/**
+ * @openapi
+ * /quote/next:
+ *   get:
+ *     tags:
+ *       - Quote
+ *     summary: Placeholder page
+ *     description: Placeholder for pages not yet implemented
+ *     responses:
+ *       200:
+ *         description: HTML placeholder page
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ */
 // Placeholder route for pages not yet implemented
 const placeholderRoute = {
   method: 'GET',
