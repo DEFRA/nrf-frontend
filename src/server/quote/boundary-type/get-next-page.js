@@ -1,4 +1,7 @@
-export default function () {
-  // return the next page to redirect to
+export default function ({ boundaryEntryType }) {
+  if (boundaryEntryType === 'upload') {
+    return '/quote/upload-boundary'
+  }
+
   return '/quote/next'
 }
