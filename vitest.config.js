@@ -17,7 +17,8 @@ export default defineConfig({
         '.public',
         'coverage',
         'postcss.config.js',
-        'stylelint.config.js'
+        'stylelint.config.js',
+        'src/server/plugins/swagger-initializer.js'
       ]
     }
   }

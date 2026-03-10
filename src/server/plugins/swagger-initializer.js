@@ -1,3 +1,4 @@
+/* global SwaggerUIBundle, SwaggerUIStandalonePreset */
 window.onload = function () {
   SwaggerUIBundle({
     url: '/swagger.json',
@@ -6,20 +7,22 @@ window.onload = function () {
     layout: 'StandaloneLayout',
     requestInterceptor: function (req) {
       if (req.method !== 'GET' && req.method !== 'HEAD') {
-        var xhr = new XMLHttpRequest()
+        const xhr = new XMLHttpRequest()
         xhr.open('GET', '/docs/csrf-token', false)
         xhr.send()
-        if (xhr.status === 200) {
-          var token = JSON.parse(xhr.responseText).csrfToken
+        const HTTP_OK = 200
+        if (xhr.status === HTTP_OK) {
+          const token = JSON.parse(xhr.responseText).csrfToken
           if (
             req.headers['Content-Type'] &&
-            req.headers['Content-Type'].indexOf(
+            req.headers['Content-Type'].includes(
               'application/x-www-form-urlencoded'
-            ) !== -1
+            )
           ) {
+            const encodedToken = encodeURIComponent(token)
             req.body = req.body
-              ? req.body + '&csrfToken=' + encodeURIComponent(token)
-              : 'csrfToken=' + encodeURIComponent(token)
+              ? `${req.body}&csrfToken=${encodedToken}`
+              : `csrfToken=${encodedToken}`
           } else {
             req.headers['x-csrf-token'] = token
           }

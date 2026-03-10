@@ -94,6 +94,19 @@ describe('#swagger plugin', () => {
       })
     })
 
+    describe('GET /docs/csrf-token', () => {
+      test('should return a JSON response with csrfToken field', async () => {
+        const { statusCode, headers, result } = await server.inject({
+          method: 'GET',
+          url: '/docs/csrf-token'
+        })
+
+        expect(statusCode).toBe(statusCodes.ok)
+        expect(headers['content-type']).toContain('application/json')
+        expect(result).toHaveProperty('csrfToken')
+      })
+    })
+
     describe('GET /swagger-ui/{file}', () => {
       test('should serve swagger-ui static assets', async () => {
         const { statusCode } = await server.inject({
@@ -112,6 +125,15 @@ describe('#swagger plugin', () => {
 
         const csp = headers['content-security-policy']
         expect(csp).toContain("style-src 'self' 'unsafe-inline'")
+      })
+
+      test('should not override CSP on error responses', async () => {
+        const { statusCode } = await server.inject({
+          method: 'GET',
+          url: '/swagger-ui/does-not-exist.js'
+        })
+
+        expect(statusCode).toBe(statusCodes.notFound)
       })
     })
   })

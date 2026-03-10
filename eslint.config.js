@@ -18,8 +18,6 @@ export default [
         SwaggerUIStandalonePreset: 'readonly'
       }
     },
-    rules: {
-      'no-var': 'off'
-    }
+    rules: {}
   }
 ]
