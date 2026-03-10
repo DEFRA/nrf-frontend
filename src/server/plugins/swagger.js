@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import swaggerJsdoc from 'swagger-jsdoc'
 
@@ -87,40 +88,17 @@ function csrfTokenRoute() {
   }
 }
 
+const initializerJs = readFileSync(
+  path.resolve(import.meta.dirname, 'swagger-initializer.js'),
+  'utf8'
+)
+
 function initializerRoute() {
   return {
     method: 'GET',
     path: '/swagger-ui/swagger-initializer.js',
-    handler: (_request, h) => {
-      return h
-        .response(
-          `window.onload = function () {
-  SwaggerUIBundle({
-    url: '/swagger.json',
-    dom_id: '#swagger-ui',
-    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-    layout: 'StandaloneLayout',
-    requestInterceptor: function (req) {
-      if (req.method !== 'GET' && req.method !== 'HEAD') {
-        var xhr = new XMLHttpRequest()
-        xhr.open('GET', '/docs/csrf-token', false)
-        xhr.send()
-        if (xhr.status === 200) {
-          var token = JSON.parse(xhr.responseText).csrfToken
-          if (req.headers['Content-Type'] && req.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
-            req.body = req.body ? req.body + '&csrfToken=' + encodeURIComponent(token) : 'csrfToken=' + encodeURIComponent(token)
-          } else {
-            req.headers['x-csrf-token'] = token
-          }
-        }
-      }
-      return req
-    }
-  })
-}`
-        )
-        .type('application/javascript')
-    },
+    handler: (_request, h) =>
+      h.response(initializerJs).type('application/javascript'),
     options: { auth: false }
   }
 }
