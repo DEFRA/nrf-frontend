@@ -3,6 +3,7 @@ import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
+import { getQuoteDataFromCache } from '../session-cache.js'
 
 vi.mock('../session-cache.js')
 vi.mock('../../common/services/uploader.js')
@@ -53,6 +54,9 @@ describe('Upload received page', () => {
   })
 
   beforeEach(() => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      boundaryEntryType: 'upload'
+    })
     vi.mocked(getUploadStatus).mockResolvedValue({
       uploadStatus: 'pending'
     })

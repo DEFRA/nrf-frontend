@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import {
-  getQuoteDataFromCache,
-  saveQuoteDataToCache
+  clearQuoteDataFromCache,
+  getQuoteDataFromCache
 } from '../session-cache.js'
 import { quoteSubmitController } from './controller-post.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -12,7 +12,7 @@ const backendUrl = config.get('backend').apiUrl
 
 vi.mock('../session-cache.js', () => ({
   getQuoteDataFromCache: vi.fn(),
-  saveQuoteDataToCache: vi.fn()
+  clearQuoteDataFromCache: vi.fn()
 }))
 
 const server = setupMswServer()
@@ -38,9 +38,7 @@ describe('quoteSubmitController', () => {
     const result = await quoteSubmitController.handler(request, h)
 
     expect(getQuoteDataFromCache).toHaveBeenCalledWith(request)
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-      nrfReference: 'REF-001002'
-    })
+    expect(clearQuoteDataFromCache).toHaveBeenCalledWith(request)
     expect(h.redirect).toHaveBeenCalledWith(
       '/quote/confirmation?reference=REF-001002'
     )

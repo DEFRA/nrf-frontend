@@ -1,7 +1,7 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
 import {
-  getQuoteDataFromCache,
-  saveQuoteDataToCache
+  clearQuoteDataFromCache,
+  getQuoteDataFromCache
 } from '../session-cache.js'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { routePath as routePathConfirmation } from '../confirmation/routes.js'
@@ -13,8 +13,8 @@ export const quoteSubmitController = {
       endpointPath: '/quote',
       payload: { emailAddress: quoteData.email }
     })
+    clearQuoteDataFromCache(request)
     const nrfReference = response.payload.reference
-    saveQuoteDataToCache(request, { nrfReference })
     return h
       .redirect(`${routePathConfirmation}?reference=${nrfReference}`)
       .code(statusCodes.redirectAfterPost)

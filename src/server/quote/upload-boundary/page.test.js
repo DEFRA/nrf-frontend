@@ -3,6 +3,7 @@ import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { initiateUpload } from '../../common/services/uploader.js'
+import { getQuoteDataFromCache } from '../session-cache.js'
 
 vi.mock('../session-cache.js')
 vi.mock('../../common/services/uploader.js')
@@ -11,6 +12,9 @@ describe('Upload boundary page', () => {
   const getServer = setupTestServer()
 
   beforeEach(() => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      boundaryEntryType: 'upload'
+    })
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
       uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
