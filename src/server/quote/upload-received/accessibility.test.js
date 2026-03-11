@@ -5,7 +5,6 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 import { getUploadStatus } from '../../common/services/cdp-uploader.js'
 
-vi.mock('../session-cache.js')
 vi.mock('../../common/services/cdp-uploader.js')
 
 describe('Upload received page accessibility checks', () => {

@@ -2,38 +2,22 @@
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { getValidationFlashFromCache } from '../session-cache.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
-
-vi.mock('../session-cache.js')
 
 describe('Development types page accessibility checks', () => {
   const getServer = setupTestServer()
 
   it('should have no HTML accessibility issues after an invalid form submission', async () => {
-    const errorMessage = 'Select a development type to continue'
-    vi.mocked(getValidationFlashFromCache).mockReturnValue({
-      validationErrors: {
-        summary: [
-          {
-            href: '#developmentTypes',
-            text: errorMessage,
-            field: ['developmentTypes']
-          }
-        ],
-        messagesByFormField: {
-          developmentTypes: {
-            href: '#developmentTypes',
-            text: errorMessage,
-            field: ['developmentTypes']
-          }
-        }
-      },
-      formSubmitData: {}
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: {}
     })
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     await runAxeChecks(document.documentElement)
   })
