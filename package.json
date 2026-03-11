@@ -12,6 +12,7 @@
   "scripts": {
     "build:frontend": "cross-env NODE_ENV=production webpack",
     "dev": "cross-env PORT=3000 run-p frontend:watch server:watch",
+    "dev:caddy": "cross-env PORT=3100 run-p frontend:watch server:watch",
     "dev:debug": "cross-env PORT=3000 run-p frontend:watch server:debug",
     "docker:dev": "npm run dev",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
