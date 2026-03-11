@@ -1,5 +1,4 @@
 import { ProxyAgent, setGlobalDispatcher } from 'undici'
-import { bootstrap } from 'global-agent'
 
 import { createLogger } from '../logging/logger.js'
 import { config } from '../../../../config/config.js'
@@ -19,9 +18,5 @@ export function setupProxy() {
 
     // Undici proxy
     setGlobalDispatcher(new ProxyAgent(proxyUrl))
-
-    // global-agent (axios/request/and others)
-    bootstrap()
-    global.GLOBAL_AGENT.HTTP_PROXY = proxyUrl
   }
 }

@@ -13,9 +13,11 @@ import {
 vi.mock('../session-cache.js')
 
 describe('Email page', () => {
+  beforeEach(() => vi.mocked(getQuoteDataFromCache).mockReturnValue({}))
+
   const getServer = setupTestServer()
 
-  it('should render a page heading, title and back link', async () => {
+  it('should render a page heading and title', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
@@ -26,9 +28,19 @@ describe('Email page', () => {
     expect(document.title).toBe(
       'Enter your email address - Nature Restoration Fund - Gov.uk'
     )
+  })
+
+  it('should render a back link', async () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      developmentTypes: ['housing']
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer()
+    })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '#'
+      '/quote/residential'
     )
   })
 
@@ -193,6 +205,6 @@ describe('Email page', () => {
       formData: { email: 'test@example.com' }
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/next')
+    expect(response.headers.location).toBe('/quote/check-your-answers')
   })
 })

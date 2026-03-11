@@ -302,6 +302,12 @@ export const config = convict({
       env: 'NRF_BACKEND_OPTIONAL'
     }
   },
+  useSwagger: {
+    doc: 'Enable Swagger API documentation at /docs',
+    format: Boolean,
+    default: false,
+    env: 'USE_SWAGGER'
+  },
   cdpUploader: {
     bucket: {
       doc: 'S3 bucket for file uploads',

@@ -18,6 +18,7 @@ import { defraIdentity } from './plugins/defra-identity.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import Bell from '@hapi/bell'
 import { csrf } from './common/helpers/csrf.js'
+import { swagger } from './plugins/swagger.js'
 
 const logger = createLogger()
 
@@ -107,6 +108,11 @@ export async function createServer() {
 
   // Register routes after auth is configured
   await server.register(router)
+
+  // Register Swagger documentation (after router so inert is available)
+  if (config.get('useSwagger')) {
+    await server.register(swagger)
+  }
 
   server.ext('onPreResponse', (request, h) => {
     const { response } = request

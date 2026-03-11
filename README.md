@@ -53,6 +53,21 @@ To mimic the application running in `production` mode locally run:
 npm start
 ```
 
+### API documentation
+
+Swagger UI is available at `/docs` when the server is running.
+The OpenAPI spec is generated from `@openapi` JSDoc annotations in the route and controller files.
+
+### Keeping Swagger docs in sync
+
+An AI (Claude Code) skill is provided to audit and fix the `@openapi` annotations so they match the actual endpoint implementations.
+
+Run it from the project root with:
+
+```shell
+/sync-swagger
+```
+
 ## Other docs
 
 - [Context for AI tools](./docs/ai-context.md)
