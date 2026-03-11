@@ -1,6 +1,10 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
-import { getQuoteDataFromCache } from '../session-cache.js'
+import {
+  getQuoteDataFromCache,
+  saveQuoteDataToCache
+} from '../session-cache.js'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
+import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {
@@ -9,7 +13,10 @@ export const quoteSubmitController = {
       endpointPath: '/quote',
       payload: { emailAddress: quoteData.email }
     })
-    const nextPage = `/quote/next?reference=${response.payload.reference}`
-    return h.redirect(nextPage).code(statusCodes.redirectAfterPost)
+    const nrfReference = response.payload.reference
+    saveQuoteDataToCache(request, { nrfReference })
+    return h
+      .redirect(`${routePathConfirmation}?reference=${nrfReference}`)
+      .code(statusCodes.redirectAfterPost)
   }
 }

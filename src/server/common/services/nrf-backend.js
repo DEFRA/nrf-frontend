@@ -15,6 +15,20 @@ const getHeaders = () => {
 
 const logger = createLogger()
 
+export const getRequestFromBackend = async ({ endpointPath }) => {
+  try {
+    const url = `${config.get('backend').apiUrl}${endpointPath}`
+    const response = await Wreck.get(url, {
+      json: true,
+      headers: getHeaders()
+    })
+    return response
+  } catch (error) {
+    logger.error(error)
+    throw error
+  }
+}
+
 export const postRequestToBackend = async ({ endpointPath, payload }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`

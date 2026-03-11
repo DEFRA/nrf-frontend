@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getTraceId } from '@defra/hapi-tracing'
-import { postRequestToBackend } from './nrf-backend.js'
+import { getRequestFromBackend, postRequestToBackend } from './nrf-backend.js'
 
 vi.mock('@hapi/wreck')
 
@@ -20,6 +20,64 @@ vi.mock('@defra/hapi-tracing', () => ({
 }))
 
 describe('nrf-backend service', () => {
+  describe('getRequestFromBackend', () => {
+    it('should call the correct URL and return the response', async () => {
+      const mockResponse = { payload: { id: '123', status: 'ok' } }
+      vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
+      vi.mocked(getTraceId).mockReturnValue(null)
+
+      const result = await getRequestFromBackend({
+        endpointPath: '/quotes/123'
+      })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        'http://localhost:3001/quotes/123',
+        {
+          json: true,
+          headers: {}
+        }
+      )
+      expect(result).toBe(mockResponse)
+    })
+
+    it('should include the tracing header when a trace ID is present', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(getTraceId).mockReturnValue('trace-abc-123')
+
+      await getRequestFromBackend({ endpointPath: '/quotes/123' })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        'http://localhost:3001/quotes/123',
+        {
+          json: true,
+          headers: { 'x-cdp-request-id': 'trace-abc-123' }
+        }
+      )
+    })
+
+    it('should not include the tracing header when no trace ID is present', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(getTraceId).mockReturnValue(undefined)
+
+      await getRequestFromBackend({ endpointPath: '/quotes/123' })
+
+      const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
+      expect(callArgs.headers).toEqual({})
+    })
+
+    it('should log and rethrow errors when the request fails', async () => {
+      const error = new Error('Network error')
+      vi.mocked(Wreck.get).mockRejectedValue(error)
+      vi.mocked(getTraceId).mockReturnValue(null)
+
+      await expect(
+        getRequestFromBackend({ endpointPath: '/quotes/123' })
+      ).rejects.toThrow('Network error')
+
+      expect(mockLogger.error).toHaveBeenCalledWith(error)
+    })
+  })
+
   describe('postRequestToBackend', () => {
     it('should call the correct URL with payload and return the response', async () => {
       const mockResponse = { payload: { id: '123', status: 'ok' } }

@@ -4,18 +4,11 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
-import {
-  getQuoteDataFromCache,
-  getValidationFlashFromCache,
-  saveValidationFlashToCache
-} from '../session-cache.js'
-
-vi.mock('../session-cache.js')
 
 describe('Boundary type page', () => {
   const getServer = setupTestServer()
 
-  it('should render a page heading, title and back link', async () => {
+  it('should render all page elements', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
@@ -30,110 +23,47 @@ describe('Boundary type page', () => {
       'href',
       '/'
     )
-  })
-
-  it("should not pre-select a radio button if the user didn't previously select one", async () => {
-    vi.mocked(getQuoteDataFromCache).mockReturnValue({})
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer()
-    })
     expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
     expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()
+    const csrfToken = document.querySelector('form input[name="csrfToken"]')
+    expect(csrfToken).toBeInTheDocument()
   })
 
-  it('should remember if the user previously selected draw', async () => {
-    vi.mocked(getQuoteDataFromCache).mockReturnValue({
-      boundaryEntryType: 'draw'
+  it("should remember the user's previous selection", async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'draw' }
     })
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     expect(getByLabelText(document, 'Draw on a map')).toBeChecked()
     expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()
   })
 
-  it('should remember if the user previously selected upload', async () => {
-    vi.mocked(getQuoteDataFromCache).mockReturnValue({
-      boundaryEntryType: 'upload'
-    })
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer()
-    })
-    expect(getByLabelText(document, 'Upload a file')).toBeChecked()
-    expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
-  })
-
-  it('should include a CSRF token inside the form, to prevent CSRF attacks', async () => {
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer()
-    })
-    const csrfToken = document.querySelector('form input[name="csrfToken"]')
-    expect(csrfToken).toBeInTheDocument()
-  })
-
-  it('should redirect and save validation errors to cache, after an invalid form submission', async () => {
-    const { response } = await submitForm({
+  it('should show a validation error, after an invalid form submission', async () => {
+    const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: {}
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(routePath)
-    expect(saveValidationFlashToCache.mock.calls[0][1]).toEqual({
-      formSubmitData: {},
-      validationErrors: {
-        messagesByFormField: {
-          boundaryEntryType: {
-            field: ['boundaryEntryType'],
-            href: '#boundaryEntryType',
-            text: 'Select if you would like to draw a map or upload a file'
-          }
-        },
-        summary: [
-          {
-            field: ['boundaryEntryType'],
-            href: '#boundaryEntryType',
-            text: 'Select if you would like to draw a map or upload a file'
-          }
-        ]
-      }
-    })
-  })
-
-  it('should show a validation error if the page is viewed after an invalid form submission', async () => {
-    const errorMessage =
-      'Select if you would like to draw a map or upload a file'
-    vi.mocked(getValidationFlashFromCache).mockReturnValue({
-      validationErrors: {
-        summary: [
-          {
-            href: '#boundaryEntryType',
-            text: errorMessage,
-            field: ['boundaryEntryType']
-          }
-        ],
-        messagesByFormField: {
-          boundaryEntryType: {
-            href: '#boundaryEntryType',
-            text: errorMessage,
-            field: ['boundaryEntryType']
-          }
-        }
-      },
-      formSubmitData: {}
-    })
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
-    expectFieldsetError({ document, errorMessage })
+    expectFieldsetError({
+      document,
+      errorMessage: 'Select if you would like to draw a map or upload a file'
+    })
   })
 
-  it('should redirect to the next page if draw is selected', async () => {
+  it('should redirect to the next page', async () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),

@@ -30,8 +30,8 @@ export const quotePostController = ({
   },
   handler(request, h) {
     const { payload } = request
-    saveQuoteDataToCache(request, payload)
-    const nextPage = getNextPage(request.payload)
+    const quoteData = saveQuoteDataToCache(request, payload)
+    const nextPage = getNextPage(quoteData)
     return h.redirect(nextPage).code(statusCodes.redirectAfterPost)
   }
 })

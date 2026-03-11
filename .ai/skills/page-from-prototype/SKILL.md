@@ -79,7 +79,7 @@ If it's a form field component, just pass the `name` attribute in, no need to pa
 ## Create a view model
 
 This is a simple function that returns the data that will be used to render data placeholders eg `{{pageTitle}}` in the nunjucks view.
-Create a file called `get-view-model.js` in the target folder with a default export that returns an object including the following properties:
+Create a file called `get-view-model.js` in the target folder with a named default export that returns an object including the following properties:
 
 - `pageTitle`, which should have the value of the page title that was read from the source page `<h1>`, plus ' - Gov.uk'
 - `pageHeading`, which should have the value of the page title that was read from the source page `<h1>`
@@ -87,7 +87,7 @@ Create a file called `get-view-model.js` in the target folder with a default exp
 
 ## Create a form validation file (if the source page has a form)
 
-Create a file called `form-validation.js` in the target folder with a default export function that returns a Joi schema to validate the request body from the form submission. See `src/server/quote/boundary-type/form-validation.js` for an example. The Joi schema should check for each form input group name that's present in the page form, using the following rules per input type:
+Create a file called `form-validation.js` in the target folder with a named default export function that returns a Joi schema to validate the request body from the form submission. See `src/server/quote/boundary-type/form-validation.js` for an example. The Joi schema should check for each form input group name that's present in the page form, using the following rules per input type:
 
 - **Radio buttons / selects**: When nothing is selected the field is absent from the payload, so use `joi.string().valid(...allowedValues).required()` where `allowedValues` is the list of `value` strings from the radio/select items. Handle both `'any.required'` (field absent) and `'any.only'` (unrecognised value submitted) — use the same error message for both.
 - **Checkbox groups**: When nothing is checked the field is absent from the payload; if at least one must be checked, use `joi.array().items(joi.string().valid(...allowedValues)).single().required()` where `allowedValues` is the list of valid checkbox values. The `.single()` call is required because when only one checkbox is checked the browser submits a plain string rather than an array — `.single()` tells Joi to accept and wrap it. Handle `'any.required'` (nothing checked) and `'any.only'` (unrecognised value submitted) — use the same error message for both. Do not add `'array.min'` — it is unreachable because an empty array is never submitted via a normal HTML form.
@@ -124,7 +124,7 @@ Run the tests and confirm they pass.
 
 ## Create a 'get next page' file (if the source page has a form)
 
-Create a file called `get-next-page.js` in the target folder with a default export that is a function that accepts the form payload as its argument and returns a path string, used by the controller to redirect to the next page after a successful form submit.
+Create a file called `get-next-page.js` in the target folder with a named default export that is a function that accepts the form payload as its argument and returns a path string, used by the controller to redirect to the next page after a successful form submit.
 
 ## Create a route file
 

@@ -27,7 +27,6 @@ describe('upload-boundary controller', () => {
   })
 
   beforeEach(() => {
-    vi.clearAllMocks()
     vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
   })
 

@@ -1,13 +1,15 @@
 import { getByRole } from '@testing-library/dom'
+import { http, HttpResponse } from 'msw'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
+import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { getQuoteDataFromCache } from '../session-cache.js'
-import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 
 vi.mock('../session-cache.js')
-vi.mock('../../common/services/nrf-backend.js')
+
+const mswServer = setupMswServer()
 
 describe('Check your answers page', () => {
   const getServer = setupTestServer()
@@ -28,19 +30,23 @@ describe('Check your answers page', () => {
     ).toBeInTheDocument()
   })
 
-  it('should redirect to the next placeholder page if Submit is clicked', async () => {
+  it('should redirect to the confirmation page if Submit is clicked', async () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       email: 'deidre@developers.org'
     })
-    vi.mocked(postRequestToBackend).mockResolvedValue({
-      payload: { reference: 'NRF-123456' }
-    })
+    mswServer.use(
+      http.post('http://localhost:3001/quote', () =>
+        HttpResponse.json({ reference: 'NRF-123456' })
+      )
+    )
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: {}
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/next?reference=NRF-123456')
+    expect(response.headers.location).toBe(
+      '/quote/confirmation?reference=NRF-123456'
+    )
   })
 })
