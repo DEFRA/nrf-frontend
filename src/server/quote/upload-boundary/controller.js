@@ -17,13 +17,8 @@ export async function handler(request, h) {
     clearValidationFlashFromCache(request)
   }
 
-  const proto =
-    request.headers['x-forwarded-proto'] ?? request.server.info.protocol
-  const host = request.headers['x-forwarded-host'] ?? request.info.host
-  const redirectUrl = `${proto}://${host}/quote/upload-received`
-
   const uploadSession = await initiateUpload({
-    redirect: redirectUrl,
+    redirect: config.get('cdpUploader.redirectUrl'),
     s3Bucket: config.get('cdpUploader.bucket'),
     metadata: {}
   })
