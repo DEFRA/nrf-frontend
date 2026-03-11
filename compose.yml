@@ -31,16 +31,6 @@ services:
         aliases:
           - localhost
 
-  mongodb:
-    image: mongo:6.0.13
-    networks:
-      - cdp-tenant
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongodb-data:/data
-    restart: always
-
   caddy:
     image: caddy:2-alpine
     ports:
