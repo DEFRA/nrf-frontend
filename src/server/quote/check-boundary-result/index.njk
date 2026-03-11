@@ -1,0 +1,62 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        {% if validationErrors %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: validationErrors.summary
+        }) }}
+        {% endif %}
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        <p class="govuk-body">
+            Your boundary file has been validated successfully.
+            {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
+        </p>
+
+        {{ govukInsetText({
+            text: "Check that the boundary shown below is correct before continuing."
+        }) }}
+
+        <div id="boundary-map" class="govuk-!-margin-bottom-6" data-geojson='{{ boundaryGeojson | safe }}'>
+            <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
+        </div>
+
+        <form method="post" novalidate>
+            {% include "partials/csrf-token.njk" %}
+
+            {{ govukRadios({
+                name: "boundaryCorrect",
+                value: formSubmitData.boundaryCorrect,
+                errorMessage: validationErrors.messagesByFormField.boundaryCorrect if validationErrors,
+                fieldset: {
+                    legend: {
+                        text: "Is this boundary correct?",
+                        classes: "govuk-fieldset__legend--m"
+                    }
+                },
+                items: [
+                    { value: "yes", text: "Yes, continue" },
+                    { value: "no", text: "No, upload a different file" }
+                ]
+            }) }}
+
+            {{ govukButton({
+                text: "Continue",
+                preventDoubleClick: true
+            }) }}
+        </form>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,5 @@
 import { getUploadStatus } from '../../common/services/uploader.js'
+import { checkBoundary } from '../../common/services/boundary.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
@@ -37,13 +38,23 @@ export async function handler(request, h) {
   return h.view('quote/upload-received/index', viewModel)
 }
 
-export function checkBoundaryHandler(request, h) {
+export async function checkBoundaryHandler(request, h) {
   const { id } = request.params
 
-  // Faciendum: call nrf-backend to do boundary spatial check
-  // then navigate to the boundary check result or map view page.
-  // return h.redirect('/quote/next')
-  return h
-    .response(`Check boundary: ${id} (Not implemented yet)`)
-    .type('text/plain')
+  logger.info(`check-boundary - uploadId: ${id}`)
+
+  const result = await checkBoundary(id)
+
+  if (result.error) {
+    logger.error(
+      `check-boundary failed - uploadId: ${id}, error: ${result.error}`
+    )
+    request.yar.set('boundaryError', result.error)
+    return h.redirect('/quote/upload-boundary')
+  }
+
+  request.yar.set('boundaryGeojson', result.geojson)
+  request.yar.clear('pendingUploadId')
+
+  return h.redirect('/quote/check-boundary-result')
 }

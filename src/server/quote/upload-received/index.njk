@@ -30,7 +30,8 @@
         <form method="post" action="/quote/check-boundary/{{ uploadId }}">
             {% include "partials/csrf-token.njk" %}
             {{ govukButton({
-                text: "Continue"
+                text: "Continue",
+                preventDoubleClick: true
             }) }}
         </form>
         {% elseif isProcessing %}

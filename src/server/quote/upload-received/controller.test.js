@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { handler } from './controller.js'
+import { handler, checkBoundaryHandler } from './controller.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
+import { checkBoundary } from '../../common/services/boundary.js'
 
 vi.mock('../../common/services/uploader.js')
+vi.mock('../../common/services/boundary.js')
 
 describe('upload-received controller', () => {
   const createMockH = () => {
@@ -16,7 +18,9 @@ describe('upload-received controller', () => {
 
   const createMockRequest = (uploadId = null) => ({
     yar: {
-      get: vi.fn().mockReturnValue(uploadId)
+      get: vi.fn().mockReturnValue(uploadId),
+      set: vi.fn(),
+      clear: vi.fn()
     }
   })
 
@@ -115,5 +119,56 @@ describe('upload-received controller', () => {
       refreshInterval: null,
       errorMessage: 'Upload failed'
     })
+  })
+})
+
+describe('checkBoundaryHandler', () => {
+  const createMockH = () => ({
+    redirect: vi.fn().mockReturnThis()
+  })
+
+  const createMockRequest = () => ({
+    params: { id: 'test-upload-id' },
+    yar: {
+      get: vi.fn(),
+      set: vi.fn(),
+      clear: vi.fn()
+    }
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should store geojson and redirect on success', async () => {
+    const mockGeojson = { type: 'FeatureCollection', features: [] }
+    vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
+    expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/check-boundary-result')
+  })
+
+  it('should redirect to upload-boundary on error', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Invalid geometry'
+    })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'boundaryError',
+      'Invalid geometry'
+    )
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
   })
 })
