@@ -11,9 +11,10 @@
   },
   "scripts": {
     "build:frontend": "cross-env NODE_ENV=production webpack",
-    "dev": "cross-env USE_SWAGGER=true run-p frontend:watch server:watch",
-    "dev:debug": "cross-env USE_SWAGGER=true run-p frontend:watch server:debug",
-    "dev:caddy": "cross-env USE_SWAGGER=true PORT=3100 run-p frontend:watch server:watch",
+    "check:node-version": "test $(node --version | cut -d. -f1 | tr -d v) -ge 24 || (echo 'ERROR: This project requires Node.js >= 24.' && exit 1)",
+    "dev": "npm run check:node-version && cross-env USE_SWAGGER=true run-p frontend:watch server:watch",
+    "dev:debug": "npm run check:node-version && cross-env USE_SWAGGER=true run-p frontend:watch server:debug",
+    "dev:caddy": "npm run check:node-version && cross-env USE_SWAGGER=true PORT=3100 run-p frontend:watch server:watch",
     "docker:dev": "npm run dev",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
     "format:check": "prettier --check \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
