@@ -13,7 +13,9 @@ describe('People count page', () => {
   const getServer = setupTestServer()
   let sessionCookie
 
-  beforeEach(async () => sessionCookie = await withValidQuoteSession(getServer()))
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render all page elements', async () => {
     const document = await loadPage({

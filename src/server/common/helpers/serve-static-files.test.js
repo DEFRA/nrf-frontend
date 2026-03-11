@@ -13,6 +13,5 @@ describe('#serveStaticFiles', () => {
 
       expect(statusCode).toBe(statusCodes.noContent)
     })
-
   })
 })

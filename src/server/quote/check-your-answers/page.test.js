@@ -16,7 +16,9 @@ describe('Check your answers page', () => {
   const getServer = setupTestServer()
   let sessionCookie
 
-  beforeEach(async () => sessionCookie = await withValidQuoteSession(getServer()))
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render a page heading and submit button', async () => {
     const document = await loadPage({

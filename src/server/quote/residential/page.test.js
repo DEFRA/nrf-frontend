@@ -11,7 +11,9 @@ describe('Residential page', () => {
   const inputLabel = 'How many residential units in this development?'
   let sessionCookie
 
-  beforeEach(async () => sessionCookie = await withValidQuoteSession(getServer()))
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render all page elements', async () => {
     const document = await loadPage({

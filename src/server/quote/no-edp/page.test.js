@@ -8,7 +8,9 @@ describe('No EDP page', () => {
   const getServer = setupTestServer()
   let sessionCookie
 
-  beforeEach(async () => sessionCookie = await withValidQuoteSession(getServer()))
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render a page heading, title and back link', async () => {
     const document = await loadPage({
