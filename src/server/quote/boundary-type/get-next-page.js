@@ -1,4 +1,9 @@
-export default function () {
-  // return the next page to redirect to
+import { routePath as routePathUploadBoundary } from '../upload-boundary/routes.js'
+
+export default function getNextPage({ boundaryEntryType }) {
+  if (boundaryEntryType === 'upload') {
+    return routePathUploadBoundary
+  }
+
   return '/quote/next'
 }
