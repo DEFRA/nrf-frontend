@@ -1,11 +1,3 @@
 :3000 {
-    # Route upload requests to cdp-uploader
-    handle /upload-and-scan/* {
-        reverse_proxy cdp-uploader:7337
-    }
-
-    # Route everything else to the node app on host
-    handle {
-        reverse_proxy host.docker.internal:3001
-    }
+    reverse_proxy host.docker.internal:3100
 }

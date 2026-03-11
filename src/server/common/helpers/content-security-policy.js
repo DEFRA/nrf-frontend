@@ -1,9 +1,12 @@
 import Blankie from 'blankie'
+import { config } from '../../../config/config.js'
 
 /**
  * Manage content security policies.
  * @satisfies {import('@hapi/hapi').Plugin}
  */
+const backendUrl = config.get('backend.apiUrl')
+
 const contentSecurityPolicy = {
   plugin: Blankie,
   options: {
@@ -22,7 +25,7 @@ const contentSecurityPolicy = {
     frameSrc: ['self', 'data:'],
     objectSrc: ['none'],
     frameAncestors: ['none'],
-    formAction: ['self'],
+    formAction: backendUrl ? ['self', backendUrl] : ['self'],
     manifestSrc: ['self'],
     generateNonces: true
   }

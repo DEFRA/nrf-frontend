@@ -1,11 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
+import { config } from '../../../config/config.js'
 import {
   getQuoteDataFromCache,
   saveQuoteDataToCache
 } from '../session-cache.js'
 import { quoteSubmitController } from './controller-post.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+
+const backendUrl = config.get('backend').apiUrl
 
 vi.mock('../session-cache.js', () => ({
   getQuoteDataFromCache: vi.fn(),
@@ -19,7 +22,7 @@ describe('quoteSubmitController', () => {
     getQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
 
     server.use(
-      http.post('http://localhost:3001/quote', () =>
+      http.post(`${backendUrl}/quote`, () =>
         HttpResponse.json({ reference: 'REF-001002' })
       )
     )
@@ -49,7 +52,7 @@ describe('quoteSubmitController', () => {
     getQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
 
     server.use(
-      http.post('http://localhost:3001/quote', () =>
+      http.post(`${backendUrl}/quote`, () =>
         HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 })
       )
     )

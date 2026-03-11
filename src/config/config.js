@@ -298,8 +298,14 @@ export const config = convict({
       doc: 'Endpoint for the backend API service',
       format: String,
       nullable: true,
-      default: 'http://localhost:3001',
+      default: 'http://localhost:4001',
       env: 'NRF_BACKEND_API_URL'
+    },
+    optional: {
+      doc: 'When true, log backend connectivity failures as warnings instead of blocking startup',
+      format: Boolean,
+      default: false,
+      env: 'NRF_BACKEND_OPTIONAL'
     }
   },
   useSwagger: {
@@ -309,18 +315,18 @@ export const config = convict({
     env: 'USE_SWAGGER'
   },
   cdpUploader: {
-    url: {
-      doc: 'Endpoint for the CDP Uploader service. Auto-derived from ENVIRONMENT if not set.',
-      format: String,
-      default: null,
-      nullable: true,
-      env: 'CDP_UPLOADER_URL'
-    },
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,
       default: 'boundaries',
       env: 'CDP_UPLOADER_BUCKET'
+    },
+    redirectUrl: {
+      doc: 'URL the uploader redirects to after upload completes. When null, derived from request origin.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'CDP_UPLOADER_REDIRECT_URL'
     }
   }
 })

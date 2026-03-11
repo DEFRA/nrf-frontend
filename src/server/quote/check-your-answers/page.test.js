@@ -1,11 +1,13 @@
 import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
+import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+const backendUrl = config.get('backend').apiUrl
 
 const mswServer = setupMswServer()
 
@@ -35,7 +37,7 @@ describe('Check your answers page', () => {
       formData: { email: 'deidre@developers.org' }
     })
     mswServer.use(
-      http.post('http://localhost:3001/quote', () =>
+      http.post(`${backendUrl}/quote`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )

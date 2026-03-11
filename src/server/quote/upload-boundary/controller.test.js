@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler } from './controller.js'
-import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../session-cache.js'
 
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 vi.mock('../session-cache.js')
 
 describe('upload-boundary controller', () => {
@@ -19,10 +19,16 @@ describe('upload-boundary controller', () => {
   }
 
   const createMockRequest = () => ({
-    headers: {},
-    info: { host: 'localhost:3000' },
     yar: {
       set: vi.fn()
+    },
+    info: {
+      host: 'localhost:3000'
+    },
+    server: {
+      info: {
+        protocol: 'http'
+      }
     }
   })
 
@@ -35,13 +41,13 @@ describe('upload-boundary controller', () => {
     const request = createMockRequest()
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
 
     await handler(request, h)
 
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received',
+      redirect: 'http://localhost:3000/quote/upload-received',
       s3Bucket: 'boundaries',
       metadata: {}
     })
@@ -52,7 +58,7 @@ describe('upload-boundary controller', () => {
     expect(h.view).toHaveBeenCalledWith(
       'quote/upload-boundary/index',
       expect.objectContaining({
-        uploadUrl: '/upload-and-scan/test-upload-id'
+        uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
       })
     )
   })
@@ -86,7 +92,7 @@ describe('upload-boundary controller', () => {
     })
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
 
     await handler(request, h)
