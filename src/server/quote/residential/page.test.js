@@ -7,6 +7,7 @@ import { expectInputError } from '../../../test-utils/assertions.js'
 import {
   getQuoteDataFromCache,
   getValidationFlashFromCache,
+  saveQuoteDataToCache,
   saveValidationFlashToCache
 } from '../session-cache.js'
 
@@ -67,24 +68,32 @@ describe('Residential page', () => {
   })
 
   describe('valid form submission', () => {
-    it('should redirect to the next page when entering a valid value (6)', async () => {
+    it('should redirect to people-count when other-residential is in the cache', async () => {
+      vi.mocked(saveQuoteDataToCache).mockReturnValue({
+        developmentTypes: ['housing', 'other-residential'],
+        residentialBuildingCount: 6
+      })
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
         formData: { residentialBuildingCount: '6' }
       })
       expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe('/quote/next')
+      expect(response.headers.location).toBe('/quote/people-count')
     })
 
-    it('should trim spaces and accept value (12 with spaces)', async () => {
+    it('should redirect to email when other-residential is not in the cache', async () => {
+      vi.mocked(saveQuoteDataToCache).mockReturnValue({
+        developmentTypes: ['housing'],
+        residentialBuildingCount: 12
+      })
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
         formData: { residentialBuildingCount: ' 12 ' }
       })
       expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe('/quote/next')
+      expect(response.headers.location).toBe('/quote/email')
     })
   })
 

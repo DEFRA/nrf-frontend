@@ -6,18 +6,20 @@ import {
 
 export const quoteController = ({ routeId, getViewModel }) => ({
   handler(request, h) {
-    const baseViewModel = getViewModel()
     const formValidationErrors = getValidationFlashFromCache(request)
-    let formSubmitData
     let validationErrors
+    let quoteData = getQuoteDataFromCache(request)
     if (formValidationErrors) {
-      formSubmitData = formValidationErrors.formSubmitData
+      quoteData = { ...quoteData, ...formValidationErrors.formSubmitData }
       validationErrors = formValidationErrors.validationErrors
       clearValidationFlashFromCache(request)
-    } else {
-      formSubmitData = getQuoteDataFromCache(request)
     }
-    const viewModel = { ...baseViewModel, formSubmitData, validationErrors }
+    const baseViewModel = getViewModel(quoteData)
+    const viewModel = {
+      ...baseViewModel,
+      formSubmitData: quoteData,
+      validationErrors
+    }
     return h.view(`quote/${routeId}/index`, viewModel)
   }
 })

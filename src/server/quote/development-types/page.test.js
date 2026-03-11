@@ -7,6 +7,7 @@ import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import {
   getQuoteDataFromCache,
   getValidationFlashFromCache,
+  saveQuoteDataToCache,
   saveValidationFlashToCache
 } from '../session-cache.js'
 
@@ -132,17 +133,23 @@ describe('Development type page', () => {
     expectFieldsetError({ document, errorMessage })
   })
 
-  it('should redirect to the next placeholder page if Housing is not selected', async () => {
+  it('should redirect to the people count page if Housing is not selected', async () => {
+    vi.mocked(saveQuoteDataToCache).mockReturnValue({
+      developmentTypes: ['other-residential']
+    })
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: { developmentTypes: ['other-residential'] }
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/next')
+    expect(response.headers.location).toBe('/quote/people-count')
   })
 
-  it('should redirect to the next placeholder page if Housing is selected', async () => {
+  it('should redirect to the residential units page if Housing is selected', async () => {
+    vi.mocked(saveQuoteDataToCache).mockReturnValue({
+      developmentTypes: ['housing', 'other-residential']
+    })
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
