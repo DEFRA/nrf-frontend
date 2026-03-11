@@ -4,8 +4,6 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 
-vi.mock('../session-cache.js')
-
 describe('No EDP page accessibility checks', () => {
   const getServer = setupTestServer()
 
