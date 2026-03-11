@@ -47,8 +47,8 @@ describe('upload-received controller', () => {
     expect(getUploadStatus).toHaveBeenCalledWith('test-upload-id')
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
       pageTitle:
-        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'Boundary file upload status',
+        'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file uploaded successfully',
       uploadId: 'test-upload-id',
       status: 'ready',
       isProcessing: false,
@@ -167,9 +167,8 @@ describe('checkBoundaryHandler', () => {
     await checkBoundaryHandler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'Boundary file upload status',
+      pageTitle: 'Boundary error - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary error',
       uploadId: 'test-upload-id',
       status: 'ready',
       isProcessing: false,

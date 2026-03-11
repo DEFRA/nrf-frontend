@@ -24,9 +24,12 @@ export async function handler(request, h) {
   const isReady = uploadStatus === STATUS_READY
   const isProcessing =
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
+  const heading = isReady
+    ? 'Boundary file uploaded successfully'
+    : 'Boundary file upload status'
   const viewModel = {
-    pageTitle: getPageTitle('Boundary file upload status'),
-    pageHeading: 'Boundary file upload status',
+    pageTitle: getPageTitle(heading),
+    pageHeading: heading,
     uploadId,
     status: uploadStatus,
     isProcessing,
@@ -50,8 +53,8 @@ export async function checkBoundaryHandler(request, h) {
       `check-boundary failed - uploadId: ${id}, error: ${result.error}`
     )
     return h.view('quote/upload-received/index', {
-      pageTitle: getPageTitle('Boundary file upload status'),
-      pageHeading: 'Boundary file upload status',
+      pageTitle: getPageTitle('Boundary error'),
+      pageHeading: 'Boundary error',
       uploadId: id,
       status: 'ready',
       isProcessing: false,
