@@ -1,6 +1,7 @@
 import {
   getQuoteDataFromCache,
   saveQuoteDataToCache,
+  clearQuoteDataFromCache,
   saveValidationFlashToCache,
   getValidationFlashFromCache,
   clearValidationFlashFromCache
@@ -40,6 +41,14 @@ describe('Save and retrieve quote data from session cache', () => {
       }
       const quoteData = getQuoteDataFromCache(request)
       expect(quoteData).toEqual({ field1: 'value1' })
+    })
+  })
+
+  describe('Clear quote data from session cache', () => {
+    it('clears the cache', () => {
+      const request = { yar: { clear: vi.fn() } }
+      clearQuoteDataFromCache(request)
+      expect(request.yar.clear).toHaveBeenCalledWith('quote')
     })
   })
 })

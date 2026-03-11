@@ -9,6 +9,7 @@ import routesUploadReceived from './upload-received/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
 import routesPeopleCount from './people-count/routes.js'
+import routesDeleteQuote from './delete-quote/routes.js'
 
 /**
  * @openapi
@@ -42,7 +43,8 @@ export const quote = {
         ...routesUploadReceived,
         ...routesCheckYourAnswers,
         ...routesPeopleCount,
-        ...routesConfirmation
+        ...routesConfirmation,
+        ...routesDeleteQuote
       ])
     }
   }

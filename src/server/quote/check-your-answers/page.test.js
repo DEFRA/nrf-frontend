@@ -28,6 +28,10 @@ describe('Check your answers page', () => {
     expect(
       getByRole(document, 'button', { name: 'Submit' })
     ).toBeInTheDocument()
+    expect(getByRole(document, 'button', { name: 'Delete' })).toHaveAttribute(
+      'href',
+      '/quote/delete-quote'
+    )
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
