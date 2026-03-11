@@ -25,7 +25,7 @@ const contentSecurityPolicy = {
     frameSrc: ['self', 'data:'],
     objectSrc: ['none'],
     frameAncestors: ['none'],
-    formAction: ['self', backendUrl],
+    formAction: backendUrl ? ['self', backendUrl] : ['self'],
     manifestSrc: ['self'],
     generateNonces: true
   }

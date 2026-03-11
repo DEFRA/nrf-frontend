@@ -21,6 +21,14 @@ describe('upload-boundary controller', () => {
   const createMockRequest = () => ({
     yar: {
       set: vi.fn()
+    },
+    info: {
+      host: 'localhost:3000'
+    },
+    server: {
+      info: {
+        protocol: 'http'
+      }
     }
   })
 

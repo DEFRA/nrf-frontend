@@ -310,9 +310,10 @@ export const config = convict({
       env: 'CDP_UPLOADER_BUCKET'
     },
     redirectUrl: {
-      doc: 'URL the uploader redirects to after upload completes',
+      doc: 'URL the uploader redirects to after upload completes. When null, derived from request origin.',
       format: String,
-      default: 'http://localhost:3000/quote/upload-received',
+      nullable: true,
+      default: null,
       env: 'CDP_UPLOADER_REDIRECT_URL'
     }
   }
