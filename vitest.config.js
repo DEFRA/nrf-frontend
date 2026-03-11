@@ -4,9 +4,12 @@ export default defineConfig({
   test: {
     globals: true,
     setupFiles: ['.vite/setup-files.js'],
+    globalSetup: ['.vite/global-setup.js'],
     environment: 'node',
     mockReset: true,
-    testTimeout: 20000,
+    testTimeout: 10000,
+    maxWorkers: '50%',
+    minWorkers: 1,
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',

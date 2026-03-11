@@ -30,7 +30,7 @@ describe('Upload boundary page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '#'
+      '/quote/boundary-type'
     )
   })
 

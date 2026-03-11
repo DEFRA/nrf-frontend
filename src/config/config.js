@@ -123,7 +123,7 @@ export const config = convict({
       engine: {
         doc: 'backend cache is written to',
         format: ['redis', 'memory'],
-        default: isProduction ? 'redis' : 'memory',
+        default: isProduction || isTest ? 'redis' : 'memory',
         env: 'SESSION_CACHE_ENGINE'
       },
       name: {
@@ -167,6 +167,12 @@ export const config = convict({
       format: String,
       default: '127.0.0.1',
       env: 'REDIS_HOST'
+    },
+    port: {
+      doc: 'Redis cache port',
+      format: String,
+      default: isTest ? '6380' : '6379',
+      env: 'REDIS_PORT'
     },
     username: {
       doc: 'Redis cache username',

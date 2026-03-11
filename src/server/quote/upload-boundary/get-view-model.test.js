@@ -13,7 +13,7 @@ describe('upload-boundary getViewModel', () => {
       pageTitle:
         'Upload a red line boundary file - Nature Restoration Fund - Gov.uk',
       pageHeading: 'Upload a red line boundary file',
-      backLinkPath: '#'
+      backLinkPath: '/quote/boundary-type'
     })
   })
 })
