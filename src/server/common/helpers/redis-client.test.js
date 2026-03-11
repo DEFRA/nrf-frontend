@@ -31,7 +31,7 @@ describe('#buildRedisClient', () => {
         db: 0,
         host: '127.0.0.1',
         keyPrefix: 'nrf-frontend:',
-        port: 6379
+        port: config.get('redis.port')
       })
     })
   })
@@ -49,7 +49,7 @@ describe('#buildRedisClient', () => {
 
     test('Should instantiate a Redis Cluster client', () => {
       expect(Cluster).toHaveBeenCalledWith(
-        [{ host: '127.0.0.1', port: 6379 }],
+        [{ host: '127.0.0.1', port: config.get('redis.port') }],
         {
           dnsLookup: expect.any(Function),
           keyPrefix: 'nrf-frontend:',
