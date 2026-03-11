@@ -31,17 +31,6 @@ services:
         aliases:
           - localhost
 
-  caddy:
-    image: caddy:2-alpine
-    ports:
-      - '4000:4000'
-    volumes:
-      - ./compose/Caddyfile:/etc/caddy/Caddyfile:ro
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    networks:
-      - cdp-tenant
-
 
 ################################################################################
 
