@@ -72,4 +72,14 @@ describe('Boundary type page', () => {
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/next')
   })
+
+  it('should redirect to the upload boundary page if upload is selected', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' }
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/upload-boundary')
+  })
 })
