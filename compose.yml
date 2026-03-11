@@ -31,27 +31,6 @@ services:
         aliases:
           - localhost
 
-  mongodb:
-    image: mongo:6.0.13
-    networks:
-      - cdp-tenant
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongodb-data:/data
-    restart: always
-
-  caddy:
-    image: caddy:2-alpine
-    ports:
-      - '4000:4000'
-    volumes:
-      - ./compose/Caddyfile:/etc/caddy/Caddyfile:ro
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    networks:
-      - cdp-tenant
-
 
 ################################################################################
 
@@ -77,27 +56,6 @@ services:
 #      USE_SINGLE_INSTANCE_CACHE: true
 #    networks:
 #      - cdp-tenant
-
-  # your-backend:
-  #   image: defradigital/your-backend:${YOUR_BACKEND_VERSION:-latest}
-  #   ports:
-  #     - '3555:3555'
-  #   links:
-  #     - 'localstack:localstack'
-  #     - 'mongodb:mongodb'
-  #   depends_on:
-  #     localstack:
-  #       condition: service_healthy
-  #     mongodb:
-  #       condition: service_started
-  #   env_file:
-  #     - 'compose/aws.env'
-  #   environment:
-  #     PORT: 3555
-  #     NODE_ENV: development
-  #     LOCALSTACK_ENDPOINT: http://localstack:4566
-  #   networks:
-  #     - cdp-tenant
 
 ################################################################################
 
