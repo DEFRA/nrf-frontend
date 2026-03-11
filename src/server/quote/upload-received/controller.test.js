@@ -124,6 +124,7 @@ describe('upload-received controller', () => {
 
 describe('checkBoundaryHandler', () => {
   const createMockH = () => ({
+    view: vi.fn().mockReturnThis(),
     redirect: vi.fn().mockReturnThis()
   })
 
@@ -155,9 +156,9 @@ describe('checkBoundaryHandler', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/check-boundary-result')
   })
 
-  it('should redirect to upload-boundary on error', async () => {
+  it('should render error page when boundary check fails', async () => {
     vi.mocked(checkBoundary).mockResolvedValue({
-      error: 'Invalid geometry'
+      error: 'Unable to contact impact assessor service'
     })
 
     const h = createMockH()
@@ -165,10 +166,16 @@ describe('checkBoundaryHandler', () => {
 
     await checkBoundaryHandler(request, h)
 
-    expect(request.yar.set).toHaveBeenCalledWith(
-      'boundaryError',
-      'Invalid geometry'
-    )
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
+      pageTitle:
+        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file upload status',
+      uploadId: 'test-upload-id',
+      status: 'ready',
+      isProcessing: false,
+      isReady: true,
+      refreshInterval: null,
+      boundaryCheckError: 'Unable to contact impact assessor service'
+    })
   })
 })

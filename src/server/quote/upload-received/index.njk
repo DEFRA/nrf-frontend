@@ -24,7 +24,29 @@
         }) }}
         {% endif %}
 
-        {% if isReady %}
+        {% if boundaryCheckError %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: "The boundary check service is currently unavailable. Try again or upload a different file."
+            }]
+        }) }}
+
+        <p class="govuk-body">We were unable to check your boundary file.</p>
+
+        <form method="post" action="/quote/check-boundary/{{ uploadId }}">
+            {% include "partials/csrf-token.njk" %}
+            {{ govukButton({
+                text: "Try again",
+                preventDoubleClick: true
+            }) }}
+        </form>
+
+        <p class="govuk-body">
+            <a href="/quote/upload-boundary" class="govuk-link">Upload a different file</a>
+        </p>
+
+        {% elseif isReady %}
         <p class="govuk-body">Upload and virus scan completed.</p>
         <p class="govuk-body">Please click continue to check and view the boundary.</p>
         <form method="post" action="/quote/check-boundary/{{ uploadId }}">
