@@ -5,7 +5,7 @@ import { routePath as routePathDevelopmentTypes } from '../development-types/rou
 export const title =
   'What is the maximum number of people the development will serve?'
 
-export default function (quoteData) {
+export default function getViewModel(quoteData) {
   const backLinkPath = quoteData.developmentTypes?.includes('housing')
     ? routePathResidential
     : routePathDevelopmentTypes
