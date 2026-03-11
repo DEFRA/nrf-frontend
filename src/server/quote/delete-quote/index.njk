@@ -1,0 +1,28 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+        <p class="govuk-body">This will permanently delete your quote. You can create a new quote.</p>
+
+        <form method="post" novalidate>
+            {% include "partials/csrf-token.njk" %}
+            <input type="hidden" name="confirmDeleteQuote" value="Yes">
+            <div class="govuk-button-group">
+                {{ govukButton({
+                    text: "Yes"
+                }) }}
+                <a class="govuk-link govuk-button govuk-button--secondary" href="{{ backLinkPath }}">No</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -10,6 +10,8 @@ export const saveQuoteDataToCache = (request, quoteData) => {
 export const getQuoteDataFromCache = (request) =>
   request.yar.get(cacheKey) || {}
 
+export const clearQuoteDataFromCache = (request) => request.yar.clear(cacheKey)
+
 export const saveValidationFlashToCache = (
   request,
   { validationErrors, formSubmitData }
