@@ -12,9 +12,16 @@
       <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
         <form method="post" novalidate>
           {% include "partials/csrf-token.njk" %}
+          <div class="govuk-button-group">
             {{ govukButton({
-                text: "Submit"
+              text: "Submit"
             }) }}
+            {{ govukButton({
+              text: "Delete",
+              classes: "govuk-button--warning",
+              href: '/quote/delete-quote'
+            }) }}
+          </div>
 
         </form>
     </div>
