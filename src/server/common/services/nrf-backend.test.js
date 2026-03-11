@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getTraceId } from '@defra/hapi-tracing'
+import { config } from '../../../config/config.js'
 import { getRequestFromBackend, postRequestToBackend } from './nrf-backend.js'
+
+const backendUrl = config.get('backend').apiUrl
 
 vi.mock('@hapi/wreck')
 
@@ -30,13 +33,10 @@ describe('nrf-backend service', () => {
         endpointPath: '/quotes/123'
       })
 
-      expect(Wreck.get).toHaveBeenCalledWith(
-        'http://localhost:3001/quotes/123',
-        {
-          json: true,
-          headers: {}
-        }
-      )
+      expect(Wreck.get).toHaveBeenCalledWith(`${backendUrl}/quotes/123`, {
+        json: true,
+        headers: {}
+      })
       expect(result).toBe(mockResponse)
     })
 
@@ -46,13 +46,10 @@ describe('nrf-backend service', () => {
 
       await getRequestFromBackend({ endpointPath: '/quotes/123' })
 
-      expect(Wreck.get).toHaveBeenCalledWith(
-        'http://localhost:3001/quotes/123',
-        {
-          json: true,
-          headers: { 'x-cdp-request-id': 'trace-abc-123' }
-        }
-      )
+      expect(Wreck.get).toHaveBeenCalledWith(`${backendUrl}/quotes/123`, {
+        json: true,
+        headers: { 'x-cdp-request-id': 'trace-abc-123' }
+      })
     })
 
     it('should not include the tracing header when no trace ID is present', async () => {
@@ -89,7 +86,7 @@ describe('nrf-backend service', () => {
         payload: { foo: 'bar' }
       })
 
-      expect(Wreck.post).toHaveBeenCalledWith('http://localhost:3001/quotes', {
+      expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/quotes`, {
         payload: { foo: 'bar' },
         json: true,
         headers: {}
@@ -106,7 +103,7 @@ describe('nrf-backend service', () => {
         payload: { foo: 'bar' }
       })
 
-      expect(Wreck.post).toHaveBeenCalledWith('http://localhost:3001/quotes', {
+      expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/quotes`, {
         payload: { foo: 'bar' },
         json: true,
         headers: { 'x-cdp-request-id': 'trace-abc-123' }

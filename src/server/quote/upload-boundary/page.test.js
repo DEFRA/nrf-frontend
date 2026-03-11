@@ -2,10 +2,10 @@ import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { initiateUpload } from '../../common/services/cdp-uploader.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 
 vi.mock('../session-cache.js')
-vi.mock('../../common/services/cdp-uploader.js')
+vi.mock('../../common/services/uploader.js')
 
 describe('Upload boundary page', () => {
   const getServer = setupTestServer()
@@ -13,7 +13,7 @@ describe('Upload boundary page', () => {
   beforeEach(() => {
     vi.mocked(initiateUpload).mockResolvedValue({
       uploadId: 'test-upload-id',
-      uploadUrl: '/upload-and-scan/test-upload-id'
+      uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
     })
   })
 
@@ -34,13 +34,16 @@ describe('Upload boundary page', () => {
     )
   })
 
-  it('should render a form with action pointing to cdp-uploader', async () => {
+  it('should render a form with action pointing to upload endpoint', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
     const form = document.querySelector('form')
-    expect(form).toHaveAttribute('action', '/upload-and-scan/test-upload-id')
+    expect(form).toHaveAttribute(
+      'action',
+      'http://localhost:4001/upload-and-scan/test-upload-id'
+    )
     expect(form).toHaveAttribute('method', 'post')
     expect(form).toHaveAttribute('enctype', 'multipart/form-data')
   })

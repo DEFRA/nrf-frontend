@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
+import { config } from '../../../config/config.js'
 import { confirmationGetController } from './controller-get.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+
+const backendUrl = config.get('backend').apiUrl
 
 const server = setupMswServer()
 
@@ -17,9 +20,7 @@ describe('confirmationGetController', () => {
     const quote = { reference: 'NRF-123456', email: 'test@example.com' }
 
     server.use(
-      http.get('http://localhost:3001/quote/NRF-123456', () =>
-        HttpResponse.json(quote)
-      )
+      http.get(`${backendUrl}/quote/NRF-123456`, () => HttpResponse.json(quote))
     )
 
     const controller = confirmationGetController({ routeId, getViewModel })
@@ -35,7 +36,7 @@ describe('confirmationGetController', () => {
 
   it('should propagate errors thrown by the backend', async () => {
     server.use(
-      http.get('http://localhost:3001/quote/NRF-FAIL', () =>
+      http.get(`${backendUrl}/quote/NRF-FAIL`, () =>
         HttpResponse.json({ message: 'Not Found' }, { status: 404 })
       )
     )

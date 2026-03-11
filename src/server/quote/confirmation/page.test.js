@@ -1,9 +1,12 @@
 import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
+import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+
+const backendUrl = config.get('backend').apiUrl
 
 const mswServer = setupMswServer()
 
@@ -12,7 +15,7 @@ describe('Confirmation page', () => {
 
   it('should render the page heading and title', async () => {
     mswServer.use(
-      http.get('http://localhost:3001/quote/NRF-123456', () =>
+      http.get(`${backendUrl}/quote/NRF-123456`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )
@@ -30,7 +33,7 @@ describe('Confirmation page', () => {
 
   it('should show the reference number', async () => {
     mswServer.use(
-      http.get('http://localhost:3001/quote/NRF-123456', () =>
+      http.get(`${backendUrl}/quote/NRF-123456`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )

@@ -32,6 +32,10 @@ describe('#startServer', () => {
     })
 
     test('Should start up server as expected', async () => {
+      const wreckSpy = vi
+        .spyOn(Wreck, 'get')
+        .mockResolvedValue({ payload: { message: 'success' } })
+
       server = await startServerImport.startServer()
 
       expect(createServerSpy).toHaveBeenCalled()
@@ -44,6 +48,8 @@ describe('#startServer', () => {
 
       expect(result).toEqual({ message: 'success' })
       expect(statusCode).toBe(statusCodes.ok)
+
+      wreckSpy.mockRestore()
     })
   })
 
@@ -58,49 +64,72 @@ describe('#startServer', () => {
   })
 })
 
-describe('#checkCdpUploaderConnectivity', () => {
-  let checkCdpUploaderConnectivity
-  const mockLogger = { info: vi.fn(), error: vi.fn() }
+describe('#checkBackendConnectivity', () => {
+  let checkBackendConnectivity
+  const mockLogger = { info: vi.fn(), error: vi.fn(), warn: vi.fn() }
 
   beforeAll(async () => {
     const mod = await import('./start-server.js')
-    checkCdpUploaderConnectivity = mod.checkCdpUploaderConnectivity
+    checkBackendConnectivity = mod.checkBackendConnectivity
   })
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  test('Should log success when cdp-uploader is reachable', async () => {
+  test('Should log success when backend is reachable', async () => {
     const wreckSpy = vi
       .spyOn(Wreck, 'get')
       .mockResolvedValue({ payload: { message: 'success' } })
 
-    await checkCdpUploaderConnectivity(mockLogger)
+    await checkBackendConnectivity(mockLogger)
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('CDP Uploader configuration')
+      expect.stringContaining('Backend configuration')
     )
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('CDP Uploader is reachable')
+      expect.stringContaining('Backend is reachable')
     )
     expect(mockLogger.error).not.toHaveBeenCalled()
 
     wreckSpy.mockRestore()
   })
 
-  test('Should log error when cdp-uploader is unreachable', async () => {
+  test('Should warn and continue when ignore errors flag is set', async () => {
     const wreckSpy = vi
       .spyOn(Wreck, 'get')
       .mockRejectedValue(new Error('ECONNREFUSED'))
 
-    await checkCdpUploaderConnectivity(mockLogger)
+    const { config } = await import('../../../config/config.js')
+    config.set('backend.optional', true)
+
+    await checkBackendConnectivity(mockLogger)
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Backend connectivity check failed')
+    )
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('NRF_BACKEND_OPTIONAL')
+    )
+
+    config.set('backend.optional', false)
+    wreckSpy.mockRestore()
+  })
+
+  test('Should throw when backend is unreachable', async () => {
+    const wreckSpy = vi
+      .spyOn(Wreck, 'get')
+      .mockRejectedValue(new Error('ECONNREFUSED'))
+
+    await expect(checkBackendConnectivity(mockLogger)).rejects.toThrow(
+      'Backend is not reachable'
+    )
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('CDP Uploader configuration')
+      expect.stringContaining('Backend configuration')
     )
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('CDP Uploader connectivity check failed')
+      expect.stringContaining('Backend connectivity check failed')
     )
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('ECONNREFUSED')
