@@ -5,6 +5,22 @@ import { createLogger } from '../helpers/logging/logger.js'
 const logger = createLogger()
 
 /**
+ * Prepend the CDP uploader base URL for local development.
+ * In CDP cloud, the platform proxy handles routing so the path is used as-is.
+ * @param {string} path - Upload path from the backend
+ * @returns {string}
+ */
+function buildUploadUrl(path) {
+  const cdpUploaderUrl = config.get('cdpUploader.url')
+
+  if (!cdpUploaderUrl || path.startsWith('http')) {
+    return path
+  }
+
+  return `${cdpUploaderUrl}${path}`
+}
+
+/**
  * Initiate an upload session via the backend
  * @param {object} options - Upload options
  * @param {string} options.redirect - URL to redirect to after upload
@@ -35,13 +51,9 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
       json: true
     })
 
-    const uploadUrl = payload.uploadUrl.startsWith('http')
-      ? payload.uploadUrl
-      : `${backendUrl}${payload.uploadUrl}`
-
     return {
       uploadId: payload.uploadId,
-      uploadUrl
+      uploadUrl: buildUploadUrl(payload.uploadUrl)
     }
   } catch (error) {
     const statusCode = error?.output?.statusCode
