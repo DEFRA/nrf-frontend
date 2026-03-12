@@ -1,6 +1,6 @@
 import { handler, postHandler } from './controller.js'
 import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validation.js'
-import { saveValidationFlashToCache } from '../session-cache.js'
+import { saveValidationFlashToCache } from '../helpers/form-validation-session/index.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import formValidation from './form-validation.js'
 

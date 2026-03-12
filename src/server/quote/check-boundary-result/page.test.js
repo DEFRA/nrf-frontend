@@ -5,6 +5,11 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { checkBoundary } from '../../common/services/boundary.js'
+import { checkBoundaryPath } from '../upload-received/routes.js'
+
+vi.mock('../../common/services/boundary.js')
 
 const mockGeojson = {
   type: 'FeatureCollection',
@@ -27,15 +32,16 @@ const mockGeojson = {
   ]
 }
 
-/**
- * Sets up the yar session with boundaryGeojson and returns the cookie.
- */
 async function setupSession(server) {
-  const setupResponse = await server.inject({
-    method: 'GET',
-    url: '/__test-setup-boundary-session'
+  const sessionCookie = await withValidQuoteSession(server)
+  vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
+  const { cookie } = await submitForm({
+    requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id'),
+    server,
+    formData: {},
+    cookie: sessionCookie
   })
-  return setupResponse.headers['set-cookie']?.[0]?.split(';')[0]
+  return cookie
 }
 
 async function loadPageWithSession(server) {
@@ -51,20 +57,6 @@ async function loadPageWithSession(server) {
 
 describe('Check boundary result page', () => {
   const getServer = setupTestServer()
-
-  beforeAll(() => {
-    const server = getServer()
-    if (server) {
-      server.route({
-        method: 'GET',
-        path: '/__test-setup-boundary-session',
-        handler(request, h) {
-          request.yar.set('boundaryGeojson', mockGeojson)
-          return h.response('ok')
-        }
-      })
-    }
-  })
 
   it('should render all page elements', async () => {
     const { document } = await loadPageWithSession(getServer())
@@ -95,9 +87,11 @@ describe('Check boundary result page', () => {
   })
 
   it('should redirect to upload-boundary when no geojson in session', async () => {
+    const sessionCookie = await withValidQuoteSession(getServer())
     const response = await getServer().inject({
       method: 'GET',
-      url: routePath
+      url: routePath,
+      headers: { cookie: sessionCookie }
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/upload-boundary')

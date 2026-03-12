@@ -4,15 +4,22 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
 describe('Residential page', () => {
   const getServer = setupTestServer()
   const inputLabel = 'How many residential units in this development?'
+  let sessionCookie
+
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render all page elements', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       inputLabel
@@ -30,31 +37,33 @@ describe('Residential page', () => {
   })
 
   it("should remember the user's previously entered value", async () => {
-    const { cookie } = await submitForm({
+    const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { residentialBuildingCount: '25' }
+      formData: { residentialBuildingCount: '25' },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
-      cookie
+      cookie: updatedCookie
     })
     expect(getByLabelText(document, inputLabel)).toHaveValue('25')
   })
 
   it('should show a validation error, after an invalid form submission', async () => {
-    const { response, cookie } = await submitForm({
+    const { response, cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: {}
+      formData: {},
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(routePath)
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
-      cookie
+      cookie: updatedCookie
     })
     expectInputError({
       document,
@@ -67,7 +76,8 @@ describe('Residential page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { residentialBuildingCount: '6' }
+      formData: { residentialBuildingCount: '6' },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/email')

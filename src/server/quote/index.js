@@ -11,6 +11,7 @@ import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
 import routesPeopleCount from './people-count/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
+import { checkForValidQuoteSession } from './helpers/is-quote-session-in-progress/index.js'
 
 /**
  * @openapi
@@ -33,6 +34,8 @@ export const quote = {
   plugin: {
     name: 'quote',
     register(server) {
+      server.ext('onPreHandler', checkForValidQuoteSession)
+
       server.route([
         ...routesStart,
         ...routesBoundaryType,

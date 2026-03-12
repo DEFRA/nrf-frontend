@@ -2,14 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler, postHandler } from './controller.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 
-vi.mock('../session-cache.js', () => ({
-  saveQuoteDataToCache: vi.fn(),
+vi.mock('../helpers/get-quote-session/index.js', () => ({
+  saveQuoteDataToCache: vi.fn()
+}))
+
+vi.mock('../helpers/form-validation-session/index.js', () => ({
   getValidationFlashFromCache: vi.fn(),
   clearValidationFlashFromCache: vi.fn()
 }))
 
-const { saveQuoteDataToCache, getValidationFlashFromCache } =
-  await import('../session-cache.js')
+const { saveQuoteDataToCache } =
+  await import('../helpers/get-quote-session/index.js')
+const { getValidationFlashFromCache } =
+  await import('../helpers/form-validation-session/index.js')
 
 describe('check-boundary-result controller', () => {
   const mockGeojson = {

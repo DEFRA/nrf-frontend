@@ -1,8 +1,8 @@
 import {
-  getQuoteDataFromCache,
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from './session-cache.js'
+} from './helpers/form-validation-session/index.js'
+import { getQuoteDataFromCache } from './helpers/get-quote-session/index.js'
 
 export const quoteController = ({ routeId, getViewModel }) => ({
   handler(request, h) {

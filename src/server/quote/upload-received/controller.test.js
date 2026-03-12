@@ -24,10 +24,6 @@ describe('upload-received controller', () => {
     }
   })
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should redirect to upload-boundary when no uploadId in session', async () => {
     const h = createMockH()
     const request = createMockRequest(null)

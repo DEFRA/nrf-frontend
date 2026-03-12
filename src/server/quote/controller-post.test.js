@@ -2,12 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { quotePostController } from './controller-post.js'
 import getNextPage from './residential/get-next-page.js'
 
-import {
-  saveQuoteDataToCache,
-  saveValidationFlashToCache
-} from './session-cache.js'
+import { saveValidationFlashToCache } from './helpers/form-validation-session/index.js'
+import { saveQuoteDataToCache } from './helpers/get-quote-session/index.js'
 
-vi.mock('./session-cache.js', async (importOriginal) => {
+vi.mock('./helpers/get-quote-session/index.js', async (importOriginal) => {
   const actual = await importOriginal()
   return {
     ...actual,
@@ -15,6 +13,17 @@ vi.mock('./session-cache.js', async (importOriginal) => {
     saveValidationFlashToCache: vi.fn()
   }
 })
+
+vi.mock(
+  './helpers/form-validation-session/index.js',
+  async (importOriginal) => {
+    const actual = await importOriginal()
+    return {
+      ...actual,
+      saveValidationFlashToCache: vi.fn()
+    }
+  }
+)
 
 describe('quotePostController', () => {
   const buildRequest = (payload = {}) => ({

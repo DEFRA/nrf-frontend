@@ -1,9 +1,9 @@
 import { createLogger } from '../../common/helpers/logging/logger.js'
+import { saveQuoteDataToCache } from '../helpers/get-quote-session/index.js'
 import {
-  saveQuoteDataToCache,
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../session-cache.js'
+} from '../helpers/form-validation-session/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import getViewModel from './get-view-model.js'
 
