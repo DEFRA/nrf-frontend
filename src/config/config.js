@@ -321,12 +321,11 @@ export const config = convict({
       default: 'boundaries',
       env: 'CDP_UPLOADER_BUCKET'
     },
-    redirectUrl: {
-      doc: 'URL the uploader redirects to after upload completes. When null, derived from request origin.',
+    s3Path: {
+      doc: 'Path prefix within the S3 bucket for uploads',
       format: String,
-      nullable: true,
-      default: null,
-      env: 'CDP_UPLOADER_REDIRECT_URL'
+      default: 'boundaries/',
+      env: 'CDP_UPLOADER_S3_PATH'
     }
   }
 })
