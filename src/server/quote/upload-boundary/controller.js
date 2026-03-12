@@ -4,7 +4,7 @@ import getViewModel from './get-view-model.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../session-cache.js'
+} from '../helpers/form-validation-session/index.js'
 
 const routeId = 'upload-boundary'
 

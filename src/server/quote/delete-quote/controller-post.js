@@ -1,7 +1,8 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
 import formValidation from './form-validation.js'
 import { routePath as routePathStart } from '../start/routes.js'
-import { clearQuoteDataFromCache } from '../session-cache.js'
+
+import { clearQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
 
 export const deleteSubmitController = {
   options: {

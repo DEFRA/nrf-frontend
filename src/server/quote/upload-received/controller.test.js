@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { handler } from './controller.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 
@@ -18,10 +18,6 @@ describe('upload-received controller', () => {
     yar: {
       get: vi.fn().mockReturnValue(uploadId)
     }
-  })
-
-  beforeEach(() => {
-    vi.clearAllMocks()
   })
 
   it('should redirect to upload-boundary when no uploadId in session', async () => {

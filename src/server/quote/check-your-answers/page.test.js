@@ -8,16 +8,23 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 const backendUrl = config.get('backend').apiUrl
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
 const mswServer = setupMswServer()
 
 describe('Check your answers page', () => {
   const getServer = setupTestServer()
+  let sessionCookie
+
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render a page heading and submit button', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     expect(document.title).toBe(
       'Check your answers - Nature Restoration Fund - Gov.uk'
@@ -35,10 +42,11 @@ describe('Check your answers page', () => {
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
-    const { cookie } = await submitForm({
+    const { cookie: updatedCookie } = await submitForm({
       requestUrl: emailRoutePath,
       server: getServer(),
-      formData: { email: 'deidre@developers.org' }
+      formData: { email: 'deidre@developers.org' },
+      cookie: sessionCookie
     })
     mswServer.use(
       http.post(`${backendUrl}/quote`, () =>
@@ -49,7 +57,7 @@ describe('Check your answers page', () => {
       requestUrl: routePath,
       server: getServer(),
       formData: {},
-      cookie
+      cookie: updatedCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(

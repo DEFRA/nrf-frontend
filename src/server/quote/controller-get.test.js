@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { quoteController } from './controller-get.js'
 import {
-  getQuoteDataFromCache,
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from './session-cache.js'
+} from './helpers/form-validation-session/index.js'
+import { getQuoteDataFromCache } from './helpers/get-quote-session/index.js'
 
-vi.mock('./session-cache.js')
+vi.mock('./helpers/get-quote-session/index.js')
+vi.mock('./helpers/form-validation-session/index.js')
 
 describe('quoteController', () => {
   const routeId = 'start'
