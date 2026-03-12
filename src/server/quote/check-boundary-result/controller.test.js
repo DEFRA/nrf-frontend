@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler, postHandler } from './controller.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 
 vi.mock('../session-cache.js', () => ({
   saveQuoteDataToCache: vi.fn(),
@@ -45,7 +46,7 @@ describe('check-boundary-result controller', () => {
 
       handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+      expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
     it('should render the view with boundary data', () => {
@@ -102,7 +103,7 @@ describe('check-boundary-result controller', () => {
       postHandler(request, h)
 
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-      expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+      expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
     it('should save to quote data and redirect when user confirms', () => {
@@ -126,7 +127,7 @@ describe('check-boundary-result controller', () => {
 
       postHandler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+      expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
   })
 })

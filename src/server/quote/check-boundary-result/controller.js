@@ -4,6 +4,7 @@ import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../session-cache.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import getViewModel from './get-view-model.js'
 
 const logger = createLogger()
@@ -13,7 +14,7 @@ export function handler(request, h) {
 
   if (!boundaryGeojson) {
     logger.info('check-boundary-result - no boundary data in session')
-    return h.redirect('/quote/upload-boundary')
+    return h.redirect(uploadBoundaryPath)
   }
 
   const flash = getValidationFlashFromCache(request)
@@ -37,12 +38,12 @@ export function postHandler(request, h) {
 
   if (boundaryCorrect === 'no') {
     request.yar.clear('boundaryGeojson')
-    return h.redirect('/quote/upload-boundary')
+    return h.redirect(uploadBoundaryPath)
   }
 
   const boundaryGeojson = request.yar.get('boundaryGeojson')
   if (!boundaryGeojson) {
-    return h.redirect('/quote/upload-boundary')
+    return h.redirect(uploadBoundaryPath)
   }
 
   saveQuoteDataToCache(request, { boundaryGeojson })
