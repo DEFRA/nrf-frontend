@@ -2,7 +2,7 @@ import joi from 'joi'
 
 const errorMessage = 'Select if the boundary is correct'
 
-export default function () {
+export default function getFormSchema() {
   return joi.object({
     boundaryCorrect: joi.string().valid('yes', 'no').required().messages({
       'any.required': errorMessage,

@@ -2,7 +2,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 
 export const title = 'Check your boundary'
 
-export default function (boundaryGeojson) {
+export default function getViewModel(boundaryGeojson) {
   const featureCount = boundaryGeojson?.features?.length ?? 0
 
   return {
