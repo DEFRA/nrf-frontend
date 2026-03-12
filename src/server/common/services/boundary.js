@@ -1,5 +1,6 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
+import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -18,7 +19,7 @@ export async function checkBoundary(uploadId) {
   try {
     const { res, payload } = await Wreck.post(url, { json: true })
 
-    if (res.statusCode >= 400) {
+    if (res.statusCode >= statusCodes.badRequest) {
       const error =
         payload?.error ?? `Boundary check failed (${res.statusCode})`
       logger.error(
