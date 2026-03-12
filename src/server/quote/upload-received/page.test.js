@@ -95,6 +95,12 @@ describe('Upload received page', () => {
     })
 
     const document = await loadPageWithSession({ server: getServer() })
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      'Boundary file uploaded successfully'
+    )
+    expect(document.title).toBe(
+      'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk'
+    )
     expect(
       getByText(document, 'Upload and virus scan completed.')
     ).toBeInTheDocument()

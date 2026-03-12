@@ -6,7 +6,7 @@ import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
-vi.mock('../session-cache.js')
+vi.mock('../helpers/form-validation-session/index.js')
 vi.mock('../../common/services/uploader.js')
 
 describe('Upload received page accessibility checks', () => {

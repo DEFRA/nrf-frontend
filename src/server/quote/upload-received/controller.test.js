@@ -1,8 +1,10 @@
-import { describe, it, expect, vi } from 'vitest'
-import { handler } from './controller.js'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handler, checkBoundaryHandler } from './controller.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
+import { checkBoundary } from '../../common/services/boundary.js'
 
 vi.mock('../../common/services/uploader.js')
+vi.mock('../../common/services/boundary.js')
 
 describe('upload-received controller', () => {
   const createMockH = () => {
@@ -16,7 +18,9 @@ describe('upload-received controller', () => {
 
   const createMockRequest = (uploadId = null) => ({
     yar: {
-      get: vi.fn().mockReturnValue(uploadId)
+      get: vi.fn().mockReturnValue(uploadId),
+      set: vi.fn(),
+      clear: vi.fn()
     }
   })
 
@@ -39,8 +43,8 @@ describe('upload-received controller', () => {
     expect(getUploadStatus).toHaveBeenCalledWith('test-upload-id')
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
       pageTitle:
-        'Boundary file upload status - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'Boundary file upload status',
+        'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary file uploaded successfully',
       uploadId: 'test-upload-id',
       status: 'ready',
       isProcessing: false,
@@ -110,6 +114,63 @@ describe('upload-received controller', () => {
       isReady: false,
       refreshInterval: null,
       errorMessage: 'Upload failed'
+    })
+  })
+})
+
+describe('checkBoundaryHandler', () => {
+  const createMockH = () => ({
+    view: vi.fn().mockReturnThis(),
+    redirect: vi.fn().mockReturnThis()
+  })
+
+  const createMockRequest = () => ({
+    params: { id: 'test-upload-id' },
+    yar: {
+      get: vi.fn(),
+      set: vi.fn(),
+      clear: vi.fn()
+    }
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should store geojson and redirect on success', async () => {
+    const mockGeojson = { type: 'FeatureCollection', features: [] }
+    vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
+    expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/check-boundary-result')
+  })
+
+  it('should render error page when boundary check fails', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Unable to contact impact assessor service'
+    })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
+      pageTitle: 'Boundary error - Nature Restoration Fund - Gov.uk',
+      pageHeading: 'Boundary error',
+      uploadId: 'test-upload-id',
+      status: 'ready',
+      isProcessing: false,
+      isReady: true,
+      refreshInterval: null,
+      boundaryCheckError: 'Unable to contact impact assessor service'
     })
   })
 })
