@@ -1,7 +1,6 @@
-import Wreck from '@hapi/wreck'
-import { config } from '../../../config/config.js'
 import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../helpers/logging/logger.js'
+import { postRequestToBackend } from './nrf-backend.js'
 
 const logger = createLogger()
 
@@ -11,13 +10,12 @@ const logger = createLogger()
  * @returns {Promise<{geojson?: object, error?: string}>}
  */
 export async function checkBoundary(uploadId) {
-  const backendUrl = config.get('backend.apiUrl')
-  const url = `${backendUrl}/boundary/check/${uploadId}`
+  const endpointPath = `/boundary/check/${uploadId}`
 
-  logger.info(`Checking boundary - url: ${url}, uploadId: ${uploadId}`)
+  logger.info(`Checking boundary - uploadId: ${uploadId}`)
 
   try {
-    const { res, payload } = await Wreck.post(url, { json: true })
+    const { res, payload } = await postRequestToBackend({ endpointPath })
 
     if (res.statusCode >= statusCodes.badRequest) {
       const error =
@@ -33,7 +31,7 @@ export async function checkBoundary(uploadId) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
-      `Error checking boundary - url: ${url}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
+      `Error checking boundary - uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return { error: 'Unable to check boundary' }
   }
