@@ -49,7 +49,7 @@ describe('Check your answers page', () => {
       cookie: sessionCookie
     })
     mswServer.use(
-      http.post(`${backendUrl}/quote`, () =>
+      http.post(`${backendUrl}/quotes`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )
