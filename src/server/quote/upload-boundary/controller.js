@@ -17,13 +17,10 @@ export async function handler(request, h) {
     clearValidationFlashFromCache(request)
   }
 
-  const redirectUrl =
-    config.get('cdpUploader.redirectUrl') ??
-    `${request.server.info.protocol}://${request.info.host}/quote/upload-received`
-
   const uploadSession = await initiateUpload({
-    redirect: redirectUrl,
+    redirect: '/quote/upload-received',
     s3Bucket: config.get('cdpUploader.bucket'),
+    s3Path: config.get('cdpUploader.s3Path'),
     metadata: {}
   })
 
