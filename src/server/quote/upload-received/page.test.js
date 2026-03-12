@@ -3,9 +3,10 @@ import { getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
-import { getQuoteDataFromCache } from '../session-cache.js'
 
-vi.mock('../session-cache.js')
+import { getQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
+
+vi.mock('../helpers/get-quote-session/index.js')
 vi.mock('../../common/services/uploader.js')
 
 /**

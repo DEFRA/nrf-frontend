@@ -4,10 +4,10 @@ import { initiateUpload } from '../../common/services/uploader.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../session-cache.js'
+} from '../helpers/form-validation-session/index.js'
 
 vi.mock('../../common/services/uploader.js')
-vi.mock('../session-cache.js')
+vi.mock('../helpers/form-validation-session/index.js')
 
 describe('upload-boundary controller', () => {
   const createMockH = () => {

@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { checkForValidQuoteSession } from './index.js'
-import * as sessionCache from '../../../quote/session-cache.js'
-import { routePath as boundaryTypePath } from '../../../quote/boundary-type/routes.js'
-import { routePath as confirmationPath } from '../../../quote/confirmation/routes.js'
-import { routePath as startPath } from '../../../quote/start/routes.js'
+import { routePath as boundaryTypePath } from '../../boundary-type/routes.js'
+import { routePath as confirmationPath } from '../../confirmation/routes.js'
+import { routePath as startPath } from '../../start/routes.js'
+import { getQuoteDataFromCache } from '../get-quote-session/index.js'
 
-vi.mock('../../../quote/session-cache.js')
+vi.mock('../get-quote-session/index.js')
 
 const makeRequest = ({ path, method = 'get' } = {}) => ({ path, method })
 
@@ -20,7 +20,7 @@ const makeH = () => {
 
 describe('checkForValidQuoteSession', () => {
   it('continues when boundaryEntryType is present', () => {
-    vi.mocked(sessionCache.getQuoteDataFromCache).mockReturnValue({
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
       boundaryEntryType: 'draw'
     })
     const request = makeRequest({ path: '/quote/residential' })
@@ -33,7 +33,7 @@ describe('checkForValidQuoteSession', () => {
   })
 
   it('redirects to start when boundaryEntryType is absent', () => {
-    vi.mocked(sessionCache.getQuoteDataFromCache).mockReturnValue({})
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({})
     const request = makeRequest({ path: '/quote/residential' })
     const h = makeH()
 
@@ -49,7 +49,7 @@ describe('checkForValidQuoteSession', () => {
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(sessionCache.getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 
   it('continues without session check for boundary-type page', () => {
@@ -59,7 +59,7 @@ describe('checkForValidQuoteSession', () => {
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(sessionCache.getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 
   it('continues without session check for confirmation page', () => {
@@ -69,7 +69,7 @@ describe('checkForValidQuoteSession', () => {
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(sessionCache.getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 
   it('continues without session check for non-GET requests', () => {
@@ -79,6 +79,6 @@ describe('checkForValidQuoteSession', () => {
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(sessionCache.getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 })

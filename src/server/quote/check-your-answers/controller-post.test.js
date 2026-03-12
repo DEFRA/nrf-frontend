@@ -1,16 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
+import { quoteSubmitController } from './controller-post.js'
+import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import {
   clearQuoteDataFromCache,
   getQuoteDataFromCache
-} from '../session-cache.js'
-import { quoteSubmitController } from './controller-post.js'
-import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+} from '../helpers/get-quote-session/index.js'
 
 const backendUrl = config.get('backend').apiUrl
 
-vi.mock('../session-cache.js', () => ({
+vi.mock('../helpers/get-quote-session/index.js', () => ({
   getQuoteDataFromCache: vi.fn(),
   clearQuoteDataFromCache: vi.fn()
 }))

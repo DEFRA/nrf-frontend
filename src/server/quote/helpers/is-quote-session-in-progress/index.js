@@ -1,7 +1,7 @@
-import { getQuoteDataFromCache } from '../../../quote/session-cache.js'
-import { routePath as boundaryTypePath } from '../../../quote/boundary-type/routes.js'
-import { routePath as confirmationPath } from '../../../quote/confirmation/routes.js'
-import { routePath as startPath } from '../../../quote/start/routes.js'
+import { routePath as boundaryTypePath } from '../../boundary-type/routes.js'
+import { routePath as confirmationPath } from '../../confirmation/routes.js'
+import { routePath as startPath } from '../../start/routes.js'
+import { getQuoteDataFromCache } from '../get-quote-session/index.js'
 
 const exemptPaths = [boundaryTypePath, confirmationPath]
 

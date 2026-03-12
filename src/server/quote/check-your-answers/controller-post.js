@@ -1,10 +1,10 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { postRequestToBackend } from '../../common/services/nrf-backend.js'
+import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import {
   clearQuoteDataFromCache,
   getQuoteDataFromCache
-} from '../session-cache.js'
-import { postRequestToBackend } from '../../common/services/nrf-backend.js'
-import { routePath as routePathConfirmation } from '../confirmation/routes.js'
+} from '../helpers/get-quote-session/index.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {

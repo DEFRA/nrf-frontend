@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { clearQuoteDataFromCache } from '../session-cache.js'
 import { deleteSubmitController } from './controller-post.js'
+import { clearQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
 
-vi.mock('../session-cache.js', () => ({
+vi.mock('../helpers/get-quote-session/index.js', () => ({
   clearQuoteDataFromCache: vi.fn()
 }))
 
