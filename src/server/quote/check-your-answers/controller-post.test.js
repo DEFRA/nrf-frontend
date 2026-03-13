@@ -5,26 +5,34 @@ import { quoteSubmitController } from './controller-post.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import {
   clearQuoteDataFromCache,
-  getQuoteDataFromCache
+  getCompleteQuoteDataFromCache
 } from '../helpers/get-quote-session/index.js'
 
 const backendUrl = config.get('backend').apiUrl
 
 vi.mock('../helpers/get-quote-session/index.js', () => ({
-  getQuoteDataFromCache: vi.fn(),
+  getCompleteQuoteDataFromCache: vi.fn(),
   clearQuoteDataFromCache: vi.fn()
 }))
 
 const server = setupMswServer()
 
 describe('quoteSubmitController', () => {
-  it('should post the email address to the backend and redirect with the reference', async () => {
-    getQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
+  it('should post the complete quote data to the backend and redirect with the reference', async () => {
+    const quoteData = {
+      boundaryEntryType: 'draw',
+      developmentTypes: ['housing'],
+      residentialBuildingCount: 10,
+      email: 'test@example.com'
+    }
+    getCompleteQuoteDataFromCache.mockReturnValue(quoteData)
 
+    let capturedBody
     server.use(
-      http.post(`${backendUrl}/quote`, () =>
-        HttpResponse.json({ reference: 'REF-001002' })
-      )
+      http.post(`${backendUrl}/quotes`, async ({ request: req }) => {
+        capturedBody = await req.json()
+        return HttpResponse.json({ reference: 'REF-001002' })
+      })
     )
 
     const codeResponse = Symbol('codeResponse')
@@ -37,7 +45,8 @@ describe('quoteSubmitController', () => {
 
     const result = await quoteSubmitController.handler(request, h)
 
-    expect(getQuoteDataFromCache).toHaveBeenCalledWith(request)
+    expect(getCompleteQuoteDataFromCache).toHaveBeenCalledWith(request)
+    expect(capturedBody).toEqual(quoteData)
     expect(clearQuoteDataFromCache).toHaveBeenCalledWith(request)
     expect(h.redirect).toHaveBeenCalledWith(
       '/quote/confirmation?reference=REF-001002'
@@ -47,10 +56,10 @@ describe('quoteSubmitController', () => {
   })
 
   it('should propagate errors thrown by the backend', async () => {
-    getQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
+    getCompleteQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
 
     server.use(
-      http.post(`${backendUrl}/quote`, () =>
+      http.post(`${backendUrl}/quotes`, () =>
         HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 })
       )
     )

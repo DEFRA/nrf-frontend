@@ -6,7 +6,7 @@ export const confirmationGetController = ({ routeId, getViewModel }) => ({
     const { reference } = request.query
 
     const { payload: quote } = await getRequestFromBackend({
-      endpointPath: `/quote/${reference}`
+      endpointPath: `/quotes/${reference}`
     })
 
     const viewModel = { ...baseViewModel, reference, quote }

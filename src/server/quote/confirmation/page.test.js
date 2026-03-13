@@ -15,7 +15,7 @@ describe('Confirmation page', () => {
 
   it('should render the page heading and title', async () => {
     mswServer.use(
-      http.get(`${backendUrl}/quote/NRF-123456`, () =>
+      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )
@@ -33,7 +33,7 @@ describe('Confirmation page', () => {
 
   it('should show the reference number', async () => {
     mswServer.use(
-      http.get(`${backendUrl}/quote/NRF-123456`, () =>
+      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
         HttpResponse.json({ reference: 'NRF-123456' })
       )
     )
