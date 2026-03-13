@@ -20,7 +20,9 @@ describe('confirmationGetController', () => {
     const quote = { reference: 'NRF-123456', email: 'test@example.com' }
 
     server.use(
-      http.get(`${backendUrl}/quote/NRF-123456`, () => HttpResponse.json(quote))
+      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
+        HttpResponse.json(quote)
+      )
     )
 
     const controller = confirmationGetController({ routeId, getViewModel })
@@ -36,7 +38,7 @@ describe('confirmationGetController', () => {
 
   it('should propagate errors thrown by the backend', async () => {
     server.use(
-      http.get(`${backendUrl}/quote/NRF-FAIL`, () =>
+      http.get(`${backendUrl}/quotes/NRF-FAIL`, () =>
         HttpResponse.json({ message: 'Not Found' }, { status: 404 })
       )
     )

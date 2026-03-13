@@ -3,15 +3,15 @@ import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import {
   clearQuoteDataFromCache,
-  getQuoteDataFromCache
+  getCompleteQuoteDataFromCache
 } from '../helpers/get-quote-session/index.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {
-    const quoteData = getQuoteDataFromCache(request)
+    const quoteData = getCompleteQuoteDataFromCache(request)
     const response = await postRequestToBackend({
-      endpointPath: '/quote',
-      payload: { emailAddress: quoteData.email }
+      endpointPath: '/quotes',
+      payload: quoteData
     })
     clearQuoteDataFromCache(request)
     const nrfReference = response.payload.reference
