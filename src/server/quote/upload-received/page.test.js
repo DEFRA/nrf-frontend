@@ -1,13 +1,15 @@
 import { JSDOM } from 'jsdom'
 import { getByRole, getByText } from '@testing-library/dom'
-import { routePath } from './routes.js'
+import { routePath, checkBoundaryPath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
+import { checkBoundary } from '../../common/services/boundary.js'
 
 import { getQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
 
 vi.mock('../helpers/get-quote-session/index.js')
 vi.mock('../../common/services/uploader.js')
+vi.mock('../../common/services/boundary.js')
 
 /**
  * Loads the upload-received page with a pendingUploadId in the session.
@@ -124,5 +126,23 @@ describe('Upload received page', () => {
     expect(
       getByRole(document, 'button', { name: 'Continue' })
     ).toBeInTheDocument()
+  })
+
+  it('should display boundary check error message in error summary', async () => {
+    const errorMessage = 'Something went wrong with the boundary check'
+
+    vi.mocked(checkBoundary).mockResolvedValue({ error: errorMessage })
+
+    const server = getServer()
+    const response = await server.inject({
+      method: 'POST',
+      url: checkBoundaryPath.replace('{id}', 'test-upload-id')
+    })
+
+    const { window } = new JSDOM(response.result)
+    const document = window.document
+
+    expect(getByText(document, 'There is a problem')).toBeInTheDocument()
+    expect(getByText(document, errorMessage)).toBeInTheDocument()
   })
 })
