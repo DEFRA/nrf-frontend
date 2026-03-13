@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom'
 import { getByRole, getByText } from '@testing-library/dom'
 import { routePath, checkBoundaryPath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 
@@ -133,14 +134,10 @@ describe('Upload received page', () => {
 
     vi.mocked(checkBoundary).mockResolvedValue({ error: errorMessage })
 
-    const server = getServer()
-    const response = await server.inject({
-      method: 'POST',
-      url: checkBoundaryPath.replace('{id}', 'test-upload-id')
+    const { document } = await submitForm({
+      server: getServer(),
+      requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id')
     })
-
-    const { window } = new JSDOM(response.result)
-    const document = window.document
 
     expect(getByText(document, 'There is a problem')).toBeInTheDocument()
     expect(getByText(document, errorMessage)).toBeInTheDocument()
