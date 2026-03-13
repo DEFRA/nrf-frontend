@@ -12,24 +12,28 @@ import { checkBoundaryPath } from '../upload-received/routes.js'
 vi.mock('../../common/services/boundary.js')
 
 const mockGeojson = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [0, 0],
-            [1, 0],
-            [1, 1],
-            [0, 0]
+  geometry: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0, 0],
+              [1, 0],
+              [1, 1],
+              [0, 0]
+            ]
           ]
-        ]
-      },
-      properties: {}
-    }
-  ]
+        },
+        properties: {}
+      }
+    ]
+  },
+  intersecting_edps: [],
+  intersects_edp: false
 }
 
 async function setupSession(server) {
