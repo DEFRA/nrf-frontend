@@ -32,6 +32,30 @@
             <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
         </div>
 
+        <h2 class="govuk-heading-m">EDP boundary check</h2>
+        <p class="govuk-body">
+            Intersects EDP: <strong>{{ "Yes" if intersectsEdp else "No" }}</strong>
+        </p>
+        {% if intersectsEdp %}
+        <p class="govuk-body">
+            Intersecting EDPs: {{ intersectingEdps | length }}
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            {% for edp in intersectingEdps %}
+            <li>{{ edp.label }}{% if edp.n2k_site_name %} ({{ edp.n2k_site_name }}){% endif %}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <details class="govuk-details govuk-!-margin-bottom-6">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">Full API response</span>
+            </summary>
+            <div class="govuk-details__text">
+                <pre style="max-height: 400px; overflow: auto; padding: 15px; background-color: #f3f2f1; border: 1px solid #b1b4b6; font-size: 11px; line-height: 1.5;">{{ boundaryResponseJson }}</pre>
+            </div>
+        </details>
+
         <form method="post" novalidate>
             {% include "partials/csrf-token.njk" %}
 
