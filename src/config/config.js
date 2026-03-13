@@ -315,6 +315,13 @@ export const config = convict({
     env: 'USE_SWAGGER'
   },
   cdpUploader: {
+    url: {
+      doc: 'Browser-facing base URL for the CDP uploader form action. Required locally where the frontend and uploader are on different origins. Not needed in CDP cloud where the platform proxy routes /upload-and-scan/* requests.',
+      format: String,
+      default: null,
+      nullable: true,
+      env: 'CDP_UPLOADER_URL'
+    },
     bucket: {
       doc: 'S3 bucket for file uploads',
       format: String,

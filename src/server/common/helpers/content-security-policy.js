@@ -5,7 +5,7 @@ import { config } from '../../../config/config.js'
  * Manage content security policies.
  * @satisfies {import('@hapi/hapi').Plugin}
  */
-const backendUrl = config.get('backend.apiUrl')
+const cdpUploaderUrl = config.get('cdpUploader.url')
 
 const contentSecurityPolicy = {
   plugin: Blankie,
@@ -25,7 +25,7 @@ const contentSecurityPolicy = {
     frameSrc: ['self', 'data:'],
     objectSrc: ['none'],
     frameAncestors: ['none'],
-    formAction: backendUrl ? ['self', backendUrl] : ['self'],
+    formAction: ['self', ...(cdpUploaderUrl ? [cdpUploaderUrl] : [])],
     manifestSrc: ['self'],
     generateNonces: true
   }
