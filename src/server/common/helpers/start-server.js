@@ -44,6 +44,9 @@ async function startServer() {
   server.logger.info(
     `Access your frontend on http://localhost:${config.get('port')}`
   )
+  server.logger.info(
+    `CDP Uploader URL: ${config.get('cdpUploader.url') ?? 'not set (using relative URLs)'}`
+  )
 
   await checkBackendConnectivity(server.logger)
 

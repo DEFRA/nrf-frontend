@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getUploadStatus, initiateUpload } from './uploader.js'
+import { config } from '../../../config/config.js'
 
 const backendUrl = 'http://localhost:4001'
 
@@ -26,18 +27,18 @@ describe('uploader service', () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: {
           uploadId: 'test-upload-id',
-          uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
+          uploadUrl: '/upload-and-scan/test-upload-id'
         }
       })
 
       const result = await initiateUpload({
-        redirect: 'http://localhost:3000/quote/upload-received',
+        redirect: '/quote/upload-received',
         s3Bucket: 'test-bucket'
       })
 
       expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/upload/initiate`, {
         payload: JSON.stringify({
-          redirect: 'http://localhost:3000/quote/upload-received',
+          redirect: '/quote/upload-received',
           s3Bucket: 'test-bucket',
           s3Path: undefined,
           metadata: undefined
@@ -49,8 +50,56 @@ describe('uploader service', () => {
       })
       expect(result).toEqual({
         uploadId: 'test-upload-id',
-        uploadUrl: 'http://localhost:4001/upload-and-scan/test-upload-id'
+        uploadUrl: '/upload-and-scan/test-upload-id'
       })
+    })
+
+    it('should prepend cdpUploader.url when set (local dev)', async () => {
+      config.set('cdpUploader.url', 'http://localhost:7337')
+
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: {
+          uploadId: 'test-upload-id',
+          uploadUrl: '/upload-and-scan/test-upload-id'
+        }
+      })
+
+      const result = await initiateUpload({
+        redirect: '/quote/upload-received',
+        s3Bucket: 'test-bucket'
+      })
+
+      expect(result).toEqual({
+        uploadId: 'test-upload-id',
+        uploadUrl: 'http://localhost:7337/upload-and-scan/test-upload-id'
+      })
+
+      config.set('cdpUploader.url', null)
+    })
+
+    it('should not prepend when uploadUrl is already absolute', async () => {
+      config.set('cdpUploader.url', 'http://localhost:7337')
+
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: {
+          uploadId: 'test-upload-id',
+          uploadUrl:
+            'http://cdp-uploader.test.cdp-int.defra.cloud/upload-and-scan/test-upload-id'
+        }
+      })
+
+      const result = await initiateUpload({
+        redirect: '/quote/upload-received',
+        s3Bucket: 'test-bucket'
+      })
+
+      expect(result).toEqual({
+        uploadId: 'test-upload-id',
+        uploadUrl:
+          'http://cdp-uploader.test.cdp-int.defra.cloud/upload-and-scan/test-upload-id'
+      })
+
+      config.set('cdpUploader.url', null)
     })
 
     it('should return error when request fails', async () => {
