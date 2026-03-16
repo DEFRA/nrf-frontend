@@ -17,9 +17,15 @@ const { getValidationFlashFromCache } =
   await import('../helpers/form-validation-session/index.js')
 
 describe('check-boundary-result controller', () => {
-  const mockGeojson = {
+  const mockGeometry = {
     type: 'FeatureCollection',
     features: [{ type: 'Feature', geometry: { type: 'Polygon' } }]
+  }
+
+  const mockGeojson = {
+    geometry: mockGeometry,
+    intersecting_edps: [],
+    intersects_edp: false
   }
 
   const createMockH = () => ({
@@ -65,7 +71,7 @@ describe('check-boundary-result controller', () => {
         expect.objectContaining({
           pageHeading: 'Check your boundary',
           featureCount: 1,
-          boundaryGeojson: JSON.stringify(mockGeojson),
+          boundaryGeojson: JSON.stringify(mockGeometry),
           formSubmitData: {},
           validationErrors: undefined
         })
