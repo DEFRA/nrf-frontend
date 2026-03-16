@@ -12,7 +12,6 @@ function parseGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.geojson)
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn('Failed to parse boundary GeoJSON', e)
     return null
   }
