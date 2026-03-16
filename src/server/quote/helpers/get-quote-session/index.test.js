@@ -9,36 +9,86 @@ describe('Save and retrieve quote data from session cache', () => {
   describe('Save quote data to session cache', () => {
     it('saves new data if the existing cache is empty', () => {
       const request = {
-        yar: { get: vi.fn().mockReturnValue(), set: vi.fn() }
+        yar: { get: vi.fn().mockReturnValue(), set: vi.fn() },
+        logger: { error: vi.fn() }
       }
-      const quoteData = { field2: 'value2' }
+      const quoteData = { boundaryEntryType: 'draw' }
       saveQuoteDataToCache(request, quoteData)
-      expect(request.yar.set).toHaveBeenCalledWith('quote', quoteData)
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.objectContaining({ boundaryEntryType: 'draw' })
+      )
     })
 
     it('merges new data with any existing cache data', () => {
       const request = {
         yar: {
-          get: vi.fn().mockReturnValue({ field1: 'value1' }),
+          get: vi.fn().mockReturnValue({ boundaryEntryType: 'draw' }),
           set: vi.fn()
-        }
+        },
+        logger: { error: vi.fn() }
       }
-      const quoteData = { field2: 'value2' }
-      saveQuoteDataToCache(request, quoteData)
-      expect(request.yar.set).toHaveBeenCalledWith('quote', {
-        field1: 'value1',
-        field2: 'value2'
-      })
+      saveQuoteDataToCache(request, { email: 'test@example.com' })
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.objectContaining({
+          boundaryEntryType: 'draw',
+          email: 'test@example.com'
+        })
+      )
+    })
+
+    it('strips fields made redundant by updated answers', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({
+            boundaryEntryType: 'draw',
+            developmentTypes: ['housing'],
+            residentialBuildingCount: 10,
+            email: 'test@example.com'
+          }),
+          set: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      // changing to other-residential means residentialBuildingCount is no longer needed
+      saveQuoteDataToCache(request, { developmentTypes: ['other-residential'] })
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.not.objectContaining({ residentialBuildingCount: 10 })
+      )
+    })
+
+    it('logs an error when the merged data is invalid', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({}),
+          set: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      saveQuoteDataToCache(request, { boundaryEntryType: 'invalid-value' })
+      expect(request.logger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        'getQuoteDataFromCache: invalid quote data'
+      )
     })
   })
 
   describe('Retrieve quote data from session cache', () => {
     it('returns the existing cache data', () => {
       const request = {
-        yar: { get: vi.fn().mockReturnValue({ field1: 'value1' }) }
+        yar: { get: vi.fn().mockReturnValue({ boundaryEntryType: 'draw' }) }
       }
       const quoteData = getQuoteDataFromCache(request)
-      expect(quoteData).toEqual({ field1: 'value1' })
+      expect(quoteData).toEqual({ boundaryEntryType: 'draw' })
+    })
+
+    it('returns an empty object when the cache is empty', () => {
+      const request = {
+        yar: { get: vi.fn().mockReturnValue(null) }
+      }
+      expect(getQuoteDataFromCache(request)).toEqual({})
     })
   })
 
@@ -101,7 +151,7 @@ describe('Save and retrieve quote data from session cache', () => {
       getCompleteQuoteDataFromCache(request)
       expect(request.logger.error).toHaveBeenCalledWith(
         expect.any(Error),
-        'getCompleteQuoteDataFromCache: invalid quote data'
+        'getQuoteDataFromCache: invalid quote data'
       )
     })
 
@@ -113,7 +163,7 @@ describe('Save and retrieve quote data from session cache', () => {
       getCompleteQuoteDataFromCache(request)
       expect(request.logger.error).toHaveBeenCalledWith(
         expect.any(Error),
-        'getCompleteQuoteDataFromCache: invalid quote data'
+        'getQuoteDataFromCache: invalid quote data'
       )
     })
   })
