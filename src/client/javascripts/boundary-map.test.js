@@ -122,7 +122,7 @@ describe('boundary-map', () => {
 
   it('does nothing when no map element exists', async () => {
     await loadModule()
-    // No error thrown
+    expect(document.getElementById('boundary-map')).toBeNull()
   })
 
   it('does nothing when geojson is invalid JSON', async () => {
@@ -143,12 +143,14 @@ describe('boundary-map', () => {
   it('does nothing when defra global is undefined', async () => {
     createMapElement(validGeojson)
     await loadModule()
+    expect(globalThis.defra).toBeUndefined()
   })
 
   it('does nothing when defra.InteractiveMap is missing', async () => {
     createMapElement(validGeojson)
     globalThis.defra = { maplibreProvider: vi.fn() }
     await loadModule()
+    expect(globalThis.defra.maplibreProvider).not.toHaveBeenCalled()
   })
 
   it('does nothing when defra.maplibreProvider is missing', async () => {
