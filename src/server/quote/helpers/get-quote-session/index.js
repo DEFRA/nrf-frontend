@@ -2,9 +2,22 @@ import { completeQuoteDataSchema } from '../quote-schema/index.js'
 
 const cacheKey = 'quote'
 
+const logInvalidQuoteData = (request) => {
+  request.logger.error(
+    new Error('Invalid quote data'),
+    `getQuoteDataFromCache: invalid quote data`
+  )
+}
+
 export const saveQuoteDataToCache = (request, quoteData) => {
   const existingQuoteCache = getQuoteDataFromCache(request)
-  request.yar.set(cacheKey, { ...existingQuoteCache, ...quoteData })
+  const updatedQuoteCache = { ...existingQuoteCache, ...quoteData }
+  // this will validate and also remove any values no longer required
+  const { error, value } = completeQuoteDataSchema.validate(updatedQuoteCache)
+  if (error) {
+    logInvalidQuoteData(request)
+  }
+  request.yar.set(cacheKey, value)
   return getQuoteDataFromCache(request)
 }
 
@@ -15,10 +28,7 @@ export const getCompleteQuoteDataFromCache = (request) => {
   const quoteData = request.yar.get(cacheKey)
   const { error, value } = completeQuoteDataSchema.validate(quoteData)
   if (error) {
-    request.logger.error(
-      error,
-      'getCompleteQuoteDataFromCache: invalid quote data'
-    )
+    logInvalidQuoteData(request)
   }
   return value
 }
