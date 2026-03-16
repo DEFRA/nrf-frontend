@@ -154,13 +154,13 @@ describe('boundary-map', () => {
   })
 
   it('does nothing when defra.maplibreProvider is missing', async () => {
+    const constructorSpy = vi.fn().mockReturnValue({})
     createMapElement(validGeojson)
     globalThis.defra = {
-      InteractiveMap: function () {
-        return {}
-      }
+      InteractiveMap: constructorSpy
     }
     await loadModule()
+    expect(constructorSpy).not.toHaveBeenCalled()
   })
 
   it('creates an InteractiveMap with correct options', async () => {
