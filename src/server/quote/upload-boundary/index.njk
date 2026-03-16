@@ -37,11 +37,11 @@
                     isPageHeading: true
                 },
                 hint: {
-                    html: "<p>Accepted file formats:</p><ul class=\"govuk-list govuk-list--bullet\"><li>GeoJSON (.geojson, .json)</li><li>KML (.kml)</li><li>Shapefile (.shp)</li></ul>The file must be smaller than 2MB."
+                    html: "<p>Accepted file formats:</p><ul class=\"govuk-list govuk-list--bullet\"><li>GeoJSON (.geojson, .json)</li><li>KML (.kml)</li><li>Zipped Shapefile (.zip)</li></ul>The file must be smaller than 2MB."
                 },
                 errorMessage: validationErrors.messagesByFormField.file if validationErrors,
                 attributes: {
-                    accept: ".shp,.geojson,.json,.kml"
+                    accept: ".geojson,.json,.kml,.zip"
                 }
             }) }}
 
