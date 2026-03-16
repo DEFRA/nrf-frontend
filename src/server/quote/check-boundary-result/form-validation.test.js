@@ -13,9 +13,9 @@ describe('check-boundary-result form validation', () => {
       expect(error).toBeUndefined()
     })
 
-    it('fails when absent', () => {
+    it('passes when absent (EDP flow submits without radio)', () => {
       const { error } = getSchema().validate({})
-      expect(error.details[0].message).toBe('Select if the boundary is correct')
+      expect(error).toBeUndefined()
     })
 
     it('fails for an unrecognised value', () => {

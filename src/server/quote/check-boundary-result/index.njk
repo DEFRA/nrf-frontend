@@ -2,6 +2,11 @@
 
 {% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
+{% block head %}
+  {{ super() }}
+  <link href="/public/interactive-map/interactive-map.css" rel="stylesheet">
+{% endblock %}
+
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
 {% endblock %}
@@ -24,37 +29,52 @@
             {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
         </p>
 
-        {{ govukInsetText({
-            text: "Check that the boundary shown below is correct before continuing."
-        }) }}
-
-        <div id="boundary-map" class="govuk-!-margin-bottom-6" data-geojson='{{ boundaryGeojson | safe }}'>
+        <div id="boundary-map" class="govuk-!-margin-bottom-6"
+             data-geojson='{{ boundaryGeojson | safe }}'
+             data-map-style-url="{{ mapStyleUrl }}">
             <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
         </div>
 
-        <h2 class="govuk-heading-m">EDP boundary check</h2>
-        <p class="govuk-body">
-            Intersects EDP: <strong>{{ "Yes" if intersectsEdp else "No" }}</strong>
-        </p>
+        <details class="govuk-details govuk-!-margin-bottom-6">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">View boundary GeoJSON</span>
+            </summary>
+            <div class="govuk-details__text">
+                <pre style="max-height: 400px; overflow: auto; padding: 15px; background-color: #f3f2f1; border: 1px solid #b1b4b6; font-size: 11px; line-height: 1.5;">{{ boundaryResponseJson }}</pre>
+            </div>
+        </details>
+
         {% if intersectsEdp %}
         <p class="govuk-body">
-            Intersecting EDPs: {{ intersectingEdps | length }}
+            Your red line boundary is within {{ intersectingEdps | length }} EDP{{ "s" if intersectingEdps | length != 1 }}:
         </p>
         <ul class="govuk-list govuk-list--bullet">
             {% for edp in intersectingEdps %}
             <li>{{ edp.label }}{% if edp.n2k_site_name %} ({{ edp.n2k_site_name }}){% endif %}</li>
             {% endfor %}
         </ul>
-        {% endif %}
 
-        <details class="govuk-details govuk-!-margin-bottom-6">
-            <summary class="govuk-details__summary">
-                <span class="govuk-details__summary-text">Full API response</span>
-            </summary>
-            <div class="govuk-details__text">
-                <pre style="max-height: 400px; overflow: auto; padding: 15px; background-color: #f3f2f1; border: 1px solid #b1b4b6; font-size: 11px; line-height: 1.5;">{{ boundaryResponseJson }}</pre>
-            </div>
-        </details>
+        {{ govukButton({
+            text: "Edit",
+            classes: "govuk-button--secondary",
+            disabled: true
+        }) }}
+
+        <form method="post" novalidate>
+            {% include "partials/csrf-token.njk" %}
+
+            {{ govukButton({
+                text: "Save and continue",
+                preventDoubleClick: true
+            }) }}
+        </form>
+
+        {% else %}
+
+        <h2 class="govuk-heading-m">EDP boundary check</h2>
+        <p class="govuk-body">
+            Intersects EDP: <strong>No</strong>
+        </p>
 
         <form method="post" novalidate>
             {% include "partials/csrf-token.njk" %}
@@ -81,6 +101,15 @@
             }) }}
         </form>
 
+        {% endif %}
+
     </div>
 </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script src="/public/interactive-map/core/index.js" nonce="{{ nonce }}"></script>
+  <script src="/public/interactive-map/maplibre/index.js" nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('boundary-map.js') }}" nonce="{{ nonce }}"></script>
 {% endblock %}

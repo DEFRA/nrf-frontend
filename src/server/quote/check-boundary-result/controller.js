@@ -2,10 +2,13 @@ import { createLogger } from '../../common/helpers/logging/logger.js'
 import { saveQuoteDataToCache } from '../helpers/get-quote-session/index.js'
 import {
   getValidationFlashFromCache,
-  clearValidationFlashFromCache
+  clearValidationFlashFromCache,
+  saveValidationFlashToCache
 } from '../helpers/form-validation-session/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import getViewModel from './get-view-model.js'
+
+const selfPath = '/quote/check-boundary-result'
 
 const logger = createLogger()
 
@@ -35,14 +38,32 @@ export function handler(request, h) {
 
 export function postHandler(request, h) {
   const { boundaryCorrect } = request.payload
+  const boundaryGeojson = request.yar.get('boundaryGeojson')
 
-  if (boundaryCorrect === 'no') {
-    request.yar.clear('boundaryGeojson')
+  if (!boundaryGeojson) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const boundaryGeojson = request.yar.get('boundaryGeojson')
-  if (!boundaryGeojson) {
+  const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
+
+  if (!intersectsEdp && !boundaryCorrect) {
+    const validationErrors = {
+      summary: [
+        { text: 'Select if the boundary is correct', href: '#boundaryCorrect' }
+      ],
+      messagesByFormField: {
+        boundaryCorrect: { text: 'Select if the boundary is correct' }
+      }
+    }
+    saveValidationFlashToCache(request, {
+      validationErrors,
+      formSubmitData: request.payload
+    })
+    return h.redirect(selfPath)
+  }
+
+  if (boundaryCorrect === 'no') {
+    request.yar.clear('boundaryGeojson')
     return h.redirect(uploadBoundaryPath)
   }
 

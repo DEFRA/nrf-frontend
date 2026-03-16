@@ -1,5 +1,9 @@
 import { JSDOM } from 'jsdom'
-import { getByRole, getByLabelText } from '@testing-library/dom'
+import {
+  getByRole,
+  getByLabelText,
+  queryByLabelText
+} from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -36,9 +40,36 @@ const mockGeojson = {
   intersects_edp: false
 }
 
-async function setupSession(server) {
+const mockEdpGeojson = {
+  geometry: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0, 0],
+              [1, 0],
+              [1, 1],
+              [0, 0]
+            ]
+          ]
+        },
+        properties: {}
+      }
+    ]
+  },
+  intersecting_edps: [
+    { label: 'Kent Downs EDP', n2k_site_name: 'North Downs Woodlands' }
+  ],
+  intersects_edp: true
+}
+
+async function setupSession(server, geojson = mockGeojson) {
   const sessionCookie = await withValidQuoteSession(server)
-  vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
+  vi.mocked(checkBoundary).mockResolvedValue({ geojson })
   const { cookie } = await submitForm({
     requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id'),
     server,
@@ -48,8 +79,8 @@ async function setupSession(server) {
   return cookie
 }
 
-async function loadPageWithSession(server) {
-  const cookie = await setupSession(server)
+async function loadPageWithSession(server, geojson = mockGeojson) {
+  const cookie = await setupSession(server, geojson)
   const response = await server.inject({
     method: 'GET',
     url: routePath,
@@ -62,32 +93,98 @@ async function loadPageWithSession(server) {
 describe('Check boundary result page', () => {
   const getServer = setupTestServer()
 
-  it('should render all page elements', async () => {
-    const { document } = await loadPageWithSession(getServer())
+  describe('when boundary does not intersect EDP', () => {
+    it('should render all page elements', async () => {
+      const { document } = await loadPageWithSession(getServer())
 
-    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Check your boundary'
-    )
-    expect(document.title).toBe(
-      'Check your boundary - Nature Restoration Fund - Gov.uk'
-    )
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/quote/upload-boundary'
-    )
-    expect(getByLabelText(document, 'Yes, continue')).not.toBeChecked()
-    expect(
-      getByLabelText(document, 'No, upload a different file')
-    ).not.toBeChecked()
-    const csrfToken = document.querySelector('form input[name="csrfToken"]')
-    expect(csrfToken).toBeInTheDocument()
-  })
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'Check your boundary'
+      )
+      expect(document.title).toBe(
+        'Check your boundary - Nature Restoration Fund - Gov.uk'
+      )
+      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+        'href',
+        '/quote/upload-boundary'
+      )
+      expect(getByLabelText(document, 'Yes, continue')).not.toBeChecked()
+      expect(
+        getByLabelText(document, 'No, upload a different file')
+      ).not.toBeChecked()
+      const csrfToken = document.querySelector('form input[name="csrfToken"]')
+      expect(csrfToken).toBeInTheDocument()
+    })
 
-  it('should display feature count', async () => {
-    const { document } = await loadPageWithSession(getServer())
+    it('should display feature count', async () => {
+      const { document } = await loadPageWithSession(getServer())
 
-    const body = document.querySelector('.govuk-body')
-    expect(body.textContent).toContain('1 feature found')
+      const body = document.querySelector('.govuk-body')
+      expect(body.textContent).toContain('1 feature found')
+    })
+
+    it('should include map container with geojson data and map scripts', async () => {
+      const { document } = await loadPageWithSession(getServer())
+
+      const mapEl = document.getElementById('boundary-map')
+      expect(mapEl).toBeInTheDocument()
+      expect(mapEl.getAttribute('data-geojson')).toBeTruthy()
+      expect(mapEl.getAttribute('data-map-style-url')).toBeTruthy()
+
+      const mapCss = document.querySelector('link[href*="interactive-map"]')
+      expect(mapCss).toBeInTheDocument()
+
+      const scripts = Array.from(document.querySelectorAll('script[src]'))
+      const mapScripts = scripts.filter((s) =>
+        s.getAttribute('src').includes('interactive-map')
+      )
+      expect(mapScripts.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('should show a validation error after submitting without a selection', async () => {
+      const cookie = await setupSession(getServer())
+      const { response, cookie: postCookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: {},
+        cookie
+      })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe(routePath)
+
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie: postCookie
+      })
+      expectFieldsetError({
+        document,
+        errorMessage: 'Select if the boundary is correct'
+      })
+    })
+
+    it('should redirect to development-types when user confirms', async () => {
+      const cookie = await setupSession(getServer())
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { boundaryCorrect: 'yes' },
+        cookie
+      })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/quote/development-types')
+    })
+
+    it('should redirect to upload-boundary when user selects no', async () => {
+      const cookie = await setupSession(getServer())
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { boundaryCorrect: 'no' },
+        cookie
+      })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/quote/upload-boundary')
+    })
   })
 
   it('should redirect to upload-boundary when no geojson in session', async () => {
@@ -101,49 +198,60 @@ describe('Check boundary result page', () => {
     expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 
-  it('should show a validation error after submitting without a selection', async () => {
-    const cookie = await setupSession(getServer())
-    const { response, cookie: postCookie } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: {},
-      cookie
-    })
-    expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(routePath)
+  describe('when boundary intersects EDP', () => {
+    it('should display EDP information', async () => {
+      const { document } = await loadPageWithSession(
+        getServer(),
+        mockEdpGeojson
+      )
 
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer(),
-      cookie: postCookie
+      expect(document.body.textContent).toContain('Kent Downs EDP')
+      expect(document.body.textContent).toContain('North Downs Woodlands')
     })
-    expectFieldsetError({
-      document,
-      errorMessage: 'Select if the boundary is correct'
-    })
-  })
 
-  it('should redirect to development-types when user confirms', async () => {
-    const cookie = await setupSession(getServer())
-    const { response } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: { boundaryCorrect: 'yes' },
-      cookie
-    })
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/development-types')
-  })
+    it('should show disabled edit button', async () => {
+      const { document } = await loadPageWithSession(
+        getServer(),
+        mockEdpGeojson
+      )
 
-  it('should redirect to upload-boundary when user selects no', async () => {
-    const cookie = await setupSession(getServer())
-    const { response } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: { boundaryCorrect: 'no' },
-      cookie
+      const editButton = getByRole(document, 'button', { name: 'Edit' })
+      expect(editButton).toBeDisabled()
     })
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/upload-boundary')
+
+    it('should not show the boundary correct radio buttons', async () => {
+      const { document } = await loadPageWithSession(
+        getServer(),
+        mockEdpGeojson
+      )
+
+      expect(queryByLabelText(document, 'Yes, continue')).toBeNull()
+      expect(
+        queryByLabelText(document, 'No, upload a different file')
+      ).toBeNull()
+    })
+
+    it('should show save and continue button', async () => {
+      const { document } = await loadPageWithSession(
+        getServer(),
+        mockEdpGeojson
+      )
+
+      expect(
+        getByRole(document, 'button', { name: 'Save and continue' })
+      ).toBeInTheDocument()
+    })
+
+    it('should redirect to development-types on save and continue', async () => {
+      const cookie = await setupSession(getServer(), mockEdpGeojson)
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: {},
+        cookie
+      })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/quote/development-types')
+    })
   })
 })
