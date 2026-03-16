@@ -10,11 +10,44 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
       <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {{ govukSummaryList({
+          classes: "govuk-!-margin-bottom-9",
+          rows: [
+            {
+              key: { text: "Development types" },
+              value: {
+                html: "<ul class=\"govuk-list\">" +
+                  ("<li>Housing</li>" if formSubmitData.developmentTypes and "housing" in formSubmitData.developmentTypes else "") +
+                  ("<li>Other residential</li>" if formSubmitData.developmentTypes and "other-residential" in formSubmitData.developmentTypes else "") +
+                  "</ul>"
+              },
+              actions: { items: [{ href: "/quote/development-types", text: "Change", visuallyHiddenText: "development types" }] }
+            } if formSubmitData.developmentTypes,
+            {
+              key: { text: "Number of residential units" },
+              value: { text: formSubmitData.residentialBuildingCount },
+              actions: { items: [{ href: "/quote/residential", text: "Change", visuallyHiddenText: "number of residential units" }] }
+            } if formSubmitData.residentialBuildingCount,
+            {
+              key: { text: "Maximum number of people" },
+              value: { text: formSubmitData.peopleCount },
+              actions: { items: [{ href: "/quote/people-count", text: "Change", visuallyHiddenText: "maximum number of people" }] }
+            } if formSubmitData.peopleCount,
+            {
+              key: { text: "Email address" },
+              value: { text: formSubmitData.email },
+              actions: { items: [{ href: "/quote/email", text: "Change", visuallyHiddenText: "email address" }] }
+            } if formSubmitData.email
+          ]
+        }) }}
+
         <form method="post" novalidate>
           {% include "partials/csrf-token.njk" %}
           <div class="govuk-button-group">
             {{ govukButton({
-              text: "Submit"
+              text: "Submit",
+              preventDoubleClick: true
             }) }}
             {{ govukButton({
               text: "Delete",

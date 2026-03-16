@@ -2,6 +2,8 @@ import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
+import { routePath as developmentTypesPath } from '../development-types/routes.js'
+import { routePath as residentialPath } from '../residential/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -39,6 +41,61 @@ describe('Check your answers page', () => {
       'href',
       '/quote/delete-quote'
     )
+  })
+
+  it('should show a summary list', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toBeInTheDocument()
+  })
+
+  it('should show all summary rows when a full session is built up', async () => {
+    let cookie = sessionCookie
+    ;({ cookie } = await submitForm({
+      requestUrl: developmentTypesPath,
+      server: getServer(),
+      formData: { developmentTypes: 'housing' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: residentialPath,
+      server: getServer(),
+      formData: { residentialBuildingCount: '42' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: emailRoutePath,
+      server: getServer(),
+      formData: { email: 'test@example.com' },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toHaveTextContent('Development types')
+    expect(summaryList).toHaveTextContent('Housing')
+    expect(summaryList).toHaveTextContent('Number of residential units')
+    expect(summaryList).toHaveTextContent('42')
+    expect(summaryList).toHaveTextContent('Email address')
+    expect(summaryList).toHaveTextContent('test@example.com')
+
+    expect(
+      getByRole(document, 'link', { name: 'Changedevelopment types' })
+    ).toHaveAttribute('href', '/quote/development-types')
+    expect(
+      getByRole(document, 'link', { name: 'Changenumber of residential units' })
+    ).toHaveAttribute('href', '/quote/residential')
+    expect(
+      getByRole(document, 'link', { name: 'Changeemail address' })
+    ).toHaveAttribute('href', '/quote/email')
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
