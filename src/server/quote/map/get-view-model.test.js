@@ -68,4 +68,59 @@ describe('getViewModel', () => {
     expect(result.cancelPath).toBe('/quote/boundary-type')
     expect(result.mapStyleUrl).toBeDefined()
   })
+
+  it('should build edpIntersectionGeojson from enhanced EDP data', () => {
+    const edps = [
+      {
+        label: 'EDP Area 1',
+        n2k_site_name: 'Site A',
+        intersection_geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-1.5, 52.0],
+              [-1.4, 52.0],
+              [-1.4, 52.1],
+              [-1.5, 52.1],
+              [-1.5, 52.0]
+            ]
+          ]
+        },
+        overlap_area_ha: 0.5,
+        overlap_area_sqm: 5000.0,
+        overlap_percentage: 25.0
+      }
+    ]
+    const response = {
+      geometry: { type: 'FeatureCollection', features: [] },
+      intersecting_edps: edps,
+      intersects_edp: true
+    }
+
+    const result = getViewModel(response)
+    const parsed = JSON.parse(result.edpIntersectionGeojson)
+
+    expect(parsed.type).toBe('FeatureCollection')
+    expect(parsed.features).toHaveLength(1)
+    expect(parsed.features[0].type).toBe('Feature')
+    expect(parsed.features[0].geometry.type).toBe('Polygon')
+    expect(parsed.features[0].properties.label).toBe('EDP Area 1')
+    expect(parsed.features[0].properties.overlap_area_ha).toBe(0.5)
+    expect(parsed.features[0].properties.overlap_percentage).toBe(25.0)
+  })
+
+  it('should return empty FeatureCollection when no EDPs have intersection geometry', () => {
+    const edps = [{ label: 'EDP Area 1', n2k_site_name: 'Site A' }]
+    const response = {
+      geometry: { type: 'FeatureCollection', features: [] },
+      intersecting_edps: edps,
+      intersects_edp: true
+    }
+
+    const result = getViewModel(response)
+    const parsed = JSON.parse(result.edpIntersectionGeojson)
+
+    expect(parsed.type).toBe('FeatureCollection')
+    expect(parsed.features).toHaveLength(0)
+  })
 })

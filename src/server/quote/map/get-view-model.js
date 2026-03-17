@@ -11,12 +11,28 @@ export default function getViewModel(boundaryGeojson) {
   const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
   const featureCount = geometry?.features?.length ?? 0
 
+  const edpIntersectionGeojson = JSON.stringify({
+    type: 'FeatureCollection',
+    features: intersectingEdps
+      .filter((edp) => edp.intersection_geometry)
+      .map((edp) => ({
+        type: 'Feature',
+        geometry: edp.intersection_geometry,
+        properties: {
+          label: edp.label,
+          overlap_area_ha: edp.overlap_area_ha,
+          overlap_percentage: edp.overlap_percentage
+        }
+      }))
+  })
+
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
     boundaryGeojson: JSON.stringify(geometry),
     intersectingEdps,
     intersectsEdp,
+    edpIntersectionGeojson,
     boundaryResponseJson: JSON.stringify(boundaryGeojson, null, 2),
     featureCount,
     backLinkPath: uploadBoundaryPath,

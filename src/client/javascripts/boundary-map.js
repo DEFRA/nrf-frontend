@@ -95,6 +95,50 @@ function addBoundaryLayer(mapInstance, geojson) {
   fitMapToBounds(mapInstance, geojson)
 }
 
+function addEdpIntersectionLayer(mapInstance, edpGeojson) {
+  if (!edpGeojson || !edpGeojson.features || !edpGeojson.features.length) {
+    return
+  }
+
+  if (mapInstance.getSource('edp-intersection')) {
+    return
+  }
+
+  mapInstance.addSource('edp-intersection', {
+    type: 'geojson',
+    data: edpGeojson
+  })
+
+  mapInstance.addLayer({
+    id: 'edp-intersection-fill',
+    type: 'fill',
+    source: 'edp-intersection',
+    paint: {
+      'fill-color': '#1d70b8',
+      'fill-opacity': 0.3
+    }
+  })
+
+  mapInstance.addLayer({
+    id: 'edp-intersection-line',
+    type: 'line',
+    source: 'edp-intersection',
+    paint: {
+      'line-color': '#1d70b8',
+      'line-width': 2,
+      'line-dasharray': [4, 2]
+    }
+  })
+}
+
+function parseEdpGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
+  } catch (e) {
+    return null
+  }
+}
+
 function initBoundaryMap() {
   const mapEl = document.getElementById('boundary-map')
   if (!mapEl) {
@@ -105,6 +149,8 @@ function initBoundaryMap() {
   if (!geojson) {
     return
   }
+
+  const edpGeojson = parseEdpGeojson(mapEl)
 
   if (
     typeof defra === 'undefined' ||
@@ -133,9 +179,11 @@ function initBoundaryMap() {
 
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)
+      addEdpIntersectionLayer(mapInstance, edpGeojson)
     } else {
       mapInstance.once('style.load', function () {
         addBoundaryLayer(mapInstance, geojson)
+        addEdpIntersectionLayer(mapInstance, edpGeojson)
       })
     }
   })
