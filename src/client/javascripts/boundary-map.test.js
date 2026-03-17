@@ -23,7 +23,29 @@ const validGeojson = {
   ]
 }
 
-const validEdpGeojson = {
+const validEdpBoundaryGeojson = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-1.6, 51.9],
+            [-1.3, 51.9],
+            [-1.3, 52.2],
+            [-1.6, 52.2],
+            [-1.6, 51.9]
+          ]
+        ]
+      },
+      properties: { label: 'EDP 1' }
+    }
+  ]
+}
+
+const validEdpIntersectionGeojson = {
   type: 'FeatureCollection',
   features: [
     {
@@ -52,7 +74,7 @@ const validEdpGeojson = {
 function createMapElement(
   geojson,
   styleUrl = 'https://example.com/style.json',
-  edpGeojson = undefined
+  { edpBoundary, edpIntersection } = {}
 ) {
   const el = document.createElement('div')
   el.id = 'boundary-map'
@@ -60,9 +82,17 @@ function createMapElement(
     el.dataset.geojson =
       typeof geojson === 'string' ? geojson : JSON.stringify(geojson)
   }
-  if (edpGeojson !== undefined) {
+  if (edpBoundary !== undefined) {
+    el.dataset.edpBoundaryGeojson =
+      typeof edpBoundary === 'string'
+        ? edpBoundary
+        : JSON.stringify(edpBoundary)
+  }
+  if (edpIntersection !== undefined) {
     el.dataset.edpIntersectionGeojson =
-      typeof edpGeojson === 'string' ? edpGeojson : JSON.stringify(edpGeojson)
+      typeof edpIntersection === 'string'
+        ? edpIntersection
+        : JSON.stringify(edpIntersection)
   }
   el.dataset.mapStyleUrl = styleUrl
   document.body.appendChild(el)
@@ -355,12 +385,11 @@ describe('boundary-map', () => {
     expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
-  it('adds EDP intersection layers when edp geojson is provided', async () => {
-    createMapElement(
-      validGeojson,
-      'https://example.com/style.json',
-      validEdpGeojson
-    )
+  it('adds EDP boundary and intersection layers when geojson is provided', async () => {
+    createMapElement(validGeojson, 'https://example.com/style.json', {
+      edpBoundary: validEdpBoundaryGeojson,
+      edpIntersection: validEdpIntersectionGeojson
+    })
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
     globalThis.defra = mockDefra
@@ -368,29 +397,43 @@ describe('boundary-map', () => {
     await loadModule()
     mockDefra._triggerReady()
 
+    expect(mapInstance.addSource).toHaveBeenCalledWith('edp-boundary', {
+      type: 'geojson',
+      data: validEdpBoundaryGeojson
+    })
     expect(mapInstance.addSource).toHaveBeenCalledWith('edp-intersection', {
       type: 'geojson',
-      data: validEdpGeojson
+      data: validEdpIntersectionGeojson
     })
-    // boundary (2) + edp intersection (2) = 4 layers
-    expect(mapInstance.addLayer).toHaveBeenCalledTimes(4)
+    // boundary (2) + edp boundary (2) + edp intersection (2) = 6 layers
+    expect(mapInstance.addLayer).toHaveBeenCalledTimes(6)
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'edp-boundary-fill',
+        source: 'edp-boundary'
+      })
+    )
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'edp-boundary-line',
+        source: 'edp-boundary'
+      })
+    )
     expect(mapInstance.addLayer).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'edp-intersection-fill',
-        type: 'fill',
         source: 'edp-intersection'
       })
     )
     expect(mapInstance.addLayer).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'edp-intersection-line',
-        type: 'line',
         source: 'edp-intersection'
       })
     )
   })
 
-  it('does not add EDP intersection layers when no edp geojson is provided', async () => {
+  it('does not add EDP layers when no edp geojson is provided', async () => {
     createMapElement(validGeojson)
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -407,9 +450,12 @@ describe('boundary-map', () => {
     expect(mapInstance.addLayer).toHaveBeenCalledTimes(2)
   })
 
-  it('does not add EDP intersection layers when edp geojson has empty features', async () => {
+  it('does not add EDP layers when edp geojson has empty features', async () => {
     const emptyEdp = { type: 'FeatureCollection', features: [] }
-    createMapElement(validGeojson, 'https://example.com/style.json', emptyEdp)
+    createMapElement(validGeojson, 'https://example.com/style.json', {
+      edpBoundary: emptyEdp,
+      edpIntersection: emptyEdp
+    })
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
     globalThis.defra = mockDefra

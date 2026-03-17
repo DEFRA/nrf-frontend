@@ -95,6 +95,45 @@ function addBoundaryLayer(mapInstance, geojson) {
   fitMapToBounds(mapInstance, geojson)
 }
 
+function addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson) {
+  if (
+    !edpBoundaryGeojson ||
+    !edpBoundaryGeojson.features ||
+    !edpBoundaryGeojson.features.length
+  ) {
+    return
+  }
+
+  if (mapInstance.getSource('edp-boundary')) {
+    return
+  }
+
+  mapInstance.addSource('edp-boundary', {
+    type: 'geojson',
+    data: edpBoundaryGeojson
+  })
+
+  mapInstance.addLayer({
+    id: 'edp-boundary-fill',
+    type: 'fill',
+    source: 'edp-boundary',
+    paint: {
+      'fill-color': '#00703c',
+      'fill-opacity': 0.08
+    }
+  })
+
+  mapInstance.addLayer({
+    id: 'edp-boundary-line',
+    type: 'line',
+    source: 'edp-boundary',
+    paint: {
+      'line-color': '#00703c',
+      'line-width': 2
+    }
+  })
+}
+
 function addEdpIntersectionLayer(mapInstance, edpGeojson) {
   if (!edpGeojson || !edpGeojson.features || !edpGeojson.features.length) {
     return
@@ -131,7 +170,15 @@ function addEdpIntersectionLayer(mapInstance, edpGeojson) {
   })
 }
 
-function parseEdpGeojson(mapEl) {
+function parseEdpBoundaryGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpBoundaryGeojson)
+  } catch (e) {
+    return null
+  }
+}
+
+function parseEdpIntersectionGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
   } catch (e) {
@@ -150,7 +197,8 @@ function initBoundaryMap() {
     return
   }
 
-  const edpGeojson = parseEdpGeojson(mapEl)
+  const edpBoundaryGeojson = parseEdpBoundaryGeojson(mapEl)
+  const edpIntersectionGeojson = parseEdpIntersectionGeojson(mapEl)
 
   if (
     typeof defra === 'undefined' ||
@@ -179,11 +227,13 @@ function initBoundaryMap() {
 
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)
-      addEdpIntersectionLayer(mapInstance, edpGeojson)
+      addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+      addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
     } else {
       mapInstance.once('style.load', function () {
         addBoundaryLayer(mapInstance, geojson)
-        addEdpIntersectionLayer(mapInstance, edpGeojson)
+        addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+        addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
       })
     }
   })

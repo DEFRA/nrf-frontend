@@ -11,6 +11,17 @@ export default function getViewModel(boundaryGeojson) {
   const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
   const featureCount = geometry?.features?.length ?? 0
 
+  const edpBoundaryGeojson = JSON.stringify({
+    type: 'FeatureCollection',
+    features: intersectingEdps
+      .filter((edp) => edp.edp_geometry)
+      .map((edp) => ({
+        type: 'Feature',
+        geometry: edp.edp_geometry,
+        properties: { label: edp.label }
+      }))
+  })
+
   const edpIntersectionGeojson = JSON.stringify({
     type: 'FeatureCollection',
     features: intersectingEdps
@@ -32,8 +43,8 @@ export default function getViewModel(boundaryGeojson) {
     boundaryGeojson: JSON.stringify(geometry),
     intersectingEdps,
     intersectsEdp,
+    edpBoundaryGeojson,
     edpIntersectionGeojson,
-    boundaryResponseJson: JSON.stringify(boundaryGeojson, null, 2),
     featureCount,
     backLinkPath: uploadBoundaryPath,
     uploadBoundaryPath,
