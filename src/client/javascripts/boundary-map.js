@@ -173,7 +173,8 @@ function addEdpIntersectionLayer(mapInstance, edpGeojson) {
 function parseEdpBoundaryGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.edpBoundaryGeojson)
-  } catch (e) {
+  } catch {
+    console.warn('Failed to parse EDP boundary GeoJSON')
     return null
   }
 }
@@ -181,7 +182,8 @@ function parseEdpBoundaryGeojson(mapEl) {
 function parseEdpIntersectionGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
-  } catch (e) {
+  } catch {
+    console.warn('Failed to parse EDP intersection GeoJSON')
     return null
   }
 }
