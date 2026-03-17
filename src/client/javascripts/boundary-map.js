@@ -8,9 +8,9 @@
 
 /* global defra */
 
-var SOURCE_BOUNDARY = 'boundary'
-var SOURCE_EDP_BOUNDARY = 'edp-boundary'
-var SOURCE_EDP_INTERSECTION = 'edp-intersection'
+const SOURCE_BOUNDARY = 'boundary'
+const SOURCE_EDP_BOUNDARY = 'edp-boundary'
+const SOURCE_EDP_INTERSECTION = 'edp-intersection'
 
 function parseGeojson(mapEl) {
   try {
