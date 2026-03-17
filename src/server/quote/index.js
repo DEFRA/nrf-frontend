@@ -6,7 +6,7 @@ import routesDevelopmentType from './development-types/routes.js'
 import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
 import routesUploadReceived from './upload-received/routes.js'
-import routesCheckBoundaryResult from './check-boundary-result/routes.js'
+import routesMap from './map/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
 import routesPeopleCount from './people-count/routes.js'
@@ -45,7 +45,7 @@ export const quote = {
         ...routesEmail,
         ...routesUploadBoundary,
         ...routesUploadReceived,
-        ...routesCheckBoundaryResult,
+        ...routesMap,
         ...routesCheckYourAnswers,
         ...routesPeopleCount,
         ...routesConfirmation,

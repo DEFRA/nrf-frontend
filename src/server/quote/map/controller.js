@@ -8,7 +8,7 @@ import {
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import getViewModel from './get-view-model.js'
 
-const selfPath = '/quote/check-boundary-result'
+const selfPath = '/quote/map'
 
 const logger = createLogger()
 
@@ -16,7 +16,7 @@ export function handler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
 
   if (!boundaryGeojson) {
-    logger.info('check-boundary-result - no boundary data in session')
+    logger.info('map - no boundary data in session')
     return h.redirect(uploadBoundaryPath)
   }
 
@@ -29,7 +29,7 @@ export function handler(request, h) {
 
   const viewModel = getViewModel(boundaryGeojson)
 
-  return h.view('quote/check-boundary-result/index', {
+  return h.view('quote/map/index', {
     ...viewModel,
     formSubmitData: flash?.formSubmitData ?? {},
     validationErrors
@@ -69,7 +69,7 @@ export function postHandler(request, h) {
 
   saveQuoteDataToCache(request, { boundaryGeojson })
   request.yar.clear('boundaryGeojson')
-  logger.info('check-boundary-result - boundary confirmed, saved to quote data')
+  logger.info('map - boundary confirmed, saved to quote data')
 
   return h.redirect('/quote/development-types')
 }

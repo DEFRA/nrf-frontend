@@ -17,7 +17,7 @@ const { saveQuoteDataToCache } =
 const { getValidationFlashFromCache, saveValidationFlashToCache } =
   await import('../helpers/form-validation-session/index.js')
 
-describe('check-boundary-result controller', () => {
+describe('map controller', () => {
   const mockGeometry = {
     type: 'FeatureCollection',
     features: [{ type: 'Feature', geometry: { type: 'Polygon' } }]
@@ -74,9 +74,9 @@ describe('check-boundary-result controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/check-boundary-result/index',
+        'quote/map/index',
         expect.objectContaining({
-          pageHeading: 'Check your boundary',
+          pageHeading: 'Boundary Map',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry),
           formSubmitData: {},
@@ -103,7 +103,7 @@ describe('check-boundary-result controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/check-boundary-result/index',
+        'quote/map/index',
         expect.objectContaining({
           validationErrors: mockErrors.validationErrors,
           formSubmitData: {}
@@ -165,7 +165,7 @@ describe('check-boundary-result controller', () => {
         }),
         formSubmitData: {}
       })
-      expect(h.redirect).toHaveBeenCalledWith('/quote/check-boundary-result')
+      expect(h.redirect).toHaveBeenCalledWith('/quote/map')
     })
 
     it('should save and redirect to development-types when boundary intersects EDP', () => {

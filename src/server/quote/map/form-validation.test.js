@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import getSchema from './form-validation.js'
 
-describe('check-boundary-result form validation', () => {
+describe('map form validation', () => {
   describe('boundaryCorrect', () => {
     it('passes for "yes"', () => {
       const { error } = getSchema().validate({ boundaryCorrect: 'yes' })
