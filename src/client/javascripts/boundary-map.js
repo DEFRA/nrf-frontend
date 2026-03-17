@@ -1,5 +1,5 @@
 /**
- * Initialises the DEFRA interactive map on the check-boundary-result page,
+ * Initialises the DEFRA interactive map on the boundary map page,
  * displaying the uploaded red line boundary.
  *
  * The backend returns geometry in WGS84 (EPSG:4326) via the `proj` query

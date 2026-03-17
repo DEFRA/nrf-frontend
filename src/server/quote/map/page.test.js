@@ -90,7 +90,7 @@ async function loadPageWithSession(server, geojson = mockGeojson) {
   return { document: window.document, cookie }
 }
 
-describe('Check boundary result page', () => {
+describe('Boundary map page', () => {
   const getServer = setupTestServer()
 
   describe('when boundary does not intersect EDP', () => {
@@ -98,10 +98,10 @@ describe('Check boundary result page', () => {
       const { document } = await loadPageWithSession(getServer())
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'Check your boundary'
+        'Boundary Map'
       )
       expect(document.title).toBe(
-        'Check your boundary - Nature Restoration Fund - Gov.uk'
+        'Boundary Map - Nature Restoration Fund - Gov.uk'
       )
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',

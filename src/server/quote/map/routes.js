@@ -4,7 +4,7 @@ import { saveValidationFlashToCache } from '../helpers/form-validation-session/i
 import { statusCodes } from '../../common/constants/status-codes.js'
 import formValidation from './form-validation.js'
 
-export const routePath = '/quote/check-boundary-result'
+export const routePath = '/quote/map'
 
 export default [
   {

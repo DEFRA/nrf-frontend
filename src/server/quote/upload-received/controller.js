@@ -67,5 +67,5 @@ export async function checkBoundaryHandler(request, h) {
   request.yar.set('boundaryGeojson', result.geojson)
   request.yar.clear('pendingUploadId')
 
-  return h.redirect('/quote/check-boundary-result')
+  return h.redirect('/quote/map')
 }

@@ -30,7 +30,7 @@ const mockGeojson = {
   ]
 }
 
-describe('Check boundary result page accessibility checks', () => {
+describe('Boundary map page accessibility checks', () => {
   const getServer = setupTestServer()
 
   it('should have no HTML accessibility issues after an invalid form submission', async () => {
