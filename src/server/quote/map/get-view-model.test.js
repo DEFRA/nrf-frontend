@@ -10,7 +10,7 @@ describe('getViewModel', () => {
     })
 
     expect(result.featureCount).toBe(0)
-    expect(result.pageHeading).toBe('Check your boundary')
+    expect(result.pageHeading).toBe('Boundary Map')
     expect(result.boundaryGeojson).toBe(
       JSON.stringify({ type: 'FeatureCollection' })
     )

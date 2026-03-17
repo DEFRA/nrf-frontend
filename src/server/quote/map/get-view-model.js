@@ -3,7 +3,7 @@ import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { config } from '../../../config/config.js'
 
-export const title = 'Check your boundary'
+export const title = 'Boundary Map'
 
 export default function getViewModel(boundaryGeojson) {
   const geometry = boundaryGeojson?.geometry
