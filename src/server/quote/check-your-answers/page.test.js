@@ -2,6 +2,7 @@ import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as developmentTypesPath } from '../development-types/routes.js'
 import { routePath as residentialPath } from '../residential/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
@@ -56,6 +57,12 @@ describe('Check your answers page', () => {
   it('should show all summary rows when a full session is built up', async () => {
     let cookie = sessionCookie
     ;({ cookie } = await submitForm({
+      requestUrl: boundaryTypePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
       requestUrl: developmentTypesPath,
       server: getServer(),
       formData: { developmentTypes: 'housing' },
@@ -80,6 +87,8 @@ describe('Check your answers page', () => {
       cookie
     })
     const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toHaveTextContent('Red line boundary')
+    expect(summaryList).toHaveTextContent('Added')
     expect(summaryList).toHaveTextContent('Development types')
     expect(summaryList).toHaveTextContent('Housing')
     expect(summaryList).toHaveTextContent('Number of residential units')
@@ -87,6 +96,11 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
 
+    expect(
+      getByRole(document, 'link', {
+        name: 'Changered line boundary'
+      })
+    ).toHaveAttribute('href', '/quote/upload-boundary')
     expect(
       getByRole(document, 'link', { name: 'Changedevelopment types' })
     ).toHaveAttribute('href', '/quote/development-types')
@@ -96,6 +110,25 @@ describe('Check your answers page', () => {
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email')
+  })
+
+  it('should link to the map page if the boundary was drawn', async () => {
+    const { cookie: updatedCookie } = await submitForm({
+      requestUrl: boundaryTypePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'draw' },
+      cookie: sessionCookie
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: updatedCookie
+    })
+    expect(
+      getByRole(document, 'link', {
+        name: 'Changered line boundary'
+      })
+    ).toHaveAttribute('href', '/quote/map')
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
