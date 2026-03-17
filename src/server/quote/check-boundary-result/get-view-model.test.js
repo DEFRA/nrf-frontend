@@ -60,4 +60,12 @@ describe('getViewModel', () => {
     expect(result.intersectsEdp).toBe(false)
     expect(result.intersectingEdps).toEqual([])
   })
+
+  it('should include uploadBoundaryPath, cancelPath, and mapStyleUrl', () => {
+    const result = getViewModel({})
+
+    expect(result.uploadBoundaryPath).toBe('/quote/upload-boundary')
+    expect(result.cancelPath).toBe('/quote/boundary-type')
+    expect(result.mapStyleUrl).toBeDefined()
+  })
 })

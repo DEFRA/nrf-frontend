@@ -314,6 +314,14 @@ export const config = convict({
     default: false,
     env: 'USE_SWAGGER'
   },
+  map: {
+    styleUrl: {
+      doc: 'URL to the map style.json (Mapbox Style Specification)',
+      format: String,
+      default: 'https://demotiles.maplibre.org/style.json',
+      env: 'MAP_STYLE_URL'
+    }
+  },
   cdpUploader: {
     url: {
       doc: 'Browser-facing base URL for the CDP uploader form action. Required locally where the frontend and uploader are on different origins. Not needed in CDP cloud where the platform proxy routes /upload-and-scan/* requests.',
