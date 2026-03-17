@@ -15,6 +15,11 @@
           classes: "govuk-!-margin-bottom-9",
           rows: [
             {
+              key: { text: "Red line boundary" },
+              value: { text: 'Added' },
+              actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/map", text: "Change", visuallyHiddenText: "red line boundary" }] }
+            } if formSubmitData.boundaryEntryType,
+            {
               key: { text: "Development types" },
               value: {
                 html: "<ul class=\"govuk-list\">" +
