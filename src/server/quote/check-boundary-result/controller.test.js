@@ -8,12 +8,13 @@ vi.mock('../helpers/get-quote-session/index.js', () => ({
 
 vi.mock('../helpers/form-validation-session/index.js', () => ({
   getValidationFlashFromCache: vi.fn(),
-  clearValidationFlashFromCache: vi.fn()
+  clearValidationFlashFromCache: vi.fn(),
+  saveValidationFlashToCache: vi.fn()
 }))
 
 const { saveQuoteDataToCache } =
   await import('../helpers/get-quote-session/index.js')
-const { getValidationFlashFromCache } =
+const { getValidationFlashFromCache, saveValidationFlashToCache } =
   await import('../helpers/form-validation-session/index.js')
 
 describe('check-boundary-result controller', () => {
@@ -26,6 +27,12 @@ describe('check-boundary-result controller', () => {
     geometry: mockGeometry,
     intersecting_edps: [],
     intersects_edp: false
+  }
+
+  const mockEdpGeojson = {
+    geometry: mockGeometry,
+    intersecting_edps: [{ label: 'EDP 1', n2k_site_name: 'Site 1' }],
+    intersects_edp: true
   }
 
   const createMockH = () => ({
@@ -139,6 +146,40 @@ describe('check-boundary-result controller', () => {
       postHandler(request, h)
 
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
+    })
+
+    it('should show validation error when no selection made and boundary does not intersect EDP', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockGeojson)
+      request.payload = {}
+
+      postHandler(request, h)
+
+      expect(saveValidationFlashToCache).toHaveBeenCalledWith(request, {
+        validationErrors: expect.objectContaining({
+          summary: [
+            expect.objectContaining({
+              text: 'Select if the boundary is correct'
+            })
+          ]
+        }),
+        formSubmitData: {}
+      })
+      expect(h.redirect).toHaveBeenCalledWith('/quote/check-boundary-result')
+    })
+
+    it('should save and redirect to development-types when boundary intersects EDP', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockEdpGeojson)
+      request.payload = {}
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+        boundaryGeojson: mockEdpGeojson
+      })
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
     })
   })
 })
