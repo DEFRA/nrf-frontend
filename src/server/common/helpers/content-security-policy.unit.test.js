@@ -11,31 +11,8 @@ describe('#contentSecurityPolicy config variations', () => {
     vi.resetModules()
   })
 
-  test('should include map style origin in connectSrc when configured', async () => {
-    mockConfigGet.mockImplementation((key) => {
-      if (key === 'map.styleUrl') {
-        return 'https://tiles.example.com/style.json'
-      }
-      if (key === 'cdpUploader.url') {
-        return null
-      }
-      return null
-    })
-
-    const { contentSecurityPolicy } =
-      await import('./content-security-policy.js')
-
-    expect(contentSecurityPolicy.options.connectSrc).toContain(
-      'https://tiles.example.com'
-    )
-    expect(contentSecurityPolicy.options.formAction).toEqual(['self'])
-  })
-
   test('should include cdpUploader url in formAction when configured', async () => {
     mockConfigGet.mockImplementation((key) => {
-      if (key === 'map.styleUrl') {
-        return null
-      }
       if (key === 'cdpUploader.url') {
         return 'https://uploader.example.com'
       }

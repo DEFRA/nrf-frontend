@@ -6,8 +6,6 @@ import { config } from '../../../config/config.js'
  * @satisfies {import('@hapi/hapi').Plugin}
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
-const mapStyleUrl = config.get('map.styleUrl')
-const mapStyleOrigin = mapStyleUrl ? new URL(mapStyleUrl).origin : null
 
 const contentSecurityPolicy = {
   plugin: Blankie,
@@ -16,12 +14,7 @@ const contentSecurityPolicy = {
     // https://frontend.design-system.service.gov.uk/import-javascript/#if-our-inline-javascript-snippet-is-blocked-by-a-content-security-policy
     defaultSrc: ['self'],
     fontSrc: ['self', 'data:'],
-    connectSrc: [
-      'self',
-      'wss',
-      'data:',
-      ...(mapStyleOrigin ? [mapStyleOrigin] : [])
-    ],
+    connectSrc: ['self', 'wss', 'data:'],
     mediaSrc: ['self'],
     styleSrc: ['self'],
     scriptSrc: [
