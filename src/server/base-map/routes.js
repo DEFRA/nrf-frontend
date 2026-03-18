@@ -1,6 +1,7 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
+import { statusCodes } from '../common/constants/status-codes.js'
 
 const logger = createLogger()
 
@@ -18,11 +19,14 @@ function getOsUrl(path, query) {
 }
 
 function rewriteOsUrls(body, host) {
-  const escapedBase = osBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const pattern = `${escapedBase}(?:/(.*?))?\\?[^"\\s]*`
-  return body.replace(
-    new RegExp(pattern, 'g'),
-    (_, path) => `${host}${routePath}${path ? `/${path}` : ''}`
+  const escapedBase = osBaseUrl.replaceAll(
+    /[.*+?^${}()|[\]\\]/g,
+    String.raw`\$&`
+  )
+  const pattern = String.raw`${escapedBase}(?:/(.*?))?\?[^"\s]*`
+  const proxyBase = `${host}${routePath}`
+  return body.replaceAll(new RegExp(pattern, 'g'), (_, path) =>
+    path ? `${proxyBase}/${path}` : proxyBase
   )
 }
 
@@ -66,7 +70,9 @@ const proxyHandler = {
       }
 
       // JSON responses — rewrite OS URLs to point to our proxy
-      const host = `${request.headers['x-forwarded-proto'] || request.server.info.protocol}://${request.info.host}`
+      const protocol =
+        request.headers['x-forwarded-proto'] || request.server.info.protocol
+      const host = `${protocol}://${request.info.host}`
       const rewritten = rewriteOsUrls(payload.toString(), host)
       return h
         .response(rewritten)
@@ -80,7 +86,7 @@ const proxyHandler = {
       }
 
       logger.error(`Map proxy error for ${path}: ${err.message}`)
-      return h.response('Map tile request failed').code(502)
+      return h.response('Map tile request failed').code(statusCodes.badGateway)
     }
   }
 }
