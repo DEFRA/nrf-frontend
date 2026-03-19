@@ -16,7 +16,7 @@ export function handler(request, h) {
 
   const viewModel = getViewModel(boundaryGeojson)
 
-  return h.view('quote/map/index', {
+  return h.view('quote/upload-preview-map/index', {
     ...viewModel
   })
 }

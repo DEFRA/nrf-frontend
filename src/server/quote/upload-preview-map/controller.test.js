@@ -66,7 +66,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/map/index',
+        'quote/upload-preview-map/index',
         expect.objectContaining({
           pageHeading: 'Boundary Map',
           featureCount: 1,
