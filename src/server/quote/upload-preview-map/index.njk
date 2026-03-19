@@ -56,6 +56,12 @@
             disabled: true
         }) }}
 
+        {{ govukButton({
+            text: "Delete",
+            classes: "govuk-button--warning",
+            disabled: true
+        }) }}
+
         <form method="post" novalidate>
             {% include "partials/csrf-token.njk" %}
 
@@ -64,6 +70,13 @@
                 preventDoubleClick: true
             }) }}
         </form>
+
+        <p class="govuk-body">
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Cancel</a>
+        </p>
+        <p class="govuk-body">
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload another red line boundary file</a>
+        </p>
 
         {% else %}
 
@@ -80,6 +93,10 @@
                 preventDoubleClick: true
             }) }}
         </form>
+
+        <p class="govuk-body">
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Cancel</a>
+        </p>
 
         {% endif %}
 
