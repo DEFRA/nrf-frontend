@@ -128,7 +128,7 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changered line boundary'
       })
-    ).toHaveAttribute('href', '/quote/map')
+    ).toHaveAttribute('href', '/quote/upload-preview-map')
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
