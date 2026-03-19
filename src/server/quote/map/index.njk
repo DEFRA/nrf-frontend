@@ -44,7 +44,7 @@
         <ul class="govuk-list govuk-list--bullet">
             {% for edp in intersectingEdps %}
             <li>
-              {{ edp.label }}{% if edp.n2k_site_name %} ({{ edp.n2k_site_name }}){% endif %}
+              {{ edp.label }}{% if edp.natura2000SiteName %} ({{ edp.natura2000SiteName }}){% endif %}
               {% if edp.overlap_area_ha %}
               <br><span class="govuk-body-s govuk-!-margin-bottom-0">
                 Overlap: {{ edp.overlap_area_ha }} ha ({{ edp.overlap_percentage }}% of boundary)

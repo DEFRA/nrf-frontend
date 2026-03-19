@@ -50,7 +50,9 @@ describe('getViewModel', () => {
     const result = getViewModel(response)
 
     expect(result.intersectsEdp).toBe(true)
-    expect(result.intersectingEdps).toEqual(edps)
+    expect(result.intersectingEdps).toEqual(
+      edps.map((edp) => ({ ...edp, natura2000SiteName: edp.n2k_site_name }))
+    )
   })
 
   it('should handle missing fields gracefully', () => {

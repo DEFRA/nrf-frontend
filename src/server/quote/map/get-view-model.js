@@ -37,11 +37,16 @@ export default function getViewModel(boundaryGeojson) {
       }))
   })
 
+  const mappedEdps = intersectingEdps.map((edp) => ({
+    ...edp,
+    natura2000SiteName: edp.n2k_site_name // n2k = Natura 2000 (EU protected sites network)
+  }))
+
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
     boundaryGeojson: JSON.stringify(geometry),
-    intersectingEdps,
+    intersectingEdps: mappedEdps,
     intersectsEdp,
     edpBoundaryGeojson,
     edpIntersectionGeojson,
