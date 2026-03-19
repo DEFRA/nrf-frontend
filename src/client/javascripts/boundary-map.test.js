@@ -1,37 +1,33 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-
-const validGeojson = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [-1.5, 52.0],
-            [-1.4, 52.0],
-            [-1.4, 52.1],
-            [-1.5, 52.1],
-            [-1.5, 52.0]
-          ]
-        ]
-      },
-      properties: {}
-    }
-  ]
-}
+import {
+  validGeojson,
+  validEdpBoundaryGeojson,
+  validEdpIntersectionGeojson
+} from './__fixtures__/boundary-map-fixtures.js'
 
 function createMapElement(
   geojson,
-  styleUrl = 'https://example.com/style.json'
+  styleUrl = 'https://example.com/style.json',
+  { edpBoundary, edpIntersection } = {}
 ) {
   const el = document.createElement('div')
   el.id = 'boundary-map'
   if (geojson !== undefined) {
     el.dataset.geojson =
       typeof geojson === 'string' ? geojson : JSON.stringify(geojson)
+  }
+  if (edpBoundary !== undefined) {
+    el.dataset.edpBoundaryGeojson =
+      typeof edpBoundary === 'string'
+        ? edpBoundary
+        : JSON.stringify(edpBoundary)
+  }
+  if (edpIntersection !== undefined) {
+    el.dataset.edpIntersectionGeojson =
+      typeof edpIntersection === 'string'
+        ? edpIntersection
+        : JSON.stringify(edpIntersection)
   }
   el.dataset.mapStyleUrl = styleUrl
   document.body.appendChild(el)
@@ -52,7 +48,6 @@ function createMockMapInstance(styleLoaded = true) {
 
 function createMockDefra(mapInstance) {
   const mockMap = { on: vi.fn() }
-  // Use a real function so it works with `new`
   function MockInteractiveMap() {
     return mockMap
   }
@@ -87,7 +82,7 @@ function createMockDefra(mapInstance) {
 let initFn = null
 const originalAddEventListener = document.addEventListener.bind(document)
 
-describe('boundary-map', () => {
+describe('boundary-map init', () => {
   let warnSpy
 
   beforeEach(() => {
@@ -96,7 +91,6 @@ describe('boundary-map', () => {
     vi.resetModules()
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    // Intercept addEventListener to capture the init function
     vi.spyOn(document, 'addEventListener').mockImplementation(
       (event, fn, ...rest) => {
         if (event === 'DOMContentLoaded') {
@@ -115,7 +109,6 @@ describe('boundary-map', () => {
 
   async function loadModule() {
     await import('./boundary-map.js')
-    // Call the captured init function directly
     if (initFn) {
       initFn()
     }
@@ -201,7 +194,23 @@ describe('boundary-map', () => {
     )
   })
 
-  it('adds boundary layers when style is already loaded', async () => {
+  it('adds all layers when style is already loaded', async () => {
+    createMapElement(validGeojson, 'https://example.com/style.json', {
+      edpBoundary: validEdpBoundaryGeojson,
+      edpIntersection: validEdpIntersectionGeojson
+    })
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.addSource).toHaveBeenCalledTimes(3)
+    expect(mapInstance.addLayer).toHaveBeenCalledTimes(6)
+  })
+
+  it('adds boundary source and layers with correct data when style is loaded', async () => {
     createMapElement(validGeojson)
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -220,7 +229,7 @@ describe('boundary-map', () => {
         [-1.5, 52.0],
         [-1.4, 52.1]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -239,7 +248,6 @@ describe('boundary-map', () => {
       expect.any(Function)
     )
 
-    // Trigger the style.load callback
     const styleLoadCallback = mapInstance.once.mock.calls[0][1]
     styleLoadCallback()
 
@@ -282,7 +290,7 @@ describe('boundary-map', () => {
         [-1.5, 52.0],
         [-1.5, 52.0]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -323,7 +331,7 @@ describe('boundary-map', () => {
         [-2.0, 51.0],
         [-1.0, 53.0]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -484,7 +492,7 @@ describe('boundary-map', () => {
         [-3.0, 50.0],
         [0.0, 53.0]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 
@@ -514,7 +522,7 @@ describe('boundary-map', () => {
         [-1.0, 51.0],
         [-0.5, 51.5]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 })
