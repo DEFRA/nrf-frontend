@@ -5,7 +5,7 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 export const title = 'Boundary Map'
 
 function getMapStyleUrl() {
-  return '/base-map/resources/styles'
+  return '/os-base-map/resources/styles'
 }
 
 export default function getViewModel(boundaryGeojson) {

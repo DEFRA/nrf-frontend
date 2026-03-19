@@ -49,15 +49,15 @@ function createMockH() {
   }
 }
 
-describe('base-map proxy routes', () => {
+describe('os-base-map proxy routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   describe('route config', () => {
-    it('should define a GET route at /base-map/{path*}', () => {
+    it('should define a GET route at /os-base-map/{path*}', () => {
       expect(routes[0].method).toBe('GET')
-      expect(routes[0].path).toBe('/base-map/{path*}')
+      expect(routes[0].path).toBe('/os-base-map/{path*}')
     })
 
     it('should not require auth', () => {
@@ -96,7 +96,7 @@ describe('base-map proxy routes', () => {
       await handler(request, h)
 
       const responseBody = h.response.mock.calls[0][0]
-      expect(responseBody).toContain('http://localhost:3000/base-map')
+      expect(responseBody).toContain('http://localhost:3000/os-base-map')
       expect(responseBody).not.toContain('api.os.uk')
       expect(responseBody).not.toContain('test-api-key')
       expect(h._response.type).toHaveBeenCalledWith('application/json')
@@ -128,7 +128,7 @@ describe('base-map proxy routes', () => {
 
       const responseBody = h.response.mock.calls[0][0]
       expect(responseBody).toContain(
-        'http://localhost:3000/base-map/tile/{z}/{y}/{x}.pbf'
+        'http://localhost:3000/os-base-map/tile/{z}/{y}/{x}.pbf'
       )
     })
 
@@ -148,7 +148,7 @@ describe('base-map proxy routes', () => {
       await handler(request, h)
 
       const responseBody = h.response.mock.calls[0][0]
-      expect(responseBody).toContain('https://localhost:3000/base-map')
+      expect(responseBody).toContain('https://localhost:3000/os-base-map')
     })
   })
 

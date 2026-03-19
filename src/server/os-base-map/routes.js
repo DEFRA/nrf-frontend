@@ -7,7 +7,7 @@ const logger = createLogger()
 
 const osBaseUrl = 'https://api.os.uk/maps/vector/v1/vts'
 
-export const routePath = '/base-map'
+export const routePath = '/os-base-map'
 
 function getOsUrl(path, query) {
   const osApiKey = config.get('map.osApiKey')

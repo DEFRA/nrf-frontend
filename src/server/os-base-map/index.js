@@ -1,8 +1,8 @@
 import routes from './routes.js'
 
-export const baseMap = {
+export const osBaseMap = {
   plugin: {
-    name: 'base-map',
+    name: 'os-base-map',
     register(server) {
       server.route(routes)
     }
