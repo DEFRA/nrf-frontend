@@ -220,7 +220,7 @@ describe('boundary-map', () => {
         [-1.5, 52.0],
         [-1.4, 52.1]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -282,7 +282,7 @@ describe('boundary-map', () => {
         [-1.5, 52.0],
         [-1.5, 52.0]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -323,7 +323,7 @@ describe('boundary-map', () => {
         [-2.0, 51.0],
         [-1.0, 53.0]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   })
 
@@ -484,7 +484,7 @@ describe('boundary-map', () => {
         [-3.0, 50.0],
         [0.0, 53.0]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 
@@ -514,7 +514,7 @@ describe('boundary-map', () => {
         [-1.0, 51.0],
         [-0.5, 51.5]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 })
