@@ -9,6 +9,7 @@ const logger = createLogger()
 export function handler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
 
+  // Session may be missing if it expired or the user navigated here directly
   if (!boundaryGeojson) {
     logger.info('map - no boundary data in session')
     return h.redirect(uploadBoundaryPath)
@@ -24,6 +25,7 @@ export function handler(request, h) {
 export function postHandler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
 
+  // Session may be missing if it expired or the user navigated here directly
   if (!boundaryGeojson) {
     return h.redirect(uploadBoundaryPath)
   }
@@ -34,7 +36,6 @@ export function postHandler(request, h) {
   request.yar.clear('boundaryGeojson')
 
   if (intersectsEdp) {
-    logger.info('map - boundary intersects EDP, saved to quote data')
     return h.redirect('/quote/development-types')
   }
 

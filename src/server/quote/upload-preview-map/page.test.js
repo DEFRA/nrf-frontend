@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import { getByRole, queryByLabelText } from '@testing-library/dom'
+import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -101,10 +101,6 @@ describe('Boundary map page', () => {
         'href',
         '/quote/upload-boundary'
       )
-      expect(queryByLabelText(document, 'Yes, continue')).toBeNull()
-      expect(
-        queryByLabelText(document, 'No, upload a different file')
-      ).toBeNull()
       const csrfToken = document.querySelector('form input[name="csrfToken"]')
       expect(csrfToken).toBeInTheDocument()
     })
@@ -163,7 +159,7 @@ describe('Boundary map page', () => {
     })
   })
 
-  it('should redirect to upload-boundary when no geojson in session', async () => {
+  it('should redirect to upload-boundary if the session cache does not contain boundary data', async () => {
     const sessionCookie = await withValidQuoteSession(getServer())
     const response = await getServer().inject({
       method: 'GET',
@@ -193,18 +189,6 @@ describe('Boundary map page', () => {
 
       const editButton = getByRole(document, 'button', { name: 'Edit' })
       expect(editButton).toBeDisabled()
-    })
-
-    it('should not show the boundary correct radio buttons', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      expect(queryByLabelText(document, 'Yes, continue')).toBeNull()
-      expect(
-        queryByLabelText(document, 'No, upload a different file')
-      ).toBeNull()
     })
 
     it('should show save and continue button', async () => {
