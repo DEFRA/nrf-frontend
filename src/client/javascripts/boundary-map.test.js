@@ -484,7 +484,7 @@ describe('boundary-map', () => {
         [-3.0, 50.0],
         [0.0, 53.0]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 
@@ -514,7 +514,7 @@ describe('boundary-map', () => {
         [-1.0, 51.0],
         [-0.5, 51.5]
       ],
-      { padding: 40 }
+      { maxZoom: 15, padding: 40 }
     )
   })
 })
