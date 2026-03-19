@@ -18,16 +18,35 @@ function getOsUrl(path, query) {
   return `${base}?${params.toString()}`
 }
 
+// OS API JSON responses (e.g. style docs, tile metadata) contain absolute URLs
+// back to api.os.uk. We rewrite these to route through our proxy, which injects
+// the API key server-side and strips the original query strings (including the
+// API key) so they aren't leaked to the client.
 function rewriteOsUrls(body, host) {
-  const escapedBase = osBaseUrl.replaceAll(
-    /[.*+?^${}()|[\]\\]/g,
-    String.raw`\$&`
-  )
-  const pattern = String.raw`${escapedBase}(?:/(.*?))?\?[^"\s]*`
   const proxyBase = `${host}${routePath}`
-  return body.replaceAll(new RegExp(pattern, 'g'), (_, path) =>
-    path ? `${proxyBase}/${path}` : proxyBase
-  )
+
+  const json = JSON.parse(body)
+
+  const rewriteValue = (value) => {
+    if (typeof value === 'string' && value.startsWith(osBaseUrl)) {
+      const rest = value.slice(osBaseUrl.length)
+      // Strip query string (contains API key) but keep the sub-path.
+      // Can't use new URL() here as it would encode MapLibre template
+      // tokens like {z}/{y}/{x}.
+      const subPath = rest.split('?')[0]
+      return `${proxyBase}${subPath}`
+    }
+    if (Array.isArray(value)) return value.map(rewriteValue)
+    if (value && typeof value === 'object') return rewriteKeys(value)
+    return value
+  }
+
+  const rewriteKeys = (obj) =>
+    Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, rewriteValue(v)])
+    )
+
+  return JSON.stringify(rewriteKeys(json))
 }
 
 function isBinaryPath(path) {

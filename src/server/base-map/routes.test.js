@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import Wreck from '@hapi/wreck'
-
-vi.mock('@hapi/wreck')
+import { http, HttpResponse } from 'msw'
+import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 
 vi.mock('../../config/config.js', () => ({
   config: {
@@ -21,6 +20,8 @@ const mockLogger = vi.hoisted(() => ({
 vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
+
+const server = setupMswServer()
 
 const { default: routes } = await import('./routes.js')
 
@@ -66,7 +67,7 @@ describe('base-map proxy routes', () => {
 
   describe('JSON responses (style, TileJSON)', () => {
     it('should proxy style requests and rewrite OS URLs', async () => {
-      const osStyleBody = JSON.stringify({
+      const osStyleBody = {
         sources: {
           esri: {
             url: 'https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857'
@@ -76,28 +77,23 @@ describe('base-map proxy routes', () => {
           'https://api.os.uk/maps/vector/v1/vts/resources/sprites/sprite?key=test-api-key&srs=3857',
         glyphs:
           'https://api.os.uk/maps/vector/v1/vts/resources/fonts/{fontstack}/{range}.pbf?key=test-api-key&srs=3857'
-      })
+      }
 
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: {
-            'content-type': 'application/json',
-            'cache-control': 'max-age=3600'
-          }
-        },
-        payload: Buffer.from(osStyleBody)
-      })
+      server.use(
+        http.get('https://api.os.uk/maps/vector/v1/vts/resources/styles', () =>
+          HttpResponse.json(osStyleBody, {
+            headers: {
+              'content-type': 'application/json',
+              'cache-control': 'max-age=3600'
+            }
+          })
+        )
+      )
 
       const request = createMockRequest({ path: 'resources/styles' })
       const h = createMockH()
 
       await handler(request, h)
-
-      expect(Wreck.get).toHaveBeenCalledWith(
-        'https://api.os.uk/maps/vector/v1/vts/resources/styles?key=test-api-key&srs=3857',
-        expect.objectContaining({ gunzip: true })
-      )
 
       const responseBody = h.response.mock.calls[0][0]
       expect(responseBody).toContain('http://localhost:3000/base-map')
@@ -111,29 +107,24 @@ describe('base-map proxy routes', () => {
     })
 
     it('should proxy TileJSON at the root path', async () => {
-      const tileJson = JSON.stringify({
+      const tileJson = {
         tiles: [
           'https://api.os.uk/maps/vector/v1/vts/tile/{z}/{y}/{x}.pbf?key=test-api-key&srs=3857'
         ]
-      })
+      }
 
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: { 'content-type': 'application/json', 'cache-control': '' }
-        },
-        payload: Buffer.from(tileJson)
-      })
+      server.use(
+        http.get('https://api.os.uk/maps/vector/v1/vts', () =>
+          HttpResponse.json(tileJson, {
+            headers: { 'content-type': 'application/json' }
+          })
+        )
+      )
 
       const request = createMockRequest()
       const h = createMockH()
 
       await handler(request, h)
-
-      expect(Wreck.get).toHaveBeenCalledWith(
-        'https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857',
-        expect.anything()
-      )
 
       const responseBody = h.response.mock.calls[0][0]
       expect(responseBody).toContain(
@@ -142,15 +133,13 @@ describe('base-map proxy routes', () => {
     })
 
     it('should use x-forwarded-proto when present', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: { 'content-type': 'application/json' }
-        },
-        payload: Buffer.from(
-          '{"url":"https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857"}'
+      server.use(
+        http.get('https://api.os.uk/maps/vector/v1/vts/resources/styles', () =>
+          HttpResponse.json({
+            url: 'https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857'
+          })
         )
-      })
+      )
 
       const request = createMockRequest({ path: 'resources/styles' })
       request.headers['x-forwarded-proto'] = 'https'
@@ -165,32 +154,28 @@ describe('base-map proxy routes', () => {
 
   describe('binary responses (tiles, sprites)', () => {
     it('should proxy .pbf tiles without decompression', async () => {
-      const tileData = Buffer.from([0x1a, 0x02, 0x03])
+      const tileData = new Uint8Array([0x1a, 0x02, 0x03])
 
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: {
-            'content-type': 'application/octet-stream',
-            'cache-control': 'max-age=86400',
-            'content-encoding': 'gzip'
-          }
-        },
-        payload: tileData
-      })
+      server.use(
+        http.get(
+          'https://api.os.uk/maps/vector/v1/vts/tile/7/63/42.pbf',
+          () =>
+            new HttpResponse(tileData, {
+              headers: {
+                'content-type': 'application/octet-stream',
+                'cache-control': 'max-age=86400',
+                'content-encoding': 'gzip'
+              }
+            })
+        )
+      )
 
-      const request = createMockRequest({
-        path: 'tile/7/63/42.pbf'
-      })
+      const request = createMockRequest({ path: 'tile/7/63/42.pbf' })
       const h = createMockH()
 
       await handler(request, h)
 
-      expect(Wreck.get).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ gunzip: false })
-      )
-      expect(h.response).toHaveBeenCalledWith(tileData)
+      expect(h.response).toHaveBeenCalled()
       expect(h._response.type).toHaveBeenCalledWith('application/octet-stream')
       expect(h._response.header).toHaveBeenCalledWith(
         'content-encoding',
@@ -203,16 +188,18 @@ describe('base-map proxy routes', () => {
     })
 
     it('should not set content-encoding if upstream does not send it', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: {
-            'content-type': 'image/png',
-            'cache-control': 'no-cache'
-          }
-        },
-        payload: Buffer.from([0x89, 0x50, 0x4e, 0x47])
-      })
+      server.use(
+        http.get(
+          'https://api.os.uk/maps/vector/v1/vts/resources/sprites/sprite.png',
+          () =>
+            new HttpResponse(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), {
+              headers: {
+                'content-type': 'image/png',
+                'cache-control': 'no-cache'
+              }
+            })
+        )
+      )
 
       const request = createMockRequest({
         path: 'resources/sprites/sprite.png'
@@ -228,14 +215,12 @@ describe('base-map proxy routes', () => {
 
   describe('error handling', () => {
     it('should pass through upstream error status codes', async () => {
-      const boomError = new Error('Response Error: 403 Forbidden')
-      boomError.data = {
-        isResponseError: true,
-        res: { statusCode: 403 },
-        payload: Buffer.from('Forbidden')
-      }
-
-      vi.mocked(Wreck.get).mockRejectedValue(boomError)
+      server.use(
+        http.get(
+          'https://api.os.uk/maps/vector/v1/vts/tile/15/10706/16499.pbf',
+          () => new HttpResponse('Forbidden', { status: 403 })
+        )
+      )
 
       const request = createMockRequest({
         path: 'tile/15/10706/16499.pbf'
@@ -249,7 +234,11 @@ describe('base-map proxy routes', () => {
     })
 
     it('should return 502 for network errors', async () => {
-      vi.mocked(Wreck.get).mockRejectedValue(new Error('ECONNREFUSED'))
+      server.use(
+        http.get('https://api.os.uk/maps/vector/v1/vts/resources/styles', () =>
+          HttpResponse.error()
+        )
+      )
 
       const request = createMockRequest({ path: 'resources/styles' })
       const h = createMockH()
@@ -258,45 +247,43 @@ describe('base-map proxy routes', () => {
 
       expect(h.response).toHaveBeenCalledWith('Map tile request failed')
       expect(h._response.code).toHaveBeenCalledWith(502)
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Map proxy error for resources/styles: ECONNREFUSED'
-      )
+      expect(mockLogger.error).toHaveBeenCalled()
     })
   })
 
   describe('URL construction', () => {
     it('should append API key and srs=3857 to all requests', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: { 'content-type': 'application/json' }
-        },
-        payload: Buffer.from('{}')
-      })
+      let capturedUrl
+      server.use(
+        http.get(
+          'https://api.os.uk/maps/vector/v1/vts/resources/styles',
+          ({ request: req }) => {
+            capturedUrl = new URL(req.url)
+            return HttpResponse.json({})
+          }
+        )
+      )
 
       const request = createMockRequest({ path: 'resources/styles' })
       const h = createMockH()
 
       await handler(request, h)
 
-      expect(Wreck.get).toHaveBeenCalledWith(
-        expect.stringContaining('key=test-api-key'),
-        expect.anything()
-      )
-      expect(Wreck.get).toHaveBeenCalledWith(
-        expect.stringContaining('srs=3857'),
-        expect.anything()
-      )
+      expect(capturedUrl.searchParams.get('key')).toBe('test-api-key')
+      expect(capturedUrl.searchParams.get('srs')).toBe('3857')
     })
 
     it('should forward query parameters from the client', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({
-        res: {
-          statusCode: 200,
-          headers: { 'content-type': 'application/json' }
-        },
-        payload: Buffer.from('{}')
-      })
+      let capturedUrl
+      server.use(
+        http.get(
+          'https://api.os.uk/maps/vector/v1/vts/resources/styles',
+          ({ request: req }) => {
+            capturedUrl = new URL(req.url)
+            return HttpResponse.json({})
+          }
+        )
+      )
 
       const request = createMockRequest({
         path: 'resources/styles',
@@ -306,10 +293,7 @@ describe('base-map proxy routes', () => {
 
       await handler(request, h)
 
-      expect(Wreck.get).toHaveBeenCalledWith(
-        expect.stringContaining('f=json'),
-        expect.anything()
-      )
+      expect(capturedUrl.searchParams.get('f')).toBe('json')
     })
   })
 })
