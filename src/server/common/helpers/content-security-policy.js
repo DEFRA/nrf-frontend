@@ -27,6 +27,7 @@ const contentSecurityPolicy = {
     frameAncestors: ['none'],
     formAction: ['self', ...(cdpUploaderUrl ? [cdpUploaderUrl] : [])],
     manifestSrc: ['self'],
+    // blob: is required by maplibre-gl which creates web workers from blob URLs
     workerSrc: ['self', 'blob:'],
     childSrc: ['self', 'blob:'],
     generateNonces: true
