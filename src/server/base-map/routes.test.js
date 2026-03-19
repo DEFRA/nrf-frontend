@@ -69,7 +69,7 @@ describe('base-map proxy routes', () => {
     it('should proxy style requests and rewrite OS URLs', async () => {
       const osStyleBody = {
         sources: {
-          esri: {
+          osVectorTiles: {
             url: 'https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857'
           }
         },
