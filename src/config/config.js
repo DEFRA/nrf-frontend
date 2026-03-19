@@ -315,11 +315,11 @@ export const config = convict({
     env: 'USE_SWAGGER'
   },
   map: {
-    styleUrl: {
-      doc: 'URL to the map style.json (Mapbox Style Specification)',
+    osApiKey: {
+      doc: 'Ordnance Survey Vector Tile API key for the OS Vector Tile API base map.',
       format: String,
-      default: 'https://demotiles.maplibre.org/style.json',
-      env: 'MAP_STYLE_URL'
+      default: '',
+      env: 'OS_API_KEY'
     }
   },
   cdpUploader: {

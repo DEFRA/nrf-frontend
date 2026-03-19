@@ -42,7 +42,7 @@ export function fitMapToBounds(mapInstance, geojson) {
         [west, south],
         [east, north]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   }
 }

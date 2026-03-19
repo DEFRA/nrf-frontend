@@ -9,6 +9,8 @@ const MAP_SOURCE_BOUNDARY = 'boundary'
 const MAP_SOURCE_EDP_BOUNDARY = 'edp-boundary'
 const MAP_SOURCE_EDP_INTERSECTION = 'edp-intersection'
 
+const BOUNDARY_COLOR = '#d4351c'
+
 export function addBoundaryLayer(mapInstance, geojson) {
   if (mapInstance.getSource(MAP_SOURCE_BOUNDARY)) {
     return
@@ -24,7 +26,7 @@ export function addBoundaryLayer(mapInstance, geojson) {
     type: 'fill',
     source: MAP_SOURCE_BOUNDARY,
     paint: {
-      'fill-color': '#d4351c',
+      'fill-color': BOUNDARY_COLOR,
       'fill-opacity': 0.1
     }
   })
@@ -34,7 +36,7 @@ export function addBoundaryLayer(mapInstance, geojson) {
     type: 'line',
     source: MAP_SOURCE_BOUNDARY,
     paint: {
-      'line-color': '#d4351c',
+      'line-color': BOUNDARY_COLOR,
       'line-width': 3
     }
   })

@@ -14,11 +14,18 @@ import {
   addEdpIntersectionLayer
 } from './boundary-map-layers.js'
 
+const MAP_ELEMENT_ID = 'boundary-map'
+
+// TODO: send warnings to the server once server-side logging is available
+function logWarning(message, error) {
+  console.warn(message, error || '')
+}
+
 function parseGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.geojson)
   } catch (e) {
-    console.warn('Failed to parse boundary GeoJSON', e)
+    logWarning('Failed to parse boundary GeoJSON', e)
     return null
   }
 }
@@ -27,7 +34,7 @@ function parseEdpBoundaryGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.edpBoundaryGeojson)
   } catch {
-    console.warn('Failed to parse EDP boundary GeoJSON')
+    logWarning('Failed to parse EDP boundary GeoJSON')
     return null
   }
 }
@@ -36,19 +43,21 @@ function parseEdpIntersectionGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
   } catch {
-    console.warn('Failed to parse EDP intersection GeoJSON')
+    logWarning('Failed to parse EDP intersection GeoJSON')
     return null
   }
 }
 
 function initBoundaryMap() {
-  const mapEl = document.getElementById('boundary-map')
+  const mapEl = document.getElementById(MAP_ELEMENT_ID)
   if (!mapEl) {
+    logWarning('Boundary map element not found')
     return
   }
 
   const geojson = parseGeojson(mapEl)
   if (!geojson) {
+    logWarning('No valid GeoJSON data for boundary map')
     return
   }
 
@@ -60,12 +69,13 @@ function initBoundaryMap() {
     !defra.InteractiveMap ||
     !defra.maplibreProvider
   ) {
+    logWarning('DEFRA interactive map dependencies not available')
     return
   }
 
   const mapStyleUrl = mapEl.dataset.mapStyleUrl
 
-  const map = new defra.InteractiveMap('boundary-map', {
+  const map = new defra.InteractiveMap(MAP_ELEMENT_ID, {
     mapProvider: defra.maplibreProvider(),
     behaviour: 'inline',
     mapLabel: 'Red line boundary',
@@ -79,6 +89,10 @@ function initBoundaryMap() {
 
   map.on('map:ready', function (event) {
     const mapInstance = event.map
+
+    mapInstance.on('error', function (err) {
+      logWarning('Boundary map error', err.error || err)
+    })
 
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)

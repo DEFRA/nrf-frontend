@@ -41,7 +41,8 @@ function createMockMapInstance(styleLoaded = true) {
     addLayer: vi.fn(),
     fitBounds: vi.fn(),
     isStyleLoaded: vi.fn().mockReturnValue(styleLoaded),
-    once: vi.fn()
+    once: vi.fn(),
+    on: vi.fn()
   }
 }
 
@@ -116,6 +117,7 @@ describe('boundary-map init', () => {
   it('does nothing when no map element exists', async () => {
     await loadModule()
     expect(document.getElementById('boundary-map')).toBeNull()
+    expect(warnSpy).toHaveBeenCalledWith('Boundary map element not found', '')
   })
 
   it('does nothing when geojson is invalid JSON', async () => {
@@ -130,13 +132,19 @@ describe('boundary-map init', () => {
   it('does nothing when geojson parses to null', async () => {
     createMapElement('null')
     await loadModule()
-    expect(globalThis.defra).toBeUndefined()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'No valid GeoJSON data for boundary map',
+      ''
+    )
   })
 
   it('does nothing when defra global is undefined', async () => {
     createMapElement(validGeojson)
     await loadModule()
-    expect(globalThis.defra).toBeUndefined()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'DEFRA interactive map dependencies not available',
+      ''
+    )
   })
 
   it('does nothing when defra.InteractiveMap is missing', async () => {
@@ -144,6 +152,10 @@ describe('boundary-map init', () => {
     globalThis.defra = { maplibreProvider: vi.fn() }
     await loadModule()
     expect(globalThis.defra.maplibreProvider).not.toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'DEFRA interactive map dependencies not available',
+      ''
+    )
   })
 
   it('does nothing when defra.maplibreProvider is missing', async () => {
@@ -154,6 +166,10 @@ describe('boundary-map init', () => {
     }
     await loadModule()
     expect(constructorSpy).not.toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'DEFRA interactive map dependencies not available',
+      ''
+    )
   })
 
   it('creates an InteractiveMap with correct options', async () => {
@@ -194,6 +210,29 @@ describe('boundary-map init', () => {
     expect(mapInstance.addLayer).toHaveBeenCalledTimes(6)
   })
 
+  it('adds boundary source and layers with correct data when style is loaded', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.addSource).toHaveBeenCalledWith('boundary', {
+      type: 'geojson',
+      data: validGeojson
+    })
+    expect(mapInstance.addLayer).toHaveBeenCalledTimes(2)
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-1.5, 52.0],
+        [-1.4, 52.1]
+      ],
+      { padding: 40, maxZoom: 15 }
+    )
+  })
+
   it('waits for style.load when style is not yet loaded', async () => {
     createMapElement(validGeojson)
     const mapInstance = createMockMapInstance(false)
@@ -215,6 +254,275 @@ describe('boundary-map init', () => {
     expect(mapInstance.addSource).toHaveBeenCalledWith(
       'boundary',
       expect.objectContaining({ type: 'geojson' })
+    )
+  })
+
+  it('skips adding layers if boundary source already exists', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    mapInstance.getSource.mockReturnValue({})
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.addSource).not.toHaveBeenCalled()
+    expect(mapInstance.addLayer).not.toHaveBeenCalled()
+  })
+
+  it('handles geojson without features array (single geometry)', async () => {
+    const singleGeometry = {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-1.5, 52.0] },
+      properties: {}
+    }
+    createMapElement(singleGeometry)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-1.5, 52.0],
+        [-1.5, 52.0]
+      ],
+      { padding: 40, maxZoom: 15 }
+    )
+  })
+
+  it('handles nested coordinate arrays (MultiPolygon)', async () => {
+    const multiPolygon = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [
+              [
+                [
+                  [-2.0, 51.0],
+                  [-1.0, 51.0],
+                  [-1.0, 53.0],
+                  [-2.0, 53.0],
+                  [-2.0, 51.0]
+                ]
+              ]
+            ]
+          },
+          properties: {}
+        }
+      ]
+    }
+    createMapElement(multiPolygon)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-2.0, 51.0],
+        [-1.0, 53.0]
+      ],
+      { padding: 40, maxZoom: 15 }
+    )
+  })
+
+  it('handles empty features array without calling fitBounds', async () => {
+    const emptyGeojson = { type: 'FeatureCollection', features: [] }
+    createMapElement(emptyGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
+  })
+
+  it('registers an error handler on the map instance', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
+    expect(errorCall).toBeTruthy()
+
+    // Trigger the error handler with an error object
+    errorCall[1]({ error: new Error('tile load failed') })
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Boundary map error',
+      expect.any(Error)
+    )
+  })
+
+  it('error handler falls back to the event itself when err.error is missing', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
+    const errEvent = { message: 'something went wrong' }
+    errorCall[1](errEvent)
+    expect(warnSpy).toHaveBeenCalledWith('Boundary map error', errEvent)
+  })
+
+  it('adds fill and line layers with correct paint properties', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.addLayer).toHaveBeenCalledWith({
+      id: 'boundary-fill',
+      type: 'fill',
+      source: 'boundary',
+      paint: {
+        'fill-color': '#d4351c',
+        'fill-opacity': 0.1
+      }
+    })
+    expect(mapInstance.addLayer).toHaveBeenCalledWith({
+      id: 'boundary-line',
+      type: 'line',
+      source: 'boundary',
+      paint: {
+        'line-color': '#d4351c',
+        'line-width': 3
+      }
+    })
+  })
+
+  it('passes maplibreProvider return value to InteractiveMap', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    const providerResult = { provider: 'maplibre' }
+    mockDefra.maplibreProvider.mockReturnValue(providerResult)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+
+    expect(mockDefra._mock).toHaveBeenCalledWith(
+      'boundary-map',
+      expect.objectContaining({
+        mapProvider: providerResult
+      })
+    )
+  })
+
+  it('includes current year in map attribution', async () => {
+    createMapElement(validGeojson)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+
+    const year = new Date().getFullYear()
+    expect(mockDefra._mock).toHaveBeenCalledWith(
+      'boundary-map',
+      expect.objectContaining({
+        mapStyle: expect.objectContaining({
+          attribution: expect.stringContaining(String(year))
+        })
+      })
+    )
+  })
+
+  it('computes bounds across multiple features', async () => {
+    const multiFeature = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-3.0, 50.0],
+                [-2.0, 50.0],
+                [-2.0, 51.0],
+                [-3.0, 51.0],
+                [-3.0, 50.0]
+              ]
+            ]
+          },
+          properties: {}
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [0.0, 53.0]
+          },
+          properties: {}
+        }
+      ]
+    }
+    createMapElement(multiFeature)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-3.0, 50.0],
+        [0.0, 53.0]
+      ],
+      { maxZoom: 15, padding: 40 }
+    )
+  })
+
+  it('handles bare geometry object without features or geometry wrapper', async () => {
+    const bareGeometry = {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [-1.0, 51.0],
+          [-0.5, 51.0],
+          [-0.5, 51.5],
+          [-1.0, 51.5],
+          [-1.0, 51.0]
+        ]
+      ]
+    }
+    createMapElement(bareGeometry)
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
+    await loadModule()
+    mockDefra._triggerReady()
+
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-1.0, 51.0],
+        [-0.5, 51.5]
+      ],
+      { maxZoom: 15, padding: 40 }
     )
   })
 })
