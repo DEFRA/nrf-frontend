@@ -142,4 +142,44 @@ describe('Upload received page', () => {
     expect(getByText(document, 'There is a problem')).toBeInTheDocument()
     expect(getByText(document, errorMessage)).toBeInTheDocument()
   })
+
+  it('should show try again and draw boundary links when boundary check error occurs', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Found 1 invalid geometries (self-intersections, etc.)'
+    })
+
+    const { document } = await submitForm({
+      server: getServer(),
+      requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id')
+    })
+
+    const tryAgainLink = getByRole(document, 'link', {
+      name: 'Try uploading another file'
+    })
+    expect(tryAgainLink).toHaveAttribute('href', '/quote/upload-boundary')
+
+    const drawLink = getByRole(document, 'link', {
+      name: 'Draw the red line boundary instead'
+    })
+    expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
+  })
+
+  it('should show try again and draw boundary links when upload error occurs', async () => {
+    vi.mocked(getUploadStatus).mockResolvedValue({
+      uploadStatus: 'error',
+      error: 'Upload failed'
+    })
+
+    const document = await loadPageWithSession({ server: getServer() })
+
+    const tryAgainLink = getByRole(document, 'link', {
+      name: 'Try uploading another file'
+    })
+    expect(tryAgainLink).toHaveAttribute('href', '/quote/upload-boundary')
+
+    const drawLink = getByRole(document, 'link', {
+      name: 'Draw the red line boundary instead'
+    })
+    expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
+  })
 })

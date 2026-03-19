@@ -22,6 +22,13 @@
                 text: errorMessage
             }]
         }) }}
+
+        <p class="govuk-body">
+            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
+        </p>
+        <p class="govuk-body">
+            <a href="/quote/boundary-type" class="govuk-link">Draw the red line boundary instead</a>
+        </p>
         {% endif %}
 
         {% if boundaryCheckError %}
@@ -31,6 +38,13 @@
                 text: boundaryCheckError
             }]
         }) }}
+
+        <p class="govuk-body">
+            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
+        </p>
+        <p class="govuk-body">
+            <a href="/quote/boundary-type" class="govuk-link">Draw the red line boundary instead</a>
+        </p>
 
         {% elseif isReady %}
         <p class="govuk-body">Upload and virus scan completed.</p>
