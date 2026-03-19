@@ -1,14 +1,8 @@
 import { JSDOM } from 'jsdom'
-import {
-  getByRole,
-  getByLabelText,
-  queryByLabelText
-} from '@testing-library/dom'
+import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
-import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
-import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 import { checkBoundaryPath } from '../upload-received/routes.js'
@@ -107,12 +101,24 @@ describe('Boundary map page', () => {
         'href',
         '/quote/upload-boundary'
       )
-      expect(getByLabelText(document, 'Yes, continue')).not.toBeChecked()
-      expect(
-        getByLabelText(document, 'No, upload a different file')
-      ).not.toBeChecked()
       const csrfToken = document.querySelector('form input[name="csrfToken"]')
       expect(csrfToken).toBeInTheDocument()
+    })
+
+    it('should display no EDPs message', async () => {
+      const { document } = await loadPageWithSession(getServer())
+
+      expect(document.body.textContent).toContain(
+        'There are no EDPs within the red line boundary.'
+      )
+    })
+
+    it('should show save and continue button', async () => {
+      const { document } = await loadPageWithSession(getServer())
+
+      expect(
+        getByRole(document, 'button', { name: 'Save and continue' })
+      ).toBeInTheDocument()
     })
 
     it('should display feature count', async () => {
@@ -140,54 +146,20 @@ describe('Boundary map page', () => {
       expect(mapScripts.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('should show a validation error after submitting without a selection', async () => {
+    it('should redirect to no-edp page on save and continue', async () => {
       const cookie = await setupSession(getServer())
-      const { response, cookie: postCookie } = await submitForm({
+      const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
         formData: {},
         cookie
       })
       expect(response.statusCode).toBe(302)
-      expect(response.headers.location).toBe(routePath)
-
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie: postCookie
-      })
-      expectFieldsetError({
-        document,
-        errorMessage: 'Select if the boundary is correct'
-      })
-    })
-
-    it('should redirect to development-types when user confirms', async () => {
-      const cookie = await setupSession(getServer())
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { boundaryCorrect: 'yes' },
-        cookie
-      })
-      expect(response.statusCode).toBe(302)
-      expect(response.headers.location).toBe('/quote/development-types')
-    })
-
-    it('should redirect to upload-boundary when user selects no', async () => {
-      const cookie = await setupSession(getServer())
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { boundaryCorrect: 'no' },
-        cookie
-      })
-      expect(response.statusCode).toBe(302)
-      expect(response.headers.location).toBe('/quote/upload-boundary')
+      expect(response.headers.location).toBe('/quote/no-edp')
     })
   })
 
-  it('should redirect to upload-boundary when no geojson in session', async () => {
+  it('should redirect to upload-boundary if the session cache does not contain boundary data', async () => {
     const sessionCookie = await withValidQuoteSession(getServer())
     const response = await getServer().inject({
       method: 'GET',
@@ -217,18 +189,6 @@ describe('Boundary map page', () => {
 
       const editButton = getByRole(document, 'button', { name: 'Edit' })
       expect(editButton).toBeDisabled()
-    })
-
-    it('should not show the boundary correct radio buttons', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      expect(queryByLabelText(document, 'Yes, continue')).toBeNull()
-      expect(
-        queryByLabelText(document, 'No, upload a different file')
-      ).toBeNull()
     })
 
     it('should show save and continue button', async () => {

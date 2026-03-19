@@ -26,7 +26,7 @@ describe('No EDP page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '#'
+      '/quote/upload-preview-map'
     )
   })
 })
