@@ -24,34 +24,25 @@ function rewriteOrdnanceSurveyMapUrls(body, host) {
   const proxyBase = `${host}${routePath}`
   const basePath = new URL(ordnanceSurveyMapUrl).pathname
 
-  let json
   try {
-    json = JSON.parse(body)
+    // Walk every value in the JSON using the parse reviver callback
+    const json = JSON.parse(body, (_key, value) => {
+      if (typeof value === 'string' && value.startsWith(ordnanceSurveyMapUrl)) {
+        // Extract the sub-path (e.g. /resources/styles) and discard the query string.
+        // decodeURIComponent restores MapLibre template tokens like {z}/{y}/{x}
+        // that new URL() percent-encodes.
+        const subPath = decodeURIComponent(
+          new URL(value).pathname.slice(basePath.length)
+        )
+        return proxyBase + subPath
+      }
+      return value
+    })
+
+    return JSON.stringify(json)
   } catch {
     return body
   }
-
-  const rewrite = (v) => {
-    if (typeof v === 'string') {
-      if (!v.startsWith(ordnanceSurveyMapUrl)) return v
-      const subPath = decodeURIComponent(
-        new URL(v).pathname.slice(basePath.length)
-      )
-      return proxyBase + subPath
-    }
-
-    if (Array.isArray(v)) return v.map(rewrite)
-
-    if (v && typeof v === 'object') {
-      return Object.fromEntries(
-        Object.entries(v).map(([k, val]) => [k, rewrite(val)])
-      )
-    }
-
-    return v
-  }
-
-  return JSON.stringify(rewrite(json))
 }
 
 function isBinaryPath(path) {
