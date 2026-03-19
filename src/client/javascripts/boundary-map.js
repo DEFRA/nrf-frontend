@@ -8,11 +8,19 @@
 
 /* global defra */
 
+const MAP_ELEMENT_ID = 'boundary-map'
+const BOUNDARY_COLOR = '#d4351c'
+
+// TODO: send warnings to the server once server-side logging is available
+function logWarning(message, error) {
+  console.warn(message, error || '')
+}
+
 function parseGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.geojson)
   } catch (e) {
-    console.warn('Failed to parse boundary GeoJSON', e)
+    logWarning('Failed to parse boundary GeoJSON', e)
     return null
   }
 }
@@ -57,7 +65,7 @@ function fitMapToBounds(mapInstance, geojson) {
         [west, south],
         [east, north]
       ],
-      { padding: 40 }
+      { padding: 40, maxZoom: 15 }
     )
   }
 }
@@ -77,7 +85,7 @@ function addBoundaryLayer(mapInstance, geojson) {
     type: 'fill',
     source: 'boundary',
     paint: {
-      'fill-color': '#d4351c',
+      'fill-color': BOUNDARY_COLOR,
       'fill-opacity': 0.1
     }
   })
@@ -87,7 +95,7 @@ function addBoundaryLayer(mapInstance, geojson) {
     type: 'line',
     source: 'boundary',
     paint: {
-      'line-color': '#d4351c',
+      'line-color': BOUNDARY_COLOR,
       'line-width': 3
     }
   })
@@ -96,13 +104,15 @@ function addBoundaryLayer(mapInstance, geojson) {
 }
 
 function initBoundaryMap() {
-  const mapEl = document.getElementById('boundary-map')
+  const mapEl = document.getElementById(MAP_ELEMENT_ID)
   if (!mapEl) {
+    logWarning('Boundary map element not found')
     return
   }
 
   const geojson = parseGeojson(mapEl)
   if (!geojson) {
+    logWarning('No valid GeoJSON data for boundary map')
     return
   }
 
@@ -111,12 +121,13 @@ function initBoundaryMap() {
     !defra.InteractiveMap ||
     !defra.maplibreProvider
   ) {
+    logWarning('DEFRA interactive map dependencies not available')
     return
   }
 
   const mapStyleUrl = mapEl.dataset.mapStyleUrl
 
-  const map = new defra.InteractiveMap('boundary-map', {
+  const map = new defra.InteractiveMap(MAP_ELEMENT_ID, {
     mapProvider: defra.maplibreProvider(),
     behaviour: 'inline',
     mapLabel: 'Red line boundary',
@@ -130,6 +141,10 @@ function initBoundaryMap() {
 
   map.on('map:ready', function (event) {
     const mapInstance = event.map
+
+    mapInstance.on('error', function (err) {
+      logWarning('Boundary map error', err.error || err)
+    })
 
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)
