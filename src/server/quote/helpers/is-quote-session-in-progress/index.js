@@ -4,13 +4,17 @@ import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../get-quote-session/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 
-const exemptPaths = [boundaryTypePath, confirmationPath, deleteConfirmationPath]
+const exemptPaths = new Set([
+  boundaryTypePath,
+  confirmationPath,
+  deleteConfirmationPath
+])
 
 export const checkForValidQuoteSession = (request, h) => {
   if (
     request.method !== 'get' ||
     !request.path.startsWith('/quote/') ||
-    exemptPaths.includes(request.path)
+    exemptPaths.has(request.path)
   ) {
     return h.continue
   }
