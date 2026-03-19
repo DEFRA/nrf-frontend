@@ -22,6 +22,7 @@ function getOrdnanceSurveyMapUrl(path, query) {
 // query strings so the API key isn't leaked to the client.
 function rewriteOrdnanceSurveyMapUrls(body, host) {
   const proxyBase = `${host}${routePath}`
+  const basePath = new URL(ordnanceSurveyMapUrl).pathname
 
   let json
   try {
@@ -33,10 +34,10 @@ function rewriteOrdnanceSurveyMapUrls(body, host) {
   const rewrite = (v) => {
     if (typeof v === 'string') {
       if (!v.startsWith(ordnanceSurveyMapUrl)) return v
-
-      const rest = v.slice(ordnanceSurveyMapUrl.length)
-      const i = rest.indexOf('?')
-      return proxyBase + (i === -1 ? rest : rest.slice(0, i))
+      const subPath = decodeURIComponent(
+        new URL(v).pathname.slice(basePath.length)
+      )
+      return proxyBase + subPath
     }
 
     if (Array.isArray(v)) return v.map(rewrite)
