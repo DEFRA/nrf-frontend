@@ -8,115 +8,74 @@
 
 /* global defra */
 
+import {
+  addBoundaryLayer,
+  addEdpBoundaryLayer,
+  addEdpIntersectionLayer
+} from './boundary-map-layers.js'
+
+const MAP_ELEMENT_ID = 'boundary-map'
+
+// TODO: send warnings to the server once server-side logging is available
+function logWarning(message, error) {
+  console.warn(message, error || '')
+}
+
 function parseGeojson(mapEl) {
   try {
     return JSON.parse(mapEl.dataset.geojson)
   } catch (e) {
-    console.warn('Failed to parse boundary GeoJSON', e)
+    logWarning('Failed to parse boundary GeoJSON', e)
     return null
   }
 }
 
-function collectCoords(c, coords) {
-  if (typeof c[0] === 'number') {
-    coords.push(c)
-  } else {
-    c.forEach(function (inner) {
-      collectCoords(inner, coords)
-    })
+function parseEdpBoundaryGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpBoundaryGeojson)
+  } catch {
+    logWarning('Failed to parse EDP boundary GeoJSON')
+    return null
   }
 }
 
-function fitMapToBounds(mapInstance, geojson) {
-  const coords = []
-  ;(geojson.features || [geojson]).forEach(function (f) {
-    collectCoords(f.geometry ? f.geometry.coordinates : f.coordinates, coords)
-  })
-
-  if (coords.length) {
-    let west = coords[0][0]
-    let south = coords[0][1]
-    let east = coords[0][0]
-    let north = coords[0][1]
-    coords.forEach(function (c) {
-      if (c[0] < west) {
-        west = c[0]
-      }
-      if (c[0] > east) {
-        east = c[0]
-      }
-      if (c[1] < south) {
-        south = c[1]
-      }
-      if (c[1] > north) {
-        north = c[1]
-      }
-    })
-    mapInstance.fitBounds(
-      [
-        [west, south],
-        [east, north]
-      ],
-      { padding: 40 }
-    )
+function parseEdpIntersectionGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
+  } catch {
+    logWarning('Failed to parse EDP intersection GeoJSON')
+    return null
   }
-}
-
-function addBoundaryLayer(mapInstance, geojson) {
-  if (mapInstance.getSource('boundary')) {
-    return
-  }
-
-  mapInstance.addSource('boundary', {
-    type: 'geojson',
-    data: geojson
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-fill',
-    type: 'fill',
-    source: 'boundary',
-    paint: {
-      'fill-color': '#d4351c',
-      'fill-opacity': 0.1
-    }
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-line',
-    type: 'line',
-    source: 'boundary',
-    paint: {
-      'line-color': '#d4351c',
-      'line-width': 3
-    }
-  })
-
-  fitMapToBounds(mapInstance, geojson)
 }
 
 function initBoundaryMap() {
-  const mapEl = document.getElementById('boundary-map')
+  const mapEl = document.getElementById(MAP_ELEMENT_ID)
   if (!mapEl) {
+    logWarning('Boundary map element not found')
     return
   }
 
   const geojson = parseGeojson(mapEl)
   if (!geojson) {
+    logWarning('No valid GeoJSON data for boundary map')
     return
   }
+
+  const edpBoundaryGeojson = parseEdpBoundaryGeojson(mapEl)
+  const edpIntersectionGeojson = parseEdpIntersectionGeojson(mapEl)
 
   if (
     typeof defra === 'undefined' ||
     !defra.InteractiveMap ||
     !defra.maplibreProvider
   ) {
+    logWarning('DEFRA interactive map dependencies not available')
     return
   }
 
   const mapStyleUrl = mapEl.dataset.mapStyleUrl
 
-  const map = new defra.InteractiveMap('boundary-map', {
+  const map = new defra.InteractiveMap(MAP_ELEMENT_ID, {
     mapProvider: defra.maplibreProvider(),
     behaviour: 'inline',
     mapLabel: 'Red line boundary',
@@ -131,11 +90,19 @@ function initBoundaryMap() {
   map.on('map:ready', function (event) {
     const mapInstance = event.map
 
+    mapInstance.on('error', function (err) {
+      logWarning('Boundary map error', err.error || err)
+    })
+
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)
+      addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+      addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
     } else {
       mapInstance.once('style.load', function () {
         addBoundaryLayer(mapInstance, geojson)
+        addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+        addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
       })
     }
   })
