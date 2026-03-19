@@ -8,8 +8,13 @@
 
 /* global defra */
 
+import {
+  addBoundaryLayer,
+  addEdpBoundaryLayer,
+  addEdpIntersectionLayer
+} from './boundary-map-layers.js'
+
 const MAP_ELEMENT_ID = 'boundary-map'
-const BOUNDARY_COLOR = '#d4351c'
 
 // TODO: send warnings to the server once server-side logging is available
 function logWarning(message, error) {
@@ -25,82 +30,22 @@ function parseGeojson(mapEl) {
   }
 }
 
-function collectCoords(c, coords) {
-  if (typeof c[0] === 'number') {
-    coords.push(c)
-  } else {
-    c.forEach(function (inner) {
-      collectCoords(inner, coords)
-    })
+function parseEdpBoundaryGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpBoundaryGeojson)
+  } catch {
+    logWarning('Failed to parse EDP boundary GeoJSON')
+    return null
   }
 }
 
-function fitMapToBounds(mapInstance, geojson) {
-  const coords = []
-  ;(geojson.features || [geojson]).forEach(function (f) {
-    collectCoords(f.geometry ? f.geometry.coordinates : f.coordinates, coords)
-  })
-
-  if (coords.length) {
-    let west = coords[0][0]
-    let south = coords[0][1]
-    let east = coords[0][0]
-    let north = coords[0][1]
-    coords.forEach(function (c) {
-      if (c[0] < west) {
-        west = c[0]
-      }
-      if (c[0] > east) {
-        east = c[0]
-      }
-      if (c[1] < south) {
-        south = c[1]
-      }
-      if (c[1] > north) {
-        north = c[1]
-      }
-    })
-    mapInstance.fitBounds(
-      [
-        [west, south],
-        [east, north]
-      ],
-      { padding: 40, maxZoom: 15 }
-    )
+function parseEdpIntersectionGeojson(mapEl) {
+  try {
+    return JSON.parse(mapEl.dataset.edpIntersectionGeojson)
+  } catch {
+    logWarning('Failed to parse EDP intersection GeoJSON')
+    return null
   }
-}
-
-function addBoundaryLayer(mapInstance, geojson) {
-  if (mapInstance.getSource('boundary')) {
-    return
-  }
-
-  mapInstance.addSource('boundary', {
-    type: 'geojson',
-    data: geojson
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-fill',
-    type: 'fill',
-    source: 'boundary',
-    paint: {
-      'fill-color': BOUNDARY_COLOR,
-      'fill-opacity': 0.1
-    }
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-line',
-    type: 'line',
-    source: 'boundary',
-    paint: {
-      'line-color': BOUNDARY_COLOR,
-      'line-width': 3
-    }
-  })
-
-  fitMapToBounds(mapInstance, geojson)
 }
 
 function initBoundaryMap() {
@@ -115,6 +60,9 @@ function initBoundaryMap() {
     logWarning('No valid GeoJSON data for boundary map')
     return
   }
+
+  const edpBoundaryGeojson = parseEdpBoundaryGeojson(mapEl)
+  const edpIntersectionGeojson = parseEdpIntersectionGeojson(mapEl)
 
   if (
     typeof defra === 'undefined' ||
@@ -148,9 +96,13 @@ function initBoundaryMap() {
 
     if (mapInstance.isStyleLoaded()) {
       addBoundaryLayer(mapInstance, geojson)
+      addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+      addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
     } else {
       mapInstance.once('style.load', function () {
         addBoundaryLayer(mapInstance, geojson)
+        addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
+        addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
       })
     }
   })

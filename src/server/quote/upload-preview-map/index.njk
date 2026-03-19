@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -18,13 +18,6 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        {% if validationErrors %}
-        {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: validationErrors.summary
-        }) }}
-        {% endif %}
-
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
         <p class="govuk-body">
@@ -34,18 +27,11 @@
 
         <div id="boundary-map" class="govuk-!-margin-bottom-6"
              data-geojson='{{ boundaryGeojson | safe }}'
+             data-edp-boundary-geojson='{{ edpBoundaryGeojson | safe }}'
+             data-edp-intersection-geojson='{{ edpIntersectionGeojson | safe }}'
              data-map-style-url="{{ mapStyleUrl }}">
             <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
         </div>
-
-        <details class="govuk-details govuk-!-margin-bottom-6">
-            <summary class="govuk-details__summary">
-                <span class="govuk-details__summary-text">View boundary GeoJSON</span>
-            </summary>
-            <div class="govuk-details__text">
-                <pre>{{ boundaryResponseJson }}</pre>
-            </div>
-        </details>
 
         {% if intersectsEdp %}
         <p class="govuk-body">
@@ -53,7 +39,14 @@
         </p>
         <ul class="govuk-list govuk-list--bullet">
             {% for edp in intersectingEdps %}
-            <li>{{ edp.label }}{% if edp.n2k_site_name %} ({{ edp.n2k_site_name }}){% endif %}</li>
+            <li>
+              {{ edp.label }}{% if edp.natura2000SiteName %} ({{ edp.natura2000SiteName }}){% endif %}
+              {% if edp.overlap_area_ha %}
+              <br><span class="govuk-body-s govuk-!-margin-bottom-0">
+                Overlap: {{ edp.overlap_area_ha }} ha ({{ edp.overlap_percentage }}% of boundary)
+              </span>
+              {% endif %}
+            </li>
             {% endfor %}
         </ul>
 
@@ -75,31 +68,15 @@
         {% else %}
 
         <h2 class="govuk-heading-m">EDP boundary check</h2>
-        <p class="govuk-body">
-            Intersects EDP: <strong>No</strong>
-        </p>
+        {{ govukInsetText({
+            text: "There are no EDPs within the red line boundary."
+        }) }}
 
         <form method="post" novalidate>
             {% include "partials/csrf-token.njk" %}
 
-            {{ govukRadios({
-                name: "boundaryCorrect",
-                value: formSubmitData.boundaryCorrect,
-                errorMessage: validationErrors.messagesByFormField.boundaryCorrect if validationErrors,
-                fieldset: {
-                    legend: {
-                        text: "Is this boundary correct?",
-                        classes: "govuk-fieldset__legend--m"
-                    }
-                },
-                items: [
-                    { value: "yes", text: "Yes, continue" },
-                    { value: "no", text: "No, upload a different file" }
-                ]
-            }) }}
-
             {{ govukButton({
-                text: "Continue",
+                text: "Save and continue",
                 preventDoubleClick: true
             }) }}
         </form>

@@ -149,7 +149,7 @@ describe('checkBoundaryHandler', () => {
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/map')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
   it('should render error page when boundary check fails', async () => {
