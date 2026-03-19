@@ -65,9 +65,9 @@ describe('os-base-map proxy routes', () => {
     })
   })
 
-  describe('JSON responses (style, TileJSON)', () => {
-    it('should proxy style requests and rewrite OS URLs', async () => {
-      const osStyleBody = {
+  describe('JSON responses (map style, TileJSON)', () => {
+    it('should proxy map style requests and rewrite Ordnance Survey URLs', async () => {
+      const osMapStyleBody = {
         sources: {
           osVectorTiles: {
             url: 'https://api.os.uk/maps/vector/v1/vts?key=test-api-key&srs=3857'
@@ -81,7 +81,7 @@ describe('os-base-map proxy routes', () => {
 
       server.use(
         http.get('https://api.os.uk/maps/vector/v1/vts/resources/styles', () =>
-          HttpResponse.json(osStyleBody, {
+          HttpResponse.json(osMapStyleBody, {
             headers: {
               'content-type': 'application/json',
               'cache-control': 'max-age=3600'
