@@ -41,7 +41,7 @@ describe('Delete quote page', () => {
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/')
+    expect(response.headers.location).toBe('/quote/delete-quote-confirmation')
   })
 
   it('should return 400 if submitted without the hidden field', async () => {
