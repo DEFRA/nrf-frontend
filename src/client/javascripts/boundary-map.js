@@ -16,7 +16,7 @@ import {
 
 const MAP_ELEMENT_ID = 'boundary-map'
 
-// TODO: send warnings to the server once server-side logging is available
+// Faciendum: send warnings to the server once server-side logging is available
 function logWarning(message, error) {
   console.warn(message, error || '')
 }
