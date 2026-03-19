@@ -8,10 +8,11 @@
 
 /* global defra */
 
-// MapLibre source IDs – each source holds GeoJSON data rendered by one or more layers
-const MAP_SOURCE_BOUNDARY = 'boundary'
-const MAP_SOURCE_EDP_BOUNDARY = 'edp-boundary'
-const MAP_SOURCE_EDP_INTERSECTION = 'edp-intersection'
+import {
+  addBoundaryLayer,
+  addEdpBoundaryLayer,
+  addEdpIntersectionLayer
+} from './boundary-map-layers.js'
 
 function parseGeojson(mapEl) {
   try {
@@ -20,155 +21,6 @@ function parseGeojson(mapEl) {
     console.warn('Failed to parse boundary GeoJSON', e)
     return null
   }
-}
-
-function collectCoords(c, coords) {
-  if (typeof c[0] === 'number') {
-    coords.push(c)
-  } else {
-    c.forEach(function (inner) {
-      collectCoords(inner, coords)
-    })
-  }
-}
-
-function fitMapToBounds(mapInstance, geojson) {
-  const coords = []
-  ;(geojson.features || [geojson]).forEach(function (f) {
-    collectCoords(f.geometry ? f.geometry.coordinates : f.coordinates, coords)
-  })
-
-  if (coords.length) {
-    let west = coords[0][0]
-    let south = coords[0][1]
-    let east = coords[0][0]
-    let north = coords[0][1]
-    coords.forEach(function (c) {
-      if (c[0] < west) {
-        west = c[0]
-      }
-      if (c[0] > east) {
-        east = c[0]
-      }
-      if (c[1] < south) {
-        south = c[1]
-      }
-      if (c[1] > north) {
-        north = c[1]
-      }
-    })
-    mapInstance.fitBounds(
-      [
-        [west, south],
-        [east, north]
-      ],
-      { padding: 40 }
-    )
-  }
-}
-
-function addBoundaryLayer(mapInstance, geojson) {
-  if (mapInstance.getSource(MAP_SOURCE_BOUNDARY)) {
-    return
-  }
-
-  mapInstance.addSource(MAP_SOURCE_BOUNDARY, {
-    type: 'geojson',
-    data: geojson
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-fill',
-    type: 'fill',
-    source: MAP_SOURCE_BOUNDARY,
-    paint: {
-      'fill-color': '#d4351c',
-      'fill-opacity': 0.1
-    }
-  })
-
-  mapInstance.addLayer({
-    id: 'boundary-line',
-    type: 'line',
-    source: MAP_SOURCE_BOUNDARY,
-    paint: {
-      'line-color': '#d4351c',
-      'line-width': 3
-    }
-  })
-
-  fitMapToBounds(mapInstance, geojson)
-}
-
-function addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson) {
-  if (!edpBoundaryGeojson?.features?.length) {
-    return
-  }
-
-  if (mapInstance.getSource(MAP_SOURCE_EDP_BOUNDARY)) {
-    return
-  }
-
-  mapInstance.addSource(MAP_SOURCE_EDP_BOUNDARY, {
-    type: 'geojson',
-    data: edpBoundaryGeojson
-  })
-
-  mapInstance.addLayer({
-    id: 'edp-boundary-fill',
-    type: 'fill',
-    source: MAP_SOURCE_EDP_BOUNDARY,
-    paint: {
-      'fill-color': '#00703c',
-      'fill-opacity': 0.08
-    }
-  })
-
-  mapInstance.addLayer({
-    id: 'edp-boundary-line',
-    type: 'line',
-    source: MAP_SOURCE_EDP_BOUNDARY,
-    paint: {
-      'line-color': '#00703c',
-      'line-width': 2
-    }
-  })
-}
-
-function addEdpIntersectionLayer(mapInstance, edpGeojson) {
-  if (!edpGeojson?.features?.length) {
-    return
-  }
-
-  if (mapInstance.getSource(MAP_SOURCE_EDP_INTERSECTION)) {
-    return
-  }
-
-  mapInstance.addSource(MAP_SOURCE_EDP_INTERSECTION, {
-    type: 'geojson',
-    data: edpGeojson
-  })
-
-  mapInstance.addLayer({
-    id: 'edp-intersection-fill',
-    type: 'fill',
-    source: MAP_SOURCE_EDP_INTERSECTION,
-    paint: {
-      'fill-color': '#1d70b8',
-      'fill-opacity': 0.3
-    }
-  })
-
-  mapInstance.addLayer({
-    id: 'edp-intersection-line',
-    type: 'line',
-    source: MAP_SOURCE_EDP_INTERSECTION,
-    paint: {
-      'line-color': '#1d70b8',
-      'line-width': 2,
-      'line-dasharray': [4, 2]
-    }
-  })
 }
 
 function parseEdpBoundaryGeojson(mapEl) {
