@@ -5,48 +5,52 @@ import { statusCodes } from '../common/constants/status-codes.js'
 
 const logger = createLogger()
 
-const osBaseUrl = 'https://api.os.uk/maps/vector/v1/vts'
+const ordnanceSurveyMapUrl = 'https://api.os.uk/maps/vector/v1/vts'
 
 export const routePath = '/os-base-map'
 
-function getOsUrl(path, query) {
-  const osApiKey = config.get('map.osApiKey')
+function getOrdnanceSurveyMapUrl(path, query) {
+  const ordnanceSurveyApiKey = config.get('map.osApiKey')
   const params = new URLSearchParams(query)
-  params.set('key', osApiKey)
+  params.set('key', ordnanceSurveyApiKey)
   params.set('srs', '3857')
-  const base = path ? `${osBaseUrl}/${path}` : osBaseUrl
+  const base = path ? `${ordnanceSurveyMapUrl}/${path}` : ordnanceSurveyMapUrl
   return `${base}?${params.toString()}`
 }
 
-// OS API JSON responses (e.g. style docs, tile metadata) contain absolute URLs
-// back to api.os.uk. We rewrite these to route through our proxy, which injects
-// the API key server-side and strips the original query strings (including the
-// API key) so they aren't leaked to the client.
-function rewriteOsUrls(body, host) {
+// Rewrites api.os.uk URLs in JSON responses to route through our proxy, stripping
+// query strings so the API key isn't leaked to the client.
+function rewriteOrdnanceSurveyMapUrls(body, host) {
   const proxyBase = `${host}${routePath}`
 
-  const json = JSON.parse(body)
-
-  const rewriteValue = (value) => {
-    if (typeof value === 'string' && value.startsWith(osBaseUrl)) {
-      const rest = value.slice(osBaseUrl.length)
-      // Strip query string (contains API key) but keep the sub-path.
-      // Can't use new URL() here as it would encode MapLibre template
-      // tokens like {z}/{y}/{x}.
-      const subPath = rest.split('?')[0]
-      return `${proxyBase}${subPath}`
-    }
-    if (Array.isArray(value)) return value.map(rewriteValue)
-    if (value && typeof value === 'object') return rewriteKeys(value)
-    return value
+  let json
+  try {
+    json = JSON.parse(body)
+  } catch {
+    return body
   }
 
-  const rewriteKeys = (obj) =>
-    Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, rewriteValue(v)])
-    )
+  const rewrite = (v) => {
+    if (typeof v === 'string') {
+      if (!v.startsWith(ordnanceSurveyMapUrl)) return v
 
-  return JSON.stringify(rewriteKeys(json))
+      const rest = v.slice(ordnanceSurveyMapUrl.length)
+      const i = rest.indexOf('?')
+      return proxyBase + (i === -1 ? rest : rest.slice(0, i))
+    }
+
+    if (Array.isArray(v)) return v.map(rewrite)
+
+    if (v && typeof v === 'object') {
+      return Object.fromEntries(
+        Object.entries(v).map(([k, val]) => [k, rewrite(val)])
+      )
+    }
+
+    return v
+  }
+
+  return JSON.stringify(rewrite(json))
 }
 
 function isBinaryPath(path) {
@@ -61,12 +65,12 @@ const proxyHandler = {
   },
   async handler(request, h) {
     const path = request.params.path || ''
-    const osUrl = getOsUrl(path, request.query)
+    const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl(path, request.query)
 
     try {
       // For binary resources (tiles, sprites), don't decompress — pass through raw
       const binary = isBinaryPath(path)
-      const { res, payload } = await Wreck.get(osUrl, {
+      const { res, payload } = await Wreck.get(ordnanceSurveyUrl, {
         redirects: 3,
         maxBytes: 10 * 1024 * 1024,
         gunzip: !binary
@@ -88,11 +92,11 @@ const proxyHandler = {
         return response
       }
 
-      // JSON responses — rewrite OS URLs to point to our proxy
+      // JSON responses — rewrite Ordnance Survey URLs to point to our proxy
       const protocol =
         request.headers['x-forwarded-proto'] || request.server.info.protocol
       const host = `${protocol}://${request.info.host}`
-      const rewritten = rewriteOsUrls(payload.toString(), host)
+      const rewritten = rewriteOrdnanceSurveyMapUrls(payload.toString(), host)
       return h
         .response(rewritten)
         .type(contentType)
