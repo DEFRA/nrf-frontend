@@ -19,7 +19,7 @@ describe('deleteSubmitController', () => {
     const result = await deleteSubmitController.handler(request, h)
 
     expect(clearQuoteDataFromCache).toHaveBeenCalledWith(request)
-    expect(h.redirect).toHaveBeenCalledWith('/')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/delete-quote-confirmation')
     expect(h.redirect().code).toHaveBeenCalledWith(303)
     expect(result).toBe(codeResponse)
   })

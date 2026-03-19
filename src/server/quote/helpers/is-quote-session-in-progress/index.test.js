@@ -4,6 +4,7 @@ import { routePath as boundaryTypePath } from '../../boundary-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../get-quote-session/index.js'
+import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 
 vi.mock('../get-quote-session/index.js')
 
@@ -64,6 +65,16 @@ describe('checkForValidQuoteSession', () => {
 
   it('continues without session check for confirmation page', () => {
     const request = makeRequest({ path: confirmationPath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+  })
+
+  it('continues without session check for delete quote confirmation page', () => {
+    const request = makeRequest({ path: deleteConfirmationPath })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
