@@ -7,8 +7,6 @@ const logger = createLogger()
 /**
  * Send a boundary check request to the backend
  * @param {string} uploadId - The upload ID to check
- * @param {object} [options] - Optional parameters
- * @param {string} [options.proj] - Projection to return geometry in (e.g. 'EPSG:4326')
  * @returns {Promise<{geojson?: object, error?: string}>}
  */
 export async function checkBoundary(uploadId) {
