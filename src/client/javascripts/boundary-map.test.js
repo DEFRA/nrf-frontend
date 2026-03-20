@@ -129,12 +129,26 @@ describe('boundary-map init', () => {
     )
   })
 
-  it('does nothing when geojson parses to null', async () => {
+  it('creates map and fits to UK bounds when geojson parses to null', async () => {
     createMapElement('null')
+    const mapInstance = createMockMapInstance(true)
+    const mockDefra = createMockDefra(mapInstance)
+    globalThis.defra = mockDefra
+
     await loadModule()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'No valid GeoJSON data for boundary map',
-      ''
+    mockDefra._triggerReady()
+
+    expect(mockDefra._mock).toHaveBeenCalled()
+    expect(mapInstance.addSource).not.toHaveBeenCalledWith(
+      'boundary',
+      expect.anything()
+    )
+    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
+      [
+        [-5.2, 50.0],
+        [1.5, 55.0]
+      ],
+      { padding: 20 }
     )
   })
 
