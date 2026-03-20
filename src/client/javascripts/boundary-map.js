@@ -17,9 +17,14 @@ import {
 const MAP_ELEMENT_ID = 'boundary-map'
 
 /** Bounding box for England in [lng, lat] format (WGS84). */
+const ENGLAND_WEST_LNG = -5.2
+const ENGLAND_SOUTH_LAT = 50
+const ENGLAND_EAST_LNG = 1.5
+const ENGLAND_NORTH_LAT = 55
+
 const DEFAULT_MAP_BOUNDS = [
-  [-5.2, 50],
-  [1.5, 55]
+  [ENGLAND_WEST_LNG, ENGLAND_SOUTH_LAT],
+  [ENGLAND_EAST_LNG, ENGLAND_NORTH_LAT]
 ]
 
 // Faciendum: send warnings to the server once server-side logging is available
