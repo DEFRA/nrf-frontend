@@ -1,5 +1,7 @@
 {% extends "govuk/template.njk" %}
 
+{% set cspNonce = nonce %}
+
 {# Import GOVUK components globally #}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
