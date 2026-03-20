@@ -57,7 +57,7 @@ describe('boundary service', () => {
       expect(result).toEqual({ error: 'Boundary check failed (502)' })
     })
 
-    it('should return error when request throws', async () => {
+    it('should return error when request throws with no payload', async () => {
       vi.mocked(postRequestToBackend).mockRejectedValue(
         new Error('ECONNREFUSED')
       )
@@ -65,6 +65,25 @@ describe('boundary service', () => {
       const result = await checkBoundary('upload-123')
 
       expect(result).toEqual({ error: 'Unable to check boundary' })
+    })
+
+    it('should return backend error message when request throws with error in payload', async () => {
+      const error = new Error('Bad Request')
+      error.output = { statusCode: 400 }
+      error.data = {
+        payload: {
+          error:
+            'The uploaded boundary contains invalid geometry (self-intersecting or overlapping lines). Please correct the file and try again.'
+        }
+      }
+      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+
+      const result = await checkBoundary('upload-123')
+
+      expect(result).toEqual({
+        error:
+          'The uploaded boundary contains invalid geometry (self-intersecting or overlapping lines). Please correct the file and try again.'
+      })
     })
 
     it('should log error details when request throws with output info', async () => {

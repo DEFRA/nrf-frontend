@@ -33,6 +33,10 @@ export async function checkBoundary(uploadId) {
     logger.error(
       `Error checking boundary - uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
+    const backendError = responsePayload?.error
+    if (backendError) {
+      return { error: backendError }
+    }
     return { error: 'Unable to check boundary' }
   }
 }
