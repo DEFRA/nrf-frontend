@@ -17,11 +17,8 @@ const contentSecurityPolicy = {
     connectSrc: ['self', 'wss'],
     mediaSrc: ['self'],
     styleSrc: ['self'],
-    scriptSrc: [
-      'self',
-      "'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw='"
-    ],
-    imgSrc: ['self'],
+    scriptSrc: ['self'],
+    imgSrc: ['self', 'data:'],
     frameSrc: ['self'],
     objectSrc: ['none'],
     frameAncestors: ['none'],
