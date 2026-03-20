@@ -52,20 +52,17 @@ export async function checkBoundaryHandler(request, h) {
     logger.error(
       `check-boundary failed - uploadId: ${id}, error: ${result.error}`
     )
-    return h.view('quote/upload-received/index', {
-      pageTitle: getPageTitle('Boundary error'),
-      pageHeading: 'Boundary error',
-      uploadId: id,
-      status: 'ready',
-      isProcessing: false,
-      isReady: true,
-      refreshInterval: null,
-      boundaryCheckError: result.error
-    })
+    if (result.geojson) {
+      request.yar.set('boundaryGeojson', result.geojson)
+    }
+    request.yar.set('boundaryError', result.error)
+    request.yar.clear('pendingUploadId')
+    return h.redirect('/quote/upload-preview-map')
   }
 
   request.yar.set('boundaryGeojson', result.geojson)
   request.yar.clear('pendingUploadId')
+  request.yar.clear('boundaryError')
 
   return h.redirect('/quote/upload-preview-map')
 }

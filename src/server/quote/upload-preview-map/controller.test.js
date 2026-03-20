@@ -53,10 +53,11 @@ describe('map controller', () => {
     redirect: vi.fn().mockReturnThis()
   })
 
-  const createMockRequest = (geojson = null) => ({
+  const createMockRequest = (geojson = null, boundaryError = null) => ({
     yar: {
       get: vi.fn().mockImplementation((key) => {
         if (key === 'boundaryGeojson') return geojson
+        if (key === 'boundaryError') return boundaryError
         return null
       }),
       set: vi.fn(),
@@ -70,9 +71,9 @@ describe('map controller', () => {
   })
 
   describe('handler (GET)', () => {
-    it('should redirect to upload-boundary when no geojson in session', () => {
+    it('should redirect to upload-boundary when no geojson or error in session', () => {
       const h = createMockH()
-      const request = createMockRequest(null)
+      const request = createMockRequest(null, null)
 
       handler(request, h)
 
@@ -90,7 +91,42 @@ describe('map controller', () => {
         expect.objectContaining({
           pageHeading: 'Boundary Map',
           featureCount: 1,
+          boundaryGeojson: JSON.stringify(mockGeometry),
+          boundaryError: null
+        })
+      )
+    })
+
+    it('should render the view with error and geojson when both exist', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockGeojson, 'Invalid geometry')
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.objectContaining({
+          pageHeading: 'Boundary Map',
+          boundaryError: 'Invalid geometry',
+          featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry)
+        })
+      )
+    })
+
+    it('should render the view with error and no geojson', () => {
+      const h = createMockH()
+      const request = createMockRequest(null, 'Unable to check boundary')
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.objectContaining({
+          pageHeading: 'Boundary Map',
+          boundaryError: 'Unable to check boundary',
+          featureCount: 0,
+          boundaryGeojson: JSON.stringify(null)
         })
       )
     })
@@ -116,6 +152,7 @@ describe('map controller', () => {
         boundaryGeojson: mockGeojson
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
@@ -129,6 +166,7 @@ describe('map controller', () => {
         boundaryGeojson: mockEdpGeojson
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
       expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
     })
   })

@@ -22,17 +22,16 @@
                 text: errorMessage
             }]
         }) }}
+
+        <p class="govuk-body">
+            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
+        </p>
+        <p class="govuk-body">
+            <a href="/quote/boundary-type" class="govuk-link">Draw the red line boundary instead</a>
+        </p>
         {% endif %}
 
-        {% if boundaryCheckError %}
-        {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: [{
-                text: boundaryCheckError
-            }]
-        }) }}
-
-        {% elseif isReady %}
+        {% if isReady %}
         <p class="govuk-body">Upload and virus scan completed.</p>
         <p class="govuk-body">Please click continue to check and view the boundary.</p>
         <form method="post" action="/quote/check-boundary/{{ uploadId }}">
