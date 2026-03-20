@@ -1,4 +1,6 @@
 import Wreck from '@hapi/wreck'
+import { HttpsProxyAgent } from 'https-proxy-agent'
+
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
@@ -6,6 +8,14 @@ import { statusCodes } from '../common/constants/status-codes.js'
 const logger = createLogger()
 
 const ordnanceSurveyMapUrl = 'https://api.os.uk/maps/vector/v1/vts'
+
+function getProxyAgent() {
+  const proxyUrl = config.get('httpProxy')
+  if (proxyUrl) {
+    return new HttpsProxyAgent(proxyUrl)
+  }
+  return undefined
+}
 
 export const routePath = '/os-base-map'
 
@@ -66,7 +76,8 @@ const proxyHandler = {
       const { res, payload } = await Wreck.get(ordnanceSurveyUrl, {
         redirects: 3,
         maxBytes: 10 * 1024 * 1024,
-        gunzip: !isBinaryResource
+        gunzip: !isBinaryResource,
+        agent: getProxyAgent()
       })
 
       const contentType = res.headers['content-type'] || ''
