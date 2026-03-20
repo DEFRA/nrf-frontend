@@ -10,7 +10,7 @@ const logger = createLogger()
 const ordnanceSurveyMapUrl = 'https://api.os.uk/maps/vector/v1/vts'
 
 function getProxyAgent() {
-  const proxyUrl = config.get('httpProxy')
+  const proxyUrl = config.get('httpProxy') ?? config.get('httpsProxy')
   if (proxyUrl) {
     return new HttpsProxyAgent(proxyUrl)
   }
