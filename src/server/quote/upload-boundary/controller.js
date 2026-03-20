@@ -11,6 +11,9 @@ const routeId = 'upload-boundary'
 export async function handler(request, h) {
   const viewModel = getViewModel()
 
+  // Clear any stale boundary data from a previous upload attempt
+  request.yar.clear('boundaryGeojson')
+
   // Get validation errors from flash if any
   const flash = getValidationFlashFromCache(request)
   if (flash) {
