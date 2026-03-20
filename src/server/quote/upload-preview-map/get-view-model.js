@@ -1,6 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 
 export const title = 'Boundary Map'
 
@@ -56,7 +55,6 @@ export default function getViewModel(boundaryGeojson) {
     featureCount,
     backLinkPath: uploadBoundaryPath,
     uploadBoundaryPath,
-    cancelPath: boundaryTypePath,
     mapStyleUrl: getMapStyleUrl()
   }
 }

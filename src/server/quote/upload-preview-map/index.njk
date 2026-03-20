@@ -50,20 +50,6 @@
             {% endfor %}
         </ul>
 
-        {# Faciendum: No handler logic implemented yet — disabled as placeholder #}
-        {{ govukButton({
-            text: "Edit",
-            classes: "govuk-button--secondary",
-            disabled: true
-        }) }}
-
-        {# Faciendum: No handler logic implemented yet — disabled as placeholder #}
-        {{ govukButton({
-            text: "Delete",
-            classes: "govuk-button--warning",
-            disabled: true
-        }) }}
-
         <form method="post" novalidate>
             {% include "partials/csrf-token.njk" %}
 
@@ -74,10 +60,7 @@
         </form>
 
         <p class="govuk-body">
-            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Cancel</a>
-        </p>
-        <p class="govuk-body">
-            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload another red line boundary file</a>
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
         </p>
 
         {% else %}
@@ -95,10 +78,6 @@
                 preventDoubleClick: true
             }) }}
         </form>
-
-        <p class="govuk-body">
-            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Cancel</a>
-        </p>
 
         {% endif %}
 

@@ -121,13 +121,6 @@ describe('Boundary map page', () => {
       ).toBeInTheDocument()
     })
 
-    it('should show cancel link to upload boundary page', async () => {
-      const { document } = await loadPageWithSession(getServer())
-
-      const cancelLink = getByRole(document, 'link', { name: 'Cancel' })
-      expect(cancelLink).toHaveAttribute('href', '/quote/upload-boundary')
-    })
-
     it('should display feature count', async () => {
       const { document } = await loadPageWithSession(getServer())
 
@@ -188,26 +181,6 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).toContain('North Downs Woodlands')
     })
 
-    it('should show disabled edit button', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      const editButton = getByRole(document, 'button', { name: 'Edit' })
-      expect(editButton).toBeDisabled()
-    })
-
-    it('should show disabled delete button', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      const deleteButton = getByRole(document, 'button', { name: 'Delete' })
-      expect(deleteButton).toBeDisabled()
-    })
-
     it('should show save and continue button', async () => {
       const { document } = await loadPageWithSession(
         getServer(),
@@ -219,16 +192,6 @@ describe('Boundary map page', () => {
       ).toBeInTheDocument()
     })
 
-    it('should show cancel link to upload boundary page', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      const cancelLink = getByRole(document, 'link', { name: 'Cancel' })
-      expect(cancelLink).toHaveAttribute('href', '/quote/upload-boundary')
-    })
-
     it('should show upload another boundary file link', async () => {
       const { document } = await loadPageWithSession(
         getServer(),
@@ -236,7 +199,7 @@ describe('Boundary map page', () => {
       )
 
       const uploadLink = getByRole(document, 'link', {
-        name: 'Upload another red line boundary file'
+        name: 'Upload a different red line boundary file'
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
     })
