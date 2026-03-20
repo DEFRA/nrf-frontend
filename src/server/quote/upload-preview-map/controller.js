@@ -8,14 +8,15 @@ const logger = createLogger()
 
 export function handler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
+  const boundaryError = request.yar.get('boundaryError')
 
   // Session may be missing if it expired or the user navigated here directly
-  if (!boundaryGeojson) {
+  if (!boundaryGeojson && !boundaryError) {
     logger.info('map - no boundary data in session')
     return h.redirect(uploadBoundaryPath)
   }
 
-  const viewModel = getViewModel(boundaryGeojson)
+  const viewModel = getViewModel(boundaryGeojson, boundaryError)
 
   return h.view('quote/upload-preview-map/index', {
     ...viewModel
@@ -34,6 +35,7 @@ export function postHandler(request, h) {
 
   saveQuoteDataToCache(request, { boundaryGeojson })
   request.yar.clear('boundaryGeojson')
+  request.yar.clear('boundaryError')
 
   if (intersectsEdp) {
     return h.redirect('/quote/development-types')

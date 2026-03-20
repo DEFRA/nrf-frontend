@@ -1,5 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 
 export const title = 'Boundary Map'
 
@@ -7,8 +8,8 @@ function getMapStyleUrl() {
   return '/os-base-map/resources/styles'
 }
 
-export default function getViewModel(boundaryGeojson) {
-  const geometry = boundaryGeojson?.geometry
+export default function getViewModel(boundaryGeojson, boundaryError = null) {
+  const geometry = boundaryGeojson?.geometry ?? null
   const intersectingEdps = boundaryGeojson?.intersecting_edps ?? []
   const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
   const featureCount = geometry?.features?.length ?? 0
@@ -55,6 +56,8 @@ export default function getViewModel(boundaryGeojson) {
     featureCount,
     backLinkPath: uploadBoundaryPath,
     uploadBoundaryPath,
+    boundaryError,
+    boundaryTypePath,
     mapStyleUrl: getMapStyleUrl()
   }
 }

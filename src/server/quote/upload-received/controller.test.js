@@ -137,7 +137,7 @@ describe('checkBoundaryHandler', () => {
     vi.clearAllMocks()
   })
 
-  it('should store geojson and redirect on success', async () => {
+  it('should store geojson, clear error, and redirect on success', async () => {
     const mockGeojson = { type: 'FeatureCollection', features: [] }
     vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
 
@@ -149,12 +149,18 @@ describe('checkBoundaryHandler', () => {
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
-  it('should render error page when boundary check fails', async () => {
+  it('should store error and redirect to map when boundary check fails with geojson', async () => {
+    const mockGeojson = {
+      error: 'Invalid geometry',
+      geometry: { type: 'FeatureCollection', features: [] }
+    }
     vi.mocked(checkBoundary).mockResolvedValue({
-      error: 'Unable to contact impact assessor service'
+      error: 'Invalid geometry',
+      geojson: mockGeojson
     })
 
     const h = createMockH()
@@ -162,15 +168,34 @@ describe('checkBoundaryHandler', () => {
 
     await checkBoundaryHandler(request, h)
 
-    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle: 'Boundary error - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'Boundary error',
-      uploadId: 'test-upload-id',
-      status: 'ready',
-      isProcessing: false,
-      isReady: true,
-      refreshInterval: null,
-      boundaryCheckError: 'Unable to contact impact assessor service'
+    expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'boundaryError',
+      'Invalid geometry'
+    )
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+  })
+
+  it('should store error without geojson and redirect to map when boundary check fails without geojson', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Unable to check boundary'
     })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(request.yar.set).not.toHaveBeenCalledWith(
+      'boundaryGeojson',
+      expect.anything()
+    )
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'boundaryError',
+      'Unable to check boundary'
+    )
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 })

@@ -37,7 +37,7 @@ describe('upload-boundary controller', () => {
     vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
   })
 
-  it('should clear stale boundaryGeojson from session', async () => {
+  it('should clear stale boundaryGeojson and boundaryError from session', async () => {
     const h = createMockH()
     const request = createMockRequest()
     vi.mocked(initiateUpload).mockResolvedValue({
@@ -48,6 +48,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
   })
 
   it('should render view with uploadUrl on successful initiate', async () => {

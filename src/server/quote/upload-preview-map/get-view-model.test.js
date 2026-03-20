@@ -16,6 +16,7 @@ describe('getViewModel', () => {
     )
     expect(result.intersectsEdp).toBe(false)
     expect(result.intersectingEdps).toEqual([])
+    expect(result.boundaryError).toBeNull()
   })
 
   it('should return the correct feature count', () => {
@@ -140,5 +141,29 @@ describe('getViewModel', () => {
 
     expect(JSON.parse(result.edpBoundaryGeojson).features).toHaveLength(0)
     expect(JSON.parse(result.edpIntersectionGeojson).features).toHaveLength(0)
+  })
+
+  it('should handle null boundaryGeojson with defaults', () => {
+    const result = getViewModel(null)
+
+    expect(result.featureCount).toBe(0)
+    expect(result.boundaryGeojson).toBe(JSON.stringify(null))
+    expect(result.intersectsEdp).toBe(false)
+    expect(result.intersectingEdps).toEqual([])
+    expect(result.boundaryError).toBeNull()
+  })
+
+  it('should include boundaryError when provided', () => {
+    const result = getViewModel(null, 'Invalid geometry')
+
+    expect(result.boundaryError).toBe('Invalid geometry')
+    expect(result.featureCount).toBe(0)
+    expect(result.boundaryGeojson).toBe(JSON.stringify(null))
+  })
+
+  it('should include boundaryTypePath', () => {
+    const result = getViewModel({})
+
+    expect(result.boundaryTypePath).toBe('/quote/boundary-type')
   })
 })

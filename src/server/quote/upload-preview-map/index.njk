@@ -20,10 +20,19 @@
 
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
+        {% if boundaryError %}
+        {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [{
+                text: boundaryError
+            }]
+        }) }}
+        {% else %}
         <p class="govuk-body">
             Your boundary file has been validated successfully.
             {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
         </p>
+        {% endif %}
 
         <div id="boundary-map" class="govuk-!-margin-bottom-6"
              data-geojson='{{ boundaryGeojson | safe }}'
@@ -33,7 +42,16 @@
             <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
         </div>
 
-        {% if intersectsEdp %}
+        {% if boundaryError %}
+
+        <p class="govuk-body">
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
+        </p>
+        <p class="govuk-body">
+            <a href="{{ boundaryTypePath }}" class="govuk-link">Draw the red line boundary instead</a>
+        </p>
+
+        {% elif intersectsEdp %}
         <p class="govuk-body">
             Your red line boundary is within {{ intersectingEdps | length }} EDP{{ "s" if intersectingEdps | length != 1 }}:
         </p>

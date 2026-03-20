@@ -56,11 +56,6 @@ function initBoundaryMap() {
   }
 
   const geojson = parseGeojson(mapEl)
-  if (!geojson) {
-    logWarning('No valid GeoJSON data for boundary map')
-    return
-  }
-
   const edpBoundaryGeojson = parseEdpBoundaryGeojson(mapEl)
   const edpIntersectionGeojson = parseEdpIntersectionGeojson(mapEl)
 
@@ -94,16 +89,27 @@ function initBoundaryMap() {
       logWarning('Boundary map error', err.error || err)
     })
 
-    if (mapInstance.isStyleLoaded()) {
-      addBoundaryLayer(mapInstance, geojson)
+    function addLayers() {
+      if (geojson) {
+        addBoundaryLayer(mapInstance, geojson)
+      } else {
+        // No boundary geometry available — zoom to England extent
+        mapInstance.fitBounds(
+          [
+            [-5.2, 50.0],
+            [1.5, 55.0]
+          ],
+          { padding: 20 }
+        )
+      }
       addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
       addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
+    }
+
+    if (mapInstance.isStyleLoaded()) {
+      addLayers()
     } else {
-      mapInstance.once('style.load', function () {
-        addBoundaryLayer(mapInstance, geojson)
-        addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
-        addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
-      })
+      mapInstance.once('style.load', addLayers)
     }
   })
 }
