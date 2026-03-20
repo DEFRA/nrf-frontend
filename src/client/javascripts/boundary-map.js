@@ -16,6 +16,12 @@ import {
 
 const MAP_ELEMENT_ID = 'boundary-map'
 
+/** Bounding box for England in [lng, lat] format (WGS84). */
+const DEFAULT_MAP_BOUNDS = [
+  [-5.2, 50],
+  [1.5, 55]
+]
+
 // Faciendum: send warnings to the server once server-side logging is available
 function logWarning(message, error) {
   console.warn(message, error || '')
@@ -94,13 +100,7 @@ function initBoundaryMap() {
         addBoundaryLayer(mapInstance, geojson)
       } else {
         // No boundary geometry available — zoom to England extent
-        mapInstance.fitBounds(
-          [
-            [-5.2, 50.0],
-            [1.5, 55.0]
-          ],
-          { padding: 20 }
-        )
+        mapInstance.fitBounds(DEFAULT_MAP_BOUNDS, { padding: 20 })
       }
       addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
       addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
