@@ -8,49 +8,14 @@ const REFRESH_INTERVAL_SECONDS = 5
 const STATUS_PENDING = 'pending'
 const STATUS_READY = 'ready'
 
-export async function handler(request, h) {
-  const uploadId = request.yar.get('pendingUploadId')
-  logger.info(`upload-received - pendingUploadId: ${uploadId}`)
-  if (!uploadId) {
-    return h.redirect('/quote/upload-boundary')
-  }
+async function processBoundaryCheck(uploadId, request, h) {
+  logger.info(`check-boundary - uploadId: ${uploadId}`)
 
-  const response = await getUploadStatus(uploadId)
-  const uploadStatus = response.uploadStatus
-  logger.info(
-    `upload-received - uploadId: ${uploadId}, uploadStatus: ${uploadStatus}`
-  )
-
-  const isReady = uploadStatus === STATUS_READY
-  const isProcessing =
-    uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
-  const heading = isReady
-    ? 'Boundary file uploaded successfully'
-    : 'Boundary file upload status'
-  const viewModel = {
-    pageTitle: getPageTitle(heading),
-    pageHeading: heading,
-    uploadId,
-    status: uploadStatus,
-    isProcessing,
-    isReady,
-    refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
-    errorMessage: response.error
-  }
-
-  return h.view('quote/upload-received/index', viewModel)
-}
-
-export async function checkBoundaryHandler(request, h) {
-  const { id } = request.params
-
-  logger.info(`check-boundary - uploadId: ${id}`)
-
-  const result = await checkBoundary(id)
+  const result = await checkBoundary(uploadId)
 
   if (result.error) {
     logger.error(
-      `check-boundary failed - uploadId: ${id}, error: ${result.error}`
+      `check-boundary failed - uploadId: ${uploadId}, error: ${result.error}`
     )
     if (result.geojson) {
       request.yar.set('boundaryGeojson', result.geojson)
@@ -65,4 +30,42 @@ export async function checkBoundaryHandler(request, h) {
   request.yar.clear('boundaryError')
 
   return h.redirect('/quote/upload-preview-map')
+}
+
+export async function handler(request, h) {
+  const uploadId = request.yar.get('pendingUploadId')
+  logger.info(`upload-received - pendingUploadId: ${uploadId}`)
+  if (!uploadId) {
+    return h.redirect('/quote/upload-boundary')
+  }
+
+  const response = await getUploadStatus(uploadId)
+  const uploadStatus = response.uploadStatus
+  logger.info(
+    `upload-received - uploadId: ${uploadId}, uploadStatus: ${uploadStatus}`
+  )
+
+  if (uploadStatus === STATUS_READY) {
+    return processBoundaryCheck(uploadId, request, h)
+  }
+
+  const isProcessing =
+    uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
+  const heading = 'Boundary file upload status'
+  const viewModel = {
+    pageTitle: getPageTitle(heading),
+    pageHeading: heading,
+    uploadId,
+    status: uploadStatus,
+    isProcessing,
+    refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
+    errorMessage: response.error
+  }
+
+  return h.view('quote/upload-received/index', viewModel)
+}
+
+export async function checkBoundaryHandler(request, h) {
+  const { id } = request.params
+  return processBoundaryCheck(id, request, h)
 }

@@ -33,25 +33,43 @@ describe('upload-received controller', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
   })
 
-  it('should render view with ready state when status is ready', async () => {
+  it('should call checkBoundary and redirect to map when status is ready', async () => {
     const h = createMockH()
     const request = createMockRequest('test-upload-id')
+    const mockGeojson = { type: 'FeatureCollection', features: [] }
     vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'ready' })
+    vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
 
     await handler(request, h)
 
     expect(getUploadStatus).toHaveBeenCalledWith('test-upload-id')
-    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk',
-      pageHeading: 'Boundary file uploaded successfully',
-      uploadId: 'test-upload-id',
-      status: 'ready',
-      isProcessing: false,
-      isReady: true,
-      refreshInterval: null,
-      errorMessage: undefined
+    expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
+    expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.view).not.toHaveBeenCalled()
+  })
+
+  it('should store error and redirect when status is ready but checkBoundary fails', async () => {
+    const h = createMockH()
+    const request = createMockRequest('test-upload-id')
+    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'ready' })
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Invalid geometry',
+      geojson: { type: 'FeatureCollection', features: [] }
     })
+
+    await handler(request, h)
+
+    expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'boundaryError',
+      'Invalid geometry'
+    )
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.view).not.toHaveBeenCalled()
   })
 
   it('should render view with processing state when status is pending', async () => {
@@ -68,7 +86,6 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'pending',
       isProcessing: true,
-      isReady: false,
       refreshInterval: 5,
       errorMessage: undefined
     })
@@ -88,7 +105,6 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'initiated',
       isProcessing: true,
-      isReady: false,
       refreshInterval: 5,
       errorMessage: undefined
     })
@@ -111,7 +127,6 @@ describe('upload-received controller', () => {
       uploadId: 'test-upload-id',
       status: 'error',
       isProcessing: false,
-      isReady: false,
       refreshInterval: null,
       errorMessage: 'Upload failed'
     })
