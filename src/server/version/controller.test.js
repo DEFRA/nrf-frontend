@@ -23,3 +23,21 @@ describe('#versionController', () => {
     expect(statusCode).toBe(statusCodes.ok)
   })
 })
+
+describe('getGitHash', () => {
+  it('should return GIT_HASH env var when set', async () => {
+    vi.stubEnv('GIT_HASH', 'abc123')
+
+    vi.resetModules()
+    const { versionController } = await import('./controller.js')
+
+    const response = versionController.handler(null, {
+      response: (v) => ({ code: () => v }),
+      code: () => {}
+    })
+
+    expect(response).toEqual({ version: 'abc123' })
+
+    vi.unstubAllEnvs()
+  })
+})
