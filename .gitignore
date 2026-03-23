@@ -11,5 +11,6 @@ coverage
 tsconfig.tsbuildinfo
 .env
 .claude/settings.local.json
+.git-hash
 test-data/*
 !test-data/.gitkeep
