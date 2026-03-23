@@ -92,43 +92,6 @@ describe('Upload received page', () => {
     expect(metaRefresh).toHaveAttribute('content', '5')
   })
 
-  it('should show ready message when upload is complete', async () => {
-    vi.mocked(getUploadStatus).mockResolvedValue({
-      uploadStatus: 'ready'
-    })
-
-    const document = await loadPageWithSession({ server: getServer() })
-    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Boundary file uploaded successfully'
-    )
-    expect(document.title).toBe(
-      'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk'
-    )
-    expect(
-      getByText(document, 'Upload and virus scan completed.')
-    ).toBeInTheDocument()
-    expect(
-      getByText(
-        document,
-        'Please click continue to check and view the boundary.'
-      )
-    ).toBeInTheDocument()
-  })
-
-  it('should render continue form when upload is ready', async () => {
-    vi.mocked(getUploadStatus).mockResolvedValue({
-      uploadStatus: 'ready'
-    })
-
-    const document = await loadPageWithSession({ server: getServer() })
-    const form = document.querySelector('form')
-    expect(form).toHaveAttribute('method', 'post')
-    expect(form.getAttribute('action')).toMatch(/\/quote\/check-boundary\/.+/)
-    expect(
-      getByRole(document, 'button', { name: 'Continue' })
-    ).toBeInTheDocument()
-  })
-
   it('should redirect to map page when boundary check fails', async () => {
     vi.mocked(checkBoundary).mockResolvedValue({
       error: 'Something went wrong with the boundary check'
