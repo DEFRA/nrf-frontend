@@ -83,7 +83,6 @@ describe('upload-received controller', () => {
       pageTitle:
         'Boundary file upload status - Nature Restoration Fund - Gov.uk',
       pageHeading: 'Boundary file upload status',
-      uploadId: 'test-upload-id',
       status: 'pending',
       isProcessing: true,
       refreshInterval: 5,
@@ -102,7 +101,6 @@ describe('upload-received controller', () => {
       pageTitle:
         'Boundary file upload status - Nature Restoration Fund - Gov.uk',
       pageHeading: 'Boundary file upload status',
-      uploadId: 'test-upload-id',
       status: 'initiated',
       isProcessing: true,
       refreshInterval: 5,
@@ -124,7 +122,6 @@ describe('upload-received controller', () => {
       pageTitle:
         'Boundary file upload status - Nature Restoration Fund - Gov.uk',
       pageHeading: 'Boundary file upload status',
-      uploadId: 'test-upload-id',
       status: 'error',
       isProcessing: false,
       refreshInterval: null,

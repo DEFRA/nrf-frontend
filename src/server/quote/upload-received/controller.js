@@ -55,7 +55,6 @@ export async function handler(request, h) {
   const viewModel = {
     pageTitle: getPageTitle(heading),
     pageHeading: heading,
-    uploadId,
     status: uploadStatus,
     isProcessing,
     refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
