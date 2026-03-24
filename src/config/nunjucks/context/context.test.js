@@ -11,6 +11,9 @@ vi.mock('node:fs', async () => {
     readFileSync: () => mockReadFileSync()
   }
 })
+vi.mock('../../../server/common/helpers/git-hash.js', () => ({
+  gitHash: 'abc123'
+}))
 vi.mock('../../../server/common/helpers/logging/logger.js', () => ({
   createLogger: () => ({ error: (...args) => mockLoggerError(...args) })
 }))
@@ -67,6 +70,7 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'Nature Restoration Fund',
+          serviceVersion: 'abc123',
           serviceUrl: '/',
           user: null
         })
@@ -163,6 +167,7 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'Nature Restoration Fund',
+          serviceVersion: 'abc123',
           serviceUrl: '/',
           user: null
         })
