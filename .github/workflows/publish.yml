@@ -43,7 +43,7 @@ jobs:
 
       - name: Export Docker image for testing
         run: |
-          docker save cdp-node-frontend-template -o nrf-frontend-image.tar
+          docker save defradigital/${{ github.event.repository.name }}:${{ github.sha }} -o nrf-frontend-image.tar
 
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4

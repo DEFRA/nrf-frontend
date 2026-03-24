@@ -31,11 +31,25 @@ jobs:
           npm run lint
           npm test
 
+      - name: Set git hash
+        run: echo "${{ github.sha }}" > .git-hash
+
       - name: Test Docker Image Build
         run: |
           set +e
           docker build --no-cache --tag cdp-node-frontend-template .
           exit $?
+
+      - name: Export Docker image for testing
+        run: |
+          docker save cdp-node-frontend-template -o nrf-frontend-image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: nrf-frontend-image.tar
+          retention-days: 3
 
       - name: SonarCloud Scan
         if: github.actor != 'dependabot[bot]'
