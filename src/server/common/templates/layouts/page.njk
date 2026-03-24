@@ -22,6 +22,7 @@
 {% from "heading/macro.njk" import appHeading %}
 
 {% set mainClasses = "app-main-wrapper" %}
+{% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
