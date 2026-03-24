@@ -41,6 +41,17 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Export Docker image for testing
+        run: |
+          docker save cdp-node-frontend-template -o nrf-frontend-image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: nrf-frontend-image.tar
+          retention-days: 3
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7 #  (or check latest version on https://github.com/marketplace/actions/official-sonarqube-scan)
         continue-on-error: true
