@@ -10,7 +10,7 @@ import { checkBoundaryPath } from '../upload-received/routes.js'
 vi.mock('../../common/services/boundary.js')
 
 const mockGeojson = {
-  geometry: {
+  boundary_geojson_full: {
     type: 'FeatureCollection',
     features: [
       {
@@ -30,12 +30,22 @@ const mockGeojson = {
       }
     ]
   },
-  intersecting_edps: [],
-  intersects_edp: false
+  boundary_geometry: {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0]
+      ]
+    ]
+  },
+  intersecting_edps: []
 }
 
 const mockEdpGeojson = {
-  geometry: {
+  boundary_geojson_full: {
     type: 'FeatureCollection',
     features: [
       {
@@ -53,12 +63,22 @@ const mockEdpGeojson = {
         },
         properties: {}
       }
+    ]
+  },
+  boundary_geometry: {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0]
+      ]
     ]
   },
   intersecting_edps: [
     { label: 'Kent Downs EDP', n2k_site_name: 'North Downs Woodlands' }
-  ],
-  intersects_edp: true
+  ]
 }
 
 async function setupSession(server, geojson = mockGeojson) {

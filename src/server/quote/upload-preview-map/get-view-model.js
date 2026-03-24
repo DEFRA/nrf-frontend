@@ -9,9 +9,9 @@ function getMapStyleUrl() {
 }
 
 export default function getViewModel(boundaryGeojson, boundaryError = null) {
-  const geometry = boundaryGeojson?.geometry ?? null
+  const geometry = boundaryGeojson?.boundary_geojson_full ?? null
   const intersectingEdps = boundaryGeojson?.intersecting_edps ?? []
-  const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
+  const intersectsEdp = intersectingEdps.length > 0
   const featureCount = geometry?.features?.length ?? 0
 
   const edpBoundaryGeojson = JSON.stringify({

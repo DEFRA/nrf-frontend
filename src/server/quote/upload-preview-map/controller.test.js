@@ -17,13 +17,34 @@ describe('map controller', () => {
   }
 
   const mockGeojson = {
-    geometry: mockGeometry,
-    intersecting_edps: [],
-    intersects_edp: false
+    boundary_geojson_full: mockGeometry,
+    boundary_geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0]
+        ]
+      ]
+    },
+    intersecting_edps: []
   }
 
   const mockEdpGeojson = {
-    geometry: mockGeometry,
+    boundary_geojson_full: mockGeometry,
+    boundary_geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0]
+        ]
+      ]
+    },
     intersecting_edps: [
       {
         label: 'EDP 1',
@@ -44,8 +65,7 @@ describe('map controller', () => {
         overlap_area_sqm: 5000.0,
         overlap_percentage: 25.0
       }
-    ],
-    intersects_edp: true
+    ]
   }
 
   const createMockH = () => ({
@@ -149,7 +169,8 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockGeojson
+        boundaryGeojson: mockGeojson,
+        boundaryGeometry: mockGeojson.boundary_geometry
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
@@ -163,7 +184,8 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockEdpGeojson
+        boundaryGeojson: mockEdpGeojson,
+        boundaryGeometry: mockEdpGeojson.boundary_geometry
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')

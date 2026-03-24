@@ -4,9 +4,8 @@ import getViewModel from './get-view-model.js'
 describe('getViewModel', () => {
   it('should return featureCount of 0 when geometry has no features property', () => {
     const result = getViewModel({
-      geometry: { type: 'FeatureCollection' },
-      intersecting_edps: [],
-      intersects_edp: false
+      boundary_geojson_full: { type: 'FeatureCollection' },
+      intersecting_edps: []
     })
 
     expect(result.featureCount).toBe(0)
@@ -21,15 +20,14 @@ describe('getViewModel', () => {
 
   it('should return the correct feature count', () => {
     const response = {
-      geometry: {
+      boundary_geojson_full: {
         type: 'FeatureCollection',
         features: [
           { type: 'Feature', geometry: { type: 'Polygon' } },
           { type: 'Feature', geometry: { type: 'Polygon' } }
         ]
       },
-      intersecting_edps: [],
-      intersects_edp: false
+      intersecting_edps: []
     }
 
     const result = getViewModel(response)
@@ -43,9 +41,8 @@ describe('getViewModel', () => {
       { name: 'EDP Area 2', attributes: {} }
     ]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundary_geojson_full: { type: 'FeatureCollection', features: [] },
+      intersecting_edps: edps
     }
 
     const result = getViewModel(response)
@@ -108,9 +105,8 @@ describe('getViewModel', () => {
       }
     ]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundary_geojson_full: { type: 'FeatureCollection', features: [] },
+      intersecting_edps: edps
     }
 
     const result = getViewModel(response)
@@ -132,9 +128,8 @@ describe('getViewModel', () => {
   it('should return empty FeatureCollections when no EDPs have geometries', () => {
     const edps = [{ label: 'EDP Area 1', n2k_site_name: 'Site A' }]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundary_geojson_full: { type: 'FeatureCollection', features: [] },
+      intersecting_edps: edps
     }
 
     const result = getViewModel(response)

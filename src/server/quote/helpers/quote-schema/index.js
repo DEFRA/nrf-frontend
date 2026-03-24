@@ -18,5 +18,6 @@ export const completeQuoteDataSchema = joi.object({
     then: peopleCountValidation().extract('peopleCount'),
     otherwise: joi.any().strip()
   }),
-  email: emailValidation().extract('email')
+  email: emailValidation().extract('email'),
+  boundaryGeometry: joi.object().optional().allow(null)
 })
