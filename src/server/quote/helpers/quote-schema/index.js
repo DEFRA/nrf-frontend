@@ -7,6 +7,7 @@ import peopleCountValidation from '../../people-count/form-validation.js'
 
 export const completeQuoteDataSchema = joi.object({
   boundaryEntryType: boundaryTypeValidation().extract('boundaryEntryType'),
+  boundaryGeojson: joi.object().required(),
   developmentTypes: developmentTypesValidation().extract('developmentTypes'),
   residentialBuildingCount: joi.when('developmentTypes', {
     is: joi.array().has(joi.valid('housing')),

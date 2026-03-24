@@ -4,9 +4,9 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { initiateUpload } from '../../common/services/uploader.js'
 
-import { getQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
+import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 
-vi.mock('../helpers/get-quote-session/index.js')
+vi.mock('../helpers/quote-session-cache/index.js')
 vi.mock('../../common/services/uploader.js')
 
 describe('Upload boundary page', () => {

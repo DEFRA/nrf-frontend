@@ -4,7 +4,7 @@ import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache
-} from '../helpers/get-quote-session/index.js'
+} from '../helpers/quote-session-cache/index.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {

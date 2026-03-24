@@ -1,5 +1,5 @@
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { saveQuoteDataToCache } from '../helpers/get-quote-session/index.js'
+import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 import getViewModel from './get-view-model.js'
@@ -31,7 +31,7 @@ export function postHandler(request, h) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
+  const intersectsEdp = boundaryGeojson?.intersectingEdps.length ?? false
 
   saveQuoteDataToCache(request, { boundaryGeojson })
   request.yar.clear('boundaryGeojson')

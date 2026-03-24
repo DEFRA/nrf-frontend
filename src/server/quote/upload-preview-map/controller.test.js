@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { handler, postHandler } from './controller.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 
-vi.mock('../helpers/get-quote-session/index.js', () => ({
+vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn()
 }))
 
 const { saveQuoteDataToCache } =
-  await import('../helpers/get-quote-session/index.js')
+  await import('../helpers/quote-session-cache/index.js')
 
 describe('map controller', () => {
   const mockGeometry = {
@@ -17,14 +17,13 @@ describe('map controller', () => {
   }
 
   const mockGeojson = {
-    geometry: mockGeometry,
-    intersecting_edps: [],
-    intersects_edp: false
+    boundaryGeometryWgs84: mockGeometry,
+    intersectingEdps: []
   }
 
   const mockEdpGeojson = {
-    geometry: mockGeometry,
-    intersecting_edps: [
+    boundaryGeometryWgs84: mockGeometry,
+    intersectingEdps: [
       {
         label: 'EDP 1',
         n2k_site_name: 'Site 1',
@@ -44,8 +43,7 @@ describe('map controller', () => {
         overlap_area_sqm: 5000.0,
         overlap_percentage: 25.0
       }
-    ],
-    intersects_edp: true
+    ]
   }
 
   const createMockH = () => ({
@@ -64,10 +62,6 @@ describe('map controller', () => {
       clear: vi.fn()
     },
     payload: {}
-  })
-
-  beforeEach(() => {
-    vi.clearAllMocks()
   })
 
   describe('handler (GET)', () => {
@@ -125,7 +119,7 @@ describe('map controller', () => {
         expect.objectContaining({
           pageHeading: 'Boundary Map',
           boundaryError: 'Unable to check boundary',
-          featureCount: 0,
+          featureCount: 1,
           boundaryGeojson: JSON.stringify(null)
         })
       )

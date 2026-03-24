@@ -1,7 +1,7 @@
 import { routePath as boundaryTypePath } from '../../boundary-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
-import { getQuoteDataFromCache } from '../get-quote-session/index.js'
+import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 
 const exemptPaths = new Set([
