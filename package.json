@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build:frontend": "cross-env NODE_ENV=production webpack",
-    "check:node-version": "test $(node --version | cut -d. -f1 | tr -d v) -ge 24 || (echo 'ERROR: This project requires Node.js >= 24.' && exit 1)",
+    "check:node-version": "node -e \"const major = Number(process.versions.node.split('.')[0]); if (major < 24) { console.error('ERROR: This project requires Node.js >= 24.'); process.exit(1); }\"",
     "dev": "npm run check:node-version && cross-env USE_SWAGGER=true run-p frontend:watch server:watch",
     "dev:debug": "npm run check:node-version && cross-env USE_SWAGGER=true run-p frontend:watch server:debug",
     "docker:dev": "npm run dev",
@@ -38,7 +38,7 @@
     "@defra/cdp-auditing": "^0.6.0",
     "@defra/hapi-secure-context": "^0.4.0",
     "@defra/hapi-tracing": "^1.30.0",
-    "@defra/interactive-map": "^0.0.1-alpha",
+    "@defra/interactive-map": "^0.0.15-alpha",
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/bell": "^13.1.0",
     "@hapi/catbox-memory": "^6.0.2",

@@ -32,6 +32,9 @@ export default {
     },
     'boundary-map': {
       import: './javascripts/boundary-map.js'
+    },
+    'draw-boundary-map': {
+      import: './javascripts/draw-boundary-map/index.js'
     }
   },
   experiments: {
@@ -186,6 +189,31 @@ export default {
         {
           from: path.join(interactiveMapPath, 'dist/css/index.css'),
           to: 'interactive-map/interactive-map.css'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/map-styles/dist/umd/index.js'
+          ),
+          to: 'interactive-map/plugins/map-styles/index.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/map-styles/dist/umd/im-map-styles-plugin.js'
+          ),
+          to: 'interactive-map/plugins/map-styles/im-map-styles-plugin.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/map-styles/dist/css/index.css'
+          ),
+          to: 'interactive-map/plugins/map-styles/index.css'
+        },
+        {
+          from: path.join(dirname, 'src/client/data/vts'),
+          to: 'data/vts'
         }
       ]
     })

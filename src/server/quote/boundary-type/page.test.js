@@ -70,7 +70,7 @@ describe('Boundary type page', () => {
       formData: { boundaryEntryType: 'draw' }
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/next')
+    expect(response.headers.location).toBe('/quote/draw-boundary')
   })
 
   it('should redirect to the upload boundary page if upload is selected', async () => {

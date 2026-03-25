@@ -320,6 +320,12 @@ export const config = convict({
       format: String,
       default: '',
       env: 'OS_API_KEY'
+    },
+    defaultStyleUrl: {
+      doc: 'Default map style URL used by boundary map pages.',
+      format: String,
+      default: '/public/data/vts/OS_VTS_3857_Outdoor.json',
+      env: 'MAP_DEFAULT_STYLE_URL'
     }
   },
   cdpUploader: {
