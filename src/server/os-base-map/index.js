@@ -10,13 +10,13 @@ export const osBaseMap = {
     name: 'os-base-map',
     register(server) {
       const osApiKey = config.get('map.osApiKey')
-      if (!osApiKey) {
-        logger.warn(
-          'OS API key (OS_API_KEY) is not set — map proxy requests will fail'
-        )
-      } else {
+      if (osApiKey) {
         logger.info(
           `Map proxy registered at ${routePath} → api.os.uk (API key: ${osApiKey.slice(0, 4)}...)`
+        )
+      } else {
+        logger.warn(
+          'OS API key (OS_API_KEY) is not set — map proxy requests will fail'
         )
       }
 
