@@ -62,15 +62,24 @@ const proxyHandler = {
 
     try {
       const isBinaryResource = isBinaryPath(path)
+      const logLevel = isBinaryResource ? 'debug' : 'info'
 
       // Using fetch (backed by Undici) so requests route through the CDP
       // HTTP_PROXY configured in setup-proxy.js via setGlobalDispatcher.
       // Note: fetch auto-decompresses responses, so for binary resources the
       // raw gzip bytes are not preserved. The overhead is minimal since tiles
       // are small (~20-80KB).
+      logger[logLevel](
+        `Map proxy ${isBinaryResource ? 'binary' : 'json'} request: ${path || '/'}`
+      )
+      const startTime = Date.now()
       const res = await fetch(ordnanceSurveyUrl, { redirect: 'follow' })
+      const duration = Date.now() - startTime
 
       if (!res.ok) {
+        logger.warn(
+          `Map proxy upstream error: ${path || '/'} returned ${res.status} (${duration}ms)`
+        )
         const body = Buffer.from(await res.arrayBuffer())
         return h.response(body).code(res.status)
       }
@@ -82,6 +91,9 @@ const proxyHandler = {
       // fetch auto-decompresses so content-encoding is not forwarded.
       if (isBinaryResource) {
         const payload = Buffer.from(await res.arrayBuffer())
+        logger.debug(
+          `Map proxy binary response: ${path} ${res.status} ${payload.length} bytes (${duration}ms)`
+        )
         return h
           .response(payload)
           .type(contentType)
@@ -92,6 +104,9 @@ const proxyHandler = {
       // URLs to point to our proxy. Only a handful of these are fetched per map session;
       // the high-volume vector tile requests (.pbf) are binary and therefore returned raw above.
       const body = await res.text()
+      logger.info(
+        `Map proxy json response: ${path || '/'} ${res.status} ${body.length} chars (${duration}ms)`
+      )
       const protocol =
         request.headers['x-forwarded-proto'] || request.server.info.protocol
       const host = `${protocol}://${request.info.host}`
@@ -101,7 +116,9 @@ const proxyHandler = {
         .type(contentType)
         .header('cache-control', cacheControl)
     } catch (err) {
-      logger.error(`Map proxy error for ${path}: ${err.message}`)
+      logger.error(
+        `Map proxy error for ${path || '/'}: ${err.message} (${err.code || 'no error code'})`
+      )
       return h.response('Map tile request failed').code(statusCodes.badGateway)
     }
   }

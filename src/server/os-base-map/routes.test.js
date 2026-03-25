@@ -12,6 +12,7 @@ vi.mock('../../config/config.js', () => ({
 }))
 
 const mockLogger = vi.hoisted(() => ({
+  debug: vi.fn(),
   error: vi.fn(),
   info: vi.fn(),
   warn: vi.fn()
