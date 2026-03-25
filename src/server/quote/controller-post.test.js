@@ -3,9 +3,9 @@ import { quotePostController } from './controller-post.js'
 import getNextPage from './residential/get-next-page.js'
 
 import { saveValidationFlashToCache } from './helpers/form-validation-session/index.js'
-import { saveQuoteDataToCache } from './helpers/get-quote-session/index.js'
+import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
 
-vi.mock('./helpers/get-quote-session/index.js', async (importOriginal) => {
+vi.mock('./helpers/quote-session-cache/index.js', async (importOriginal) => {
   const actual = await importOriginal()
   return {
     ...actual,
