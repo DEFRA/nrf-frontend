@@ -6,9 +6,12 @@ import { config } from '../../../../config/config.js'
 const logger = createLogger()
 
 /**
- * If HTTP_PROXY is set setupProxy() will enable it globally
- * for a number of http clients.
- * Node Fetch will still need to pass a ProxyAgent in on each call.
+ * If HTTP_PROXY is set, setupProxy() will enable it globally
+ * for all undici-based HTTP clients, including Node's built-in fetch.
+ *
+ * Node's built-in fetch (available since v18) uses undici internally.
+ * Since we're on Node v24, setGlobalDispatcher() already applies to
+ * the global fetch — no per-call ProxyAgent needed.
  */
 export function setupProxy() {
   const proxyUrl = config.get('httpProxy')
