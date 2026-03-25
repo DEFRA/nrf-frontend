@@ -2,7 +2,7 @@ const VTS_STYLE_BASE_URL = '/public/data/vts'
 const VTS_THUMBNAIL_BASE_URL = '/public/data/vts/thumbnails'
 const UK_BOUNDS = [-8.75, 49.8, 2.1, 60.95]
 
-function toAbsoluteUrl(url, baseUrl = window.location.origin) {
+function toAbsoluteUrl(url, baseUrl = globalThis.location.origin) {
   if (typeof url !== 'string' || !url.startsWith('/')) {
     return url
   }
@@ -25,7 +25,7 @@ function normalizeMapStyleSource(source, baseUrl) {
   }
 }
 
-export function normalizeMapStyle(style, baseUrl = window.location.origin) {
+export function normalizeMapStyle(style, baseUrl = globalThis.location.origin) {
   if (!style || typeof style !== 'object') {
     return style
   }
@@ -43,7 +43,9 @@ export function normalizeMapStyle(style, baseUrl = window.location.origin) {
   }
 }
 
-export function createMapStyleRequestHooks(baseUrl = window.location.origin) {
+export function createMapStyleRequestHooks(
+  baseUrl = globalThis.location.origin
+) {
   return {
     transformRequest(url) {
       return { url: toAbsoluteUrl(url, baseUrl) }

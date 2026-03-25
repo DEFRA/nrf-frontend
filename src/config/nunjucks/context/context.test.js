@@ -1,7 +1,6 @@
 import { vi } from 'vitest'
 
 const mockReadFileSync = vi.fn()
-const mockStatSync = vi.fn()
 const mockLoggerError = vi.fn()
 
 vi.mock('node:fs', async () => {
@@ -9,8 +8,7 @@ vi.mock('node:fs', async () => {
 
   return {
     ...nodeFs,
-    readFileSync: () => mockReadFileSync(),
-    statSync: () => mockStatSync()
+    readFileSync: () => mockReadFileSync()
   }
 })
 vi.mock('../../../server/common/helpers/git-hash.js', () => ({
@@ -23,7 +21,6 @@ vi.mock('../../../server/common/helpers/logging/logger.js', () => ({
 describe('context and cache', () => {
   beforeEach(() => {
     mockReadFileSync.mockReset()
-    mockStatSync.mockReset()
     mockLoggerError.mockReset()
     vi.resetModules()
   })
@@ -40,7 +37,6 @@ describe('context and cache', () => {
       })
 
       beforeEach(() => {
-        mockStatSync.mockReturnValue({ mtimeMs: 1 })
         // Return JSON string
         mockReadFileSync.mockReturnValue(`{
         "application.js": "javascripts/application.js",
@@ -105,10 +101,9 @@ describe('context and cache', () => {
       })
 
       beforeEach(() => {
-        mockStatSync.mockImplementation(() => {
+        mockReadFileSync.mockImplementation(() => {
           throw new Error('File not found')
         })
-        mockReadFileSync.mockReturnValue(new Error('File not found'))
 
         contextImport.context(mockRequest)
       })
@@ -130,7 +125,6 @@ describe('context and cache', () => {
 
       beforeEach(async () => {
         contextImport = await import('./context.js')
-        mockStatSync.mockReturnValue({ mtimeMs: 1 })
         // Return JSON string
         mockReadFileSync.mockReturnValue(`{
         "application.js": "javascripts/application.js",
@@ -153,10 +147,9 @@ describe('context and cache', () => {
         contextImport.context(mockRequest)
         expect(mockReadFileSync).toHaveBeenCalledTimes(1)
 
-        mockStatSync.mockReturnValue({ mtimeMs: 2 })
         contextImport.context(mockRequest)
 
-        expect(mockReadFileSync).toHaveBeenCalledTimes(2)
+        expect(mockReadFileSync).toHaveBeenCalledTimes(1)
       })
 
       test('Should provide expected context', () => {

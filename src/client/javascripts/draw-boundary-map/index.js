@@ -29,7 +29,7 @@ function getMapContainerHeight(mapEl) {
 function getDefraApi() {
   const defraApi = globalThis?.defra
 
-  if (!defraApi || !defraApi.InteractiveMap || !defraApi.maplibreProvider) {
+  if (!defraApi?.InteractiveMap || !defraApi?.maplibreProvider) {
     return null
   }
 
