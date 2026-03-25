@@ -20,7 +20,7 @@ const contentSecurityPolicy = {
     mediaSrc: ['self'],
     styleSrc: ['self'],
     scriptSrc: ['self'],
-    imgSrc: ['self', 'data:'],
+    imgSrc: ['self', 'data:', ...mapExternalOrigins],
     frameSrc: ['self'],
     objectSrc: ['none'],
     frameAncestors: ['none'],
