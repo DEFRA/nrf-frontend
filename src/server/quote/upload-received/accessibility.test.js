@@ -26,16 +26,4 @@ describe('Upload received page accessibility checks', () => {
     })
     await runAxeChecks(document.documentElement)
   })
-
-  it('should have no HTML accessibility issues when ready', async () => {
-    vi.mocked(getUploadStatus).mockResolvedValue({
-      uploadStatus: 'ready'
-    })
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer(),
-      cookie
-    })
-    await runAxeChecks(document.documentElement)
-  })
 })

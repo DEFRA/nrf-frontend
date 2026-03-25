@@ -1,7 +1,7 @@
 import { mapValidationErrorsForDisplay } from '../common/helpers/form-validation.js'
 import { saveValidationFlashToCache } from './helpers/form-validation-session/index.js'
 import { statusCodes } from '../common/constants/status-codes.js'
-import { saveQuoteDataToCache } from './helpers/get-quote-session/index.js'
+import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
 
 export const quotePostController = ({
   formValidation,

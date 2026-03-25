@@ -6,11 +6,11 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache
-} from '../helpers/get-quote-session/index.js'
+} from '../helpers/quote-session-cache/index.js'
 
 const backendUrl = config.get('backend').apiUrl
 
-vi.mock('../helpers/get-quote-session/index.js', () => ({
+vi.mock('../helpers/quote-session-cache/index.js', () => ({
   getCompleteQuoteDataFromCache: vi.fn(),
   clearQuoteDataFromCache: vi.fn()
 }))

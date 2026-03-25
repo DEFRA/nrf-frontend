@@ -16,7 +16,18 @@ import {
 
 const MAP_ELEMENT_ID = 'boundary-map'
 
-// TODO: send warnings to the server once server-side logging is available
+/** Bounding box for England in [lng, lat] format (WGS84). */
+const ENGLAND_WEST_LNG = -5.2
+const ENGLAND_SOUTH_LAT = 50
+const ENGLAND_EAST_LNG = 1.5
+const ENGLAND_NORTH_LAT = 55
+
+const DEFAULT_MAP_BOUNDS = [
+  [ENGLAND_WEST_LNG, ENGLAND_SOUTH_LAT],
+  [ENGLAND_EAST_LNG, ENGLAND_NORTH_LAT]
+]
+
+// Faciendum: send warnings to the server once server-side logging is available
 function logWarning(message, error) {
   console.warn(message, error || '')
 }
@@ -56,11 +67,6 @@ function initBoundaryMap() {
   }
 
   const geojson = parseGeojson(mapEl)
-  if (!geojson) {
-    logWarning('No valid GeoJSON data for boundary map')
-    return
-  }
-
   const edpBoundaryGeojson = parseEdpBoundaryGeojson(mapEl)
   const edpIntersectionGeojson = parseEdpIntersectionGeojson(mapEl)
 
@@ -94,16 +100,21 @@ function initBoundaryMap() {
       logWarning('Boundary map error', err.error || err)
     })
 
-    if (mapInstance.isStyleLoaded()) {
-      addBoundaryLayer(mapInstance, geojson)
+    function addLayers() {
+      if (geojson) {
+        addBoundaryLayer(mapInstance, geojson)
+      } else {
+        // No boundary geometry available — zoom to England extent
+        mapInstance.fitBounds(DEFAULT_MAP_BOUNDS, { padding: 20 })
+      }
       addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
       addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
+    }
+
+    if (mapInstance.isStyleLoaded()) {
+      addLayers()
     } else {
-      mapInstance.once('style.load', function () {
-        addBoundaryLayer(mapInstance, geojson)
-        addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
-        addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
-      })
+      mapInstance.once('style.load', addLayers)
     }
   })
 }

@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import { getByRole } from '@testing-library/dom'
+import { getByRole, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -10,7 +10,7 @@ import { checkBoundaryPath } from '../upload-received/routes.js'
 vi.mock('../../common/services/boundary.js')
 
 const mockGeojson = {
-  geometry: {
+  boundaryGeometryWgs84: {
     type: 'FeatureCollection',
     features: [
       {
@@ -30,12 +30,11 @@ const mockGeojson = {
       }
     ]
   },
-  intersecting_edps: [],
-  intersects_edp: false
+  intersectingEdps: []
 }
 
 const mockEdpGeojson = {
-  geometry: {
+  boundaryGeometryWgs84: {
     type: 'FeatureCollection',
     features: [
       {
@@ -55,10 +54,9 @@ const mockEdpGeojson = {
       }
     ]
   },
-  intersecting_edps: [
+  intersectingEdps: [
     { label: 'Kent Downs EDP', n2k_site_name: 'North Downs Woodlands' }
-  ],
-  intersects_edp: true
+  ]
 }
 
 async function setupSession(server, geojson = mockGeojson) {
@@ -73,8 +71,31 @@ async function setupSession(server, geojson = mockGeojson) {
   return cookie
 }
 
+async function setupErrorSession(server, error, geojson = null) {
+  const sessionCookie = await withValidQuoteSession(server)
+  vi.mocked(checkBoundary).mockResolvedValue({ error, geojson })
+  const { cookie } = await submitForm({
+    requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id'),
+    server,
+    formData: {},
+    cookie: sessionCookie
+  })
+  return cookie
+}
+
 async function loadPageWithSession(server, geojson = mockGeojson) {
   const cookie = await setupSession(server, geojson)
+  const response = await server.inject({
+    method: 'GET',
+    url: routePath,
+    headers: cookie ? { cookie } : {}
+  })
+  const { window } = new JSDOM(response.result)
+  return { document: window.document, cookie }
+}
+
+async function loadPageWithError(server, error, geojson = null) {
+  const cookie = await setupErrorSession(server, error, geojson)
   const response = await server.inject({
     method: 'GET',
     url: routePath,
@@ -181,16 +202,6 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).toContain('North Downs Woodlands')
     })
 
-    it('should show disabled edit button', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
-
-      const editButton = getByRole(document, 'button', { name: 'Edit' })
-      expect(editButton).toBeDisabled()
-    })
-
     it('should show save and continue button', async () => {
       const { document } = await loadPageWithSession(
         getServer(),
@@ -200,6 +211,18 @@ describe('Boundary map page', () => {
       expect(
         getByRole(document, 'button', { name: 'Save and continue' })
       ).toBeInTheDocument()
+    })
+
+    it('should show upload another boundary file link', async () => {
+      const { document } = await loadPageWithSession(
+        getServer(),
+        mockEdpGeojson
+      )
+
+      const uploadLink = getByRole(document, 'link', {
+        name: 'Upload a different red line boundary file'
+      })
+      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
     })
 
     it('should redirect to development-types on save and continue', async () => {
@@ -212,6 +235,72 @@ describe('Boundary map page', () => {
       })
       expect(response.statusCode).toBe(302)
       expect(response.headers.location).toBe('/quote/development-types')
+    })
+  })
+
+  describe('when boundary check returns an error', () => {
+    it('should display error summary', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      expect(document.body.textContent).toContain('There is a problem')
+      expect(document.body.textContent).toContain('Invalid geometry detected')
+    })
+
+    it('should not show validated successfully message', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      expect(document.body.textContent).not.toContain('validated successfully')
+    })
+
+    it('should not show save and continue button', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      expect(
+        queryByRole(document, 'button', { name: 'Save and continue' })
+      ).not.toBeInTheDocument()
+    })
+
+    it('should show upload another file link', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      const uploadLink = getByRole(document, 'link', {
+        name: 'Upload a different red line boundary file'
+      })
+      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
+    })
+
+    it('should show draw boundary link', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      const drawLink = getByRole(document, 'link', {
+        name: 'Draw the red line boundary instead'
+      })
+      expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
+    })
+
+    it('should still render the map container', async () => {
+      const { document } = await loadPageWithError(
+        getServer(),
+        'Invalid geometry detected'
+      )
+
+      const mapEl = document.getElementById('boundary-map')
+      expect(mapEl).toBeInTheDocument()
     })
   })
 })

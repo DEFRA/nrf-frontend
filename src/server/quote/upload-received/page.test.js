@@ -6,9 +6,9 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 
-import { getQuoteDataFromCache } from '../helpers/get-quote-session/index.js'
+import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 
-vi.mock('../helpers/get-quote-session/index.js')
+vi.mock('../helpers/quote-session-cache/index.js')
 vi.mock('../../common/services/uploader.js')
 vi.mock('../../common/services/boundary.js')
 
@@ -92,54 +92,36 @@ describe('Upload received page', () => {
     expect(metaRefresh).toHaveAttribute('content', '5')
   })
 
-  it('should show ready message when upload is complete', async () => {
-    vi.mocked(getUploadStatus).mockResolvedValue({
-      uploadStatus: 'ready'
+  it('should redirect to map page when boundary check fails', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      error: 'Something went wrong with the boundary check'
     })
 
-    const document = await loadPageWithSession({ server: getServer() })
-    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Boundary file uploaded successfully'
-    )
-    expect(document.title).toBe(
-      'Boundary file uploaded successfully - Nature Restoration Fund - Gov.uk'
-    )
-    expect(
-      getByText(document, 'Upload and virus scan completed.')
-    ).toBeInTheDocument()
-    expect(
-      getByText(
-        document,
-        'Please click continue to check and view the boundary.'
-      )
-    ).toBeInTheDocument()
-  })
-
-  it('should render continue form when upload is ready', async () => {
-    vi.mocked(getUploadStatus).mockResolvedValue({
-      uploadStatus: 'ready'
-    })
-
-    const document = await loadPageWithSession({ server: getServer() })
-    const form = document.querySelector('form')
-    expect(form).toHaveAttribute('method', 'post')
-    expect(form.getAttribute('action')).toMatch(/\/quote\/check-boundary\/.+/)
-    expect(
-      getByRole(document, 'button', { name: 'Continue' })
-    ).toBeInTheDocument()
-  })
-
-  it('should display boundary check error message in error summary', async () => {
-    const errorMessage = 'Something went wrong with the boundary check'
-
-    vi.mocked(checkBoundary).mockResolvedValue({ error: errorMessage })
-
-    const { document } = await submitForm({
+    const { response } = await submitForm({
       server: getServer(),
       requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id')
     })
 
-    expect(getByText(document, 'There is a problem')).toBeInTheDocument()
-    expect(getByText(document, errorMessage)).toBeInTheDocument()
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/quote/upload-preview-map')
+  })
+
+  it('should show try again and draw boundary links when upload error occurs', async () => {
+    vi.mocked(getUploadStatus).mockResolvedValue({
+      uploadStatus: 'error',
+      error: 'Upload failed'
+    })
+
+    const document = await loadPageWithSession({ server: getServer() })
+
+    const tryAgainLink = getByRole(document, 'link', {
+      name: 'Try uploading another file'
+    })
+    expect(tryAgainLink).toHaveAttribute('href', '/quote/upload-boundary')
+
+    const drawLink = getByRole(document, 'link', {
+      name: 'Draw the red line boundary instead'
+    })
+    expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
   })
 })

@@ -35,29 +35,37 @@ describe('boundary service', () => {
       expect(result).toEqual({ geojson: mockGeojson })
     })
 
-    it('should return error from payload when status >= 400', async () => {
+    it('should return error and geojson from payload when status >= 400', async () => {
+      const payload = { error: 'Unsupported file format' }
       vi.mocked(postRequestToBackend).mockResolvedValue({
         res: { statusCode: 400 },
-        payload: { error: 'Unsupported file format' }
+        payload
       })
 
       const result = await checkBoundary('upload-123')
 
-      expect(result).toEqual({ error: 'Unsupported file format' })
+      expect(result).toEqual({
+        error: 'Unsupported file format',
+        geojson: payload
+      })
     })
 
-    it('should return a default error message when status >= 400 and no error in payload', async () => {
+    it('should return a default error message and geojson when status >= 400 and no error in payload', async () => {
+      const payload = {}
       vi.mocked(postRequestToBackend).mockResolvedValue({
         res: { statusCode: 502 },
-        payload: {}
+        payload
       })
 
       const result = await checkBoundary('upload-123')
 
-      expect(result).toEqual({ error: 'Boundary check failed (502)' })
+      expect(result).toEqual({
+        error: 'Boundary check failed (502)',
+        geojson: payload
+      })
     })
 
-    it('should return error when request throws', async () => {
+    it('should return error when request throws with no payload', async () => {
       vi.mocked(postRequestToBackend).mockRejectedValue(
         new Error('ECONNREFUSED')
       )
@@ -65,6 +73,30 @@ describe('boundary service', () => {
       const result = await checkBoundary('upload-123')
 
       expect(result).toEqual({ error: 'Unable to check boundary' })
+    })
+
+    it('should return backend error message and geojson when request throws with error and geometry in payload', async () => {
+      const mockGeometry = {
+        type: 'FeatureCollection',
+        features: [{ type: 'Feature', geometry: { type: 'Polygon' } }]
+      }
+      const responsePayload = {
+        error:
+          'The uploaded boundary contains invalid geometry (self-intersecting or overlapping lines). Please correct the file and try again.',
+        geometry: mockGeometry
+      }
+      const error = new Error('Bad Request')
+      error.output = { statusCode: 400 }
+      error.data = { payload: responsePayload }
+      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+
+      const result = await checkBoundary('upload-123')
+
+      expect(result).toEqual({
+        error:
+          'The uploaded boundary contains invalid geometry (self-intersecting or overlapping lines). Please correct the file and try again.',
+        geojson: responsePayload
+      })
     })
 
     it('should log error details when request throws with output info', async () => {

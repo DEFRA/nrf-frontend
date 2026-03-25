@@ -8,11 +8,11 @@ function getMapStyleUrl() {
   return '/os-base-map/resources/styles'
 }
 
-export default function getViewModel(boundaryGeojson) {
-  const geometry = boundaryGeojson?.geometry
-  const intersectingEdps = boundaryGeojson?.intersecting_edps ?? []
-  const intersectsEdp = boundaryGeojson?.intersects_edp ?? false
-  const featureCount = geometry?.features?.length ?? 0
+export default function getViewModel(boundaryGeojson, boundaryError = null) {
+  const geometry = boundaryGeojson?.boundaryGeometryWgs84 ?? null
+  const intersectingEdps = boundaryGeojson?.intersectingEdps ?? []
+  const intersectsEdp = intersectingEdps.length > 0
+  const featureCount = 1
 
   const edpBoundaryGeojson = JSON.stringify({
     type: 'FeatureCollection',
@@ -56,7 +56,8 @@ export default function getViewModel(boundaryGeojson) {
     featureCount,
     backLinkPath: uploadBoundaryPath,
     uploadBoundaryPath,
-    cancelPath: boundaryTypePath,
+    boundaryError,
+    boundaryTypePath,
     mapStyleUrl: getMapStyleUrl()
   }
 }

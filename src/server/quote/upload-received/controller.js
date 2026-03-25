@@ -8,6 +8,30 @@ const REFRESH_INTERVAL_SECONDS = 5
 const STATUS_PENDING = 'pending'
 const STATUS_READY = 'ready'
 
+async function processBoundaryCheck(uploadId, request, h) {
+  logger.info(`check-boundary - uploadId: ${uploadId}`)
+
+  const result = await checkBoundary(uploadId)
+
+  if (result.error) {
+    logger.error(
+      `check-boundary failed - uploadId: ${uploadId}, error: ${result.error}`
+    )
+    if (result.geojson) {
+      request.yar.set('boundaryGeojson', result.geojson)
+    }
+    request.yar.set('boundaryError', result.error)
+    request.yar.clear('pendingUploadId')
+    return h.redirect('/quote/upload-preview-map')
+  }
+
+  request.yar.set('boundaryGeojson', result.geojson)
+  request.yar.clear('pendingUploadId')
+  request.yar.clear('boundaryError')
+
+  return h.redirect('/quote/upload-preview-map')
+}
+
 export async function handler(request, h) {
   const uploadId = request.yar.get('pendingUploadId')
   logger.info(`upload-received - pendingUploadId: ${uploadId}`)
@@ -21,19 +45,18 @@ export async function handler(request, h) {
     `upload-received - uploadId: ${uploadId}, uploadStatus: ${uploadStatus}`
   )
 
-  const isReady = uploadStatus === STATUS_READY
+  if (uploadStatus === STATUS_READY) {
+    return processBoundaryCheck(uploadId, request, h)
+  }
+
   const isProcessing =
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
-  const heading = isReady
-    ? 'Boundary file uploaded successfully'
-    : 'Boundary file upload status'
+  const heading = 'Boundary file upload status'
   const viewModel = {
     pageTitle: getPageTitle(heading),
     pageHeading: heading,
-    uploadId,
     status: uploadStatus,
     isProcessing,
-    isReady,
     refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
     errorMessage: response.error
   }
@@ -43,29 +66,5 @@ export async function handler(request, h) {
 
 export async function checkBoundaryHandler(request, h) {
   const { id } = request.params
-
-  logger.info(`check-boundary - uploadId: ${id}`)
-
-  const result = await checkBoundary(id)
-
-  if (result.error) {
-    logger.error(
-      `check-boundary failed - uploadId: ${id}, error: ${result.error}`
-    )
-    return h.view('quote/upload-received/index', {
-      pageTitle: getPageTitle('Boundary error'),
-      pageHeading: 'Boundary error',
-      uploadId: id,
-      status: 'ready',
-      isProcessing: false,
-      isReady: true,
-      refreshInterval: null,
-      boundaryCheckError: result.error
-    })
-  }
-
-  request.yar.set('boundaryGeojson', result.geojson)
-  request.yar.clear('pendingUploadId')
-
-  return h.redirect('/quote/upload-preview-map')
+  return processBoundaryCheck(id, request, h)
 }

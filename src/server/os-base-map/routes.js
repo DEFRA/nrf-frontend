@@ -45,6 +45,8 @@ function rewriteOrdnanceSurveyMapUrls(body, host) {
   }
 }
 
+// Binary resources (vector tiles, sprite images) are passed through without parsing.
+// Only JSON responses (style definitions, metadata) go through URL rewriting.
 function isBinaryPath(path) {
   return path.endsWith('.pbf') || path.endsWith('.png') || path.endsWith('.jpg')
 }
@@ -60,18 +62,18 @@ const proxyHandler = {
     const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl(path, request.query)
 
     try {
-      // For binary resources (tiles, sprites), don't decompress — pass through raw
-      const binary = isBinaryPath(path)
+      const isBinaryResource = isBinaryPath(path)
       const { res, payload } = await Wreck.get(ordnanceSurveyUrl, {
         redirects: 3,
         maxBytes: 10 * 1024 * 1024,
-        gunzip: !binary
+        gunzip: !isBinaryResource
       })
 
       const contentType = res.headers['content-type'] || ''
       const cacheControl = res.headers['cache-control'] || 'no-cache'
 
-      if (binary) {
+      // For binary resources (tiles, sprites), don't decompress — pass through raw
+      if (isBinaryResource) {
         const response = h
           .response(payload)
           .type(contentType)
@@ -84,7 +86,9 @@ const proxyHandler = {
         return response
       }
 
-      // JSON responses — rewrite Ordnance Survey URLs to point to our proxy
+      // JSON responses (style definitions, TileJSON metadata) — rewrite Ordnance Survey
+      // URLs to point to our proxy. Only a handful of these are fetched per map session;
+      // the high-volume vector tile requests (.pbf) are binary and therefore returned raw above.
       const protocol =
         request.headers['x-forwarded-proto'] || request.server.info.protocol
       const host = `${protocol}://${request.info.host}`

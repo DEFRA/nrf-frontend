@@ -1,5 +1,8 @@
 {% extends "govuk/template.njk" %}
 
+{# Pass the Blankie-generated nonce to GOV.UK Frontend's template so its inline script is allowed by CSP #}
+{% set cspNonce = nonce %}
+
 {# Import GOVUK components globally #}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
@@ -19,6 +22,7 @@
 {% from "heading/macro.njk" import appHeading %}
 
 {% set mainClasses = "app-main-wrapper" %}
+{% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">

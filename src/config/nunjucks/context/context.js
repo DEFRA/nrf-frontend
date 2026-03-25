@@ -3,6 +3,7 @@ import { readFileSync, statSync } from 'node:fs'
 
 import { config } from '../../config.js'
 import { buildNavigation } from './build-navigation.js'
+import { gitHash } from '../../../server/common/helpers/git-hash.js'
 import { createLogger } from '../../../server/common/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -50,6 +51,7 @@ export function context(request) {
   return {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
+    serviceVersion: gitHash,
     serviceUrl: '/',
     breadcrumbs: [],
     navigation: buildNavigation(request),
