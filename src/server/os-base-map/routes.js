@@ -1,4 +1,3 @@
-import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
@@ -63,47 +62,45 @@ const proxyHandler = {
 
     try {
       const isBinaryResource = isBinaryPath(path)
-      const { res, payload } = await Wreck.get(ordnanceSurveyUrl, {
-        redirects: 3,
-        maxBytes: 10 * 1024 * 1024,
-        gunzip: !isBinaryResource
-      })
 
-      const contentType = res.headers['content-type'] || ''
-      const cacheControl = res.headers['cache-control'] || 'no-cache'
+      // Using fetch (backed by Undici) so requests route through the CDP
+      // HTTP_PROXY configured in setup-proxy.js via setGlobalDispatcher.
+      // Note: fetch auto-decompresses responses, so for binary resources the
+      // raw gzip bytes are not preserved. The overhead is minimal since tiles
+      // are small (~20-80KB).
+      const res = await fetch(ordnanceSurveyUrl, { redirect: 'follow' })
 
-      // For binary resources (tiles, sprites), don't decompress — pass through raw
+      if (!res.ok) {
+        const body = Buffer.from(await res.arrayBuffer())
+        return h.response(body).code(res.status)
+      }
+
+      const contentType = res.headers.get('content-type') || ''
+      const cacheControl = res.headers.get('cache-control') || 'no-cache'
+
+      // For binary resources (tiles, sprites), pass through the decompressed bytes.
+      // fetch auto-decompresses so content-encoding is not forwarded.
       if (isBinaryResource) {
-        const response = h
+        const payload = Buffer.from(await res.arrayBuffer())
+        return h
           .response(payload)
           .type(contentType)
           .header('cache-control', cacheControl)
-
-        if (res.headers['content-encoding']) {
-          response.header('content-encoding', res.headers['content-encoding'])
-        }
-
-        return response
       }
 
       // JSON responses (style definitions, TileJSON metadata) — rewrite Ordnance Survey
       // URLs to point to our proxy. Only a handful of these are fetched per map session;
       // the high-volume vector tile requests (.pbf) are binary and therefore returned raw above.
+      const body = await res.text()
       const protocol =
         request.headers['x-forwarded-proto'] || request.server.info.protocol
       const host = `${protocol}://${request.info.host}`
-      const rewritten = rewriteOrdnanceSurveyMapUrls(payload.toString(), host)
+      const rewritten = rewriteOrdnanceSurveyMapUrls(body, host)
       return h
         .response(rewritten)
         .type(contentType)
         .header('cache-control', cacheControl)
     } catch (err) {
-      // Wreck throws a Boom error on non-2xx responses (e.g. 403 for tiles outside UK coverage)
-      if (err.data?.isResponseError) {
-        const statusCode = err.data.res.statusCode
-        return h.response(err.data.payload).code(statusCode)
-      }
-
       logger.error(`Map proxy error for ${path}: ${err.message}`)
       return h.response('Map tile request failed').code(statusCodes.badGateway)
     }

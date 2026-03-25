@@ -153,7 +153,7 @@ describe('os-base-map proxy routes', () => {
   })
 
   describe('binary responses (tiles, sprites)', () => {
-    it('should proxy .pbf tiles without decompression', async () => {
+    it('should proxy .pbf tiles as binary', async () => {
       const tileData = new Uint8Array([0x1a, 0x02, 0x03])
 
       server.use(
@@ -163,8 +163,7 @@ describe('os-base-map proxy routes', () => {
             new HttpResponse(tileData, {
               headers: {
                 'content-type': 'application/octet-stream',
-                'cache-control': 'max-age=86400',
-                'content-encoding': 'gzip'
+                'cache-control': 'max-age=86400'
               }
             })
         )
@@ -178,16 +177,12 @@ describe('os-base-map proxy routes', () => {
       expect(h.response).toHaveBeenCalled()
       expect(h._response.type).toHaveBeenCalledWith('application/octet-stream')
       expect(h._response.header).toHaveBeenCalledWith(
-        'content-encoding',
-        'gzip'
-      )
-      expect(h._response.header).toHaveBeenCalledWith(
         'cache-control',
         'max-age=86400'
       )
     })
 
-    it('should not set content-encoding if upstream does not send it', async () => {
+    it('should proxy .png sprites as binary', async () => {
       server.use(
         http.get(
           'https://api.os.uk/maps/vector/v1/vts/resources/sprites/sprite.png',
@@ -208,8 +203,12 @@ describe('os-base-map proxy routes', () => {
 
       await handler(request, h)
 
-      const headerCalls = h._response.header.mock.calls.map((c) => c[0])
-      expect(headerCalls).not.toContain('content-encoding')
+      expect(h.response).toHaveBeenCalled()
+      expect(h._response.type).toHaveBeenCalledWith('image/png')
+      expect(h._response.header).toHaveBeenCalledWith(
+        'cache-control',
+        'no-cache'
+      )
     })
   })
 
@@ -229,7 +228,9 @@ describe('os-base-map proxy routes', () => {
 
       await handler(request, h)
 
-      expect(h.response).toHaveBeenCalledWith(Buffer.from('Forbidden'))
+      const responseBody = h.response.mock.calls[0][0]
+      expect(Buffer.isBuffer(responseBody)).toBe(true)
+      expect(responseBody.toString()).toBe('Forbidden')
       expect(h._response.code).toHaveBeenCalledWith(403)
     })
 
