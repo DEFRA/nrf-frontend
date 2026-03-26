@@ -34,6 +34,12 @@
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "copy-webpack-plugin": {
+      "serialize-javascript": "^7.0.5"
+    }
+  },
   "dependencies": {
     "@defra/cdp-auditing": "^0.6.0",
     "@defra/hapi-secure-context": "^0.4.0",
