@@ -49,6 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@v6
       - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
