@@ -1,4 +1,3 @@
-import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
@@ -6,6 +5,8 @@ import { statusCodes } from '../common/constants/status-codes.js'
 const logger = createLogger()
 
 const ordnanceSurveyMapUrl = 'https://api.os.uk/maps/vector/v1/vts'
+const defaultCacheControl = 'no-cache'
+const cacheControlHeader = 'cache-control'
 
 export const routePath = '/os-base-map'
 
@@ -51,6 +52,69 @@ function isBinaryPath(path) {
   return path.endsWith('.pbf') || path.endsWith('.png') || path.endsWith('.jpg')
 }
 
+function getResponseHeaders(res) {
+  return {
+    contentType: res.headers.get('content-type') || '',
+    cacheControl: res.headers.get(cacheControlHeader) || defaultCacheControl
+  }
+}
+
+async function handleBinaryResponse(res, h, path, duration) {
+  const { contentType, cacheControl } = getResponseHeaders(res)
+  const payload = Buffer.from(await res.arrayBuffer())
+  logger.debug(
+    `Map proxy binary response: ${path} ${res.status} ${payload.length} bytes (${duration}ms)`
+  )
+  return h
+    .response(payload)
+    .type(contentType)
+    .header(cacheControlHeader, cacheControl)
+}
+
+async function handleJsonResponse(res, h, request, path, duration) {
+  const { contentType, cacheControl } = getResponseHeaders(res)
+  const body = await res.text()
+  logger.info(
+    `Map proxy json response: ${path || '/'} ${res.status} ${body.length} chars (${duration}ms)`
+  )
+  const protocol =
+    request.headers['x-forwarded-proto'] || request.server.info.protocol
+  const host = `${protocol}://${request.info.host}`
+  const rewritten = rewriteOrdnanceSurveyMapUrls(body, host)
+  return h
+    .response(rewritten)
+    .type(contentType)
+    .header(cacheControlHeader, cacheControl)
+}
+
+async function handleUpstreamError(res, h, path, duration) {
+  logger.warn(
+    `Map proxy upstream error: ${path || '/'} returned ${res.status} (${duration}ms)`
+  )
+  const body = Buffer.from(await res.arrayBuffer())
+  return h.response(body).code(res.status)
+}
+
+async function fetchUpstream(request, path) {
+  const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl(path, request.query)
+  const isBinaryResource = isBinaryPath(path)
+  const logLevel = isBinaryResource ? 'debug' : 'info'
+
+  // Using fetch (backed by Undici) so requests route through the CDP
+  // HTTP_PROXY configured in setup-proxy.js via setGlobalDispatcher.
+  // Note: fetch auto-decompresses responses, so for binary resources the
+  // raw gzip bytes are not preserved. The overhead is minimal since tiles
+  // are small (~20-80KB).
+  logger[logLevel](
+    `Map proxy ${isBinaryResource ? 'binary' : 'json'} request: ${path || '/'}`
+  )
+  const startTime = Date.now()
+  const res = await fetch(ordnanceSurveyUrl, { redirect: 'follow' })
+  const duration = Date.now() - startTime
+
+  return { res, duration, isBinaryResource }
+}
+
 const proxyHandler = {
   method: 'GET',
   path: `${routePath}/{path*}`,
@@ -59,52 +123,24 @@ const proxyHandler = {
   },
   async handler(request, h) {
     const path = request.params.path || ''
-    const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl(path, request.query)
 
     try {
-      const isBinaryResource = isBinaryPath(path)
-      const { res, payload } = await Wreck.get(ordnanceSurveyUrl, {
-        redirects: 3,
-        maxBytes: 10 * 1024 * 1024,
-        gunzip: !isBinaryResource
-      })
+      const { res, duration, isBinaryResource } = await fetchUpstream(
+        request,
+        path
+      )
 
-      const contentType = res.headers['content-type'] || ''
-      const cacheControl = res.headers['cache-control'] || 'no-cache'
-
-      // For binary resources (tiles, sprites), don't decompress — pass through raw
-      if (isBinaryResource) {
-        const response = h
-          .response(payload)
-          .type(contentType)
-          .header('cache-control', cacheControl)
-
-        if (res.headers['content-encoding']) {
-          response.header('content-encoding', res.headers['content-encoding'])
-        }
-
-        return response
+      if (!res.ok) {
+        return handleUpstreamError(res, h, path, duration)
       }
 
-      // JSON responses (style definitions, TileJSON metadata) — rewrite Ordnance Survey
-      // URLs to point to our proxy. Only a handful of these are fetched per map session;
-      // the high-volume vector tile requests (.pbf) are binary and therefore returned raw above.
-      const protocol =
-        request.headers['x-forwarded-proto'] || request.server.info.protocol
-      const host = `${protocol}://${request.info.host}`
-      const rewritten = rewriteOrdnanceSurveyMapUrls(payload.toString(), host)
-      return h
-        .response(rewritten)
-        .type(contentType)
-        .header('cache-control', cacheControl)
+      return isBinaryResource
+        ? handleBinaryResponse(res, h, path, duration)
+        : handleJsonResponse(res, h, request, path, duration)
     } catch (err) {
-      // Wreck throws a Boom error on non-2xx responses (e.g. 403 for tiles outside UK coverage)
-      if (err.data?.isResponseError) {
-        const statusCode = err.data.res.statusCode
-        return h.response(err.data.payload).code(statusCode)
-      }
-
-      logger.error(`Map proxy error for ${path}: ${err.message}`)
+      logger.error(
+        `Map proxy error for ${path || '/'}: ${err.message} (${err.code || 'no error code'})`
+      )
       return h.response('Map tile request failed').code(statusCodes.badGateway)
     }
   }
