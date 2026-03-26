@@ -31,11 +31,17 @@ jobs:
           npm run lint
           npm test
 
+      - name: Set git hash
+        run: echo "${{ github.sha }}" > .git-hash
+
       - name: Test Docker Image Build
         run: |
           set +e
           docker build --no-cache --tag cdp-node-frontend-template .
           exit $?
+
+      - name: Verify git hash in Docker image
+        run: docker run --rm cdp-node-frontend-template cat .git-hash
 
       - name: SonarCloud Scan
         if: github.actor != 'dependabot[bot]'
