@@ -1,6 +1,10 @@
 const VTS_STYLE_BASE_URL = '/public/data/vts'
 const VTS_THUMBNAIL_BASE_URL = '/public/data/vts/thumbnails'
-const UK_BOUNDS = [-8.75, 49.8, 2.1, 60.95]
+const UK_W = -8.75
+const UK_S = 49.8
+const UK_E = 2.1
+const UK_N = 60.95
+const UK_BOUNDS = [UK_W, UK_S, UK_E, UK_N]
 
 function toAbsoluteUrl(url, baseUrl = globalThis.location.origin) {
   if (typeof url !== 'string' || !url.startsWith('/')) {
