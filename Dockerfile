@@ -16,6 +16,7 @@ EXPOSE ${PORT} ${PORT_DEBUG}
 COPY --chown=node:node --chmod=755 package*.json ./
 RUN npm install
 COPY --chown=node:node --chmod=755 . .
+COPY --chmod=444 .git-has[h] ./
 RUN npm run build:frontend
 
 CMD [ "npm", "run", "docker:dev" ]
@@ -41,13 +42,12 @@ USER node
 COPY --from=production_build /home/node/package*.json ./
 COPY --from=production_build /home/node/src ./src/
 COPY --from=production_build /home/node/.public/ ./.public/
+COPY --from=production_build --chmod=444 /home/node/.git-has[h] ./
 
 RUN npm ci --omit=dev
 
 ARG PORT
-ARG GIT_HASH=unknown
 ENV PORT=${PORT}
-ENV GIT_HASH=${GIT_HASH}
 EXPOSE ${PORT}
 
 CMD [ "node", "src" ]
