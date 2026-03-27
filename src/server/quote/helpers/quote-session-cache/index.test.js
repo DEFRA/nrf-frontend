@@ -43,6 +43,7 @@ describe('Save and retrieve quote data from session cache', () => {
         yar: {
           get: vi.fn().mockReturnValue({
             boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
             residentialBuildingCount: 10,
             email: 'test@example.com'
@@ -95,6 +96,7 @@ describe('Save and retrieve quote data from session cache', () => {
   describe('getCompleteQuoteDataFromCache', () => {
     const validQuoteData = {
       boundaryEntryType: 'draw',
+      boundaryGeojson: { type: 'Polygon' },
       developmentTypes: ['housing'],
       residentialBuildingCount: 10,
       email: 'test@example.com'
@@ -129,6 +131,7 @@ describe('Save and retrieve quote data from session cache', () => {
         yar: {
           get: vi.fn().mockReturnValue({
             boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing', 'other-residential'],
             residentialBuildingCount: 10,
             peopleCount: 5,

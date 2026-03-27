@@ -2,39 +2,36 @@ import { describe, it, expect } from 'vitest'
 import getViewModel from './get-view-model.js'
 
 describe('getViewModel', () => {
-  it('should return featureCount of 0 when geometry has no features property', () => {
+  it('should return featureCount of 1 and correct fields', () => {
+    const geo = { type: 'FeatureCollection' }
     const result = getViewModel({
-      geometry: { type: 'FeatureCollection' },
-      intersecting_edps: [],
-      intersects_edp: false
+      boundaryGeometryWgs84: geo,
+      intersectingEdps: []
     })
 
-    expect(result.featureCount).toBe(0)
+    expect(result.featureCount).toBe(1)
     expect(result.pageHeading).toBe('Boundary Map')
-    expect(result.boundaryGeojson).toBe(
-      JSON.stringify({ type: 'FeatureCollection' })
-    )
-    expect(result.intersectsEdp).toBe(false)
+    expect(result.boundaryGeojson).toBe(JSON.stringify(geo))
+    expect(result.intersectsEdp).toBeFalsy()
     expect(result.intersectingEdps).toEqual([])
     expect(result.boundaryError).toBeNull()
   })
 
-  it('should return the correct feature count', () => {
+  it('should always return featureCount of 1', () => {
     const response = {
-      geometry: {
+      boundaryGeometryWgs84: {
         type: 'FeatureCollection',
         features: [
           { type: 'Feature', geometry: { type: 'Polygon' } },
           { type: 'Feature', geometry: { type: 'Polygon' } }
         ]
       },
-      intersecting_edps: [],
-      intersects_edp: false
+      intersectingEdps: []
     }
 
     const result = getViewModel(response)
 
-    expect(result.featureCount).toBe(2)
+    expect(result.featureCount).toBe(1)
   })
 
   it('should extract intersecting EDPs from response', () => {
@@ -43,14 +40,13 @@ describe('getViewModel', () => {
       { name: 'EDP Area 2', attributes: {} }
     ]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
+      intersectingEdps: edps
     }
 
     const result = getViewModel(response)
 
-    expect(result.intersectsEdp).toBe(true)
+    expect(result.intersectsEdp).toBeTruthy()
     expect(result.intersectingEdps).toEqual(
       edps.map((edp) => ({ ...edp, natura2000SiteName: edp.n2k_site_name }))
     )
@@ -59,8 +55,8 @@ describe('getViewModel', () => {
   it('should handle missing fields gracefully', () => {
     const result = getViewModel({})
 
-    expect(result.featureCount).toBe(0)
-    expect(result.intersectsEdp).toBe(false)
+    expect(result.featureCount).toBe(1)
+    expect(result.intersectsEdp).toBeFalsy()
     expect(result.intersectingEdps).toEqual([])
   })
 
@@ -108,9 +104,8 @@ describe('getViewModel', () => {
       }
     ]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
+      intersectingEdps: edps
     }
 
     const result = getViewModel(response)
@@ -132,9 +127,8 @@ describe('getViewModel', () => {
   it('should return empty FeatureCollections when no EDPs have geometries', () => {
     const edps = [{ label: 'EDP Area 1', n2k_site_name: 'Site A' }]
     const response = {
-      geometry: { type: 'FeatureCollection', features: [] },
-      intersecting_edps: edps,
-      intersects_edp: true
+      boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
+      intersectingEdps: edps
     }
 
     const result = getViewModel(response)
@@ -146,9 +140,9 @@ describe('getViewModel', () => {
   it('should handle null boundaryGeojson with defaults', () => {
     const result = getViewModel(null)
 
-    expect(result.featureCount).toBe(0)
+    expect(result.featureCount).toBe(1)
     expect(result.boundaryGeojson).toBe(JSON.stringify(null))
-    expect(result.intersectsEdp).toBe(false)
+    expect(result.intersectsEdp).toBeFalsy()
     expect(result.intersectingEdps).toEqual([])
     expect(result.boundaryError).toBeNull()
   })
@@ -157,7 +151,7 @@ describe('getViewModel', () => {
     const result = getViewModel(null, 'Invalid geometry')
 
     expect(result.boundaryError).toBe('Invalid geometry')
-    expect(result.featureCount).toBe(0)
+    expect(result.featureCount).toBe(1)
     expect(result.boundaryGeojson).toBe(JSON.stringify(null))
   })
 

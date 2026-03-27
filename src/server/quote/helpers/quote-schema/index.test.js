@@ -2,10 +2,43 @@ import { completeQuoteDataSchema } from './index.js'
 
 const validBase = {
   boundaryEntryType: 'draw',
+  boundaryGeojson: {
+    crs: {
+      type: 'name',
+      properties: {
+        name: 'urn:ogc:def:crs:EPSG::27700'
+      }
+    },
+    type: 'Polygon',
+    coordinates: [
+      [
+        [530000, 180000],
+        [530100, 180000],
+        [530100, 180100],
+        [530000, 180100],
+        [530000, 180000]
+      ]
+    ]
+  },
+  developmentTypes: ['housing'],
+  residentialBuildingCount: '10',
   email: 'test@example.com'
 }
 
 describe('completeQuoteDataSchema', () => {
+  describe('boundaryGeojson', () => {
+    it('passes with a valid object', () => {
+      const { error } = completeQuoteDataSchema.validate(validBase)
+      expect(error).toBeUndefined()
+    })
+
+    it('fails when boundaryGeojson is missing', () => {
+      const { boundaryGeojson: _, ...withoutGeojson } = validBase
+      const { error } = completeQuoteDataSchema.validate(withoutGeojson)
+      expect(error).toBeDefined()
+    })
+  })
+
   describe('when developmentTypes is ["housing"]', () => {
     it('passes with residentialBuildingCount present', () => {
       const { error } = completeQuoteDataSchema.validate({
@@ -19,7 +52,8 @@ describe('completeQuoteDataSchema', () => {
     it('fails when residentialBuildingCount is missing', () => {
       const { error } = completeQuoteDataSchema.validate({
         ...validBase,
-        developmentTypes: ['housing']
+        developmentTypes: ['housing'],
+        residentialBuildingCount: undefined
       })
       expect(error).toBeDefined()
       expect(error.details[0].message).toBe(
@@ -85,7 +119,8 @@ describe('completeQuoteDataSchema', () => {
       const { error } = completeQuoteDataSchema.validate({
         ...validBase,
         developmentTypes: ['housing', 'other-residential'],
-        peopleCount: 5
+        peopleCount: 5,
+        residentialBuildingCount: undefined
       })
       expect(error).toBeDefined()
       expect(error.details[0].message).toBe(
