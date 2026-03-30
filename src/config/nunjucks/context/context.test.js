@@ -101,7 +101,9 @@ describe('context and cache', () => {
       })
 
       beforeEach(() => {
-        mockReadFileSync.mockReturnValue(new Error('File not found'))
+        mockReadFileSync.mockImplementation(() => {
+          throw new Error('File not found')
+        })
 
         contextImport.context(mockRequest)
       })
@@ -121,11 +123,8 @@ describe('context and cache', () => {
     describe('Webpack manifest file cache', () => {
       let contextImport
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         contextImport = await import('./context.js')
-      })
-
-      beforeEach(() => {
         // Return JSON string
         mockReadFileSync.mockReturnValue(`{
         "application.js": "javascripts/application.js",
@@ -140,7 +139,17 @@ describe('context and cache', () => {
       })
 
       test('Should use cache', () => {
-        expect(mockReadFileSync).not.toHaveBeenCalled()
+        contextImport.context(mockRequest)
+        expect(mockReadFileSync).toHaveBeenCalledTimes(1)
+      })
+
+      test('Should refresh cache when manifest file changes', () => {
+        contextImport.context(mockRequest)
+        expect(mockReadFileSync).toHaveBeenCalledTimes(1)
+
+        contextImport.context(mockRequest)
+
+        expect(mockReadFileSync).toHaveBeenCalledTimes(1)
       })
 
       test('Should provide expected context', () => {

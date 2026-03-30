@@ -1,0 +1,38 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% set mainClasses = "app-main-wrapper app-main-wrapper--draw-boundary" %}
+
+{% block head %}
+  {{ super() }}
+  <script src="{{ getAssetPath('interactive-map/core/index.js') }}" defer nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('interactive-map/maplibre/index.js') }}" defer nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('interactive-map/plugins/map-styles/index.js') }}" defer nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('draw-boundary-map.js') }}" defer nonce="{{ nonce }}"></script>
+  <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
+  <link href="{{ getAssetPath('interactive-map/plugins/map-styles/index.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="app-draw-boundary">
+    <h1 class="govuk-visually-hidden">{{ pageHeading }}</h1>
+    <div
+      id="draw-boundary-map"
+      class="app-draw-boundary__map"
+      data-map-style-url="{{ mapStyleUrl }}"
+    >
+      <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available.</p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block govukFooter %}{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+{% endblock %}

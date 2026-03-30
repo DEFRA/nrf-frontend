@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" role="img" aria-label="Outdoor OS thumbnail">
+  <rect width="60" height="60" fill="#d8efe0"/>
+  <path d="M0 44 L14 32 L24 36 L37 22 L60 34 L60 60 L0 60 Z" fill="#86b97b"/>
+  <path d="M0 52 L17 42 L27 47 L40 36 L60 44 L60 60 L0 60 Z" fill="#a6cf8d"/>
+  <path d="M0 26 H60" stroke="#ffffff" stroke-width="3" stroke-opacity="0.8"/>
+  <path d="M0 26 H60" stroke="#d2b96d" stroke-width="1.2" stroke-dasharray="6 4"/>
+</svg>

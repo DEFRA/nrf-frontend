@@ -6,17 +6,21 @@ import { config } from '../../../config/config.js'
  * @satisfies {import('@hapi/hapi').Plugin}
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
+const mapExternalOrigins = [
+  'https://raw.githubusercontent.com',
+  'https://server.arcgisonline.com'
+]
 
 const contentSecurityPolicy = {
   plugin: Blankie,
   options: {
     defaultSrc: ['self'],
     fontSrc: ['self'],
-    connectSrc: ['self', 'wss'],
+    connectSrc: ['self', 'wss', ...mapExternalOrigins],
     mediaSrc: ['self'],
     styleSrc: ['self'],
     scriptSrc: ['self'],
-    imgSrc: ['self', 'data:'],
+    imgSrc: ['self', 'data:', ...mapExternalOrigins],
     frameSrc: ['self'],
     objectSrc: ['none'],
     frameAncestors: ['none'],

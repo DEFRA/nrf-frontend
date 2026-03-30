@@ -105,5 +105,11 @@ describe('#config', () => {
     test('cookie.isSecure is false', () => {
       expect(config.get('cookie.isSecure')).toBe(false)
     })
+
+    test('map.defaultStyleUrl is set', () => {
+      expect(config.get('map.defaultStyleUrl')).toBe(
+        '/public/data/vts/OS_VTS_3857_Outdoor.json'
+      )
+    })
   })
 })
