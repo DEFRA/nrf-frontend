@@ -6,7 +6,7 @@ export const title =
 
 const iDontKnowValue = 'i-dont-know'
 
-export default function (quoteData) {
+export default function getViewModel(quoteData) {
   const wasteWaterOptions = quoteData?.wasteWaterOptions ?? []
 
   const items = wasteWaterOptions.map((option) => ({
