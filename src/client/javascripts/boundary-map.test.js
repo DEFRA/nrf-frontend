@@ -147,8 +147,8 @@ describe('boundary-map init', () => {
     )
     expect(mapInstance.fitBounds).toHaveBeenCalledWith(
       [
-        [-5.2, 50.0],
-        [1.5, 55.0]
+        [-5.75, 49.95],
+        [1.8, 55.85]
       ],
       { padding: 20 }
     )
