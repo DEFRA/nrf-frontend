@@ -75,7 +75,7 @@ describe('boundary service', () => {
       expect(result).toEqual({ error: 'Unable to check boundary' })
     })
 
-    it('should return backend error message and geojson when request throws with error and geometry in payload', async () => {
+    it('should return backend error message and geojson when request throws with error and boundaryGeometryWgs84 in payload', async () => {
       const mockGeometry = {
         type: 'FeatureCollection',
         features: [{ type: 'Feature', geometry: { type: 'Polygon' } }]
@@ -83,7 +83,7 @@ describe('boundary service', () => {
       const responsePayload = {
         error:
           'The uploaded boundary contains invalid geometry (self-intersecting or overlapping lines). Please correct the file and try again.',
-        geometry: mockGeometry
+        boundaryGeometryWgs84: mockGeometry
       }
       const error = new Error('Bad Request')
       error.output = { statusCode: 400 }
