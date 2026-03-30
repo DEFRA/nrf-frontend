@@ -1,0 +1,46 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{  backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+            {{ govukRadios({
+                name: "wasteWaterTreatmentWorks",
+                fieldset: {
+                    legend: {
+                        html: legendHtml,
+                        classes: "govuk-fieldset__legend--l"
+                    }
+                },
+                hint: {
+                    text: "Your quote will be partially based on the waste water treatment works you choose. If you don't know your waste water treatment works yet, we will provide a quote range."
+                },
+                errorMessage: validationErrors.messagesByFormField.wasteWaterTreatmentWorks,
+                value: formSubmitData.wasteWaterTreatmentWorks,
+                items: wasteWaterItems
+            }) }}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
