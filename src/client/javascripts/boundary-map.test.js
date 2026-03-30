@@ -40,6 +40,8 @@ function createMockMapInstance(styleLoaded = true) {
     addSource: vi.fn(),
     addLayer: vi.fn(),
     fitBounds: vi.fn(),
+    setMinZoom: vi.fn(),
+    setMaxBounds: vi.fn(),
     isStyleLoaded: vi.fn().mockReturnValue(styleLoaded),
     once: vi.fn(),
     on: vi.fn()

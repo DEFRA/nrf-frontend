@@ -165,10 +165,10 @@ describe('checkBoundaryHandler', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
-  it('should store error and redirect to map when boundary check fails with geojson', async () => {
+  it('should store error and geojson and redirect to map when boundary check fails with geojson', async () => {
     const mockGeojson = {
       error: 'Invalid geometry',
-      geometry: { type: 'FeatureCollection', features: [] }
+      boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] }
     }
     vi.mocked(checkBoundary).mockResolvedValue({
       error: 'Invalid geometry',
