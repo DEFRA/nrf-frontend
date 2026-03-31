@@ -46,7 +46,7 @@ describe('quoteSubmitController', () => {
     const result = await quoteSubmitController.handler(request, h)
 
     expect(getCompleteQuoteDataFromCache).toHaveBeenCalledWith(request)
-    expect(capturedBody).toEqual(quoteData)
+    expect(capturedBody).toEqual({ ...quoteData, DUMMY_TEST_PROPERTY: true })
     expect(clearQuoteDataFromCache).toHaveBeenCalledWith(request)
     expect(h.redirect).toHaveBeenCalledWith(
       '/quote/confirmation?reference=REF-001002'

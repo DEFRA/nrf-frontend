@@ -11,7 +11,7 @@ export const quoteSubmitController = {
     const quoteData = getCompleteQuoteDataFromCache(request)
     const response = await postRequestToBackend({
       endpointPath: '/quotes',
-      payload: quoteData
+      payload: { ...quoteData, DUMMY_TEST_PROPERTY: true }
     })
     clearQuoteDataFromCache(request)
     const nrfReference = response.payload.reference
