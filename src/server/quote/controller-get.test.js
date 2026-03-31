@@ -21,14 +21,14 @@ describe('quoteController', () => {
     }
   })
 
-  it('should render the correct view with the view model', () => {
+  it('should render the correct view with the view model', async () => {
     const controller = quoteController({ routeId, getViewModel })
-    const result = controller.handler({}, buildH())
+    const result = await controller.handler({}, buildH())
     expect(result.template).toBe('quote/start/index')
     expect(result.model).toEqual(viewModel)
   })
 
-  it('should pass quoteData to getViewModel', () => {
+  it('should pass quoteData to getViewModel', async () => {
     const quoteData = { boundaryEntryType: 'draw' }
     vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
@@ -36,19 +36,19 @@ describe('quoteController', () => {
       routeId,
       getViewModel: mockGetViewModel
     })
-    controller.handler({}, buildH())
+    await controller.handler({}, buildH())
     expect(mockGetViewModel).toHaveBeenCalledWith(quoteData)
   })
 
-  it('should set formSubmitData from quoteData', () => {
+  it('should set formSubmitData from quoteData', async () => {
     const quoteData = { boundaryEntryType: 'draw' }
     vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const controller = quoteController({ routeId, getViewModel })
-    const result = controller.handler({}, buildH())
+    const result = await controller.handler({}, buildH())
     expect(result.model.formSubmitData).toEqual(quoteData)
   })
 
-  it('should render form validation errors and formSubmitData if they were stored in flash', () => {
+  it('should render form validation errors and formSubmitData if they were stored in flash', async () => {
     const flash = {
       validationErrors: { summary: [{ href: '#field1', text: 'Required' }] },
       formSubmitData: { field1: 'bad' }
@@ -57,13 +57,13 @@ describe('quoteController', () => {
     const controller = quoteController({ routeId, getViewModel })
     const request = {}
 
-    const result = controller.handler(request, buildH())
+    const result = await controller.handler(request, buildH())
 
     expect(result.model.validationErrors).toEqual(flash.validationErrors)
     expect(result.model.formSubmitData).toEqual(flash.formSubmitData)
   })
 
-  it('should clear the flash after reading it', () => {
+  it('should clear the flash after reading it', async () => {
     const flash = {
       validationErrors: { summary: [] },
       formSubmitData: {}
@@ -72,19 +72,19 @@ describe('quoteController', () => {
     const controller = quoteController({ routeId, getViewModel })
     const request = {}
 
-    controller.handler(request, buildH())
+    await controller.handler(request, buildH())
 
     expect(clearValidationFlashFromCache).toHaveBeenCalledWith(request)
   })
 
-  it('should fall back to quote cache for formSubmitData when there is no flash', () => {
+  it('should fall back to quote cache for formSubmitData when there is no flash', async () => {
     vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       boundaryEntryType: 'upload'
     })
     const controller = quoteController({ routeId, getViewModel })
 
-    const result = controller.handler({}, buildH())
+    const result = await controller.handler({}, buildH())
 
     expect(result.model.formSubmitData).toEqual({ boundaryEntryType: 'upload' })
     expect(result.model.validationErrors).toBeUndefined()

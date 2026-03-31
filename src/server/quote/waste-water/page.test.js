@@ -3,13 +3,10 @@ import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
-import { expectInputError } from '../../../test-utils/assertions.js'
+import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
-const pageHeading =
-  'What is the maximum number of people the development will serve?'
-
-describe('People count page', () => {
+describe('Waste water treatment works page', () => {
   const getServer = setupTestServer()
   let sessionCookie
 
@@ -24,25 +21,24 @@ describe('People count page', () => {
       cookie: sessionCookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      pageHeading
+      'Confirm which waste water treatment works will be used for this development'
     )
     expect(document.title).toBe(
-      'What is the maximum number of people the development will serve? - Nature Restoration Fund - Gov.uk'
+      'Confirm which waste water treatment works will be used for this development - Nature Restoration Fund - Gov.uk'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/development-types'
+      '/quote/residential'
     )
-    expect(getByLabelText(document, pageHeading)).toHaveValue(null)
     const csrfToken = document.querySelector('form input[name="csrfToken"]')
     expect(csrfToken).toBeInTheDocument()
   })
 
-  it("should remember the user's previously entered value", async () => {
+  it("should remember the user's previous selection", async () => {
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { peopleCount: '42' },
+      formData: { wasteWaterTreatmentWorks: 'i-dont-know' },
       cookie: sessionCookie
     })
     const document = await loadPage({
@@ -50,7 +46,12 @@ describe('People count page', () => {
       server: getServer(),
       cookie: updatedCookie
     })
-    expect(getByLabelText(document, pageHeading)).toHaveValue(42)
+    expect(
+      getByLabelText(
+        document,
+        "I don't know the waste water treatment works yet"
+      )
+    ).toBeChecked()
   })
 
   it('should show a validation error, after an invalid form submission', async () => {
@@ -67,10 +68,10 @@ describe('People count page', () => {
       server: getServer(),
       cookie: updatedCookie
     })
-    expectInputError({
+    expectFieldsetError({
       document,
-      inputLabel: pageHeading,
-      errorMessage: 'Enter the maximum number of people to continue'
+      errorMessage:
+        'Select a waste water treatment works, or select that you do not know yet'
     })
   })
 
@@ -78,10 +79,10 @@ describe('People count page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { peopleCount: '50' },
+      formData: { wasteWaterTreatmentWorks: 'i-dont-know' },
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/waste-water')
+    expect(response.headers.location).toBe('/quote/email')
   })
 })
