@@ -34,7 +34,7 @@ export default {
       import: './javascripts/boundary-map.js'
     },
     'draw-boundary-map': {
-      import: './javascripts/draw-boundary-map/index.js'
+      import: './javascripts/draw-boundary-map.js'
     }
   },
   experiments: {

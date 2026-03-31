@@ -63,7 +63,7 @@ describe('draw-boundary-map init', () => {
   })
 
   async function loadModule() {
-    await import('./index.js')
+    await import('./draw-boundary-map.js')
     if (initFn) {
       initFn()
     }

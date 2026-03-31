@@ -1,3 +1,5 @@
+import { createInlineMapOptions } from '../interactive-map-profile-common.js'
+
 const VTS_STYLE_BASE_URL = '/public/data/vts'
 const VTS_THUMBNAIL_BASE_URL = '/public/data/vts/thumbnails'
 const UK_W = -8.75
@@ -148,19 +150,16 @@ export function getDrawBoundaryMapOptions({
     )
   }
 
-  return {
+  return createInlineMapOptions({
     mapProvider,
-    ...mapStyleRequestHooks,
-    behaviour: 'inline',
     mapLabel: 'Draw boundary map',
-    bounds: UK_BOUNDS,
-    maxBounds: UK_BOUNDS,
     containerHeight,
-    enableZoomControls: true,
-    mapStyle: {
-      url: mapStyleUrl || mapStyles[0].url,
-      attribution: `&copy; Crown copyright and database rights ${new Date().getFullYear()} Ordnance Survey`
-    },
-    plugins
-  }
+    mapStyleUrl: mapStyleUrl || mapStyles[0].url,
+    extraOptions: {
+      ...mapStyleRequestHooks,
+      bounds: UK_BOUNDS,
+      maxBounds: UK_BOUNDS,
+      plugins
+    }
+  })
 }
