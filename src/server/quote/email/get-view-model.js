@@ -3,7 +3,7 @@ import { routePath as routePathWasteWater } from '../waste-water/routes.js'
 
 export const title = 'Enter your email address'
 
-export default function () {
+export default function getViewModel() {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
