@@ -1,4 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
+import { getWasteWaterTreatmentWorks } from '../../common/services/waste-water-treatment-works.js'
 import { routePath as backLinkPath } from '../people-count/routes.js'
 
 export const title =
@@ -6,8 +7,8 @@ export const title =
 
 const iDontKnowValue = 'i-dont-know'
 
-export default function getViewModel(quoteData) {
-  const wasteWaterOptions = quoteData?.wasteWaterOptions ?? []
+export default async function getViewModel() {
+  const wasteWaterOptions = await getWasteWaterTreatmentWorks()
 
   const items = wasteWaterOptions.map((option) => ({
     value: option.id,
