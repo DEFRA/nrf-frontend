@@ -9,13 +9,14 @@ export const title =
 const iDontKnowValue = 'i-dont-know'
 
 export default async function getViewModel(quoteData) {
-  const wasteWaterOptions = await getWasteWaterTreatmentWorks()
+  const boundaryGeometry = quoteData?.boundaryGeojson?.boundaryGeometryOriginal
+  const wasteWaterOptions = await getWasteWaterTreatmentWorks(boundaryGeometry)
 
   const items = wasteWaterOptions.map((option) => ({
     value: option.id,
     text: option.name,
     hint: {
-      text: `${option.distance} km from the centre of the development`
+      text: `${option.distance} km from the development boundary`
     }
   }))
 
