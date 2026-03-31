@@ -28,7 +28,7 @@ describe('Waste water treatment works page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/people-count'
+      '/quote/residential'
     )
     const csrfToken = document.querySelector('form input[name="csrfToken"]')
     expect(csrfToken).toBeInTheDocument()

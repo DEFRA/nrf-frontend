@@ -24,9 +24,25 @@ describe('waste-water getViewModel', () => {
     expect(viewModel.pageHeading).toBe(title)
   })
 
-  it('should link back to people-count', async () => {
+  it('should link back to residential by default', async () => {
     mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
     const viewModel = await getViewModel()
+    expect(viewModel.backLinkPath).toBe('/quote/residential')
+  })
+
+  it('should link back to residential when developmentTypes does not include other-residential', async () => {
+    mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
+    const viewModel = await getViewModel({
+      developmentTypes: ['commercial']
+    })
+    expect(viewModel.backLinkPath).toBe('/quote/residential')
+  })
+
+  it('should link back to people-count when developmentTypes includes other-residential', async () => {
+    mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
+    const viewModel = await getViewModel({
+      developmentTypes: ['other-residential']
+    })
     expect(viewModel.backLinkPath).toBe('/quote/people-count')
   })
 

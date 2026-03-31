@@ -1,13 +1,14 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getWasteWaterTreatmentWorks } from '../../common/services/waste-water-treatment-works.js'
-import { routePath as backLinkPath } from '../people-count/routes.js'
+import { routePath as routePathPeopleCount } from '../people-count/routes.js'
+import { routePath as routePathResidential } from '../residential/routes.js'
 
 export const title =
   'Confirm which waste water treatment works will be used for this development'
 
 const iDontKnowValue = 'i-dont-know'
 
-export default async function getViewModel() {
+export default async function getViewModel(quoteData) {
   const wasteWaterOptions = await getWasteWaterTreatmentWorks()
 
   const items = wasteWaterOptions.map((option) => ({
@@ -32,7 +33,9 @@ export default async function getViewModel() {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
-    backLinkPath,
+    backLinkPath: quoteData?.developmentTypes?.includes('other-residential')
+      ? routePathPeopleCount
+      : routePathResidential,
     wasteWaterItems: items
   }
 }
