@@ -28,7 +28,7 @@ describe('Email page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/residential'
+      '/quote/waste-water'
     )
     expect(getByLabelText(document, 'Enter your email address')).toHaveValue('')
     const csrfToken = document.querySelector('form input[name="csrfToken"]')

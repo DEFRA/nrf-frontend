@@ -1,5 +1,5 @@
-import { routePath as routePathEmail } from '../email/routes.js'
+import { routePath as routePathWasteWater } from '../waste-water/routes.js'
 
 export default function getNextPage() {
-  return routePathEmail
+  return routePathWasteWater
 }
