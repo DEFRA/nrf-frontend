@@ -2,9 +2,7 @@ import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validat
 import { saveValidationFlashToCache } from '../helpers/form-validation-session/index.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
-
-const nearbyOptionsCacheKey = 'nearbyWasteWaterOptions'
-const iDontKnowValue = 'i-dont-know'
+import { iDontKnowValue, nearbyOptionsCacheKey } from './constants.js'
 
 /**
  * Custom POST controller for the waste-water page.

@@ -4,9 +4,10 @@ import {
 } from '../helpers/form-validation-session/index.js'
 import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 import { getWasteWaterTreatmentWorks } from '../../common/services/waste-water-treatment-works.js'
-
-const cacheKey = 'nearbyWasteWaterOptions'
-const iDontKnowValue = 'i-dont-know'
+import {
+  iDontKnowValue,
+  nearbyOptionsCacheKey as cacheKey
+} from './constants.js'
 
 export const wasteWaterGetController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {

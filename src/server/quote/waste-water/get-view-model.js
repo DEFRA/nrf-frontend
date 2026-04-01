@@ -2,11 +2,10 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getWasteWaterTreatmentWorks } from '../../common/services/waste-water-treatment-works.js'
 import { routePath as routePathPeopleCount } from '../people-count/routes.js'
 import { routePath as routePathResidential } from '../residential/routes.js'
+import { iDontKnowValue } from './constants.js'
 
 export const title =
   'Confirm which waste water treatment works will be used for this development'
-
-const iDontKnowValue = 'i-dont-know'
 
 export default async function getViewModel(quoteData, { cachedOptions } = {}) {
   const wasteWaterOptions =
