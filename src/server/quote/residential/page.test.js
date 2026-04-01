@@ -80,6 +80,6 @@ describe('Residential page', () => {
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/email')
+    expect(response.headers.location).toBe('/quote/waste-water')
   })
 })

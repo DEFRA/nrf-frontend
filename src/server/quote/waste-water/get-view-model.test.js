@@ -67,12 +67,12 @@ describe('waste-water getViewModel', () => {
       {
         value: 'great-billing',
         text: 'Great Billing WRC',
-        hint: { text: '3.2 km from the centre of the development' }
+        hint: { text: '3.2 km from the development boundary' }
       },
       {
         value: 'letchworth',
         text: 'Letchworth WWTP',
-        hint: { text: '7.5 km from the centre of the development' }
+        hint: { text: '7.5 km from the development boundary' }
       },
       { divider: 'or' },
       {
@@ -80,6 +80,31 @@ describe('waste-water getViewModel', () => {
         text: "I don't know the waste water treatment works yet"
       }
     ])
+  })
+
+  it('should pass boundaryGeometryWgs84 from quoteData to the service', async () => {
+    mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
+    const mockGeometry = {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0]
+        ]
+      ]
+    }
+    await getViewModel({
+      boundaryGeojson: { boundaryGeometryWgs84: mockGeometry }
+    })
+    expect(mockGetWasteWaterTreatmentWorks).toHaveBeenCalledWith(mockGeometry)
+  })
+
+  it('should pass undefined to service when quoteData has no boundary', async () => {
+    mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
+    await getViewModel({})
+    expect(mockGetWasteWaterTreatmentWorks).toHaveBeenCalledWith(undefined)
   })
 
   it('should include a divider when there is a single waste water treatment works', async () => {
@@ -91,7 +116,7 @@ describe('waste-water getViewModel', () => {
       {
         value: 'main-pump',
         text: 'Main Pump Hall',
-        hint: { text: '1.8 km from the centre of the development' }
+        hint: { text: '1.8 km from the development boundary' }
       },
       { divider: 'or' },
       {
