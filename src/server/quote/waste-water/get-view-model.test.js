@@ -82,7 +82,7 @@ describe('waste-water getViewModel', () => {
     ])
   })
 
-  it('should pass boundaryGeometryOriginal from quoteData to the service', async () => {
+  it('should pass boundaryGeometryWgs84 from quoteData to the service', async () => {
     mockGetWasteWaterTreatmentWorks.mockResolvedValue([])
     const mockGeometry = {
       type: 'Polygon',
@@ -96,7 +96,7 @@ describe('waste-water getViewModel', () => {
       ]
     }
     await getViewModel({
-      boundaryGeojson: { boundaryGeometryOriginal: mockGeometry }
+      boundaryGeojson: { boundaryGeometryWgs84: mockGeometry }
     })
     expect(mockGetWasteWaterTreatmentWorks).toHaveBeenCalledWith(mockGeometry)
   })

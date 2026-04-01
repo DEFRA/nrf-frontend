@@ -20,8 +20,7 @@ export const wasteWaterGetController = ({ routeId, getViewModel }) => ({
 
     let cachedOptions = request.yar.get(cacheKey)
     if (!cachedOptions) {
-      const boundaryGeometry =
-        quoteData?.boundaryGeojson?.boundaryGeometryOriginal
+      const boundaryGeometry = quoteData?.boundaryGeojson?.boundaryGeometryWgs84
       cachedOptions = await getWasteWaterTreatmentWorks(boundaryGeometry)
       request.yar.set(cacheKey, cachedOptions)
     }

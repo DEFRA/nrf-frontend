@@ -12,7 +12,7 @@ export default async function getViewModel(quoteData, { cachedOptions } = {}) {
   const wasteWaterOptions =
     cachedOptions ??
     (await getWasteWaterTreatmentWorks(
-      quoteData?.boundaryGeojson?.boundaryGeometryOriginal
+      quoteData?.boundaryGeojson?.boundaryGeometryWgs84
     ))
 
   const items = wasteWaterOptions.map((option) => ({

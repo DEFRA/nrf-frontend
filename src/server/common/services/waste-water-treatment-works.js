@@ -6,7 +6,7 @@ const logger = createLogger()
 
 /**
  * Fetch nearby waste water treatment works from the impact assessor.
- * @param {object} boundaryGeometry - RLB geometry as GeoJSON (EPSG:27700)
+ * @param {object} boundaryGeometry - RLB geometry as GeoJSON (WGS84)
  * @returns {Promise<Array<{id: string, name: string, distance: number}>>}
  */
 export async function getWasteWaterTreatmentWorks(boundaryGeometry) {
