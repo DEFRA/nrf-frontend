@@ -6,6 +6,7 @@ import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 import { getWasteWaterTreatmentWorks } from '../../common/services/waste-water-treatment-works.js'
 
 const cacheKey = 'nearbyWasteWaterOptions'
+const iDontKnowValue = 'i-dont-know'
 
 export const wasteWaterGetController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {
@@ -26,9 +27,16 @@ export const wasteWaterGetController = ({ routeId, getViewModel }) => ({
     }
 
     const baseViewModel = await getViewModel(quoteData, { cachedOptions })
+    const formSubmitData = {
+      ...quoteData,
+      wasteWaterTreatmentWorksId:
+        quoteData?.wasteWaterTreatmentWorksId === null
+          ? iDontKnowValue
+          : quoteData?.wasteWaterTreatmentWorksId
+    }
     const viewModel = {
       ...baseViewModel,
-      formSubmitData: quoteData,
+      formSubmitData,
       validationErrors
     }
     return h.view(`quote/${routeId}/index`, viewModel)

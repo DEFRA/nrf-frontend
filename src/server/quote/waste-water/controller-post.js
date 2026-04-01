@@ -42,7 +42,8 @@ export const wasteWaterPostController = ({ formValidation, getNextPage }) => ({
     }
 
     const quoteData = saveQuoteDataToCache(request, {
-      wasteWaterTreatmentWorksId: selectedId,
+      wasteWaterTreatmentWorksId:
+        selectedId === iDontKnowValue ? null : selectedId,
       wasteWaterTreatmentWorksName
     })
     const nextPage = getNextPage(quoteData)

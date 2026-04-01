@@ -77,7 +77,7 @@ describe('wasteWaterPostController', () => {
     controller.handler(request, h)
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-      wasteWaterTreatmentWorksId: 'i-dont-know',
+      wasteWaterTreatmentWorksId: null,
       wasteWaterTreatmentWorksName: null
     })
   })
