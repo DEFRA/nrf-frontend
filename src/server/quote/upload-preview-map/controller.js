@@ -36,6 +36,8 @@ export function postHandler(request, h) {
   saveQuoteDataToCache(request, { boundaryGeojson })
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
+  // Clear cached WWTW options so they are re-fetched for the new boundary
+  request.yar.clear('nearbyWasteWaterOptions')
 
   if (intersectsEdp) {
     return h.redirect('/quote/development-types')
