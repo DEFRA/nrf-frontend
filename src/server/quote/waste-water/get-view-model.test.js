@@ -65,12 +65,12 @@ describe('waste-water getViewModel', () => {
     const viewModel = await getViewModel()
     expect(viewModel.wasteWaterItems).toEqual([
       {
-        value: 'Great Billing WRC',
+        value: 'great-billing',
         text: 'Great Billing WRC',
         hint: { text: '3.2 km from the development boundary' }
       },
       {
-        value: 'Letchworth WWTP',
+        value: 'letchworth',
         text: 'Letchworth WWTP',
         hint: { text: '7.5 km from the development boundary' }
       },
@@ -114,7 +114,7 @@ describe('waste-water getViewModel', () => {
     const viewModel = await getViewModel()
     expect(viewModel.wasteWaterItems).toEqual([
       {
-        value: 'Main Pump Hall',
+        value: 'main-pump',
         text: 'Main Pump Hall',
         hint: { text: '1.8 km from the development boundary' }
       },

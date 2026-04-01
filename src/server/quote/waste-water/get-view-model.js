@@ -16,7 +16,7 @@ export default async function getViewModel(quoteData, { cachedOptions } = {}) {
     ))
 
   const items = wasteWaterOptions.map((option) => ({
-    value: option.name,
+    value: option.id,
     text: option.name,
     hint: {
       text: `${option.distance} km from the development boundary`

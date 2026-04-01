@@ -4,8 +4,6 @@ import developmentTypesValidation from '../../development-types/form-validation.
 import residentialValidation from '../../residential/form-validation.js'
 import emailValidation from '../../email/form-validation.js'
 import peopleCountValidation from '../../people-count/form-validation.js'
-import wasteWaterValidation from '../../waste-water/form-validation.js'
-
 export const completeQuoteDataSchema = joi.object({
   boundaryEntryType: boundaryTypeValidation().extract('boundaryEntryType'),
   boundaryGeojson: joi.object().required(),
@@ -20,8 +18,7 @@ export const completeQuoteDataSchema = joi.object({
     then: peopleCountValidation().extract('peopleCount'),
     otherwise: joi.any().strip()
   }),
-  wasteWaterTreatmentWorks: wasteWaterValidation().extract(
-    'wasteWaterTreatmentWorks'
-  ),
+  wasteWaterTreatmentWorksId: joi.string().required(),
+  wasteWaterTreatmentWorksName: joi.string().allow(null).required(),
   email: emailValidation().extract('email')
 })
