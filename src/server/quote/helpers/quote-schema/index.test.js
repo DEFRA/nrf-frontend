@@ -22,6 +22,7 @@ const validBase = {
   },
   developmentTypes: ['housing'],
   residentialBuildingCount: '10',
+  wasteWaterTreatmentWorks: 'Great Billing WRC',
   email: 'test@example.com'
 }
 

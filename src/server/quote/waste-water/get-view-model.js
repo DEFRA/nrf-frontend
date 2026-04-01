@@ -8,12 +8,15 @@ export const title =
 
 const iDontKnowValue = 'i-dont-know'
 
-export default async function getViewModel(quoteData) {
-  const boundaryGeometry = quoteData?.boundaryGeojson?.boundaryGeometryOriginal
-  const wasteWaterOptions = await getWasteWaterTreatmentWorks(boundaryGeometry)
+export default async function getViewModel(quoteData, { cachedOptions } = {}) {
+  const wasteWaterOptions =
+    cachedOptions ??
+    (await getWasteWaterTreatmentWorks(
+      quoteData?.boundaryGeojson?.boundaryGeometryOriginal
+    ))
 
   const items = wasteWaterOptions.map((option) => ({
-    value: option.id,
+    value: option.name,
     text: option.name,
     hint: {
       text: `${option.distance} km from the development boundary`

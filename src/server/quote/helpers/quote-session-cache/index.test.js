@@ -99,6 +99,7 @@ describe('Save and retrieve quote data from session cache', () => {
       boundaryGeojson: { type: 'Polygon' },
       developmentTypes: ['housing'],
       residentialBuildingCount: 10,
+      wasteWaterTreatmentWorks: 'Great Billing WRC',
       email: 'test@example.com'
     }
 
@@ -135,6 +136,7 @@ describe('Save and retrieve quote data from session cache', () => {
             developmentTypes: ['housing', 'other-residential'],
             residentialBuildingCount: 10,
             peopleCount: 5,
+            wasteWaterTreatmentWorks: 'Great Billing WRC',
             email: 'test@example.com'
           })
         },
