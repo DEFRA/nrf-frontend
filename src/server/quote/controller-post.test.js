@@ -51,7 +51,7 @@ describe('quotePostController', () => {
     controller.handler(request, h)
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, request.payload)
-    expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/waste-water')
   })
 
   it('should save validation errors to flash and redirect on validation failure', () => {

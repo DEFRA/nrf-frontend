@@ -1,5 +1,5 @@
-import { quoteController } from '../controller-get.js'
-import { quotePostController } from '../controller-post.js'
+import { wasteWaterGetController } from './controller-get.js'
+import { wasteWaterPostController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
@@ -45,15 +45,13 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...quoteController({ routeId, getViewModel })
+    ...wasteWaterGetController({ routeId, getViewModel })
   },
   {
     method: 'POST',
     path: routePath,
-    ...quotePostController({
-      routeId,
+    ...wasteWaterPostController({
       formValidation,
-      getViewModel,
       getNextPage
     })
   }

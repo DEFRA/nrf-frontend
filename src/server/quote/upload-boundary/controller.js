@@ -14,6 +14,8 @@ export async function handler(request, h) {
   // Clear any stale boundary data from a previous upload attempt
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
+  // Clear cached WWTW options – the new boundary may have different nearby works
+  request.yar.clear('nearbyWasteWaterOptions')
 
   // Get validation errors from flash if any
   const flash = getValidationFlashFromCache(request)

@@ -32,8 +32,8 @@
                 hint: {
                     text: "Your quote will be partially based on the waste water treatment works you choose. If you don't know your waste water treatment works yet, we will provide a quote range."
                 },
-                errorMessage: validationErrors.messagesByFormField.wasteWaterTreatmentWorks,
-                value: formSubmitData.wasteWaterTreatmentWorks,
+                errorMessage: validationErrors.messagesByFormField.wasteWaterTreatmentWorks if validationErrors,
+                value: formSubmitData.wasteWaterTreatmentWorksId,
                 items: wasteWaterItems
             }) }}
             {{ govukButton({
