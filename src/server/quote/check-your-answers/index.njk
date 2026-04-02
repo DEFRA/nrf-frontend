@@ -40,6 +40,11 @@
               actions: { items: [{ href: "/quote/people-count", text: "Change", visuallyHiddenText: "maximum number of people" }] }
             } if formSubmitData.peopleCount,
             {
+              key: { text: "Waste water treatment works" },
+              value: { text: formSubmitData.wasteWaterTreatmentWorksName or "I don't know yet" },
+              actions: { items: [{ href: "/quote/waste-water", text: "Change", visuallyHiddenText: "waste water treatment works" }] }
+            } if formSubmitData.wasteWaterTreatmentWorksId is defined,
+            {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },
               actions: { items: [{ href: "/quote/email", text: "Change", visuallyHiddenText: "email address" }] }

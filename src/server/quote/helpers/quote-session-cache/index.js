@@ -1,4 +1,7 @@
-import { completeQuoteDataSchema } from '../quote-schema/index.js'
+import {
+  inProgressQuoteDataSchema,
+  completeQuoteDataSchema
+} from '../quote-schema/index.js'
 
 const cacheKey = 'quote'
 
@@ -9,11 +12,27 @@ const logInvalidQuoteData = (request) => {
   )
 }
 
-export const saveQuoteDataToCache = (request, quoteData) => {
+export const saveQuoteDataToCache = (
+  request,
+  quoteData,
+  { boundaryChanged = false } = {}
+) => {
   const existingQuoteCache = getQuoteDataFromCache(request)
+
+  // When the boundary changes, clear all answers that depend on it
+  if (boundaryChanged) {
+    quoteData = {
+      ...quoteData,
+      developmentTypes: null,
+      wasteWaterTreatmentWorksId: null,
+      wasteWaterTreatmentWorksName: null
+    }
+    request.yar.clear('nearbyWasteWaterOptions')
+  }
+
   const updatedQuoteCache = { ...existingQuoteCache, ...quoteData }
   // this will validate and also remove any values no longer required
-  const { error, value } = completeQuoteDataSchema.validate(updatedQuoteCache)
+  const { error, value } = inProgressQuoteDataSchema.validate(updatedQuoteCache)
   if (error) {
     logInvalidQuoteData(request)
   }

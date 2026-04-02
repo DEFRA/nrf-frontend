@@ -60,6 +60,72 @@ describe('Save and retrieve quote data from session cache', () => {
       )
     })
 
+    it('clears dependent answers when boundaryChanged flag is set', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({
+            boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
+            developmentTypes: ['housing'],
+            residentialBuildingCount: 10,
+            wasteWaterTreatmentWorksId: '101',
+            wasteWaterTreatmentWorksName: 'Great Billing WRC',
+            email: 'test@example.com'
+          }),
+          set: vi.fn(),
+          clear: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      saveQuoteDataToCache(
+        request,
+        { boundaryGeojson: { type: 'NewPolygon' } },
+        { boundaryChanged: true }
+      )
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.objectContaining({
+          boundaryGeojson: { type: 'NewPolygon' },
+          developmentTypes: null,
+          wasteWaterTreatmentWorksId: null,
+          wasteWaterTreatmentWorksName: null
+        })
+      )
+      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
+    })
+
+    it('does not clear dependent answers without boundaryChanged flag', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({
+            boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
+            developmentTypes: ['housing'],
+            residentialBuildingCount: 10,
+            wasteWaterTreatmentWorksId: '101',
+            wasteWaterTreatmentWorksName: 'Great Billing WRC',
+            email: 'test@example.com'
+          }),
+          set: vi.fn(),
+          clear: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      saveQuoteDataToCache(request, {
+        boundaryGeojson: { type: 'NewPolygon' }
+      })
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.objectContaining({
+          boundaryGeojson: { type: 'NewPolygon' },
+          developmentTypes: ['housing'],
+          wasteWaterTreatmentWorksId: '101',
+          wasteWaterTreatmentWorksName: 'Great Billing WRC'
+        })
+      )
+      expect(request.yar.clear).not.toHaveBeenCalled()
+    })
+
     it('logs an error when the merged data is invalid', () => {
       const request = {
         yar: {
