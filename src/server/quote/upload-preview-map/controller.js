@@ -33,7 +33,14 @@ export function postHandler(request, h) {
 
   const intersectsEdp = boundaryGeojson?.intersectingEdps.length ?? false
 
-  saveQuoteDataToCache(request, { boundaryGeojson })
+  saveQuoteDataToCache(request, {
+    boundaryGeojson,
+    // Clear all subsequent answers – a new boundary may intersect different EDPs
+    // and have different nearby waste water treatment works
+    developmentTypes: null,
+    wasteWaterTreatmentWorksId: null,
+    wasteWaterTreatmentWorksName: null
+  })
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
   // Clear cached WWTW options so they are re-fetched for the new boundary

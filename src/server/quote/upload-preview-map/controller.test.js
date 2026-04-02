@@ -143,7 +143,10 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockGeojson
+        boundaryGeojson: mockGeojson,
+        developmentTypes: null,
+        wasteWaterTreatmentWorksId: null,
+        wasteWaterTreatmentWorksName: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
@@ -157,7 +160,10 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockEdpGeojson
+        boundaryGeojson: mockEdpGeojson,
+        developmentTypes: null,
+        wasteWaterTreatmentWorksId: null,
+        wasteWaterTreatmentWorksName: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
