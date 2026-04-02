@@ -143,10 +143,13 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockGeojson
+        boundaryGeojson: mockGeojson,
+        wasteWaterTreatmentWorksId: null,
+        wasteWaterTreatmentWorksName: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
@@ -157,10 +160,13 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockEdpGeojson
+        boundaryGeojson: mockEdpGeojson,
+        wasteWaterTreatmentWorksId: null,
+        wasteWaterTreatmentWorksName: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
       expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
     })
   })

@@ -1,9 +1,42 @@
-// Faciendum: Replace mock data with a call to the backend endpoint
-const mockWasteWaterTreatmentWorks = [
-  { id: 'great-billing', name: 'Great Billing WRC (Mock)', distance: 3.2 },
-  { id: 'letchworth', name: 'Letchworth WWTP (Mock)', distance: 7.5 }
-]
+import { statusCodes } from '../constants/status-codes.js'
+import { createLogger } from '../helpers/logging/logger.js'
+import { postRequestToBackend } from './nrf-backend.js'
 
-export async function getWasteWaterTreatmentWorks() {
-  return mockWasteWaterTreatmentWorks
+const logger = createLogger()
+
+/**
+ * Fetch nearby waste water treatment works from the impact assessor.
+ * @param {object} boundaryGeometry - RLB geometry as GeoJSON (WGS84)
+ * @returns {Promise<Array<{id: string, name: string, distance: number}>>}
+ */
+export async function getWasteWaterTreatmentWorks(boundaryGeometry) {
+  if (!boundaryGeometry) {
+    logger.warn('No boundary geometry provided for nearby WWTW lookup')
+    return []
+  }
+
+  try {
+    const { res, payload } = await postRequestToBackend({
+      endpointPath: '/wwtw/nearby',
+      payload: { geometry: boundaryGeometry }
+    })
+
+    if (res.statusCode >= statusCodes.badRequest) {
+      const error =
+        payload?.error ?? `Nearby WWTW request failed (${res.statusCode})`
+      logger.error(
+        `Nearby WWTW error - statusCode: ${res.statusCode}, error: ${error}`
+      )
+      return []
+    }
+
+    return (payload.nearbyWwtws || []).map((wwtw) => ({
+      id: String(wwtw.wwtwId),
+      name: wwtw.wwtwName,
+      distance: wwtw.distanceKm
+    }))
+  } catch (error) {
+    logger.error(`Error fetching nearby WWTWs: ${error?.message}`)
+    return []
+  }
 }

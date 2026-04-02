@@ -52,6 +52,7 @@ describe('upload-boundary controller', () => {
 
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
   })
 
   it('should render view with uploadUrl on successful initiate', async () => {
