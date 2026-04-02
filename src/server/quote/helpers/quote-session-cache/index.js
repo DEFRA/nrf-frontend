@@ -1,4 +1,7 @@
-import { completeQuoteDataSchema } from '../quote-schema/index.js'
+import {
+  inProgressQuoteDataSchema,
+  completeQuoteDataSchema
+} from '../quote-schema/index.js'
 
 const cacheKey = 'quote'
 
@@ -13,7 +16,7 @@ export const saveQuoteDataToCache = (request, quoteData) => {
   const existingQuoteCache = getQuoteDataFromCache(request)
   const updatedQuoteCache = { ...existingQuoteCache, ...quoteData }
   // this will validate and also remove any values no longer required
-  const { error, value } = completeQuoteDataSchema.validate(updatedQuoteCache)
+  const { error, value } = inProgressQuoteDataSchema.validate(updatedQuoteCache)
   if (error) {
     logInvalidQuoteData(request)
   }
