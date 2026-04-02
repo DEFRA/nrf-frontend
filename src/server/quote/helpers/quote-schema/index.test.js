@@ -1,4 +1,4 @@
-import { completeQuoteDataSchema } from './index.js'
+import { completeQuoteDataSchema, inProgressQuoteDataSchema } from './index.js'
 
 const validBase = {
   boundaryEntryType: 'draw',
@@ -148,6 +148,51 @@ describe('completeQuoteDataSchema', () => {
         developmentTypes: ['housing', 'other-residential']
       })
       expect(error).toBeDefined()
+    })
+  })
+
+  describe('developmentTypes', () => {
+    it('fails when developmentTypes is null', () => {
+      const { error } = completeQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: null
+      })
+      expect(error).toBeDefined()
+    })
+  })
+})
+
+describe('inProgressQuoteDataSchema', () => {
+  it('passes with a fully valid object', () => {
+    const { error } = inProgressQuoteDataSchema.validate(validBase)
+    expect(error).toBeUndefined()
+  })
+
+  describe('developmentTypes', () => {
+    it('allows null developmentTypes', () => {
+      const { error } = inProgressQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: null
+      })
+      expect(error).toBeUndefined()
+    })
+
+    it('strips residentialBuildingCount when developmentTypes is null', () => {
+      const { value } = inProgressQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: null,
+        residentialBuildingCount: '10'
+      })
+      expect(value.residentialBuildingCount).toBeUndefined()
+    })
+
+    it('strips peopleCount when developmentTypes is null', () => {
+      const { value } = inProgressQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: null,
+        peopleCount: 5
+      })
+      expect(value.peopleCount).toBeUndefined()
     })
   })
 })
