@@ -1,4 +1,4 @@
-import { getByRole, queryByRole } from '@testing-library/dom'
+import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -14,6 +14,8 @@ import {
 vi.mock('../../common/services/boundary.js')
 
 const boundaryCheckPath = checkBoundaryPath.replace('{id}', 'test-upload-id')
+const uploadLinkText = 'Upload a different red line boundary file'
+const drawLinkText = 'Draw the red line boundary on a map instead'
 
 describe('Boundary map page', () => {
   const getServer = setupTestServer()
@@ -106,6 +108,26 @@ describe('Boundary map page', () => {
       expect(mapScripts.length).toBeGreaterThanOrEqual(1)
     })
 
+    it('should show upload another boundary file and draw boundary links', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const uploadLink = getByRole(document, 'link', {
+        name: uploadLinkText
+      })
+      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
+
+      expect(
+        getByRole(document, 'link', {
+          name: drawLinkText
+        })
+      ).toHaveAttribute('href', '/quote/draw-boundary')
+    })
+
     it('should redirect to no-edp page on save and continue', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const { response } = await submitForm({
@@ -169,13 +191,13 @@ describe('Boundary map page', () => {
       })
 
       const uploadLink = getByRole(document, 'link', {
-        name: 'Upload a different red line boundary file'
+        name: uploadLinkText
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
 
       expect(
         getByRole(document, 'link', {
-          name: 'Draw the red line boundary on a map instead'
+          name: drawLinkText
         })
       ).toHaveAttribute('href', '/quote/draw-boundary')
     })
@@ -221,7 +243,7 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).not.toContain('validated successfully')
     })
 
-    it('should not show upload another file link', async () => {
+    it('should show upload another file link', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -229,14 +251,13 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      expect(
-        queryByRole(document, 'link', {
-          name: 'Upload a different red line boundary file'
-        })
-      ).not.toBeInTheDocument()
+      const uploadLink = getByRole(document, 'link', {
+        name: uploadLinkText
+      })
+      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
     })
 
-    it('should not show draw boundary link', async () => {
+    it('should show draw boundary link', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -245,10 +266,10 @@ describe('Boundary map page', () => {
       })
 
       expect(
-        queryByRole(document, 'link', {
-          name: /Draw the red line boundary/
+        getByRole(document, 'link', {
+          name: drawLinkText
         })
-      ).not.toBeInTheDocument()
+      ).toHaveAttribute('href', '/quote/draw-boundary')
     })
 
     it('should still render the map container', async () => {
