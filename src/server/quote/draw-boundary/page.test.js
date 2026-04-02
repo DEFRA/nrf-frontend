@@ -61,5 +61,10 @@ describe('Draw boundary page', () => {
       'src',
       expect.stringContaining('draw-boundary-map')
     )
+    expect(
+      getByRole(document, 'link', {
+        name: 'Upload a red line boundary file instead'
+      })
+    ).toHaveAttribute('href', '/quote/upload-boundary')
   })
 })

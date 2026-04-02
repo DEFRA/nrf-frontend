@@ -88,7 +88,7 @@ describe('Check your answers page', () => {
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('Red line boundary')
-    expect(summaryList).toHaveTextContent('Added')
+    expect(summaryList).toHaveTextContent('Uploaded')
     expect(summaryList).toHaveTextContent('Development types')
     expect(summaryList).toHaveTextContent('Housing')
     expect(summaryList).toHaveTextContent('Number of residential units')
@@ -124,6 +124,8 @@ describe('Check your answers page', () => {
       server: getServer(),
       cookie: updatedCookie
     })
+    const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toHaveTextContent('Drawn')
     expect(
       getByRole(document, 'link', {
         name: 'Changered line boundary'
