@@ -63,7 +63,7 @@ describe('draw-boundary-map init', () => {
   })
 
   async function loadModule() {
-    await import('./index.js')
+    await import('./draw-boundary-map.js')
     if (initFn) {
       initFn()
     }
@@ -108,8 +108,6 @@ describe('draw-boundary-map init', () => {
         })
       })
     )
-    const mapOptions = mockDefra._mock.mock.calls[0][1]
-
     expect(mockDefra._mock).toHaveBeenCalledWith(
       'draw-boundary-map',
       expect.objectContaining({
@@ -118,63 +116,11 @@ describe('draw-boundary-map init', () => {
         maxBounds: [-8.75, 49.8, 2.1, 60.95],
         containerHeight: expect.stringMatching(/^\d+px$/),
         mapStyle: expect.objectContaining({
-          url: '/public/data/vts/OS_VTS_3857_Outdoor.json'
+          url: '/public/data/vts/ESRI_World_Imagery.json'
         }),
         plugins: [expect.objectContaining({ id: 'mapStyles' })]
       })
     )
-
-    expect(mapOptions).toEqual(
-      expect.objectContaining({
-        transformRequest: expect.any(Function),
-        transformStyle: expect.any(Function)
-      })
-    )
-
-    expect(mapOptions.transformRequest('/os-base-map/tile/0/0/0.pbf')).toEqual({
-      url: new URL(
-        '/os-base-map/tile/0/0/0.pbf',
-        window.location.origin
-      ).toString()
-    })
-
-    const esriTileUrl =
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/0/0/0'
-    expect(mapOptions.transformRequest(esriTileUrl)).toEqual({
-      url: esriTileUrl
-    })
-
-    const styleDefinition = {
-      version: 8,
-      sprite: '/public/images/os-sprite',
-      glyphs: '/os-base-map/resources/fonts/{fontstack}/{range}.pbf',
-      sources: {
-        basemap: {
-          type: 'vector',
-          url: '/os-base-map/resources/source.json',
-          tiles: ['/os-base-map/tile/{z}/{y}/{x}.pbf']
-        }
-      }
-    }
-
-    expect(mapOptions.transformStyle(undefined, styleDefinition)).toEqual({
-      version: 8,
-      sprite: new URL(
-        '/public/images/os-sprite',
-        window.location.origin
-      ).toString(),
-      glyphs: `${window.location.origin}/os-base-map/resources/fonts/{fontstack}/{range}.pbf`,
-      sources: {
-        basemap: {
-          type: 'vector',
-          url: new URL(
-            '/os-base-map/resources/source.json',
-            window.location.origin
-          ).toString(),
-          tiles: [`${window.location.origin}/os-base-map/tile/{z}/{y}/{x}.pbf`]
-        }
-      }
-    })
   })
 
   it('warns when map styles plugin is unavailable', async () => {

@@ -65,12 +65,12 @@ function createMockDefra(mapInstance) {
     _mock: MockInteractiveMap._mock,
     _mockMap: mockMap,
     _triggerReady() {
-      const readyCallback = mockMap.on.mock.calls.find(
-        (c) => c[0] === 'map:ready'
-      )?.[1]
-      if (readyCallback) {
+      const readyCallbacks = mockMap.on.mock.calls
+        .filter((c) => c[0] === 'map:ready')
+        .map((c) => c[1])
+      readyCallbacks.forEach((readyCallback) => {
         readyCallback({ map: mapInstance })
-      }
+      })
     }
   }
 }
@@ -204,7 +204,7 @@ describe('boundary-map init', () => {
         containerHeight: '400px',
         enableZoomControls: true,
         mapStyle: expect.objectContaining({
-          url: 'https://tiles.example.com/style.json'
+          url: '/public/data/vts/ESRI_World_Imagery.json'
         })
       })
     )

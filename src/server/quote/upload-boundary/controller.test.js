@@ -23,6 +23,9 @@ describe('upload-boundary controller', () => {
       set: vi.fn(),
       clear: vi.fn()
     },
+    headers: {
+      host: 'localhost:3000'
+    },
     info: {
       host: 'localhost:3000'
     },

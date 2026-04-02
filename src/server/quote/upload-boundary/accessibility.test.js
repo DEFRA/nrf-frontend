@@ -5,12 +5,21 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { getValidationFlashFromCache } from '../helpers/form-validation-session/index.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
+import { initiateUpload } from '../../common/services/uploader.js'
 
 vi.mock('../helpers/quote-session-cache/index.js')
 vi.mock('../helpers/form-validation-session/index.js')
+vi.mock('../../common/services/uploader.js')
 
 describe('Upload boundary page accessibility checks', () => {
   const getServer = setupTestServer()
+
+  beforeEach(() => {
+    vi.mocked(initiateUpload).mockResolvedValue({
+      uploadId: 'test-upload-id',
+      uploadUrl: '/upload-and-scan/test-upload-id'
+    })
+  })
 
   it('should have no HTML accessibility issues after an invalid form submission', async () => {
     const errorMessage = 'Select a file'
