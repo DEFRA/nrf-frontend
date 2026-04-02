@@ -107,6 +107,36 @@ describe('base-map config', () => {
       )
     })
 
+    it('supports legacy string signature for createMap', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap('test-map', {
+        bounds: [-8.75, 49.8, 2.1, 60.95],
+        maxBounds: [-8.75, 49.8, 2.1, 60.95]
+      })
+
+      expect(constructorSpy).toHaveBeenCalledWith(
+        'test-map',
+        expect.objectContaining({
+          bounds: [-8.75, 49.8, 2.1, 60.95],
+          maxBounds: [-8.75, 49.8, 2.1, 60.95]
+        })
+      )
+    })
+
     it('supports containerHeight resolver function', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
@@ -190,6 +220,36 @@ describe('base-map config', () => {
       expect(options.plugins).toBeUndefined()
     })
 
+    it('preserves existing plugins when style controls are disabled', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      const customPlugin = { id: 'custom-plugin' }
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        options: { plugins: [customPlugin] }
+      })
+
+      expect(constructorSpy).toHaveBeenCalledWith(
+        'test-map',
+        expect.objectContaining({
+          plugins: [customPlugin]
+        })
+      )
+    })
+
     it('wires draw controls when showDrawControls is true', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
@@ -261,6 +321,186 @@ describe('base-map config', () => {
       expect(map.on).not.toHaveBeenCalledWith('app:ready', expect.any(Function))
       expect(map.addButton).not.toHaveBeenCalled()
       expect(map.addPanel).not.toHaveBeenCalled()
+    })
+
+    it('adds transformRequest hook that resolves root-relative URLs', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      const options = constructorSpy.mock.calls[0][1]
+      const transformed = options.transformRequest(
+        '/public/data/vts/style.json'
+      )
+
+      expect(transformed).toEqual({
+        url: `${globalThis.location.origin}/public/data/vts/style.json`
+      })
+    })
+
+    it('adds transformStyle hook that normalizes style asset URLs', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      const options = constructorSpy.mock.calls[0][1]
+      const style = {
+        sprite: '/sprite',
+        glyphs: '/fonts/{fontstack}/{range}.pbf',
+        sources: {
+          vts: {
+            type: 'vector',
+            url: '/public/data/vts/source.json',
+            tiles: ['/public/data/vts/{z}/{x}/{y}.pbf', 'https://cdn.example/a']
+          }
+        }
+      }
+
+      const normalized = options.transformStyle(null, style)
+
+      expect(normalized.sprite).toBe(`${globalThis.location.origin}/sprite`)
+      expect(normalized.glyphs).toBe(
+        `${globalThis.location.origin}/fonts/{fontstack}/{range}.pbf`
+      )
+      expect(normalized.sources.vts.url).toBe(
+        `${globalThis.location.origin}/public/data/vts/source.json`
+      )
+      expect(normalized.sources.vts.tiles).toEqual([
+        `${globalThis.location.origin}/public/data/vts/{z}/{x}/{y}.pbf`,
+        'https://cdn.example/a'
+      ])
+    })
+
+    it('keeps absolute URLs unchanged in transformRequest and transformStyle', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      const options = constructorSpy.mock.calls[0][1]
+      expect(
+        options.transformRequest('https://example.com/style.json')
+      ).toEqual({
+        url: 'https://example.com/style.json'
+      })
+
+      const style = {
+        sprite: 'https://example.com/sprite',
+        glyphs: 'https://example.com/fonts/{fontstack}/{range}.pbf',
+        sources: {
+          vts: {
+            type: 'vector',
+            url: 'https://example.com/source.json',
+            tiles: ['https://example.com/{z}/{x}/{y}.pbf']
+          }
+        }
+      }
+
+      const normalized = options.transformStyle(null, style)
+
+      expect(normalized).toEqual(style)
+    })
+
+    it('returns style unchanged when transformStyle receives non-object', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      const options = constructorSpy.mock.calls[0][1]
+      expect(options.transformStyle(null, null)).toBeNull()
+      expect(options.transformStyle(null, 'not-an-object')).toBe(
+        'not-an-object'
+      )
+    })
+
+    it('handles source definitions with non-array tiles', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      const options = constructorSpy.mock.calls[0][1]
+      const style = {
+        sprite: '/sprite',
+        glyphs: '/glyphs',
+        sources: {
+          raster: {
+            type: 'raster',
+            url: '/source.json',
+            tiles: '/single-tile-url'
+          }
+        }
+      }
+
+      const normalized = options.transformStyle(null, style)
+
+      expect(normalized.sources.raster.url).toBe(
+        `${globalThis.location.origin}/source.json`
+      )
+      expect(normalized.sources.raster.tiles).toBe('/single-tile-url')
     })
   })
 })

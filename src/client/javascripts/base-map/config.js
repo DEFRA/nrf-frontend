@@ -55,10 +55,19 @@ function createMapStyleRequestHooks(baseUrl = globalThis.location.origin) {
   }
 }
 
-export const ENGLAND_BOUNDS = [-5.75, 49.95, 1.8, 55.85]
+export const ENGLAND_WEST_LNG = -5.75
+export const ENGLAND_SOUTH_LAT = 49.95
+export const ENGLAND_EAST_LNG = 1.8
+export const ENGLAND_NORTH_LAT = 55.85
+export const ENGLAND_BOUNDS = [
+  ENGLAND_WEST_LNG,
+  ENGLAND_SOUTH_LAT,
+  ENGLAND_EAST_LNG,
+  ENGLAND_NORTH_LAT
+]
 export const DEFAULT_MAP_BOUNDS = [
-  [-5.75, 49.95],
-  [1.8, 55.85]
+  [ENGLAND_WEST_LNG, ENGLAND_SOUTH_LAT],
+  [ENGLAND_EAST_LNG, ENGLAND_NORTH_LAT]
 ]
 export const ENGLAND_MIN_ZOOM = 4
 const DRAW_PANEL_ID = 'draw'
@@ -174,50 +183,55 @@ function wireDrawControls(map) {
   })
 }
 
-export function createMap(mapElementId, mapOptions = {}) {
-  const mapConfig =
-    typeof mapElementId === 'string'
-      ? { mapElementId, options: mapOptions }
-      : mapElementId || {}
-
-  const {
-    mapElementId: elementId,
-    mapLabel,
-    mapStyles = getMapStyles(),
-    containerHeight,
-    showStyleControls = false,
-    showDrawControls = false,
-    options = {}
-  } = mapConfig
-
-  const mapEl = document.getElementById(elementId)
-  if (!mapEl) return null
-
-  const defraApi = getDefraApi()
-  if (!defraApi) {
-    logWarning('DEFRA interactive map dependencies not available')
-    return null
+function resolveMapConfig(mapElementId, mapOptions = {}) {
+  if (typeof mapElementId === 'string') {
+    return { mapElementId, options: mapOptions }
   }
 
-  const resolvedContainerHeight =
-    typeof containerHeight === 'function'
-      ? containerHeight(mapEl)
-      : containerHeight
+  return mapElementId || {}
+}
 
+function resolveContainerHeightValue(containerHeight, mapEl) {
+  if (typeof containerHeight === 'function') {
+    return containerHeight(mapEl)
+  }
+
+  return containerHeight
+}
+
+function resolvePlugins({
+  options = {},
+  showStyleControls,
+  defraApi,
+  mapStyles
+}) {
   const plugins = [...(options.plugins || [])]
-  if (showStyleControls) {
-    const mapStylesPlugin = resolveMapStylesPlugin(defraApi)
-    if (mapStylesPlugin) {
-      plugins.push(
-        mapStylesPlugin({
-          mapStyles,
-          manifest: getStyleControlsManifest()
-        })
-      )
-    }
+
+  if (!showStyleControls) {
+    return plugins
   }
 
-  const baseOptions = {
+  const mapStylesPlugin = resolveMapStylesPlugin(defraApi)
+  if (mapStylesPlugin) {
+    plugins.push(
+      mapStylesPlugin({
+        mapStyles,
+        manifest: getStyleControlsManifest()
+      })
+    )
+  }
+
+  return plugins
+}
+
+function buildBaseOptions({
+  defraApi,
+  mapLabel,
+  mapStyles,
+  resolvedContainerHeight,
+  plugins
+}) {
+  return {
     mapProvider: defraApi.maplibreProvider(),
     behaviour: 'inline',
     enableZoomControls: true,
@@ -233,6 +247,49 @@ export function createMap(mapElementId, mapOptions = {}) {
     ...(plugins.length ? { plugins } : {}),
     ...createMapStyleRequestHooks()
   }
+}
+
+export function createMap(mapElementId, mapOptions = {}) {
+  const mapConfig = resolveMapConfig(mapElementId, mapOptions)
+
+  const {
+    mapElementId: elementId,
+    mapLabel,
+    mapStyles = getMapStyles(),
+    containerHeight,
+    showStyleControls = false,
+    showDrawControls = false,
+    options = {}
+  } = mapConfig
+
+  const mapEl = document.getElementById(elementId)
+  if (!mapEl) {
+    return null
+  }
+
+  const defraApi = getDefraApi()
+  if (!defraApi) {
+    logWarning('DEFRA interactive map dependencies not available')
+    return null
+  }
+
+  const resolvedContainerHeight = resolveContainerHeightValue(
+    containerHeight,
+    mapEl
+  )
+  const plugins = resolvePlugins({
+    options,
+    showStyleControls,
+    defraApi,
+    mapStyles
+  })
+  const baseOptions = buildBaseOptions({
+    defraApi,
+    mapLabel,
+    mapStyles,
+    resolvedContainerHeight,
+    plugins
+  })
 
   const map = new defraApi.InteractiveMap(elementId, {
     ...baseOptions,

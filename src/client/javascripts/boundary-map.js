@@ -36,7 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
     containerHeight: '400px'
   })
 
-  if (!map) return
+  if (!map) {
+    return
+  }
 
   map.on('map:ready', function (event) {
     const mapInstance = event.map

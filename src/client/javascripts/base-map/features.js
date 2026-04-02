@@ -2,6 +2,19 @@ import { logWarning } from './helpers.js'
 
 const FEATURE_SOURCE_ID = 'feature'
 const BOUNDARY_SOURCE_ID = 'boundary'
+const DEFAULT_FIT_BOUNDS_PADDING = 40
+const DEFAULT_MAX_ZOOM = 15
+const DEFAULT_FIT_BOUNDS_OPTIONS = {
+  padding: DEFAULT_FIT_BOUNDS_PADDING,
+  maxZoom: DEFAULT_MAX_ZOOM
+}
+const FALLBACK_FIT_BOUNDS_PADDING = 20
+const FEATURE_COLOR = '#1d70b8'
+const FEATURE_FILL_OPACITY = 0.2
+const FEATURE_LINE_WIDTH = 2
+const BOUNDARY_COLOR = '#d4351c'
+const BOUNDARY_FILL_OPACITY = 0.1
+const BOUNDARY_LINE_WIDTH = 3
 
 function collectCoords(c, coords) {
   if (!Array.isArray(c)) {
@@ -59,11 +72,7 @@ function getBoundsFromGeojson(geojson) {
   ]
 }
 
-export function fitMapToBounds(
-  map,
-  geojson,
-  fitBoundsOptions = { padding: 40, maxZoom: 15 }
-) {
+export function fitMapToBounds(map, geojson, fitBoundsOptions) {
   if (!map || !geojson) {
     return false
   }
@@ -73,7 +82,10 @@ export function fitMapToBounds(
     return false
   }
 
-  map.fitBounds(bounds, fitBoundsOptions)
+  const resolvedFitBoundsOptions =
+    fitBoundsOptions || DEFAULT_FIT_BOUNDS_OPTIONS
+
+  map.fitBounds(bounds, resolvedFitBoundsOptions)
   return true
 }
 
@@ -118,15 +130,12 @@ export function addSourceAndLayers(
   return true
 }
 
-export function drawFeature(
-  map,
-  {
-    featureGeojson,
-    boundaryGeojson,
-    fallbackBounds,
-    fitBoundsOptions = { padding: 40, maxZoom: 15 }
-  }
-) {
+export function drawFeature(map, options = {}) {
+  const { featureGeojson, boundaryGeojson, fallbackBounds, fitBoundsOptions } =
+    options
+  const resolvedFitBoundsOptions =
+    fitBoundsOptions || DEFAULT_FIT_BOUNDS_OPTIONS
+
   if (!map) {
     return
   }
@@ -134,26 +143,26 @@ export function drawFeature(
   addSourceAndLayers(map, {
     sourceId: FEATURE_SOURCE_ID,
     geojson: featureGeojson,
-    color: '#1d70b8',
-    fillOpacity: 0.2,
-    lineWidth: 2
+    color: FEATURE_COLOR,
+    fillOpacity: FEATURE_FILL_OPACITY,
+    lineWidth: FEATURE_LINE_WIDTH
   })
 
   addSourceAndLayers(map, {
     sourceId: BOUNDARY_SOURCE_ID,
     geojson: boundaryGeojson,
-    color: '#d4351c',
-    fillOpacity: 0.1,
-    lineWidth: 3
+    color: BOUNDARY_COLOR,
+    fillOpacity: BOUNDARY_FILL_OPACITY,
+    lineWidth: BOUNDARY_LINE_WIDTH
   })
 
   const primaryGeojson = featureGeojson || boundaryGeojson
-  if (fitMapToBounds(map, primaryGeojson, fitBoundsOptions)) {
+  if (fitMapToBounds(map, primaryGeojson, resolvedFitBoundsOptions)) {
     return
   }
 
   if (!primaryGeojson && fallbackBounds) {
-    map.fitBounds(fallbackBounds, { padding: 20 })
+    map.fitBounds(fallbackBounds, { padding: FALLBACK_FIT_BOUNDS_PADDING })
   }
 }
 
