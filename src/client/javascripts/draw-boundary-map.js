@@ -1,8 +1,18 @@
-import { getDrawBoundaryMapProfile } from './draw-boundary-map-profile.js'
-import { initialiseInteractiveMap } from './interactive-map-base.js'
+import { createMap } from './base-map/config.js'
+import { getDrawMapContainerHeight } from './base-map/helpers.js'
 
-function initDrawBoundaryMap() {
-  initialiseInteractiveMap(getDrawBoundaryMapProfile())
-}
+const UK_BOUNDS = [-8.75, 49.8, 2.1, 60.95]
 
-document.addEventListener('DOMContentLoaded', initDrawBoundaryMap)
+document.addEventListener('DOMContentLoaded', function () {
+  createMap({
+    mapElementId: 'draw-boundary-map',
+    mapLabel: 'Draw boundary map',
+    containerHeight: getDrawMapContainerHeight,
+    showStyleControls: true,
+    showDrawControls: true,
+    options: {
+      bounds: UK_BOUNDS,
+      maxBounds: UK_BOUNDS
+    }
+  })
+})

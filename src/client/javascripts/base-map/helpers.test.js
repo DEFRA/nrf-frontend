@@ -3,10 +3,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   getDefraApi,
   logWarning,
-  parseDatasetJson
-} from './interactive-map-utils.js'
+  parseDatasetJson,
+  runWhenMapStyleReady
+} from './helpers.js'
 
-describe('interactive-map-utils', () => {
+describe('base-map helpers', () => {
   let warnSpy
 
   beforeEach(() => {
@@ -78,6 +79,34 @@ describe('interactive-map-utils', () => {
         'Failed to parse boundary GeoJSON',
         expect.any(SyntaxError)
       )
+    })
+  })
+
+  describe('runWhenMapStyleReady', () => {
+    it('executes callback immediately when style is loaded', () => {
+      const callback = vi.fn()
+      const mapInstance = {
+        isStyleLoaded: vi.fn().mockReturnValue(true),
+        once: vi.fn()
+      }
+
+      runWhenMapStyleReady(mapInstance, callback)
+
+      expect(callback).toHaveBeenCalledTimes(1)
+      expect(mapInstance.once).not.toHaveBeenCalled()
+    })
+
+    it('registers style.load callback when style is not loaded', () => {
+      const callback = vi.fn()
+      const mapInstance = {
+        isStyleLoaded: vi.fn().mockReturnValue(false),
+        once: vi.fn()
+      }
+
+      runWhenMapStyleReady(mapInstance, callback)
+
+      expect(mapInstance.once).toHaveBeenCalledWith('style.load', callback)
+      expect(callback).not.toHaveBeenCalled()
     })
   })
 })

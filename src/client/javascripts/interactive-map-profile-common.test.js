@@ -19,7 +19,7 @@ describe('interactive-map-profile-common', () => {
     const options = createInlineMapOptions({
       mapProvider: { provider: 'maplibre' },
       mapLabel: 'Test map',
-      mapStyleUrl: '/public/data/vts/OS_VTS_3857_Dark.json',
+      mapStyles: [{ url: '/public/data/vts/OS_VTS_3857_Dark.json' }],
       containerHeight: '400px',
       extraOptions: { bounds: [-8.75, 49.8, 2.1, 60.95] }
     })

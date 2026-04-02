@@ -4,13 +4,13 @@ import {
   addBoundaryLayer,
   addEdpBoundaryLayer,
   addEdpIntersectionLayer
-} from './boundary-map-layers.js'
+} from './layers.js'
 import {
   validGeojson,
   validEdpBoundaryGeojson,
   validEdpIntersectionGeojson,
   emptyGeojson
-} from './__fixtures__/boundary-map-fixtures.js'
+} from '../__fixtures__/boundary-map-fixtures.js'
 
 function createMockMapInstance() {
   return {

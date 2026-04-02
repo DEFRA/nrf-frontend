@@ -204,7 +204,7 @@ describe('boundary-map init', () => {
         containerHeight: '400px',
         enableZoomControls: true,
         mapStyle: expect.objectContaining({
-          url: 'https://tiles.example.com/style.json'
+          url: '/public/data/vts/ESRI_World_Imagery.json'
         })
       })
     )
