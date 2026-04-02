@@ -67,12 +67,6 @@
             }) }}
         </form>
 
-        <p class="govuk-body">
-            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
-        </p>
-          <p class="govuk-body">
-            <a href="{{ drawBoundaryPath }}" class="govuk-link">Draw the red line boundary on a map instead</a>
-          </p>
         {% else %}
 
         <h2 class="govuk-heading-m">EDP boundary check</h2>
@@ -90,6 +84,13 @@
         </form>
 
         {% endif %}
+
+        <p class="govuk-body">
+            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
+        </p>
+        <p class="govuk-body">
+            <a href="{{ drawBoundaryPath }}" class="govuk-link">Draw the red line boundary on a map instead</a>
+        </p>
 
     </div>
 </div>
