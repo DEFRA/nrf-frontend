@@ -58,3 +58,13 @@ export function runWhenMapStyleReady(mapInstance, callback) {
 
   mapInstance.once('style.load', callback)
 }
+
+export function wireMapErrorLogging(
+  mapInstance,
+  message = 'Map error',
+  extractError = (err) => err?.error || err
+) {
+  mapInstance.on('error', function (err) {
+    logWarning(message, extractError(err))
+  })
+}

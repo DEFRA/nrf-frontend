@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const map = createMap({
     mapElementId: 'boundary-map',
     mapLabel: 'Red line boundary',
+    mapErrorMessage: 'Boundary map error',
     containerHeight: '400px'
   })
 
@@ -42,9 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   map.on('map:ready', function (event) {
     const mapInstance = event.map
-    mapInstance.on('error', function (err) {
-      logWarning('Boundary map error', err.error || err)
-    })
 
     runWhenMapStyleReady(mapInstance, function () {
       drawFeature(mapInstance, {

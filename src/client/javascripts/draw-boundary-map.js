@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
   createMap({
     mapElementId: 'draw-boundary-map',
     mapLabel: 'Draw boundary map',
+    mapErrorMessage: 'Draw boundary map error',
     containerHeight: getDrawMapContainerHeight,
     showStyleControls: true,
     showDrawControls: true,

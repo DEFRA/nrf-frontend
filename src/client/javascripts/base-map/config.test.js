@@ -323,6 +323,36 @@ describe('base-map config', () => {
       expect(map.addPanel).not.toHaveBeenCalled()
     })
 
+    it('wires map instance error logging when mapErrorMessage is provided', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const mapInstance = { on: vi.fn() }
+      const map = { on: vi.fn() }
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        mapErrorMessage: 'Boundary map error'
+      })
+
+      const readyCallback = map.on.mock.calls.find(
+        (c) => c[0] === 'map:ready'
+      )?.[1]
+      readyCallback({ map: mapInstance })
+
+      expect(map.on).toHaveBeenCalledWith('map:ready', expect.any(Function))
+      expect(mapInstance.on).toHaveBeenCalledWith('error', expect.any(Function))
+    })
+
     it('adds transformRequest hook that resolves root-relative URLs', () => {
       const el = document.createElement('div')
       el.id = 'test-map'

@@ -4,7 +4,8 @@ import {
   getDefraApi,
   logWarning,
   parseDatasetJson,
-  runWhenMapStyleReady
+  runWhenMapStyleReady,
+  wireMapErrorLogging
 } from './helpers.js'
 
 describe('base-map helpers', () => {
@@ -107,6 +108,50 @@ describe('base-map helpers', () => {
 
       expect(mapInstance.once).toHaveBeenCalledWith('style.load', callback)
       expect(callback).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('wireMapErrorLogging', () => {
+    it('logs err.error when present', () => {
+      const mapInstance = { on: vi.fn() }
+
+      wireMapErrorLogging(mapInstance, 'Boundary map error')
+
+      const errorHandler = mapInstance.on.mock.calls[0][1]
+      errorHandler({ error: new Error('tile load failed') })
+
+      expect(mapInstance.on).toHaveBeenCalledWith('error', expect.any(Function))
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Boundary map error',
+        expect.any(Error)
+      )
+    })
+
+    it('falls back to the event object when err.error is missing', () => {
+      const mapInstance = { on: vi.fn() }
+
+      wireMapErrorLogging(mapInstance, 'Boundary map error')
+
+      const errorHandler = mapInstance.on.mock.calls[0][1]
+      const errEvent = { message: 'something went wrong' }
+      errorHandler(errEvent)
+
+      expect(warnSpy).toHaveBeenCalledWith('Boundary map error', errEvent)
+    })
+
+    it('supports custom error extraction', () => {
+      const mapInstance = { on: vi.fn() }
+
+      wireMapErrorLogging(
+        mapInstance,
+        'Custom map error',
+        (err) => err?.detail || err
+      )
+
+      const errorHandler = mapInstance.on.mock.calls[0][1]
+      errorHandler({ detail: 'detail message' })
+
+      expect(warnSpy).toHaveBeenCalledWith('Custom map error', 'detail message')
     })
   })
 })

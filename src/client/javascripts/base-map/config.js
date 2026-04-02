@@ -1,4 +1,9 @@
-import { getDefraApi, logWarning, resolveMapStylesPlugin } from './helpers.js'
+import {
+  getDefraApi,
+  logWarning,
+  resolveMapStylesPlugin,
+  wireMapErrorLogging
+} from './helpers.js'
 
 const VTS_STYLE_BASE_URL = '/public/data/vts'
 const VTS_THUMBNAIL_BASE_URL = '/public/data/vts/thumbnails'
@@ -257,6 +262,7 @@ export function createMap(mapElementId, mapOptions = {}) {
     mapLabel,
     mapStyles = getMapStyles(),
     containerHeight,
+    mapErrorMessage,
     showStyleControls = false,
     showDrawControls = false,
     options = {}
@@ -295,6 +301,12 @@ export function createMap(mapElementId, mapOptions = {}) {
     ...baseOptions,
     ...options
   })
+
+  if (mapErrorMessage) {
+    map.on('map:ready', function (event) {
+      wireMapErrorLogging(event.map, mapErrorMessage)
+    })
+  }
 
   if (showDrawControls) {
     wireDrawControls(map)
