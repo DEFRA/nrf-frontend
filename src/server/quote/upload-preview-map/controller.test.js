@@ -150,6 +150,7 @@ describe('map controller', () => {
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
@@ -167,6 +168,7 @@ describe('map controller', () => {
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
       expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
     })
   })

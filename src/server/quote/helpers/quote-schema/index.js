@@ -20,7 +20,7 @@ export const completeQuoteDataSchema = joi.object({
     then: peopleCountValidation().extract('peopleCount'),
     otherwise: joi.any().strip()
   }),
-  wasteWaterTreatmentWorksId: joi.string().required(),
+  wasteWaterTreatmentWorksId: joi.string().allow(null).required(),
   wasteWaterTreatmentWorksName: joi.string().allow(null).required(),
   email: emailValidation().extract('email')
 })
