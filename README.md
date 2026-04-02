@@ -23,7 +23,7 @@ nvm use
 Install application dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Docker Compose (LocalStack)
