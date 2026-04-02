@@ -1,116 +1,35 @@
-import { JSDOM } from 'jsdom'
 import { getByRole, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
-import { checkBoundary } from '../../common/services/boundary.js'
+import { loadPage } from '../../../test-utils/load-page.js'
+import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
 import { checkBoundaryPath } from '../upload-received/routes.js'
+import {
+  boundaryGeojson,
+  boundaryGeojsonWithEdp
+} from '../../../test-utils/fixtures/boundary-geojson.js'
 
 vi.mock('../../common/services/boundary.js')
 
-const mockGeojson = {
-  boundaryGeometryWgs84: {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [0, 0],
-              [1, 0],
-              [1, 1],
-              [0, 0]
-            ]
-          ]
-        },
-        properties: {}
-      }
-    ]
-  },
-  intersectingEdps: []
-}
-
-const mockEdpGeojson = {
-  boundaryGeometryWgs84: {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [0, 0],
-              [1, 0],
-              [1, 1],
-              [0, 0]
-            ]
-          ]
-        },
-        properties: {}
-      }
-    ]
-  },
-  intersectingEdps: [
-    { label: 'Kent Downs EDP', n2k_site_name: 'North Downs Woodlands' }
-  ]
-}
-
-async function setupSession(server, geojson = mockGeojson) {
-  const sessionCookie = await withValidQuoteSession(server)
-  vi.mocked(checkBoundary).mockResolvedValue({ geojson })
-  const { cookie } = await submitForm({
-    requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id'),
-    server,
-    formData: {},
-    cookie: sessionCookie
-  })
-  return cookie
-}
-
-async function setupErrorSession(server, error, geojson = null) {
-  const sessionCookie = await withValidQuoteSession(server)
-  vi.mocked(checkBoundary).mockResolvedValue({ error, geojson })
-  const { cookie } = await submitForm({
-    requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id'),
-    server,
-    formData: {},
-    cookie: sessionCookie
-  })
-  return cookie
-}
-
-async function loadPageWithSession(server, geojson = mockGeojson) {
-  const cookie = await setupSession(server, geojson)
-  const response = await server.inject({
-    method: 'GET',
-    url: routePath,
-    headers: cookie ? { cookie } : {}
-  })
-  const { window } = new JSDOM(response.result)
-  return { document: window.document, cookie }
-}
-
-async function loadPageWithError(server, error, geojson = null) {
-  const cookie = await setupErrorSession(server, error, geojson)
-  const response = await server.inject({
-    method: 'GET',
-    url: routePath,
-    headers: cookie ? { cookie } : {}
-  })
-  const { window } = new JSDOM(response.result)
-  return { document: window.document, cookie }
-}
+const boundaryCheckPath = checkBoundaryPath.replace('{id}', 'test-upload-id')
 
 describe('Boundary map page', () => {
   const getServer = setupTestServer()
 
+  beforeEach(() => {
+    mockCheckBoundary({ geojson: boundaryGeojson })
+  })
+
   describe('when boundary does not intersect EDP', () => {
     it('should render all page elements', async () => {
-      const { document } = await loadPageWithSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
         'Boundary Map'
@@ -127,7 +46,12 @@ describe('Boundary map page', () => {
     })
 
     it('should display no EDPs message', async () => {
-      const { document } = await loadPageWithSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(document.body.textContent).toContain(
         'There are no EDPs within the red line boundary.'
@@ -135,7 +59,12 @@ describe('Boundary map page', () => {
     })
 
     it('should show save and continue button', async () => {
-      const { document } = await loadPageWithSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(
         getByRole(document, 'button', { name: 'Save and continue' })
@@ -143,14 +72,24 @@ describe('Boundary map page', () => {
     })
 
     it('should display feature count', async () => {
-      const { document } = await loadPageWithSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       const body = document.querySelector('.govuk-body')
       expect(body.textContent).toContain('1 feature found')
     })
 
     it('should include map container with geojson data and map scripts', async () => {
-      const { document } = await loadPageWithSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
@@ -168,7 +107,7 @@ describe('Boundary map page', () => {
     })
 
     it('should redirect to no-edp page on save and continue', async () => {
-      const cookie = await setupSession(getServer())
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
@@ -192,41 +131,57 @@ describe('Boundary map page', () => {
   })
 
   describe('when boundary intersects EDP', () => {
+    beforeEach(() => {
+      mockCheckBoundary({ geojson: boundaryGeojsonWithEdp })
+    })
+
     it('should display EDP information', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(document.body.textContent).toContain('Kent Downs EDP')
       expect(document.body.textContent).toContain('North Downs Woodlands')
     })
 
     it('should show save and continue button', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(
         getByRole(document, 'button', { name: 'Save and continue' })
       ).toBeInTheDocument()
     })
 
-    it('should show upload another boundary file link', async () => {
-      const { document } = await loadPageWithSession(
-        getServer(),
-        mockEdpGeojson
-      )
+    it('should show upload another boundary file and draw boundary links', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       const uploadLink = getByRole(document, 'link', {
         name: 'Upload a different red line boundary file'
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
+
+      expect(
+        getByRole(document, 'link', {
+          name: 'Draw the red line boundary on a map instead'
+        })
+      ).toHaveAttribute('href', '/quote/draw-boundary')
     })
 
     it('should redirect to development-types on save and continue', async () => {
-      const cookie = await setupSession(getServer(), mockEdpGeojson)
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
@@ -239,65 +194,70 @@ describe('Boundary map page', () => {
   })
 
   describe('when boundary check returns an error', () => {
+    beforeEach(() => {
+      mockCheckBoundary({ error: 'Invalid geometry detected' })
+    })
+
     it('should display error summary', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(document.body.textContent).toContain('There is a problem')
       expect(document.body.textContent).toContain('Invalid geometry detected')
     })
 
     it('should not show validated successfully message', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(document.body.textContent).not.toContain('validated successfully')
     })
 
-    it('should not show save and continue button', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
+    it('should not show upload another file link', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       expect(
-        queryByRole(document, 'button', { name: 'Save and continue' })
+        queryByRole(document, 'link', {
+          name: 'Upload a different red line boundary file'
+        })
       ).not.toBeInTheDocument()
     })
 
-    it('should show upload another file link', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
-
-      const uploadLink = getByRole(document, 'link', {
-        name: 'Upload a different red line boundary file'
+    it('should not show draw boundary link', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
       })
-      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
-    })
 
-    it('should show draw boundary link', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
-
-      const drawLink = getByRole(document, 'link', {
-        name: 'Draw the red line boundary instead'
-      })
-      expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
+      expect(
+        queryByRole(document, 'link', {
+          name: /Draw the red line boundary/
+        })
+      ).not.toBeInTheDocument()
     })
 
     it('should still render the map container', async () => {
-      const { document } = await loadPageWithError(
-        getServer(),
-        'Invalid geometry detected'
-      )
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
 
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
