@@ -123,7 +123,7 @@ describe('boundary service', () => {
 
       expect(result).toEqual({
         error:
-          'The uploaded file is too large. The maximum file size allowed is 2MB.',
+          'The uploaded boundary file is too large. The maximum file size allowed is 2MB.',
         geojson: payload
       })
     })
@@ -138,7 +138,7 @@ describe('boundary service', () => {
 
       expect(result).toEqual({
         error:
-          'The uploaded file is too large. The maximum file size allowed is 2MB.',
+          'The uploaded boundary file is too large. The maximum file size allowed is 2MB.',
         geojson: { error: 'HTTP 413' }
       })
     })
@@ -153,7 +153,7 @@ describe('boundary service', () => {
 
       expect(result).toEqual({
         error:
-          'The uploaded file is too large. The maximum file size allowed is 2MB.',
+          'The uploaded boundary file is too large. The maximum file size allowed is 2MB.',
         geojson: { error: 'Payload too large' }
       })
     })
