@@ -4,8 +4,6 @@ import { postRequestToBackend } from './nrf-backend.js'
 
 const logger = createLogger()
 
-const defaultMaxBoundaryFileSizeMb = 2
-
 /**
  * Map a backend error response to a user-friendly error message.
  * Checks known error patterns and returns an appropriate message,
@@ -20,8 +18,11 @@ function getResponseError(rawError, statusCode, payload) {
     statusCode === statusCodes.payloadTooLarge ||
     /413|payload too large/i.test(rawError)
   ) {
-    const maxSizeMb = payload?.maxFileSizeMb ?? defaultMaxBoundaryFileSizeMb
-    return `The uploaded boundary file is too large. The maximum file size allowed is ${maxSizeMb}MB.`
+    const maxSizeMb = payload?.maxFileSizeMb
+    const sizeDetail = maxSizeMb
+      ? ` The maximum file size allowed is ${maxSizeMb}MB.`
+      : ''
+    return `The uploaded boundary file is too large.${sizeDetail}`
   }
 
   return rawError
