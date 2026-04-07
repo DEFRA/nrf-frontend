@@ -4,6 +4,22 @@ import { postRequestToBackend } from './nrf-backend.js'
 
 const logger = createLogger()
 
+const fileSizeError =
+  'The uploaded file is too large. The maximum file size allowed is 2MB.'
+
+/**
+ * Map raw backend/upstream error messages to user-friendly text.
+ * @param {string} error - The original error message
+ * @param {number} statusCode - The HTTP status code
+ * @returns {string}
+ */
+function toUserFriendlyError(error, statusCode) {
+  if (statusCode === 413 || /413|payload too large/i.test(error)) {
+    return fileSizeError
+  }
+  return error
+}
+
 /**
  * Send a boundary check request to the backend
  * @param {string} uploadId - The upload ID to check
@@ -18,11 +34,12 @@ export async function checkBoundary(uploadId) {
     const { res, payload } = await postRequestToBackend({ endpointPath })
 
     if (res.statusCode >= statusCodes.badRequest) {
-      const error =
+      const rawError =
         payload?.error ?? `Boundary check failed (${res.statusCode})`
       logger.error(
-        `Boundary check error - uploadId: ${uploadId}, statusCode: ${res.statusCode}, error: ${error}`
+        `Boundary check error - uploadId: ${uploadId}, statusCode: ${res.statusCode}, error: ${rawError}`
       )
+      const error = toUserFriendlyError(rawError, res.statusCode)
       return { error, geojson: payload }
     }
 
@@ -35,7 +52,10 @@ export async function checkBoundary(uploadId) {
     )
     const backendError = responsePayload?.error
     if (backendError) {
-      return { error: backendError, geojson: responsePayload }
+      return {
+        error: toUserFriendlyError(backendError, statusCode),
+        geojson: responsePayload
+      }
     }
     return { error: 'Unable to check boundary' }
   }
