@@ -16,7 +16,10 @@ const defaultMaxBoundaryFileSizeMb = 2
  * @returns {string}
  */
 function getResponseError(rawError, statusCode, payload) {
-  if (statusCode === 413 || /413|payload too large/i.test(rawError)) {
+  if (
+    statusCode === statusCodes.payloadTooLarge ||
+    /413|payload too large/i.test(rawError)
+  ) {
     const maxSizeMb = payload?.maxFileSizeMb ?? defaultMaxBoundaryFileSizeMb
     return `The uploaded boundary file is too large. The maximum file size allowed is ${maxSizeMb}MB.`
   }
