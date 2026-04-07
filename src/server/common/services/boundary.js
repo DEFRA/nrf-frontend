@@ -4,17 +4,24 @@ import { postRequestToBackend } from './nrf-backend.js'
 
 const logger = createLogger()
 
-const boundaryFileTooLargeError =
-  'The uploaded boundary file is too large. The maximum file size allowed is 2MB.'
+const defaultMaxBoundaryFileSizeMb = 2
 
 /**
- * Check if the error indicates the boundary file exceeded the size limit.
- * @param {string} error - The error message from the backend
+ * Map a backend error response to a user-friendly error message.
+ * Checks known error patterns and returns an appropriate message,
+ * falling back to the raw backend error if no pattern matches.
+ * @param {string} rawError - The raw error message from the backend
  * @param {number} statusCode - The HTTP status code
- * @returns {boolean}
+ * @param {object} payload - The full response payload
+ * @returns {string}
  */
-function isBoundaryFileTooLarge(error, statusCode) {
-  return statusCode === 413 || /413|payload too large/i.test(error)
+function getResponseError(rawError, statusCode, payload) {
+  if (statusCode === 413 || /413|payload too large/i.test(rawError)) {
+    const maxSizeMb = payload?.maxFileSizeMb ?? defaultMaxBoundaryFileSizeMb
+    return `The uploaded boundary file is too large. The maximum file size allowed is ${maxSizeMb}MB.`
+  }
+
+  return rawError
 }
 
 /**
@@ -36,9 +43,7 @@ export async function checkBoundary(uploadId) {
       logger.error(
         `Boundary check error - uploadId: ${uploadId}, statusCode: ${res.statusCode}, error: ${rawError}`
       )
-      const error = isBoundaryFileTooLarge(rawError, res.statusCode)
-        ? boundaryFileTooLargeError
-        : rawError
+      const error = getResponseError(rawError, res.statusCode, payload)
       return { error, geojson: payload }
     }
 
@@ -51,10 +56,10 @@ export async function checkBoundary(uploadId) {
     )
     const backendError = responsePayload?.error
     if (backendError) {
-      const friendlyError = isBoundaryFileTooLarge(backendError, statusCode)
-        ? boundaryFileTooLargeError
-        : backendError
-      return { error: friendlyError, geojson: responsePayload }
+      return {
+        error: getResponseError(backendError, statusCode, responsePayload),
+        geojson: responsePayload
+      }
     }
     return { error: 'Unable to check boundary' }
   }

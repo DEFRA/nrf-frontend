@@ -112,8 +112,8 @@ describe('boundary service', () => {
       )
     })
 
-    it('should return a user-friendly message when status is 413', async () => {
-      const payload = { error: 'HTTP 413' }
+    it('should return a user-friendly message when status is 413 with maxFileSizeMb from backend', async () => {
+      const payload = { error: 'HTTP 413', maxFileSizeMb: 5 }
       vi.mocked(postRequestToBackend).mockResolvedValue({
         res: { statusCode: 413 },
         payload
@@ -123,14 +123,14 @@ describe('boundary service', () => {
 
       expect(result).toEqual({
         error:
-          'The uploaded boundary file is too large. The maximum file size allowed is 2MB.',
+          'The uploaded boundary file is too large. The maximum file size allowed is 5MB.',
         geojson: payload
       })
     })
 
-    it('should return a user-friendly message when error contains 413', async () => {
+    it('should fall back to default max size when maxFileSizeMb is not in the response', async () => {
       vi.mocked(postRequestToBackend).mockResolvedValue({
-        res: { statusCode: 400 },
+        res: { statusCode: 413 },
         payload: { error: 'HTTP 413' }
       })
 
@@ -143,18 +143,35 @@ describe('boundary service', () => {
       })
     })
 
-    it('should return a user-friendly message when thrown error is 413', async () => {
-      const error = new Error('Payload Too Large')
-      error.output = { statusCode: 413 }
-      error.data = { payload: { error: 'Payload too large' } }
-      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+    it('should return a user-friendly message when error contains 413', async () => {
+      vi.mocked(postRequestToBackend).mockResolvedValue({
+        res: { statusCode: 400 },
+        payload: { error: 'HTTP 413', maxFileSizeMb: 2 }
+      })
 
       const result = await checkBoundary('upload-123')
 
       expect(result).toEqual({
         error:
           'The uploaded boundary file is too large. The maximum file size allowed is 2MB.',
-        geojson: { error: 'Payload too large' }
+        geojson: { error: 'HTTP 413', maxFileSizeMb: 2 }
+      })
+    })
+
+    it('should return a user-friendly message when thrown error is 413', async () => {
+      const error = new Error('Payload Too Large')
+      error.output = { statusCode: 413 }
+      error.data = {
+        payload: { error: 'Payload too large', maxFileSizeMb: 3 }
+      }
+      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+
+      const result = await checkBoundary('upload-123')
+
+      expect(result).toEqual({
+        error:
+          'The uploaded boundary file is too large. The maximum file size allowed is 3MB.',
+        geojson: { error: 'Payload too large', maxFileSizeMb: 3 }
       })
     })
   })
