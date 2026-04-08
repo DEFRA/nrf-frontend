@@ -39,10 +39,11 @@ describe('POST /quote/draw-boundary/check', () => {
     expect(checkBoundaryGeometry).toHaveBeenCalledWith(validGeometry)
   })
 
-  it('should return an error and pass through geojson on backend failure', async () => {
+  it('should propagate the backend status code and pass through geojson on backend failure', async () => {
     vi.mocked(checkBoundaryGeometry).mockResolvedValue({
       error: 'Invalid geometry',
-      geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } }
+      geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } },
+      statusCode: statusCodes.badRequest
     })
 
     const response = await getServer().inject({
@@ -58,7 +59,25 @@ describe('POST /quote/draw-boundary/check', () => {
     })
   })
 
-  it('should return only the error when no geojson is present', async () => {
+  it('should propagate a 502 from the backend when the impact assessor is unreachable', async () => {
+    vi.mocked(checkBoundaryGeometry).mockResolvedValue({
+      error: 'Unable to contact impact assessor service',
+      statusCode: statusCodes.badGateway
+    })
+
+    const response = await getServer().inject({
+      method: 'POST',
+      url: checkPath,
+      payload: { geometry: validGeometry }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badGateway)
+    expect(JSON.parse(response.payload)).toEqual({
+      error: 'Unable to contact impact assessor service'
+    })
+  })
+
+  it('should default to 400 when the service returns no status code', async () => {
     vi.mocked(checkBoundaryGeometry).mockResolvedValue({
       error: 'Unable to check boundary'
     })

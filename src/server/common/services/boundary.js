@@ -73,8 +73,8 @@ export async function checkBoundary(uploadId) {
  * Send a GeoJSON boundary geometry to the backend for checking against EDPs.
  * Used by the draw map page where the user draws a polygon directly rather
  * than uploading a file.
- * @param {object} geometry - GeoJSON geometry, Feature, or FeatureCollection
- * @returns {Promise<{geojson?: object, error?: string}>}
+ * @param {object} geometry - GeoJSON Polygon Geometry
+ * @returns {Promise<{geojson?: object, error?: string, statusCode?: number}>}
  */
 export async function checkBoundaryGeometry(geometry) {
   const endpointPath = '/boundary/check'
@@ -94,7 +94,7 @@ export async function checkBoundaryGeometry(geometry) {
         `Boundary geometry check error - statusCode: ${res.statusCode}, error: ${rawError}`
       )
       const error = getResponseError(rawError, res.statusCode, payload)
-      return { error, geojson: payload }
+      return { error, geojson: payload, statusCode: res.statusCode }
     }
 
     return { geojson: payload }
@@ -108,9 +108,10 @@ export async function checkBoundaryGeometry(geometry) {
     if (backendError) {
       return {
         error: getResponseError(backendError, statusCode, responsePayload),
-        geojson: responsePayload
+        geojson: responsePayload,
+        statusCode
       }
     }
-    return { error: 'Unable to check boundary' }
+    return { error: 'Unable to check boundary', statusCode }
   }
 }

@@ -22,7 +22,8 @@ export async function checkBoundaryHandler(request, h) {
     if (result.geojson) {
       response.geojson = result.geojson
     }
-    return h.response(response).code(statusCodes.badRequest)
+    const statusCode = result.statusCode ?? statusCodes.badRequest
+    return h.response(response).code(statusCode)
   }
 
   return h.response(result.geojson)
