@@ -244,7 +244,7 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).not.toContain('validated successfully')
     })
 
-    it('should show upload another file link and draw boundary link', async () => {
+    it('should show upload another file link', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -256,6 +256,16 @@ describe('Boundary map page', () => {
         name: uploadLinkText
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
+    })
+
+    it('should show draw boundary link', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
       expect(
         getByRole(document, 'link', {
           name: drawLinkText
@@ -263,7 +273,7 @@ describe('Boundary map page', () => {
       ).toHaveAttribute('href', '/quote/draw-boundary')
     })
 
-    it('should still render the map container but disable the Save button', async () => {
+    it('should still render the map container', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -273,6 +283,16 @@ describe('Boundary map page', () => {
 
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
+    })
+
+    it('should disable the Save button on boundary error', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
       const saveButton = getByRole(document, 'button', {
         name: 'Save and continue'
       })
