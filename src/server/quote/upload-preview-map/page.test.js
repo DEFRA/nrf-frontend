@@ -68,9 +68,10 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      expect(
-        getByRole(document, 'button', { name: 'Save and continue' })
-      ).toBeInTheDocument()
+      const saveButton = getByRole(document, 'button', {
+        name: 'Save and continue'
+      })
+      expect(saveButton).not.toBeDisabled()
     })
 
     it('should display feature count', async () => {
@@ -243,7 +244,7 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).not.toContain('validated successfully')
     })
 
-    it('should show upload another file link', async () => {
+    it('should show upload another file link and draw boundary link', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -255,16 +256,6 @@ describe('Boundary map page', () => {
         name: uploadLinkText
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
-    })
-
-    it('should show draw boundary link', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
       expect(
         getByRole(document, 'link', {
           name: drawLinkText
@@ -272,7 +263,7 @@ describe('Boundary map page', () => {
       ).toHaveAttribute('href', '/quote/draw-boundary')
     })
 
-    it('should still render the map container', async () => {
+    it('should still render the map container but disable the Save button', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -282,6 +273,10 @@ describe('Boundary map page', () => {
 
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
+      const saveButton = getByRole(document, 'button', {
+        name: 'Save and continue'
+      })
+      expect(saveButton).toBeDisabled()
     })
   })
 })

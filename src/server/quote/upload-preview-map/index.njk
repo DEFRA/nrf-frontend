@@ -79,7 +79,8 @@
 
             {{ govukButton({
                 text: "Save and continue",
-                preventDoubleClick: true
+                preventDoubleClick: true,
+              disabled: boundaryError
             }) }}
         </form>
 
