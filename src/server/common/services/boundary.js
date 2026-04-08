@@ -77,13 +77,9 @@ export async function checkBoundary(uploadId) {
  * @returns {Promise<{geojson?: object, error?: string, statusCode?: number}>}
  */
 export async function checkBoundaryGeometry(geometry) {
-  const endpointPath = '/boundary/check'
-
-  logger.info('Checking boundary geometry')
-
   try {
     const { res, payload } = await postRequestToBackend({
-      endpointPath,
+      endpointPath: '/boundary/check',
       payload: { geometry }
     })
 

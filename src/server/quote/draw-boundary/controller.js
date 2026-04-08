@@ -12,8 +12,6 @@ const logger = createLogger()
 export async function checkBoundaryHandler(request, h) {
   const { geometry } = request.payload
 
-  logger.info('draw-boundary check')
-
   const result = await checkBoundaryGeometry(geometry)
 
   if (result.error) {
