@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { postRequestToBackend } from './nrf-backend.js'
-import { checkBoundary } from './boundary.js'
+import { checkBoundary, checkBoundaryGeometry } from './boundary.js'
 
 vi.mock('./nrf-backend.js')
 
@@ -172,6 +172,120 @@ describe('boundary service', () => {
           'The uploaded boundary file is too large. The maximum file size allowed is 3MB.',
         geojson: { error: 'Payload too large', maxFileSizeMb: 3 }
       })
+    })
+  })
+
+  describe('checkBoundaryGeometry', () => {
+    const geometry = {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+          [0, 0]
+        ]
+      ]
+    }
+
+    it('should return geojson on a successful response', async () => {
+      const mockGeojson = {
+        type: 'FeatureCollection',
+        features: [{ type: 'Feature', geometry: { type: 'Polygon' } }]
+      }
+
+      vi.mocked(postRequestToBackend).mockResolvedValue({
+        res: { statusCode: 200 },
+        payload: mockGeojson
+      })
+
+      const result = await checkBoundaryGeometry(geometry)
+
+      expect(postRequestToBackend).toHaveBeenCalledWith({
+        endpointPath: '/boundary/check',
+        payload: { geometry }
+      })
+      expect(result).toEqual({ geojson: mockGeojson })
+    })
+
+    it('should return error and geojson from payload when status >= 400', async () => {
+      const payload = { error: 'Invalid geometry' }
+      vi.mocked(postRequestToBackend).mockResolvedValue({
+        res: { statusCode: 400 },
+        payload
+      })
+
+      const result = await checkBoundaryGeometry(geometry)
+
+      expect(result).toEqual({
+        error: 'Invalid geometry',
+        geojson: payload,
+        statusCode: 400
+      })
+    })
+
+    it('should return a default error message and geojson when status >= 400 and no error in payload', async () => {
+      const payload = {}
+      vi.mocked(postRequestToBackend).mockResolvedValue({
+        res: { statusCode: 502 },
+        payload
+      })
+
+      const result = await checkBoundaryGeometry(geometry)
+
+      expect(result).toEqual({
+        error: 'Boundary check failed (502)',
+        geojson: payload,
+        statusCode: 502
+      })
+    })
+
+    it('should return error when request throws with no payload', async () => {
+      vi.mocked(postRequestToBackend).mockRejectedValue(
+        new Error('ECONNREFUSED')
+      )
+
+      const result = await checkBoundaryGeometry(geometry)
+
+      expect(result).toEqual({
+        error: 'Unable to check boundary',
+        statusCode: undefined
+      })
+    })
+
+    it('should return backend error message and geojson when request throws with error in payload', async () => {
+      const responsePayload = {
+        error:
+          'The drawn boundary contains invalid geometry (self-intersecting or overlapping lines).',
+        boundaryGeometryWgs84: geometry
+      }
+      const error = new Error('Bad Request')
+      error.output = { statusCode: 400 }
+      error.data = { payload: responsePayload }
+      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+
+      const result = await checkBoundaryGeometry(geometry)
+
+      expect(result).toEqual({
+        error:
+          'The drawn boundary contains invalid geometry (self-intersecting or overlapping lines).',
+        geojson: responsePayload,
+        statusCode: 400
+      })
+    })
+
+    it('should log error details when request throws with output info', async () => {
+      const error = new Error('Bad Request')
+      error.output = { statusCode: 400 }
+      error.data = { payload: { detail: 'invalid geometry' } }
+      vi.mocked(postRequestToBackend).mockRejectedValue(error)
+
+      await checkBoundaryGeometry(geometry)
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('statusCode: 400')
+      )
     })
   })
 })

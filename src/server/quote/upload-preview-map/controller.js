@@ -31,7 +31,7 @@ export function postHandler(request, h) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const intersectsEdp = boundaryGeojson?.intersectingEdps.length ?? false
+  const intersectsEdp = boundaryGeojson?.intersectingEdps?.length ?? false
 
   saveQuoteDataToCache(request, { boundaryGeojson }, { boundaryChanged: true })
   request.yar.clear('boundaryGeojson')
