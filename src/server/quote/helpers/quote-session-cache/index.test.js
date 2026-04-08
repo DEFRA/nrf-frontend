@@ -126,6 +126,18 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.yar.clear).not.toHaveBeenCalled()
     })
 
+    it('does not log an error when quoteData is {boundaryEntryType: "upload"}', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({}),
+          set: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      saveQuoteDataToCache(request, { boundaryEntryType: 'upload' })
+      expect(request.logger.error).not.toHaveBeenCalled()
+    })
+
     it('logs an error when the merged data is invalid', () => {
       const request = {
         yar: {
@@ -214,6 +226,27 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(result.residentialBuildingCount).toBe(10)
       expect(result.peopleCount).toBe(5)
       expect(request.logger.error).not.toHaveBeenCalled()
+    })
+
+    it('logs an error if developmentTypes set but not residentialBuildingCount or peopleCount', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({
+            boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
+            developmentTypes: ['housing', 'other-residential'],
+            wasteWaterTreatmentWorksId: '101',
+            wasteWaterTreatmentWorksName: 'Great Billing WRC',
+            email: 'test@example.com'
+          })
+        },
+        logger: { error: vi.fn() }
+      }
+      getCompleteQuoteDataFromCache(request)
+      expect(request.logger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        'getQuoteDataFromCache: invalid quote data'
+      )
     })
 
     it('logs an error when cache data is invalid', () => {
