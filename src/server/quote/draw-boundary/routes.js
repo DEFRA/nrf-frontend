@@ -23,7 +23,16 @@ export default [
           geometry: joi
             .object({
               type: joi.string().valid('Polygon').required(),
-              coordinates: joi.array().required()
+              coordinates: joi
+                .array()
+                .min(1)
+                .items(
+                  joi
+                    .array()
+                    .min(4)
+                    .items(joi.array().length(2).items(joi.number()).required())
+                )
+                .required()
             })
             .unknown(true)
             .required()

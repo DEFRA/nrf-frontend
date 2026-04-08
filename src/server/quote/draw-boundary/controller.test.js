@@ -154,4 +154,83 @@ describe('POST /quote/draw-boundary/check', () => {
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(checkBoundaryGeometry).not.toHaveBeenCalled()
   })
+
+  it('should reject a Polygon with empty coordinates array', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: checkPath,
+      payload: { geometry: { type: 'Polygon', coordinates: [] } }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(checkBoundaryGeometry).not.toHaveBeenCalled()
+  })
+
+  it('should reject a Polygon with a ring of fewer than 4 positions', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: checkPath,
+      payload: {
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0, 0],
+              [1, 0],
+              [0, 0]
+            ]
+          ]
+        }
+      }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(checkBoundaryGeometry).not.toHaveBeenCalled()
+  })
+
+  it('should reject a Polygon with non-numeric coordinates', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: checkPath,
+      payload: {
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              ['a', 'b'],
+              ['c', 'd'],
+              ['e', 'f'],
+              ['a', 'b']
+            ]
+          ]
+        }
+      }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(checkBoundaryGeometry).not.toHaveBeenCalled()
+  })
+
+  it('should reject a Polygon position with the wrong arity', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: checkPath,
+      payload: {
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0, 0, 0],
+              [1, 0, 0],
+              [1, 1, 0],
+              [0, 0, 0]
+            ]
+          ]
+        }
+      }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(checkBoundaryGeometry).not.toHaveBeenCalled()
+  })
 })
