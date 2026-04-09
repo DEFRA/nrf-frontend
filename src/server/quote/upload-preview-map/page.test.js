@@ -68,9 +68,10 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      expect(
-        getByRole(document, 'button', { name: 'Save and continue' })
-      ).toBeInTheDocument()
+      const saveButton = getByRole(document, 'button', {
+        name: 'Save and continue'
+      })
+      expect(saveButton).not.toBeDisabled()
     })
 
     it('should display feature count', async () => {
@@ -282,6 +283,20 @@ describe('Boundary map page', () => {
 
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
+    })
+
+    it('should disable the Save button on boundary error', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const saveButton = getByRole(document, 'button', {
+        name: 'Save and continue'
+      })
+      expect(saveButton).toBeDisabled()
     })
   })
 })

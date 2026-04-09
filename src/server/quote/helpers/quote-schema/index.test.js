@@ -195,4 +195,26 @@ describe('inProgressQuoteDataSchema', () => {
       expect(value.peopleCount).toBeUndefined()
     })
   })
+
+  describe('residentialBuildingCount', () => {
+    it('does not require residentialBuildingCount when developmentTypes includes housing', () => {
+      const { error } = inProgressQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: ['housing'],
+        residentialBuildingCount: undefined
+      })
+      expect(error).toBeUndefined()
+    })
+  })
+
+  describe('peopleCount', () => {
+    it('does not require peopleCount when developmentTypes includes other-residential', () => {
+      const { error } = inProgressQuoteDataSchema.validate({
+        ...validBase,
+        developmentTypes: ['other-residential'],
+        peopleCount: undefined
+      })
+      expect(error).toBeUndefined()
+    })
+  })
 })
