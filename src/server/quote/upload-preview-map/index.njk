@@ -32,6 +32,11 @@
             Your boundary file has been validated successfully.
             {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
         </p>
+        {% if boundaryFilename %}
+        <p class="govuk-body">
+            Uploaded file: <span class="govuk-!-font-weight-bold">{{ boundaryFilename }}</span>
+        </p>
+        {% endif %}
         {% endif %}
 
         <div id="boundary-map" class="govuk-!-margin-bottom-6"

@@ -16,7 +16,12 @@
           rows: [
             {
               key: { text: "Red line boundary" },
-              value: { text: 'Uploaded' if formSubmitData.boundaryEntryType === 'upload' else 'Drawn' },
+              value: {
+                text:
+                  formSubmitData.boundaryFilename
+                    if formSubmitData.boundaryEntryType === 'upload' and formSubmitData.boundaryFilename
+                    else ('Uploaded' if formSubmitData.boundaryEntryType === 'upload' else 'Drawn')
+              },
               actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/upload-preview-map", text: "Change", visuallyHiddenText: "red line boundary" }] }
             } if formSubmitData.boundaryEntryType,
             {
