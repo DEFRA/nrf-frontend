@@ -76,6 +76,11 @@ export const DEFAULT_MAP_BOUNDS = [
   [ENGLAND_EAST_LNG, ENGLAND_NORTH_LAT]
 ]
 export const ENGLAND_MIN_ZOOM = 4
+const BOUNDS_DECIMAL_PLACES = 6
+const DEFAULT_LAYER_FILL_OPACITY = 0.08
+const DEFAULT_LAYER_LINE_WIDTH = 2
+const LEGEND_OPACITY_MULTIPLIER = 4
+const LEGEND_MIN_OPACITY = 0.25
 const DRAW_PANEL_ID = 'draw'
 const BOUNDARY_INFO_PANEL_ID = 'boundary-info'
 const LAYERS_PANEL_ID = 'layers'
@@ -84,6 +89,7 @@ const DRAW_ACTION_EDIT = 'edit'
 const DRAW_ACTION_DELETE = 'delete'
 const BOUNDARY_ACTION_SAVE = 'save'
 const LAYER_ACTION_TOGGLE = 'toggle-layer'
+const DRAW_EVENT_CREATED = 'draw:created'
 const PENCIL_SVG =
   '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'
 const LAYERS_SVG =
@@ -140,7 +146,11 @@ function buildLayersPanelHtml(mapElementId, layerControlOptions = {}) {
       const defaultPaint = resolveLayerPaint(layer, 'default')
       const swatchOpacity = Math.min(
         1,
-        Math.max((defaultPaint.fillOpacity ?? 0.08) * 4, 0.25)
+        Math.max(
+          (defaultPaint.fillOpacity ?? DEFAULT_LAYER_FILL_OPACITY) *
+            LEGEND_OPACITY_MULTIPLIER,
+          LEGEND_MIN_OPACITY
+        )
       )
       return `
         <div class="govuk-checkboxes__item">
@@ -165,9 +175,9 @@ function buildLayersPanelHtml(mapElementId, layerControlOptions = {}) {
 function resolveLayerDefinitions(layerControlOptions = {}) {
   const mapLayerPaint = (layer) => ({
     fillColor: layer.fillColor || '#00703c',
-    fillOpacity: layer.fillOpacity ?? 0.08,
+    fillOpacity: layer.fillOpacity ?? DEFAULT_LAYER_FILL_OPACITY,
     lineColor: layer.lineColor || '#00703c',
-    lineWidth: layer.lineWidth ?? 2
+    lineWidth: layer.lineWidth ?? DEFAULT_LAYER_LINE_WIDTH
   })
 
   const mapLayerDefinition = (layer) => ({
@@ -209,51 +219,58 @@ function formatBounds(bounds) {
     return 'Not available'
   }
 
-  return bounds.map((value) => Number(value).toFixed(6)).join(', ')
+  return bounds
+    .map((value) => Number(value).toFixed(BOUNDS_DECIMAL_PLACES))
+    .join(', ')
+}
+
+function formatIntersectionItem(item) {
+  if (typeof item === 'string') {
+    return item
+  }
+
+  if (!item || typeof item !== 'object') {
+    return String(item)
+  }
+
+  const name = item.name ?? item.label
+  const code = item.code ?? item.id
+
+  if (name && code) {
+    return `${name} (${code})`
+  }
+
+  if (name) {
+    return String(name)
+  }
+
+  if (code) {
+    return String(code)
+  }
+
+  return JSON.stringify(item)
 }
 
 function formatIntersections(intersections) {
   if (!Array.isArray(intersections)) {
-    return 'Not available'
+    return ['Not available']
   }
 
   if (!intersections.length) {
-    return 'None'
+    return ['None']
   }
 
-  return intersections.map((item) => {
-    if (typeof item === 'string') {
-      return item
-    }
-
-    if (!item || typeof item !== 'object') {
-      return String(item)
-    }
-
-    const name = item.name ?? item.label
-    const code = item.code ?? item.id
-
-    if (name && code) {
-      return `${name} (${code})`
-    }
-
-    if (name) {
-      return String(name)
-    }
-
-    if (code) {
-      return String(code)
-    }
-
-    return JSON.stringify(item)
-  })
+  return intersections.map(formatIntersectionItem)
 }
 
 function renderIntersections(container, intersections) {
   const formatted = formatIntersections(intersections)
 
-  if (!Array.isArray(formatted)) {
-    container.textContent = formatted
+  if (
+    formatted.length === 1 &&
+    ['Not available', 'None'].includes(formatted[0])
+  ) {
+    container.textContent = formatted[0]
     return
   }
 
@@ -346,235 +363,177 @@ function getBoundsFromGeoJsonValue(value) {
   return getBoundsFromGeometry(value)
 }
 
-function normalizeBoundaryInfoResponse(payload) {
-  const sourcePayload = payload?.geojson ?? payload ?? {}
+function resolveField(...candidates) {
+  for (const candidate of candidates) {
+    if (candidate !== null && candidate !== undefined) {
+      return candidate
+    }
+  }
+  return null
+}
 
-  const intersectingEdps =
-    payload?.intersectingEdps ??
-    sourcePayload?.intersectingEdps ??
-    payload?.edps ??
-    sourcePayload?.edps ??
-    payload?.intersections?.edps ??
-    sourcePayload?.intersections?.edps ??
-    null
+function resolveIntersectingEdps(payload, src) {
+  return resolveField(
+    payload?.intersectingEdps,
+    src?.intersectingEdps,
+    payload?.edps,
+    src?.edps,
+    payload?.intersections?.edps,
+    src?.intersections?.edps
+  )
+}
 
-  const geometry =
-    payload?.boundaryGeometryWgs84 ??
-    sourcePayload?.boundaryGeometryWgs84 ??
-    payload?.boundaryGeometryOriginal ??
-    sourcePayload?.boundaryGeometryOriginal ??
-    payload?.geometry ??
-    sourcePayload?.geometry ??
-    payload?.geojson?.geometry ??
-    sourcePayload?.geojson?.geometry ??
-    null
+function resolveGeometry(payload, src) {
+  return resolveField(
+    payload?.boundaryGeometryWgs84,
+    src?.boundaryGeometryWgs84,
+    payload?.boundaryGeometryOriginal,
+    src?.boundaryGeometryOriginal,
+    payload?.geometry,
+    src?.geometry,
+    payload?.geojson?.geometry,
+    src?.geojson?.geometry
+  )
+}
 
-  const error =
-    payload?.error ??
-    sourcePayload?.error ??
-    payload?.message ??
-    sourcePayload?.message ??
-    null
+function resolveBounds(payload, src, geometry) {
+  return resolveField(
+    payload?.bounds,
+    src?.bounds,
+    payload?.boundingBox,
+    src?.boundingBox,
+    payload?.bbox,
+    src?.bbox,
+    getBoundsFromGeoJsonValue(geometry)
+  )
+}
 
-  const explicitIsValid =
-    payload?.isValid ??
-    sourcePayload?.isValid ??
-    payload?.valid ??
-    sourcePayload?.valid ??
-    payload?.validation?.isValid ??
-    sourcePayload?.validation?.isValid
+function resolveError(payload, src) {
+  return resolveField(
+    payload?.error,
+    src?.error,
+    payload?.message,
+    src?.message
+  )
+}
 
-  const inferredIsValid =
+function resolveIsValid(payload, src, geometry, intersectingEdps, error) {
+  const explicit = resolveField(
+    payload?.isValid,
+    src?.isValid,
+    payload?.valid,
+    src?.valid,
+    payload?.validation?.isValid,
+    src?.validation?.isValid
+  )
+  const inferred =
     Boolean(geometry) && Array.isArray(intersectingEdps) && !error
+  return !!(explicit ?? inferred)
+}
 
-  const isValid = explicitIsValid ?? inferredIsValid
+function normalizeBoundaryInfoResponse(payload) {
+  const src = payload?.geojson ?? payload ?? {}
+  const intersectingEdps = resolveIntersectingEdps(payload, src)
+  const geometry = resolveGeometry(payload, src)
+  const error = resolveError(payload, src)
 
   return {
-    isValid: !!isValid,
-    bounds:
-      payload?.bounds ??
-      sourcePayload?.bounds ??
-      payload?.boundingBox ??
-      sourcePayload?.boundingBox ??
-      payload?.bbox ??
-      sourcePayload?.bbox ??
-      getBoundsFromGeoJsonValue(geometry),
+    isValid: resolveIsValid(payload, src, geometry, intersectingEdps, error),
+    bounds: resolveBounds(payload, src, geometry),
     intersectingEdps,
     error,
     raw: payload
   }
 }
 
-function wireBoundaryInfoPanel(
-  map,
-  { mapElementId, boundaryInfoOptions = {} }
-) {
-  const state = {
-    activeFeature: null,
-    latestResponse: null,
-    inFlightRequest: null
+function submitSaveAndContinue(saveAndContinueUrl, csrfToken) {
+  if (!saveAndContinueUrl) {
+    return
   }
 
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = saveAndContinueUrl
+  form.style.display = 'none'
+
+  if (csrfToken) {
+    const tokenInput = document.createElement('input')
+    tokenInput.type = 'hidden'
+    tokenInput.name = 'csrfToken'
+    tokenInput.value = csrfToken
+    form.appendChild(tokenInput)
+  }
+
+  document.body.appendChild(form)
+  form.submit()
+}
+
+function getBoundaryPanelRoot(mapElementId) {
+  return document.querySelector(
+    `.app-boundary-info-panel[data-map-element-id="${mapElementId}"]`
+  )
+}
+
+function renderBoundaryPanel(mapElementId, viewModel) {
   const {
-    endpoint,
-    method = 'POST',
-    requestBuilder = (feature) => ({ geojson: feature }),
-    responseParser = normalizeBoundaryInfoResponse,
-    csrfToken,
-    saveAndContinueUrl,
-    onSaveAndContinue
-  } = boundaryInfoOptions
-
-  const submitSaveAndContinue = () => {
-    if (!saveAndContinueUrl) {
-      return
-    }
-
-    const form = document.createElement('form')
-    form.method = 'POST'
-    form.action = saveAndContinueUrl
-    form.style.display = 'none'
-
-    if (csrfToken) {
-      const tokenInput = document.createElement('input')
-      tokenInput.type = 'hidden'
-      tokenInput.name = 'csrfToken'
-      tokenInput.value = csrfToken
-      form.appendChild(tokenInput)
-    }
-
-    document.body.appendChild(form)
-    form.submit()
-  }
-
-  const getPanelRoot = () =>
-    document.querySelector(
-      `.app-boundary-info-panel[data-map-element-id="${mapElementId}"]`
-    )
-
-  const renderPanel = ({
     summary,
     loading = false,
     error,
     results,
     canContinue = false
-  }) => {
-    const panelRoot = getPanelRoot()
-    if (!panelRoot) {
-      return
-    }
-
-    const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
-    const loadingEl = panelRoot.querySelector('[data-boundary-info-loading]')
-    const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
-    const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
-    const boundsEl = panelRoot.querySelector('[data-boundary-info-bounds]')
-    const intersectionsEl = panelRoot.querySelector(
-      '[data-boundary-info-intersections]'
-    )
-    const saveButton = panelRoot.querySelector(
-      `[data-boundary-action="${BOUNDARY_ACTION_SAVE}"]`
-    )
-
-    summaryEl.textContent = summary
-    loadingEl.hidden = !loading
-    errorEl.hidden = !error
-    errorEl.textContent = error || ''
-    resultsEl.hidden = !results
-
-    if (results) {
-      boundsEl.textContent = formatBounds(results.bounds)
-      renderIntersections(intersectionsEl, results.intersectingEdps)
-    }
-
-    const canShowSave = !!results?.isValid
-    saveButton.hidden = !canShowSave
-    saveButton.disabled = !canContinue
+  } = viewModel
+  const panelRoot = getBoundaryPanelRoot(mapElementId)
+  if (!panelRoot) {
+    return
   }
 
-  const abortActiveRequest = () => {
-    state.inFlightRequest?.abort()
-    state.inFlightRequest = null
+  const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
+  const loadingEl = panelRoot.querySelector('[data-boundary-info-loading]')
+  const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
+  const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
+  const boundsEl = panelRoot.querySelector('[data-boundary-info-bounds]')
+  const intersectionsEl = panelRoot.querySelector(
+    '[data-boundary-info-intersections]'
+  )
+  const saveButton = panelRoot.querySelector(
+    `[data-boundary-action="${BOUNDARY_ACTION_SAVE}"]`
+  )
+
+  summaryEl.textContent = summary
+  loadingEl.hidden = !loading
+  errorEl.hidden = !error
+  errorEl.textContent = error || ''
+  resultsEl.hidden = !results
+
+  if (results) {
+    boundsEl.textContent = formatBounds(results.bounds)
+    renderIntersections(intersectionsEl, results.intersectingEdps)
   }
 
-  const runValidation = async (feature) => {
-    state.activeFeature = feature
-    state.latestResponse = null
+  const canShowSave = !!results?.isValid
+  saveButton.hidden = !canShowSave
+  saveButton.disabled = !canContinue
+}
 
-    map.showPanel?.(BOUNDARY_INFO_PANEL_ID)
-    renderPanel({
-      summary: 'Validating boundary with backend',
-      loading: true
-    })
+function abortBoundaryRequest(state) {
+  state.inFlightRequest?.abort()
+  state.inFlightRequest = null
+}
 
-    if (!endpoint) {
-      renderPanel({
-        summary:
-          'Boundary captured. Validation endpoint is not configured yet.',
-        loading: false
-      })
-      return
-    }
-
-    abortActiveRequest()
-    const controller = new AbortController()
-    state.inFlightRequest = controller
-
-    try {
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(csrfToken ? { 'x-csrf-token': csrfToken } : {})
-        },
-        body: JSON.stringify(requestBuilder(feature)),
-        signal: controller.signal
-      })
-
-      let payload = null
-      try {
-        payload = await response.json()
-      } catch {
-        payload = null
-      }
-
-      const normalized = responseParser(payload)
-      state.latestResponse = normalized
-
-      if (!response.ok) {
-        renderPanel({
-          summary: 'Boundary validation failed.',
-          error:
-            normalized.error ||
-            `Validation request failed with status ${response.status}`,
-          results: normalized
-        })
-        return
-      }
-
-      renderPanel({
-        summary: normalized.isValid
-          ? 'Boundary validation passed.'
-          : 'Boundary validation failed.',
-        results: normalized,
-        canContinue: Boolean(saveAndContinueUrl || onSaveAndContinue)
-      })
-    } catch (error) {
-      if (error?.name === 'AbortError') {
-        return
-      }
-
-      renderPanel({
-        summary: 'Boundary validation could not be completed.',
-        error: error?.message || 'Unexpected validation error'
-      })
-    } finally {
-      if (state.inFlightRequest === controller) {
-        state.inFlightRequest = null
-      }
-    }
+function buildBoundaryRequestHeaders(csrfToken) {
+  return {
+    'Content-Type': 'application/json',
+    ...(csrfToken ? { 'x-csrf-token': csrfToken } : {})
   }
+}
 
+function registerBoundaryInfoSaveHandler({
+  mapElementId,
+  state,
+  onSaveAndContinue,
+  saveAndContinueUrl,
+  csrfToken
+}) {
   document.addEventListener('click', function (event) {
     const button = event.target.closest('[data-boundary-action]')
     if (!button) {
@@ -604,10 +563,17 @@ function wireBoundaryInfoPanel(
       return
     }
 
-    submitSaveAndContinue()
+    submitSaveAndContinue(saveAndContinueUrl, csrfToken)
   })
+}
 
-  map.on('draw:created', function (feature) {
+function registerBoundaryInfoMapEvents({
+  map,
+  state,
+  runValidation,
+  mapElementId
+}) {
+  map.on(DRAW_EVENT_CREATED, function (feature) {
     runValidation(feature)
   })
 
@@ -616,14 +582,183 @@ function wireBoundaryInfoPanel(
   })
 
   map.on('draw:delete', function () {
-    abortActiveRequest()
+    abortBoundaryRequest(state)
     state.activeFeature = null
     state.latestResponse = null
-    renderPanel({ summary: 'Draw a boundary to validate it.' })
+    renderBoundaryPanel(mapElementId, {
+      summary: 'Draw a boundary to validate it.'
+    })
     map.hidePanel?.(BOUNDARY_INFO_PANEL_ID)
   })
+}
 
-  renderPanel({ summary: 'Draw a boundary to validate it.' })
+function beginBoundaryValidation({
+  map,
+  mapElementId,
+  state,
+  feature,
+  endpoint
+}) {
+  state.activeFeature = feature
+  state.latestResponse = null
+
+  map.showPanel?.(BOUNDARY_INFO_PANEL_ID)
+  renderBoundaryPanel(mapElementId, {
+    summary: 'Validating boundary with backend',
+    loading: true
+  })
+
+  if (!endpoint) {
+    renderBoundaryPanel(mapElementId, {
+      summary: 'Boundary captured. Validation endpoint is not configured yet.',
+      loading: false
+    })
+    return false
+  }
+
+  return true
+}
+
+function renderBoundaryValidationResult({
+  mapElementId,
+  validationResult,
+  saveAndContinueUrl,
+  onSaveAndContinue
+}) {
+  if (!validationResult.ok) {
+    renderBoundaryPanel(mapElementId, {
+      summary: 'Boundary validation failed.',
+      error:
+        validationResult.normalized.error ||
+        `Validation request failed with status ${validationResult.status}`,
+      results: validationResult.normalized
+    })
+    return
+  }
+
+  renderBoundaryPanel(mapElementId, {
+    summary: validationResult.normalized.isValid
+      ? 'Boundary validation passed.'
+      : 'Boundary validation failed.',
+    results: validationResult.normalized,
+    canContinue: Boolean(saveAndContinueUrl || onSaveAndContinue)
+  })
+}
+
+function createBoundaryValidationRunner({
+  map,
+  mapElementId,
+  state,
+  endpoint,
+  method,
+  requestBuilder,
+  responseParser,
+  csrfToken,
+  saveAndContinueUrl,
+  onSaveAndContinue
+}) {
+  return async function runValidation(feature) {
+    if (
+      !beginBoundaryValidation({ map, mapElementId, state, feature, endpoint })
+    ) {
+      return
+    }
+
+    abortBoundaryRequest(state)
+    const controller = new AbortController()
+    state.inFlightRequest = controller
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: buildBoundaryRequestHeaders(csrfToken),
+        body: JSON.stringify(requestBuilder(feature)),
+        signal: controller.signal
+      })
+
+      let payload = null
+      try {
+        payload = await response.json()
+      } catch {
+        payload = null
+      }
+
+      const validationResult = {
+        ok: response.ok,
+        status: response.status,
+        normalized: responseParser(payload)
+      }
+
+      state.latestResponse = validationResult.normalized
+
+      renderBoundaryValidationResult({
+        mapElementId,
+        validationResult,
+        saveAndContinueUrl,
+        onSaveAndContinue
+      })
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        return
+      }
+
+      renderBoundaryPanel(mapElementId, {
+        summary: 'Boundary validation could not be completed.',
+        error: error?.message || 'Unexpected validation error'
+      })
+    } finally {
+      if (state.inFlightRequest === controller) {
+        state.inFlightRequest = null
+      }
+    }
+  }
+}
+
+function wireBoundaryInfoPanel(
+  map,
+  { mapElementId, boundaryInfoOptions = {} }
+) {
+  const state = {
+    activeFeature: null,
+    latestResponse: null,
+    inFlightRequest: null
+  }
+
+  const {
+    endpoint,
+    method = 'POST',
+    requestBuilder = (feature) => ({ geojson: feature }),
+    responseParser = normalizeBoundaryInfoResponse,
+    csrfToken,
+    saveAndContinueUrl,
+    onSaveAndContinue
+  } = boundaryInfoOptions
+
+  const runValidation = createBoundaryValidationRunner({
+    map,
+    mapElementId,
+    state,
+    endpoint,
+    method,
+    requestBuilder,
+    responseParser,
+    csrfToken,
+    saveAndContinueUrl,
+    onSaveAndContinue
+  })
+
+  registerBoundaryInfoSaveHandler({
+    mapElementId,
+    state,
+    onSaveAndContinue,
+    saveAndContinueUrl,
+    csrfToken
+  })
+  registerBoundaryInfoMapEvents({ map, state, runValidation, mapElementId })
+
+  renderBoundaryPanel(mapElementId, {
+    summary: 'Draw a boundary to validate it.'
+  })
 }
 
 function ensureVectorTileOverlay(mapInstance, layerControlOptions) {
@@ -678,9 +813,9 @@ function resolveLayerPaint(layerControlOptions, styleVariant) {
     layerControlOptions.paintByStyle?.default ||
     layerControlOptions.paint || {
       fillColor: '#00703c',
-      fillOpacity: 0.08,
+      fillOpacity: DEFAULT_LAYER_FILL_OPACITY,
       lineColor: '#00703c',
-      lineWidth: 2
+      lineWidth: DEFAULT_LAYER_LINE_WIDTH
     }
   )
 }
@@ -772,7 +907,12 @@ function updateLayerLegendSwatches({
     swatch.style.verticalAlign = 'text-bottom'
     swatch.style.borderColor = lineColor
     swatch.style.backgroundColor = fillColor
-    swatch.style.opacity = String(Math.min(1, Math.max(fillOpacity * 4, 0.25)))
+    swatch.style.opacity = String(
+      Math.min(
+        1,
+        Math.max(fillOpacity * LEGEND_OPACITY_MULTIPLIER, LEGEND_MIN_OPACITY)
+      )
+    )
   })
 }
 
@@ -791,72 +931,30 @@ function setVectorTileOverlayVisibility(
   })
 }
 
-function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
-  const layerDefinitions = resolveLayerDefinitions(layerControlOptions)
-  const state = {
-    visibleByLayer: Object.fromEntries(
-      layerDefinitions.map((layer) => [layer.sourceId, !!layer.defaultVisible])
-    ),
-    mapInstance: null,
-    styleVariant: 'default'
-  }
+function resolveLayerPanelStyleVariant(layerControlOptions, mapInstance) {
+  return typeof layerControlOptions.styleVariantResolver === 'function'
+    ? layerControlOptions.styleVariantResolver(mapInstance)
+    : inferStyleVariant(mapInstance)
+}
 
-  const applyVisibility = () => {
-    if (!state.mapInstance) {
-      return
-    }
+function getLayerPanelToggles(mapElementId) {
+  return document.querySelectorAll(
+    `.app-layers-panel[data-map-element-id="${mapElementId}"] [data-layer-action="${LAYER_ACTION_TOGGLE}"]`
+  )
+}
 
-    state.styleVariant =
-      typeof layerControlOptions.styleVariantResolver === 'function'
-        ? layerControlOptions.styleVariantResolver(state.mapInstance)
-        : inferStyleVariant(state.mapInstance)
-
-    layerDefinitions.forEach((layer) => {
-      ensureVectorTileOverlay(state.mapInstance, layer)
-      applyVectorTileOverlayPaint(state.mapInstance, layer, state.styleVariant)
-      setVectorTileOverlayVisibility(
-        state.mapInstance,
-        layer,
-        !!state.visibleByLayer[layer.sourceId]
-      )
-    })
-
-    updateLayerLegendSwatches({
-      mapElementId,
-      layerDefinitions,
-      styleVariant: state.styleVariant
-    })
-  }
-
-  const getToggles = () =>
-    document.querySelectorAll(
-      `.app-layers-panel[data-map-element-id="${mapElementId}"] [data-layer-action="${LAYER_ACTION_TOGGLE}"]`
-    )
-
-  const syncToggleState = () => {
-    getToggles().forEach((toggle) => {
-      const layerId = toggle.dataset.layerId
-      toggle.checked = !!state.visibleByLayer[layerId]
-    })
-  }
-
-  map.on('map:ready', function (event) {
-    state.mapInstance = event.map
-    state.mapInstance.on('styledata', function () {
-      applyVisibility()
-    })
-
-    applyVisibility()
+function syncLayerToggleState(mapElementId, visibleByLayer) {
+  getLayerPanelToggles(mapElementId).forEach((toggle) => {
+    const layerId = toggle.dataset.layerId
+    toggle.checked = !!visibleByLayer[layerId]
   })
+}
 
-  map.on('app:panelopened', function ({ panelId } = {}) {
-    if (panelId !== LAYERS_PANEL_ID) {
-      return
-    }
-
-    applyVisibility()
-  })
-
+function registerLayerPanelToggleHandler({
+  mapElementId,
+  state,
+  applyVisibility
+}) {
   document.addEventListener('change', function (event) {
     const toggle = event.target.closest('[data-layer-action]')
     if (!toggle) {
@@ -879,8 +977,64 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
     state.visibleByLayer[layerId] = toggle.checked
     applyVisibility()
   })
+}
 
-  syncToggleState()
+function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
+  const layerDefinitions = resolveLayerDefinitions(layerControlOptions)
+  const state = {
+    visibleByLayer: Object.fromEntries(
+      layerDefinitions.map((layer) => [layer.sourceId, !!layer.defaultVisible])
+    ),
+    mapInstance: null,
+    styleVariant: 'default'
+  }
+
+  const applyVisibility = () => {
+    if (!state.mapInstance) {
+      return
+    }
+
+    state.styleVariant = resolveLayerPanelStyleVariant(
+      layerControlOptions,
+      state.mapInstance
+    )
+
+    layerDefinitions.forEach((layer) => {
+      ensureVectorTileOverlay(state.mapInstance, layer)
+      applyVectorTileOverlayPaint(state.mapInstance, layer, state.styleVariant)
+      setVectorTileOverlayVisibility(
+        state.mapInstance,
+        layer,
+        !!state.visibleByLayer[layer.sourceId]
+      )
+    })
+
+    updateLayerLegendSwatches({
+      mapElementId,
+      layerDefinitions,
+      styleVariant: state.styleVariant
+    })
+  }
+
+  map.on('map:ready', function (event) {
+    state.mapInstance = event.map
+    state.mapInstance.on('styledata', function () {
+      applyVisibility()
+    })
+
+    applyVisibility()
+  })
+
+  map.on('app:panelopened', function ({ panelId } = {}) {
+    if (panelId !== LAYERS_PANEL_ID) {
+      return
+    }
+
+    applyVisibility()
+  })
+
+  registerLayerPanelToggleHandler({ mapElementId, state, applyVisibility })
+  syncLayerToggleState(mapElementId, state.visibleByLayer)
 }
 
 function createFeatureId() {
@@ -891,68 +1045,68 @@ function createFeatureId() {
   return `boundary-${Date.now()}`
 }
 
-function wireDrawPanelButtons({
-  map,
-  drawPlugin,
-  mapElementId,
-  drawControlOptions = {}
-}) {
-  const { initialFeature } = drawControlOptions
-  const drawState = { featureId: null, pendingFeatureId: null }
-  let hasHydratedInitialFeature = false
-  const hideDrawPanel = () => map.hidePanel?.(DRAW_PANEL_ID)
-  const showDrawPanel = () => map.showPanel?.(DRAW_PANEL_ID)
+function getDrawPanelButtons(mapElementId) {
+  return document.querySelectorAll(
+    `.app-draw-panel[data-map-element-id="${mapElementId}"] [data-draw-action]`
+  )
+}
 
-  const getPanelButtons = () =>
-    document.querySelectorAll(
-      `.app-draw-panel[data-map-element-id="${mapElementId}"] [data-draw-action]`
-    )
+function refreshDrawPanelButtons(mapElementId, drawState) {
+  const hasConfirmedFeature = !!drawState.featureId
+  const drawBusy = !!(drawState.featureId || drawState.pendingFeatureId)
 
-  const refreshButtonState = () => {
-    const hasConfirmedFeature = !!drawState.featureId
-    const drawBusy = !!(drawState.featureId || drawState.pendingFeatureId)
-    getPanelButtons().forEach((button) => {
-      const action = button.dataset.drawAction
-      if (action === DRAW_ACTION_DRAW) {
-        button.disabled = drawBusy
-      } else if (action === DRAW_ACTION_EDIT || action === DRAW_ACTION_DELETE) {
-        button.disabled = !hasConfirmedFeature
-      }
-    })
-  }
-
-  const runAction = (action) => {
-    if (!drawPlugin) {
-      logWarning('Draw plugin not available, action ignored')
-      return
-    }
-
+  getDrawPanelButtons(mapElementId).forEach((button) => {
+    const action = button.dataset.drawAction
     if (action === DRAW_ACTION_DRAW) {
-      const featureId = createFeatureId()
-      hideDrawPanel()
-      drawPlugin.newPolygon?.(featureId)
-      drawState.pendingFeatureId = featureId
-      refreshButtonState()
+      button.disabled = drawBusy
       return
     }
 
-    if (!drawState.featureId) {
-      return
+    if (action === DRAW_ACTION_EDIT || action === DRAW_ACTION_DELETE) {
+      button.disabled = !hasConfirmedFeature
     }
+  })
+}
 
-    if (action === DRAW_ACTION_EDIT) {
-      hideDrawPanel()
-      drawPlugin.editFeature?.(drawState.featureId)
-      return
-    }
-
-    if (action === DRAW_ACTION_DELETE) {
-      drawPlugin.deleteFeature?.([drawState.featureId])
-      drawState.featureId = null
-      refreshButtonState()
-    }
+function runDrawPanelAction({
+  action,
+  drawPlugin,
+  drawState,
+  hideDrawPanel,
+  refreshButtonState
+}) {
+  if (!drawPlugin) {
+    logWarning('Draw plugin not available, action ignored')
+    return
   }
 
+  if (action === DRAW_ACTION_DRAW) {
+    const featureId = createFeatureId()
+    hideDrawPanel()
+    drawPlugin.newPolygon?.(featureId)
+    drawState.pendingFeatureId = featureId
+    refreshButtonState()
+    return
+  }
+
+  if (!drawState.featureId) {
+    return
+  }
+
+  if (action === DRAW_ACTION_EDIT) {
+    hideDrawPanel()
+    drawPlugin.editFeature?.(drawState.featureId)
+    return
+  }
+
+  if (action === DRAW_ACTION_DELETE) {
+    drawPlugin.deleteFeature?.([drawState.featureId])
+    drawState.featureId = null
+    refreshButtonState()
+  }
+}
+
+function registerDrawPanelClickHandler({ mapElementId, runAction }) {
   document.addEventListener('click', function (event) {
     const button = event.target.closest('[data-draw-action]')
     if (!button) {
@@ -967,12 +1121,20 @@ function wireDrawPanelButtons({
 
     runAction(button.dataset.drawAction)
   })
+}
 
+function bindDrawStateEvents({
+  map,
+  drawState,
+  refreshButtonState,
+  hideDrawPanel,
+  showDrawPanel
+}) {
   map.on('draw:started', function () {
     hideDrawPanel()
   })
 
-  map.on('draw:created', function (feature) {
+  map.on(DRAW_EVENT_CREATED, function (feature) {
     drawState.featureId = feature?.id || drawState.pendingFeatureId || null
     drawState.pendingFeatureId = null
     refreshButtonState()
@@ -1012,25 +1174,67 @@ function wireDrawPanelButtons({
     refreshButtonState()
     showDrawPanel()
   })
+}
+
+function canHydrateInitialDrawFeature(initialFeature, drawPlugin) {
+  return (
+    initialFeature?.type === 'Feature' &&
+    !!initialFeature?.geometry &&
+    typeof drawPlugin?.addFeature === 'function'
+  )
+}
+
+function resolveInitialDrawFeature(initialFeature) {
+  return {
+    ...initialFeature,
+    id: initialFeature.id || createFeatureId(),
+    properties: initialFeature.properties || {}
+  }
+}
+
+function wireDrawPanelButtons({
+  map,
+  drawPlugin,
+  mapElementId,
+  drawControlOptions = {}
+}) {
+  const { initialFeature } = drawControlOptions
+  const drawState = { featureId: null, pendingFeatureId: null }
+  let hasHydratedInitialFeature = false
+  const hideDrawPanel = () => map.hidePanel?.(DRAW_PANEL_ID)
+  const showDrawPanel = () => map.showPanel?.(DRAW_PANEL_ID)
+
+  const refreshButtonState = () =>
+    refreshDrawPanelButtons(mapElementId, drawState)
+
+  const runAction = (action) =>
+    runDrawPanelAction({
+      action,
+      drawPlugin,
+      drawState,
+      hideDrawPanel,
+      refreshButtonState
+    })
+
+  registerDrawPanelClickHandler({ mapElementId, runAction })
+  bindDrawStateEvents({
+    map,
+    drawState,
+    refreshButtonState,
+    hideDrawPanel,
+    showDrawPanel
+  })
 
   const hydrateInitialFeature = () => {
     if (hasHydratedInitialFeature) {
       return
     }
 
-    if (
-      initialFeature?.type !== 'Feature' ||
-      !initialFeature?.geometry ||
-      typeof drawPlugin?.addFeature !== 'function'
-    ) {
+    if (!canHydrateInitialDrawFeature(initialFeature, drawPlugin)) {
       return
     }
 
-    const resolvedInitialFeature = {
-      ...initialFeature,
-      id: initialFeature.id || createFeatureId(),
-      properties: initialFeature.properties || {}
-    }
+    const resolvedInitialFeature = resolveInitialDrawFeature(initialFeature)
 
     drawPlugin.addFeature(resolvedInitialFeature)
     drawState.featureId = resolvedInitialFeature.id
@@ -1040,7 +1244,7 @@ function wireDrawPanelButtons({
 
     map.fitToBounds?.(resolvedInitialFeature)
 
-    map.emit?.('draw:created', resolvedInitialFeature)
+    map.emit?.(DRAW_EVENT_CREATED, resolvedInitialFeature)
   }
 
   map.on('draw:ready', hydrateInitialFeature)

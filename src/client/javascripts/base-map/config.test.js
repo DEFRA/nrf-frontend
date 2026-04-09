@@ -526,6 +526,173 @@ describe('base-map config', () => {
       )
     })
 
+    it('does not hydrate an invalid initial feature', () => {
+      const el = document.createElement('div')
+      el.id = 'draw-test-map-invalid-feature'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addButton: vi.fn(),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn(),
+        emit: vi.fn(),
+        fitToBounds: vi.fn()
+      }
+
+      const drawPluginInstance = {
+        id: 'draw',
+        addFeature: vi.fn(),
+        newPolygon: vi.fn(),
+        editFeature: vi.fn(),
+        deleteFeature: vi.fn()
+      }
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        drawMLPlugin: vi.fn().mockReturnValue(drawPluginInstance)
+      }
+
+      createMap({
+        mapElementId: 'draw-test-map-invalid-feature',
+        showDrawControls: true,
+        drawControlOptions: {
+          initialFeature: { type: 'Feature', properties: {} }
+        }
+      })
+
+      eventHandlers['app:ready']?.()
+      eventHandlers['draw:ready']?.()
+
+      expect(drawPluginInstance.addFeature).not.toHaveBeenCalled()
+      expect(map.fitToBounds).not.toHaveBeenCalled()
+      expect(map.emit).not.toHaveBeenCalled()
+    })
+
+    it('ignores edit and delete actions before a feature exists', () => {
+      const el = document.createElement('div')
+      el.id = 'draw-test-map-no-feature'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addButton: vi.fn(),
+        addPanel,
+        hidePanel: vi.fn(),
+        showPanel: vi.fn()
+      }
+
+      const drawPluginInstance = {
+        id: 'draw',
+        newPolygon: vi.fn(),
+        editFeature: vi.fn(),
+        deleteFeature: vi.fn()
+      }
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        drawMLPlugin: vi.fn().mockReturnValue(drawPluginInstance)
+      }
+
+      createMap({
+        mapElementId: 'draw-test-map-no-feature',
+        showDrawControls: true
+      })
+
+      eventHandlers['app:ready']?.()
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'draw'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      document
+        .querySelector(
+          '.app-draw-panel[data-map-element-id="draw-test-map-no-feature"] [data-draw-action="edit"]'
+        )
+        .click()
+      document
+        .querySelector(
+          '.app-draw-panel[data-map-element-id="draw-test-map-no-feature"] [data-draw-action="delete"]'
+        )
+        .click()
+
+      expect(drawPluginInstance.editFeature).not.toHaveBeenCalled()
+      expect(drawPluginInstance.deleteFeature).not.toHaveBeenCalled()
+    })
+
+    it('logs a warning when draw actions are clicked without a draw plugin', () => {
+      const el = document.createElement('div')
+      el.id = 'draw-test-map-no-plugin'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addButton: vi.fn(),
+        addPanel,
+        hidePanel: vi.fn(),
+        showPanel: vi.fn()
+      }
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'draw-test-map-no-plugin',
+        showDrawControls: true
+      })
+
+      eventHandlers['app:ready']?.()
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'draw'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      document
+        .querySelector(
+          '.app-draw-panel[data-map-element-id="draw-test-map-no-plugin"] [data-draw-action="draw"]'
+        )
+        .click()
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Draw plugin not available, action ignored',
+        ''
+      )
+
+      consoleWarnSpy.mockRestore()
+    })
+
     it('wires map instance error logging when mapErrorMessage is provided', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
@@ -1049,6 +1216,114 @@ describe('base-map config', () => {
       )
     })
 
+    it('renders an empty layers panel when no layers are configured', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-empty-layers'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addButton: vi.fn(),
+        addPanel
+      }
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-empty-layers',
+        showLayerControls: true,
+        layerControlOptions: {}
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'layers'
+      )?.[1]
+      expect(panelOptions.html).toContain('No layers are configured.')
+    })
+
+    it('supports a single layer definition without a layers array', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-single-layer'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const mapEventHandlers = {}
+      const mapInstance = {
+        getStyle: vi
+          .fn()
+          .mockReturnValue({ sprite: '/public/data/vts/OS_VTS_3857_Outdoor' }),
+        getSource: vi.fn().mockReturnValue(null),
+        addSource: vi.fn(),
+        getLayer: vi.fn().mockReturnValue({}),
+        addLayer: vi.fn(),
+        setPaintProperty: vi.fn(),
+        setLayoutProperty: vi.fn(),
+        on: vi.fn((eventName, callback) => {
+          mapEventHandlers[eventName] = callback
+        })
+      }
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addButton: vi.fn(),
+        addPanel
+      }
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-single-layer',
+        showLayerControls: true,
+        layerControlOptions: {
+          sourceId: 'single-layer',
+          sourceLayer: 'single_layer',
+          tilesUrl: '/tiles/{z}/{x}/{y}.mvt',
+          label: 'Single layer'
+        }
+      })
+
+      eventHandlers['app:ready']?.()
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'layers'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['map:ready']?.({ map: mapInstance })
+      mapEventHandlers.styledata?.()
+
+      expect(mapInstance.addSource).toHaveBeenCalledWith(
+        'single-layer',
+        expect.objectContaining({ type: 'vector' })
+      )
+      expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
+        'single-layer-fill',
+        'fill-color',
+        '#00703c'
+      )
+    })
+
     it('adds transformRequest hook that resolves root-relative URLs', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
@@ -1227,6 +1502,630 @@ describe('base-map config', () => {
         `${globalThis.location.origin}/source.json`
       )
       expect(normalized.sources.raster.tiles).toBe('/single-tile-url')
+    })
+
+    it('calls onSaveAndContinue callback when provided and save button clicked', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-onsave'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          boundaryGeometryWgs84: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.3191546171725879, 51.85916129554659],
+                [-1.3460261914845242, 51.84190872189816],
+                [-1.3265601691618827, 51.82896495118416],
+                [-1.289109234889739, 51.84177799534028],
+                [-1.3191546171725879, 51.85916129554659]
+              ]
+            ]
+          },
+          intersectingEdps: [{ name: 'Test EDP', code: 'EDP-999' }]
+        })
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      const onSaveAndContinue = vi.fn()
+
+      createMap({
+        mapElementId: 'test-map-onsave',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: {
+          endpoint: '/boundary/validate',
+          onSaveAndContinue
+        }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      const feature = {
+        id: 'feature-cb',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      }
+
+      eventHandlers['draw:created']?.(feature)
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const saveButton = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-onsave"] [data-boundary-action="save"]'
+      )
+      saveButton.click()
+
+      expect(onSaveAndContinue).toHaveBeenCalledWith(
+        expect.objectContaining({
+          feature: expect.objectContaining({ id: 'feature-cb' }),
+          response: expect.objectContaining({ isValid: true })
+        })
+      )
+
+      delete globalThis.fetch
+    })
+
+    it('submits form without csrf input when saveAndContinueUrl provided but no csrfToken', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-nocsrf'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          boundaryGeometryWgs84: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.3191546171725879, 51.85916129554659],
+                [-1.3460261914845242, 51.84190872189816],
+                [-1.3265601691618827, 51.82896495118416],
+                [-1.289109234889739, 51.84177799534028],
+                [-1.3191546171725879, 51.85916129554659]
+              ]
+            ]
+          },
+          intersectingEdps: [{ name: 'Test EDP', code: 'EDP-999' }]
+        })
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      const submitSpy = vi
+        .spyOn(globalThis.HTMLFormElement.prototype, 'submit')
+        .mockImplementation(() => {})
+
+      createMap({
+        mapElementId: 'test-map-nocsrf',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: {
+          endpoint: '/boundary/validate',
+          saveAndContinueUrl: '/quote/draw-boundary/save'
+        }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      const feature = {
+        id: 'feature-nocsrf',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      }
+
+      eventHandlers['draw:created']?.(feature)
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const saveButton = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-nocsrf"] [data-boundary-action="save"]'
+      )
+      saveButton.click()
+
+      expect(submitSpy).toHaveBeenCalledTimes(1)
+
+      const saveForm = document.querySelector(
+        'form[action="/quote/draw-boundary/save"]'
+      )
+      expect(saveForm).toBeTruthy()
+      expect(saveForm.querySelector('input[name="csrfToken"]')).toBeNull()
+
+      submitSpy.mockRestore()
+      delete globalThis.fetch
+    })
+
+    it('triggers revalidation when draw:edited fires in boundary info panel', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-edited'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          boundaryGeometryWgs84: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.32, 51.85],
+                [-1.34, 51.84],
+                [-1.33, 51.83],
+                [-1.29, 51.84],
+                [-1.32, 51.85]
+              ]
+            ]
+          },
+          intersectingEdps: []
+        })
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-edited',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      const feature = {
+        id: 'feature-edited',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      }
+
+      eventHandlers['draw:edited']?.(feature)
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        '/boundary/validate',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ geojson: feature })
+        })
+      )
+
+      delete globalThis.fetch
+    })
+
+    it('resets boundary info panel when draw:delete fires', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-delete'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const hidePanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          boundaryGeometryWgs84: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.32, 51.85],
+                [-1.34, 51.84],
+                [-1.33, 51.83],
+                [-1.29, 51.84],
+                [-1.32, 51.85]
+              ]
+            ]
+          },
+          intersectingEdps: [{ name: 'Test EDP', code: 'EDP-001' }]
+        })
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-delete',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      const feature = {
+        id: 'feature-del',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      }
+
+      eventHandlers['draw:created']?.(feature)
+      await Promise.resolve()
+      await Promise.resolve()
+
+      eventHandlers['draw:delete']?.()
+
+      expect(hidePanel).toHaveBeenCalledWith('boundary-info')
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-delete"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-summary]').textContent
+      ).toBe('Draw a boundary to validate it.')
+
+      delete globalThis.fetch
+    })
+
+    it('shows a configured message when boundary validation endpoint is missing', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-no-endpoint'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      const fetchSpy = vi.fn()
+      globalThis.fetch = fetchSpy
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-no-endpoint',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: {}
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-no-endpoint',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-no-endpoint"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-summary]').textContent
+      ).toBe('Boundary captured. Validation endpoint is not configured yet.')
+      expect(fetchSpy).not.toHaveBeenCalled()
+
+      delete globalThis.fetch
+    })
+
+    it('shows a fallback backend error when the error response has no json body', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-error-fallback'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: vi.fn().mockRejectedValue(new Error('bad json'))
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-error-fallback',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-error-fallback',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-error-fallback"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-error]').textContent
+      ).toBe('Validation request failed with status 503')
+
+      delete globalThis.fetch
+    })
+
+    it('shows unexpected validation errors when fetch rejects', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-fetch-error'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network offline'))
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-fetch-error',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-fetch-error',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-fetch-error"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-summary]').textContent
+      ).toBe('Boundary validation could not be completed.')
+      expect(
+        panelRoot.querySelector('[data-boundary-info-error]').textContent
+      ).toBe('Network offline')
+
+      delete globalThis.fetch
+    })
+
+    it('aborts the previous validation request when a new boundary is drawn', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-abort'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      const fetchSpy = vi
+        .fn()
+        .mockImplementationOnce((_url, options) => {
+          return new Promise((resolve, reject) => {
+            options.signal.addEventListener('abort', () => {
+              reject(new DOMException('Aborted', 'AbortError'))
+            })
+          })
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            boundaryGeometryWgs84: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-1.32, 51.85],
+                  [-1.34, 51.84],
+                  [-1.33, 51.83],
+                  [-1.29, 51.84],
+                  [-1.32, 51.85]
+                ]
+              ]
+            },
+            intersectingEdps: []
+          })
+        })
+      globalThis.fetch = fetchSpy
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-abort',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-abort-1',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-abort-2',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2)
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-abort"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-summary]').textContent
+      ).toBe('Boundary validation passed.')
+
+      delete globalThis.fetch
     })
   })
 })

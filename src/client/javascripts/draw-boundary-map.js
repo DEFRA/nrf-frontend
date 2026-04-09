@@ -7,6 +7,9 @@ const UK_SOUTH_LAT = 49.8
 const UK_EAST_LNG = 2.1
 const UK_NORTH_LAT = 60.95
 const UK_BOUNDS = [UK_WEST_LNG, UK_SOUTH_LAT, UK_EAST_LNG, UK_NORTH_LAT]
+const DEFAULT_LAYER_FILL_OPACITY = 0.08
+const DARK_LAYER_FILL_OPACITY = 0.16
+const DEFAULT_LAYER_LINE_WIDTH = 2
 const DEFAULT_IMPACT_ASSESSOR_LAYERS = [
   'edp_boundaries',
   'lpa_boundaries',
@@ -57,12 +60,12 @@ function buildLayerDefinitions(layerParams) {
     sourceId: `${layerParam}-tiles`,
     sourceLayer: layerParam,
     tilesUrl: `/impact-assessor-map/tiles/${layerParam}/{z}/{x}/{y}.mvt`,
-    fillOpacity: 0.08,
-    lineWidth: 2,
+    fillOpacity: DEFAULT_LAYER_FILL_OPACITY,
+    lineWidth: DEFAULT_LAYER_LINE_WIDTH,
     paintByStyle: {
       dark: {
         ...(LAYER_COLOR_CONFIG[layerParam]?.dark || {}),
-        fillOpacity: 0.16
+        fillOpacity: DARK_LAYER_FILL_OPACITY
       }
     },
     defaultVisible: index === 0
@@ -119,10 +122,9 @@ document.addEventListener('DOMContentLoaded', function () {
     ?.split(',')
     .map((value) => value.trim())
     .filter(Boolean)
-  const impactAssessorLayers =
-    layerParams && layerParams.length
-      ? layerParams
-      : DEFAULT_IMPACT_ASSESSOR_LAYERS
+  const impactAssessorLayers = layerParams?.length
+    ? layerParams
+    : DEFAULT_IMPACT_ASSESSOR_LAYERS
 
   createMap({
     mapElementId: 'draw-boundary-map',
