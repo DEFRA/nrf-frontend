@@ -9,7 +9,11 @@ function getMapStyleUrl() {
   return '/os-base-map/resources/styles'
 }
 
-export default function getViewModel(boundaryGeojson, boundaryError = null) {
+export default function getViewModel(
+  boundaryGeojson,
+  boundaryError = null,
+  boundaryFilename = null
+) {
   const geometry = boundaryGeojson?.boundaryGeometryWgs84 ?? null
   const intersectingEdps = boundaryGeojson?.intersectingEdps ?? []
   const intersectsEdp = intersectingEdps.length > 0
@@ -59,6 +63,7 @@ export default function getViewModel(boundaryGeojson, boundaryError = null) {
     uploadBoundaryPath,
     drawBoundaryPath,
     boundaryError,
+    boundaryFilename,
     boundaryTypePath,
     mapStyleUrl: getMapStyleUrl()
   }
