@@ -20,6 +20,7 @@ function createMockDefra() {
 
   MockInteractiveMap._mock = vi.fn()
   const mapStylesPlugin = vi.fn().mockReturnValue({ id: 'mapStyles' })
+  const drawMLPlugin = vi.fn().mockReturnValue({ id: 'draw' })
 
   return {
     InteractiveMap: new Proxy(MockInteractiveMap, {
@@ -30,6 +31,7 @@ function createMockDefra() {
     }),
     maplibreProvider: vi.fn().mockReturnValue({ provider: 'maplibre' }),
     mapStylesPlugin,
+    drawMLPlugin,
     _mock: MockInteractiveMap._mock
   }
 }
@@ -92,6 +94,7 @@ describe('draw-boundary-map init', () => {
 
     expect(mockDefra.maplibreProvider).toHaveBeenCalledTimes(1)
     expect(mockDefra.mapStylesPlugin).toHaveBeenCalledTimes(1)
+    expect(mockDefra.drawMLPlugin).toHaveBeenCalledTimes(1)
     expect(mockDefra.mapStylesPlugin).toHaveBeenCalledWith(
       expect.objectContaining({
         mapStyles: expect.arrayContaining([
@@ -118,7 +121,10 @@ describe('draw-boundary-map init', () => {
         mapStyle: expect.objectContaining({
           url: '/public/data/vts/ESRI_World_Imagery.json'
         }),
-        plugins: [expect.objectContaining({ id: 'mapStyles' })]
+        plugins: expect.arrayContaining([
+          expect.objectContaining({ id: 'mapStyles' }),
+          expect.objectContaining({ id: 'draw' })
+        ])
       })
     )
   })
@@ -134,6 +140,51 @@ describe('draw-boundary-map init', () => {
     expect(warnSpy).toHaveBeenCalledWith(
       'Map styles plugin not available, using single style',
       ''
+    )
+  })
+
+  it('passes cached boundary geometry to createMap as initial draw feature', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryGeojson = JSON.stringify({
+      type: 'Polygon',
+      coordinates: [
+        [
+          [-1.2, 51.8],
+          [-1.1, 51.8],
+          [-1.1, 51.9],
+          [-1.2, 51.8]
+        ]
+      ]
+    })
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drawControlOptions: {
+          initialFeature: {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-1.2, 51.8],
+                  [-1.1, 51.8],
+                  [-1.1, 51.9],
+                  [-1.2, 51.8]
+                ]
+              ]
+            },
+            properties: {}
+          }
+        }
+      })
     )
   })
 })

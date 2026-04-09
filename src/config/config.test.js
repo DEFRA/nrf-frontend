@@ -111,5 +111,17 @@ describe('#config', () => {
         '/public/data/vts/OS_VTS_3857_Outdoor.json'
       )
     })
+
+    test('map.impactAssessorBaseUrl is set', () => {
+      expect(config.get('map.impactAssessorBaseUrl')).toBe(
+        'http://localhost:8085'
+      )
+    })
+
+    test('map.impactAssessorLayers is set', () => {
+      expect(config.get('map.impactAssessorLayers')).toBe(
+        'edp_boundaries,lpa_boundaries,nn_catchments,subcatchments,wwtw_catchments'
+      )
+    })
   })
 })
