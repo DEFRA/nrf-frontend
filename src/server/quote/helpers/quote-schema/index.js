@@ -9,29 +9,55 @@ const boundaryEntryType = boundaryTypeValidation().extract('boundaryEntryType')
 const boundaryGeojson = joi.object().required()
 const developmentTypes =
   developmentTypesValidation().extract('developmentTypes')
-const residentialBuildingCount = joi.when('developmentTypes', {
-  is: joi.array().has(joi.valid('housing')),
-  then: residentialValidation().extract('residentialBuildingCount'),
-  otherwise: joi.any().strip()
-})
-const peopleCount = joi.when('developmentTypes', {
-  is: joi.array().has(joi.valid('other-residential')),
-  then: peopleCountValidation().extract('peopleCount'),
-  otherwise: joi.any().strip()
-})
+const whenDevelopmentType = (type, thenSchema) =>
+  joi.when('developmentTypes', {
+    is: joi.array().has(joi.valid(type)).required(),
+    then: thenSchema,
+    otherwise: joi.any().strip()
+  })
+
+const whenDevelopmentTypeOptional = (type, thenSchema) =>
+  joi.when('developmentTypes', {
+    is: joi.array().required(),
+    then: whenDevelopmentType(type, thenSchema),
+    otherwise: joi.when('developmentTypes', {
+      is: joi.exist(),
+      then: joi.any().strip(),
+      otherwise: joi.any()
+    })
+  })
+
+const residentialBuildingCountSchema = residentialValidation().extract(
+  'residentialBuildingCount'
+)
+const residentialBuildingCount = whenDevelopmentType(
+  'housing',
+  residentialBuildingCountSchema
+)
+const residentialBuildingCountOptional = whenDevelopmentTypeOptional(
+  'housing',
+  residentialBuildingCountSchema.optional()
+)
+
+const peopleCountSchema = peopleCountValidation().extract('peopleCount')
+const peopleCount = whenDevelopmentType('other-residential', peopleCountSchema)
+const peopleCountOptional = whenDevelopmentTypeOptional(
+  'other-residential',
+  peopleCountSchema.optional()
+)
 const wasteWaterTreatmentWorksId = joi.string().allow(null).required()
 const wasteWaterTreatmentWorksName = joi.string().allow(null).required()
 const email = emailValidation().extract('email')
 
 export const inProgressQuoteDataSchema = joi.object({
   boundaryEntryType,
-  boundaryGeojson,
-  developmentTypes: developmentTypes.allow(null),
-  residentialBuildingCount,
-  peopleCount,
-  wasteWaterTreatmentWorksId,
-  wasteWaterTreatmentWorksName,
-  email
+  boundaryGeojson: boundaryGeojson.optional().allow(null),
+  developmentTypes: developmentTypes.optional().allow(null),
+  residentialBuildingCount: residentialBuildingCountOptional,
+  peopleCount: peopleCountOptional,
+  wasteWaterTreatmentWorksId: joi.string().optional().allow(null),
+  wasteWaterTreatmentWorksName: joi.string().optional().allow(null),
+  email: email.optional().allow(null)
 })
 
 export const completeQuoteDataSchema = joi.object({
