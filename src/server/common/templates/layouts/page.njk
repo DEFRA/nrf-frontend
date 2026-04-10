@@ -46,7 +46,11 @@
     tag: {
       text: "Beta"
     },
-    html: 'This is a new service – your <a class="govuk-link" href="' + phaseBanner.feedbackUrl + '">feedback</a> will help us to improve it.'
+    html: 'This is a new service – your <a class="govuk-link" href="' + phaseBanner.feedbackUrl + '">feedback</a> will help us to improve it.',
+    attributes: {
+      role: "region",
+      "aria-label": "Service phase"
+    }
   }) }}
   {{ super() }}
 {% endblock %}
