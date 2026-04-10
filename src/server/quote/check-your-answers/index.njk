@@ -25,7 +25,7 @@
                     if formSubmitData.boundaryEntryType === 'upload' and formSubmitData.boundaryFilename
                     else ('Uploaded' if formSubmitData.boundaryEntryType === 'upload' else 'Drawn')
               },
-              actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/upload-preview-map", text: "Change", visuallyHiddenText: "red line boundary" }] }
+              actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/draw-boundary", text: "Change", visuallyHiddenText: "red line boundary" }] }
             } if formSubmitData.boundaryEntryType,
             {
               key: { text: "Development types" },
