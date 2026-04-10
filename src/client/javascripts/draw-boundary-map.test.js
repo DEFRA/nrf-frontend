@@ -187,4 +187,112 @@ describe('draw-boundary-map init', () => {
       })
     )
   })
+
+  it('passes boundary validation and layer parameters from dataset values', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.boundaryValidationUrl = '/quote/validate-boundary'
+    mapEl.dataset.saveAndContinueUrl = '/quote/check-your-answers'
+    mapEl.dataset.csrfToken = 'csrf-token-123'
+    mapEl.dataset.impactAssessorLayers = 'edp_boundaries, lpa_boundaries'
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        boundaryInfoOptions: expect.objectContaining({
+          endpoint: '/quote/validate-boundary',
+          csrfToken: 'csrf-token-123',
+          saveAndContinueUrl: '/quote/check-your-answers'
+        }),
+        layerControlOptions: {
+          layers: expect.arrayContaining([
+            expect.objectContaining({ sourceLayer: 'edp_boundaries' }),
+            expect.objectContaining({ sourceLayer: 'lpa_boundaries' })
+          ])
+        }
+      })
+    )
+  })
+
+  it('falls back to default layers and no initial feature for invalid cached boundary JSON', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryGeojson = '{invalid-json}'
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to parse existing boundary GeoJSON',
+      expect.any(Error)
+    )
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drawControlOptions: {},
+        layerControlOptions: {
+          layers: expect.arrayContaining([
+            expect.objectContaining({ sourceLayer: 'edp_boundaries' }),
+            expect.objectContaining({ sourceLayer: 'lpa_boundaries' }),
+            expect.objectContaining({ sourceLayer: 'nn_catchments' }),
+            expect.objectContaining({ sourceLayer: 'subcatchments' }),
+            expect.objectContaining({ sourceLayer: 'wwtw_catchments' })
+          ])
+        }
+      })
+    )
+  })
+
+  it('normalizes a feature collection boundary to an initial draw feature', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryGeojson = JSON.stringify({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          id: 'feature-from-collection',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.2, 51.8],
+                [-1.1, 51.8],
+                [-1.1, 51.9],
+                [-1.2, 51.8]
+              ]
+            ]
+          },
+          properties: { persisted: true }
+        }
+      ]
+    })
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drawControlOptions: {
+          initialFeature: expect.objectContaining({
+            id: 'feature-from-collection',
+            properties: { persisted: true }
+          })
+        }
+      })
+    )
+  })
 })
