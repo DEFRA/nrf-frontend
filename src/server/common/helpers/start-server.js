@@ -22,6 +22,7 @@ async function checkBackendConnectivity(logger) {
     const ignoreErrors = config.get('backend.optional')
 
     logger.error(
+      error,
       `Backend connectivity check failed - apiUrl: ${backendUrl}, healthUrl: ${healthUrl}, statusCode: ${error?.output?.statusCode}, message: ${error?.message}`
     )
 
