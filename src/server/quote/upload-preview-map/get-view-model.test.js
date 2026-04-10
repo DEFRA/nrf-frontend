@@ -160,4 +160,20 @@ describe('getViewModel', () => {
 
     expect(result.boundaryTypePath).toBe('/quote/boundary-type')
   })
+
+  it('should include boundaryFilename when provided', () => {
+    const result = getViewModel(
+      { boundaryGeometryWgs84: null, intersectingEdps: [] },
+      null,
+      'site-boundary.shp'
+    )
+
+    expect(result.boundaryFilename).toBe('site-boundary.shp')
+  })
+
+  it('should default boundaryFilename to null', () => {
+    const result = getViewModel({})
+
+    expect(result.boundaryFilename).toBeNull()
+  })
 })

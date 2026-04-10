@@ -16,7 +16,12 @@ export function handler(request, h) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const viewModel = getViewModel(boundaryGeojson, boundaryError)
+  const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
+  const viewModel = getViewModel(
+    boundaryGeojson,
+    boundaryError,
+    boundaryFilename
+  )
 
   return h.view('quote/upload-preview-map/index', {
     ...viewModel
@@ -32,8 +37,16 @@ export function postHandler(request, h) {
   }
 
   const intersectsEdp = boundaryGeojson?.intersectingEdps?.length ?? false
+  // Lift the filename out of the geojson blob so it lives at the top of the
+  // quote cache alongside other submit fields, and posts to the backend as a
+  // top-level column rather than a buried property.
+  const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
 
-  saveQuoteDataToCache(request, { boundaryGeojson }, { boundaryChanged: true })
+  saveQuoteDataToCache(
+    request,
+    { boundaryGeojson, boundaryFilename },
+    { boundaryChanged: true }
+  )
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
 

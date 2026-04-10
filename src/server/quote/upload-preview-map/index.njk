@@ -32,6 +32,14 @@
             Your boundary file has been validated successfully.
             {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
         </p>
+        {% if boundaryFilename %}
+        {# boundaryFilename is user-controlled. Safe here because Nunjucks
+           autoescapes {{ }}, and the backend validates it against a strict
+           allowlist. Do NOT wrap in | safe or embed into data-* / inline-script. #}
+        <p class="govuk-body">
+            Uploaded file: <span class="govuk-!-font-weight-bold">{{ boundaryFilename }}</span>
+        </p>
+        {% endif %}
         {% endif %}
 
         <div id="boundary-map" class="govuk-!-margin-bottom-6"
