@@ -29,6 +29,11 @@ describe('Draw boundary page', () => {
     const mapEl = document.getElementById('draw-boundary-map')
     expect(mapEl).toBeInTheDocument()
     expect(mapEl).toHaveAttribute('data-map-style-url')
+    expect(mapEl).toHaveAttribute(
+      'data-save-and-continue-url',
+      '/quote/draw-boundary/save'
+    )
+    expect(mapEl).toHaveAttribute('data-existing-boundary-geojson', 'null')
 
     const mapCss = document.querySelector(
       'link[href*="interactive-map/interactive-map.css"]'
@@ -39,6 +44,11 @@ describe('Draw boundary page', () => {
       'link[href*="interactive-map/plugins/map-styles/index.css"]'
     )
     expect(mapStylesCss).toBeInTheDocument()
+
+    const drawPluginCss = document.querySelector(
+      'link[href*="interactive-map/plugins/draw-ml/index.css"]'
+    )
+    expect(drawPluginCss).toBeInTheDocument()
 
     const coreScript = document.querySelector(
       'script[src*="interactive-map/core/index.js"]'
@@ -54,6 +64,11 @@ describe('Draw boundary page', () => {
       'script[src*="interactive-map/plugins/map-styles/index.js"]'
     )
     expect(mapStylesScript).toBeInTheDocument()
+
+    const drawPluginScript = document.querySelector(
+      'script[src*="interactive-map/plugins/draw-ml/index.js"]'
+    )
+    expect(drawPluginScript).toBeInTheDocument()
 
     const mapScript = document.querySelector('script[src*="draw-boundary-map"]')
     expect(mapScript).toBeInTheDocument()
