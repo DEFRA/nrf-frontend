@@ -160,6 +160,39 @@ describe('completeQuoteDataSchema', () => {
       expect(error).toBeDefined()
     })
   })
+
+  describe('boundaryFilename', () => {
+    it('is optional for drawn boundaries', () => {
+      const { error } = completeQuoteDataSchema.validate(validBase)
+      expect(error).toBeUndefined()
+    })
+
+    it('accepts a .shp filename for uploaded boundaries', () => {
+      const { error, value } = completeQuoteDataSchema.validate({
+        ...validBase,
+        boundaryEntryType: 'upload',
+        boundaryFilename: 'site-boundary.shp'
+      })
+      expect(error).toBeUndefined()
+      expect(value.boundaryFilename).toBe('site-boundary.shp')
+    })
+
+    it('accepts null', () => {
+      const { error } = completeQuoteDataSchema.validate({
+        ...validBase,
+        boundaryFilename: null
+      })
+      expect(error).toBeUndefined()
+    })
+
+    it('rejects a filename longer than 255 characters', () => {
+      const { error } = completeQuoteDataSchema.validate({
+        ...validBase,
+        boundaryFilename: `${'a'.repeat(252)}.shp`
+      })
+      expect(error).toBeDefined()
+    })
+  })
 })
 
 describe('inProgressQuoteDataSchema', () => {

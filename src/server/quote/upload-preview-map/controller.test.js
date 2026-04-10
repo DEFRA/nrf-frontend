@@ -144,7 +144,7 @@ describe('map controller', () => {
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(
         request,
-        { boundaryGeojson: mockGeojson },
+        { boundaryGeojson: mockGeojson, boundaryFilename: null },
         { boundaryChanged: true }
       )
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
@@ -160,12 +160,32 @@ describe('map controller', () => {
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(
         request,
-        { boundaryGeojson: mockEdpGeojson },
+        { boundaryGeojson: mockEdpGeojson, boundaryFilename: null },
         { boundaryChanged: true }
       )
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
       expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
+    })
+
+    it('should lift boundaryFilename from boundaryGeojson when saving to cache', () => {
+      const h = createMockH()
+      const geojsonWithFilename = {
+        ...mockGeojson,
+        boundaryFilename: 'site-boundary.shp'
+      }
+      const request = createMockRequest(geojsonWithFilename)
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).toHaveBeenCalledWith(
+        request,
+        {
+          boundaryGeojson: geojsonWithFilename,
+          boundaryFilename: 'site-boundary.shp'
+        },
+        { boundaryChanged: true }
+      )
     })
   })
 })
