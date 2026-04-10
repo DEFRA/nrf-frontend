@@ -1,6 +1,8 @@
 import { createMap } from './base-map/config.js'
-import { parseDatasetJson } from './base-map/helpers.js'
-import { getDrawMapContainerHeight } from './base-map/helpers.js'
+import {
+  getDrawMapContainerHeight,
+  parseDatasetJson
+} from './base-map/helpers.js'
 
 const UK_WEST_LNG = -8.75
 const UK_SOUTH_LAT = 49.8
@@ -10,6 +12,7 @@ const UK_BOUNDS = [UK_WEST_LNG, UK_SOUTH_LAT, UK_EAST_LNG, UK_NORTH_LAT]
 const DEFAULT_LAYER_FILL_OPACITY = 0.08
 const DARK_LAYER_FILL_OPACITY = 0.16
 const DEFAULT_LAYER_LINE_WIDTH = 2
+const EMPTY_FEATURE_PROPERTIES = Object.freeze({})
 const DEFAULT_IMPACT_ASSESSOR_LAYERS = [
   'edp_boundaries',
   'lpa_boundaries',
@@ -87,7 +90,7 @@ function normalizeInitialDrawFeature(value) {
           id: value.id,
           type: 'Feature',
           geometry: value.geometry,
-          properties: value.properties || {}
+          properties: value.properties ?? EMPTY_FEATURE_PROPERTIES
         }
       : null
   }
@@ -96,7 +99,7 @@ function normalizeInitialDrawFeature(value) {
     return {
       type: 'Feature',
       geometry: value,
-      properties: {}
+      properties: EMPTY_FEATURE_PROPERTIES
     }
   }
 
