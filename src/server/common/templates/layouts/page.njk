@@ -16,6 +16,7 @@
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "back-link/macro.njk" import backLink %}
 
 {# Import custom components globally #}
@@ -38,6 +39,20 @@
 
 {% block pageTitle %}
   {{ pageTitle }} | {{ serviceName }}
+{% endblock %}
+
+{% block containerStart %}
+  {{ govukPhaseBanner({
+    tag: {
+      text: "Beta"
+    },
+    html: 'This is a new service – your <a class="govuk-link" href="' + phaseBanner.feedbackUrl + '">feedback</a> will help us to improve it.',
+    attributes: {
+      role: "region",
+      "aria-label": "Service phase"
+    }
+  }) }}
+  {{ super() }}
 {% endblock %}
 
 {% block beforeContent %}
