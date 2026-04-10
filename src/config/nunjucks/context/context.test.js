@@ -72,6 +72,9 @@ describe('context and cache', () => {
           serviceName: 'Nature Restoration Fund',
           serviceVersion: 'abc123',
           serviceUrl: '/',
+          phaseBanner: {
+            feedbackUrl: '#'
+          },
           user: null
         })
       })
@@ -178,6 +181,9 @@ describe('context and cache', () => {
           serviceName: 'Nature Restoration Fund',
           serviceVersion: 'abc123',
           serviceUrl: '/',
+          phaseBanner: {
+            feedbackUrl: '#'
+          },
           user: null
         })
       })

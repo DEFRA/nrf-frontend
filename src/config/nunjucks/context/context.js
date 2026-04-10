@@ -32,6 +32,9 @@ export function context(request) {
     serviceName: config.get('serviceName'),
     serviceVersion: gitHash,
     serviceUrl: '/',
+    phaseBanner: {
+      feedbackUrl: config.get('phaseBanner.feedbackUrl')
+    },
     breadcrumbs: [],
     navigation: buildNavigation(request),
     isAuthenticated,
