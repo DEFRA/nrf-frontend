@@ -9,9 +9,11 @@
   <script src="{{ getAssetPath('interactive-map/core/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('interactive-map/maplibre/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('interactive-map/plugins/map-styles/index.js') }}" defer nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('interactive-map/plugins/draw-ml/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('draw-boundary-map.js') }}" defer nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/map-styles/index.css') }}" rel="stylesheet">
+  <link href="{{ getAssetPath('interactive-map/plugins/draw-ml/index.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block beforeContent %}
@@ -25,6 +27,11 @@
       id="draw-boundary-map"
       class="app-draw-boundary__map"
       data-map-style-url="{{ mapStyleUrl }}"
+      data-impact-assessor-layers="{{ impactAssessorLayers }}"
+      data-boundary-validation-url="{{ boundaryValidationUrl }}"
+      data-save-and-continue-url="{{ saveAndContinueUrl }}"
+      data-existing-boundary-geojson='{{ existingBoundaryGeojson | safe }}'
+      data-csrf-token="{{ csrfToken }}"
     >
       <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available.</p>
     </div>

@@ -2,6 +2,15 @@ import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath } from './routes.js'
+import { saveBoundaryHandler } from './controller.js'
+import { routePath as noEdpPath } from '../no-edp/routes.js'
+
+vi.mock('../helpers/quote-session-cache/index.js', () => ({
+  saveQuoteDataToCache: vi.fn()
+}))
+
+const { saveQuoteDataToCache } =
+  await import('../helpers/quote-session-cache/index.js')
 
 vi.mock('../../common/services/boundary.js')
 
@@ -232,5 +241,72 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(checkBoundaryGeometry).not.toHaveBeenCalled()
+  })
+})
+
+describe('saveBoundaryHandler', () => {
+  const createMockH = () => ({
+    redirect: vi.fn().mockReturnThis()
+  })
+
+  const createMockRequest = (boundaryGeojson = null) => ({
+    yar: {
+      get: vi.fn().mockImplementation((key) => {
+        if (key === 'boundaryGeojson') {
+          return boundaryGeojson
+        }
+        return null
+      }),
+      clear: vi.fn()
+    }
+  })
+
+  it('redirects back to draw page when no boundary geojson is in session', () => {
+    const h = createMockH()
+    const request = createMockRequest()
+
+    saveBoundaryHandler(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith('/quote/draw-boundary')
+  })
+
+  it('saves and redirects to development types when there are intersections', () => {
+    const h = createMockH()
+    const boundaryGeojson = {
+      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
+      intersectingEdps: [{ code: 'EDP-1' }]
+    }
+    const request = createMockRequest(boundaryGeojson)
+
+    saveBoundaryHandler(request, h)
+
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
+      request,
+      { boundaryGeojson },
+      { boundaryChanged: true }
+    )
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
+  })
+
+  it('saves and redirects to no-edp when there are no intersections', () => {
+    const h = createMockH()
+    const boundaryGeojson = {
+      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
+      intersectingEdps: []
+    }
+    const request = createMockRequest(boundaryGeojson)
+
+    saveBoundaryHandler(request, h)
+
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
+      request,
+      { boundaryGeojson },
+      { boundaryChanged: true }
+    )
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
   })
 })

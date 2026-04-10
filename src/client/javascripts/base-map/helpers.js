@@ -50,6 +50,17 @@ export function resolveMapStylesPlugin(defraApi) {
   return mapStylesPlugin
 }
 
+export function resolveDrawPlugin(defraApi) {
+  const drawPlugin =
+    typeof defraApi.drawMLPlugin === 'function' ? defraApi.drawMLPlugin : null
+
+  if (!drawPlugin) {
+    logWarning('Draw plugin not available, draw controls disabled')
+  }
+
+  return drawPlugin
+}
+
 export function runWhenMapStyleReady(mapInstance, callback) {
   if (mapInstance.isStyleLoaded()) {
     callback()

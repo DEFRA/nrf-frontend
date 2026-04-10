@@ -321,6 +321,19 @@ export const config = convict({
       default: '',
       env: 'OS_API_KEY'
     },
+    impactAssessorBaseUrl: {
+      doc: 'Base URL for the impact assessor tile and validation APIs.',
+      format: String,
+      default: 'http://localhost:8085',
+      env: 'IMPACT_ASSESSOR_BASE_URL'
+    },
+    impactAssessorLayers: {
+      doc: 'Comma-separated list of impact assessor tile layer params shown in the Layers panel.',
+      format: String,
+      default:
+        'edp_boundaries,lpa_boundaries,nn_catchments,subcatchments,wwtw_catchments',
+      env: 'IMPACT_ASSESSOR_LAYERS'
+    },
     defaultStyleUrl: {
       doc: 'Default map style URL used by boundary map pages.',
       format: String,

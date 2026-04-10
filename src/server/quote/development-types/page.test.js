@@ -1,5 +1,6 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -28,7 +29,7 @@ describe('Development type page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '#'
+      '/quote/upload-preview-map'
     )
     // unchecked, if user made no previous input
     expect(getByLabelText(document, 'Housing')).not.toBeChecked()
@@ -83,5 +84,24 @@ describe('Development type page', () => {
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/people-count')
+  })
+
+  it('should link back to draw-boundary when boundary entry type is draw', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: boundaryTypePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'draw' }
+    })
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/draw-boundary'
+    )
   })
 })

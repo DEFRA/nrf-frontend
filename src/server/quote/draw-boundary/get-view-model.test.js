@@ -13,10 +13,37 @@ describe('draw-boundary getViewModel', () => {
       expect.objectContaining({
         pageHeading: title,
         backLinkPath: '/quote/boundary-type',
-        mapStyleUrl: '/public/data/vts/test-style.json'
+        mapStyleUrl: '/public/data/vts/test-style.json',
+        impactAssessorLayers: expect.any(String),
+        saveAndContinueUrl: '/quote/draw-boundary/save',
+        existingBoundaryGeojson: JSON.stringify(null)
       })
     )
 
     config.set('map.defaultStyleUrl', originalStyleUrl)
+  })
+
+  test('returns existing boundary geometry from quote cache when present', () => {
+    const quoteData = {
+      boundaryGeojson: {
+        boundaryGeometryWgs84: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-1.2, 51.8],
+              [-1.1, 51.8],
+              [-1.1, 51.9],
+              [-1.2, 51.8]
+            ]
+          ]
+        }
+      }
+    }
+
+    const viewModel = getViewModel(quoteData)
+
+    expect(viewModel.existingBoundaryGeojson).toBe(
+      JSON.stringify(quoteData.boundaryGeojson.boundaryGeometryWgs84)
+    )
   })
 })

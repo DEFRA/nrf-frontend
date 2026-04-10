@@ -8,6 +8,7 @@ import { profile } from './profile/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
 import { quote } from './quote/index.js'
 import { osBaseMap } from './os-base-map/index.js'
+import { impactAssessorMap } from './impact-assessor-map/index.js'
 
 export const router = {
   plugin: {
@@ -19,7 +20,14 @@ export const router = {
       await server.register([health, version])
 
       // Application specific routes, add your own routes here
-      await server.register([about, auth, profile, quote, osBaseMap])
+      await server.register([
+        about,
+        auth,
+        profile,
+        quote,
+        osBaseMap,
+        impactAssessorMap
+      ])
 
       // Static assets
       await server.register([serveStaticFiles])

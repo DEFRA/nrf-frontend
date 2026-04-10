@@ -2,11 +2,12 @@ import joi from 'joi'
 
 import { quoteController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
-import { checkBoundaryHandler } from './controller.js'
+import { checkBoundaryHandler, saveBoundaryHandler } from './controller.js'
 
 const routeId = 'draw-boundary'
 export const routePath = '/quote/draw-boundary'
 export const checkPath = '/quote/draw-boundary/check'
+export const savePath = '/quote/draw-boundary/save'
 
 export default [
   {
@@ -18,6 +19,9 @@ export default [
     method: 'POST',
     path: checkPath,
     options: {
+      plugins: {
+        crumb: { restful: true }
+      },
       validate: {
         payload: joi.object({
           geometry: joi
@@ -40,5 +44,15 @@ export default [
       }
     },
     handler: checkBoundaryHandler
+  },
+  {
+    method: 'POST',
+    path: savePath,
+    options: {
+      plugins: {
+        crumb: true
+      }
+    },
+    handler: saveBoundaryHandler
   }
 ]
