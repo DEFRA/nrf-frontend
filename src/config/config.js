@@ -46,6 +46,14 @@ export const config = convict({
     format: String,
     default: 'Nature Restoration Fund'
   },
+  phaseBanner: {
+    feedbackUrl: {
+      doc: 'URL for the phase banner feedback link',
+      format: String,
+      default: '#',
+      env: 'PHASE_BANNER_FEEDBACK_URL'
+    }
+  },
   root: {
     doc: 'Project root',
     format: String,
