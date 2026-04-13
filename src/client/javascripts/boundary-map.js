@@ -34,7 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
     mapElementId: 'boundary-map',
     mapLabel: 'Red line boundary',
     mapErrorMessage: 'Boundary map error',
-    containerHeight: '400px'
+    containerHeight: '400px',
+    options: {
+      // Ensure the OS copyright attribution overlay renders on this map.
+      // The interactive-map core hides attribution at the "mobile" breakpoint,
+      // and the default maxMobileWidth (640px) matches the two-thirds column
+      // width this map sits in. Lowering it to 500 classifies the column as
+      // tablet so the attribution is shown (matching the draw-boundary page),
+      // while real phone viewports (~320–430px) stay in the mobile breakpoint.
+      maxMobileWidth: 500
+    }
   })
 
   if (!map) {
