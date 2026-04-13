@@ -129,9 +129,11 @@ describe('uploader service', () => {
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('statusCode: 503')
       )
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining(`url: ${backendUrl}/upload/initiate`)
       )
     })
@@ -145,6 +147,7 @@ describe('uploader service', () => {
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('message: ECONNREFUSED')
       )
     })
@@ -186,9 +189,11 @@ describe('uploader service', () => {
       await getUploadStatus('test-upload-id')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('statusCode: 503')
       )
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('uploadId: test-upload-id')
       )
     })
@@ -199,6 +204,7 @@ describe('uploader service', () => {
       await getUploadStatus('test-upload-id')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('message: ECONNREFUSED')
       )
     })

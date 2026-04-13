@@ -118,7 +118,14 @@ describe('#catchAll', () => {
   test('Should provide expected "Something went wrong" page and log error for internalServerError', () => {
     catchAll(mockRequest(statusCodes.internalServerError), mockToolkit)
 
-    expect(mockErrorLogger).toHaveBeenCalledWith(mockStack)
+    expect(mockErrorLogger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isBoom: true,
+        stack: mockStack,
+        output: { statusCode: statusCodes.internalServerError }
+      }),
+      'Something went wrong'
+    )
     expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
       pageTitle: 'Something went wrong',
       heading: statusCodes.internalServerError,

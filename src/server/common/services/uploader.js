@@ -59,6 +59,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
+      error,
       `Error initiating upload - url: ${url}, backendUrl: ${backendUrl}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
@@ -88,6 +89,7 @@ export async function getUploadStatus(uploadId) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
+      error,
       `Error fetching upload status - url: ${url}, backendUrl: ${backendUrl}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {

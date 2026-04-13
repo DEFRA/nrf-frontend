@@ -108,6 +108,7 @@ describe('boundary service', () => {
       await checkBoundary('upload-123')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('statusCode: 400')
       )
     })
@@ -284,6 +285,7 @@ describe('boundary service', () => {
       await checkBoundaryGeometry(geometry)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining('statusCode: 400')
       )
     })

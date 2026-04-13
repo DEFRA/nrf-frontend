@@ -36,7 +36,7 @@ export async function getWasteWaterTreatmentWorks(boundaryGeometry) {
       distance: wwtw.distanceKm
     }))
   } catch (error) {
-    logger.error(`Error fetching nearby WWTWs: ${error?.message}`)
+    logger.error(error, `Error fetching nearby WWTWs: ${error?.message}`)
     return []
   }
 }

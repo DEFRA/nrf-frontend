@@ -56,6 +56,7 @@ export async function checkBoundary(uploadId) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
+      error,
       `Error checking boundary - uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     const backendError = responsePayload?.error
@@ -98,6 +99,7 @@ export async function checkBoundaryGeometry(geometry) {
     const statusCode = error?.output?.statusCode
     const responsePayload = error?.data?.payload
     logger.error(
+      error,
       `Error checking boundary geometry - statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     const backendError = responsePayload?.error
