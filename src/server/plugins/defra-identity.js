@@ -96,8 +96,8 @@ function yarSessionScheme(sessionCache) {
             )
           } catch (refreshError) {
             logger.error(
-              `Token refresh failed for session ${sessionId}:`,
-              refreshError
+              refreshError,
+              `Token refresh failed for session ${sessionId}`
             )
             await sessionCache.drop(sessionId)
             request.yar.clear('sessionId')

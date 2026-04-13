@@ -106,6 +106,7 @@ describe('#checkBackendConnectivity', () => {
     await checkBackendConnectivity(mockLogger)
 
     expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.any(Error),
       expect.stringContaining('Backend connectivity check failed')
     )
     expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -129,9 +130,11 @@ describe('#checkBackendConnectivity', () => {
       expect.stringContaining('Backend configuration')
     )
     expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.any(Error),
       expect.stringContaining('Backend connectivity check failed')
     )
     expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.any(Error),
       expect.stringContaining('ECONNREFUSED')
     )
 

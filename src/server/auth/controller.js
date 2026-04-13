@@ -173,7 +173,7 @@ export const signInOidcController = {
 
       return h.redirect(getSafeRedirect(redirect))
     } catch (error) {
-      logger.error('Token exchange failed:', error)
+      logger.error(error, 'Token exchange failed')
       return h.view('auth/login', {
         pageTitle: 'Sign in',
         heading: 'Authentication Error',
@@ -228,7 +228,7 @@ export const signOutOidcController = {
         )
         logger.debug('Sign-out callback state validated:', state)
       } catch (error) {
-        logger.warn('Invalid sign-out callback state:', error)
+        logger.warn(error, 'Invalid sign-out callback state')
       }
     }
 
