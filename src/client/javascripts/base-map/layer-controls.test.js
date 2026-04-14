@@ -32,6 +32,7 @@ function createMapInstance(styleName = 'dark') {
     }),
     setPaintProperty: vi.fn(),
     setLayoutProperty: vi.fn(),
+    isStyleLoaded: vi.fn(() => true),
     getStyle: vi.fn(() => ({ name: styleName, sources: {} })),
     on: vi.fn((eventName, callback) => {
       styleHandlers[eventName] = callback

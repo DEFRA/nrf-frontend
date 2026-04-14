@@ -1062,6 +1062,7 @@ describe('base-map config', () => {
       const addPanel = vi.fn()
       const mapEventHandlers = {}
       const mapInstance = {
+        isStyleLoaded: vi.fn(() => true),
         getStyle: vi
           .fn()
           .mockReturnValue({ sprite: '/public/data/vts/OS_VTS_3857_Dark' }),
@@ -1263,6 +1264,7 @@ describe('base-map config', () => {
       const addPanel = vi.fn()
       const mapEventHandlers = {}
       const mapInstance = {
+        isStyleLoaded: vi.fn(() => true),
         getStyle: vi
           .fn()
           .mockReturnValue({ sprite: '/public/data/vts/OS_VTS_3857_Outdoor' }),
