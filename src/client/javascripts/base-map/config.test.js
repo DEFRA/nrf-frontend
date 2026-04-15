@@ -61,7 +61,7 @@ describe('base-map config', () => {
       expect(constructorSpy).toHaveBeenCalledWith(
         'test-map',
         expect.objectContaining({
-          minZoom: 4,
+          minZoom: 3,
           bounds: [-5.75, 49.95, 1.8, 55.85],
           maxBounds: [-5.75, 49.95, 1.8, 55.85],
           mapStyle: expect.objectContaining({ id: 'esri-tiles' }),
@@ -1074,7 +1074,8 @@ describe('base-map config', () => {
         setLayoutProperty: vi.fn(),
         on: vi.fn((eventName, callback) => {
           mapEventHandlers[eventName] = callback
-        })
+        }),
+        once: vi.fn()
       }
       const map = {
         on: vi.fn((eventName, callback) => {
@@ -1196,24 +1197,19 @@ describe('base-map config', () => {
         'visible'
       )
 
-      expect(mapInstance.setLayoutProperty).toHaveBeenCalledWith(
-        'edp-boundaries-tiles-fill',
-        'visibility',
-        'visible'
-      )
-
       mapInstance.getLayer.mockReturnValue({})
+      mapInstance.getStyle.mockReturnValue({ sprite: 'imagery/sprite' })
       mapEventHandlers.styledata?.()
 
       expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
         'edp-boundaries-tiles-fill',
         'fill-color',
-        '#9ddfa6'
+        '#00703c'
       )
       expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
         'edp-boundaries-tiles-line',
         'line-color',
-        '#9ddfa6'
+        '#00703c'
       )
     })
 

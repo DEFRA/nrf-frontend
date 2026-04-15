@@ -7,6 +7,11 @@ import {
   LEGEND_MIN_OPACITY,
   LEGEND_OPACITY_MULTIPLIER
 } from './constants.js'
+import { runWhenMapStyleReady } from './helpers.js'
+
+const layerPanelToggleHandlers = new Map()
+const STYLE_REFRESH_MAX_ATTEMPTS = 20
+const STYLE_REFRESH_DELAY_MS = 150
 
 function resolveLayerDefinitions(layerControlOptions = {}) {
   const mergeLayerPaint = (layer, paint) =>
@@ -157,7 +162,8 @@ function inferStyleVariant(mapInstance) {
 function applyVectorTileOverlayPaint(
   mapInstance,
   layerControlOptions,
-  styleVariant
+  styleVariant,
+  shouldUpdatePaint = true
 ) {
   const { sourceId, sourceLayer } = layerControlOptions
   const { fillColor, fillOpacity, lineColor, lineWidth } = resolveLayerPaint(
@@ -166,16 +172,24 @@ function applyVectorTileOverlayPaint(
   )
 
   if (!mapInstance || !sourceId || !sourceLayer) {
-    return
+    return false
   }
 
+  let addedLayer = false
+
   if (mapInstance.getLayer(`${sourceId}-fill`)) {
-    mapInstance.setPaintProperty?.(`${sourceId}-fill`, 'fill-color', fillColor)
-    mapInstance.setPaintProperty?.(
-      `${sourceId}-fill`,
-      'fill-opacity',
-      fillOpacity
-    )
+    if (shouldUpdatePaint) {
+      mapInstance.setPaintProperty?.(
+        `${sourceId}-fill`,
+        'fill-color',
+        fillColor
+      )
+      mapInstance.setPaintProperty?.(
+        `${sourceId}-fill`,
+        'fill-opacity',
+        fillOpacity
+      )
+    }
   } else {
     mapInstance.addLayer({
       id: `${sourceId}-fill`,
@@ -187,11 +201,22 @@ function applyVectorTileOverlayPaint(
         'fill-opacity': fillOpacity
       }
     })
+    addedLayer = true
   }
 
   if (mapInstance.getLayer(`${sourceId}-line`)) {
-    mapInstance.setPaintProperty?.(`${sourceId}-line`, 'line-color', lineColor)
-    mapInstance.setPaintProperty?.(`${sourceId}-line`, 'line-width', lineWidth)
+    if (shouldUpdatePaint) {
+      mapInstance.setPaintProperty?.(
+        `${sourceId}-line`,
+        'line-color',
+        lineColor
+      )
+      mapInstance.setPaintProperty?.(
+        `${sourceId}-line`,
+        'line-width',
+        lineWidth
+      )
+    }
   } else {
     mapInstance.addLayer({
       id: `${sourceId}-line`,
@@ -203,7 +228,10 @@ function applyVectorTileOverlayPaint(
         'line-width': lineWidth
       }
     })
+    addedLayer = true
   }
+
+  return addedLayer
 }
 
 function updateLayerLegendSwatches({
@@ -253,10 +281,15 @@ function updateLayerLegendSwatches({
 function setVectorTileOverlayVisibility(
   mapInstance,
   layerControlOptions,
-  visible
+  visible,
+  shouldUpdateVisibility = true
 ) {
   const { sourceId } = layerControlOptions
   const visibility = visible ? 'visible' : 'none'
+
+  if (!shouldUpdateVisibility) {
+    return
+  }
 
   ;[`${sourceId}-fill`, `${sourceId}-line`].forEach(function (layerId) {
     if (mapInstance.getLayer?.(layerId)) {
@@ -289,7 +322,12 @@ function registerLayerPanelToggleHandler({
   state,
   applyVisibility
 }) {
-  document.addEventListener('change', function (event) {
+  const existingHandler = layerPanelToggleHandlers.get(mapElementId)
+  if (existingHandler) {
+    document.removeEventListener('change', existingHandler)
+  }
+
+  const handleChange = function (event) {
     const toggle = event.target.closest('[data-layer-action]')
     if (!toggle) {
       return
@@ -310,7 +348,10 @@ function registerLayerPanelToggleHandler({
 
     state.visibleByLayer[layerId] = toggle.checked
     applyVisibility()
-  })
+  }
+
+  document.addEventListener('change', handleChange)
+  layerPanelToggleHandlers.set(mapElementId, handleChange)
 }
 
 function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
@@ -320,7 +361,37 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
       layerDefinitions.map((layer) => [layer.sourceId, !!layer.defaultVisible])
     ),
     mapInstance: null,
-    styleVariant: 'default'
+    styleVariant: 'default',
+    lastAppliedStyleVariant: null,
+    lastAppliedVisibilityByLayer: {}
+  }
+  let pendingStyleRefresh = null
+
+  const resetAppliedState = () => {
+    state.lastAppliedStyleVariant = null
+    state.lastAppliedVisibilityByLayer = {}
+  }
+
+  const cancelScheduledStyleRefresh = () => {
+    if (pendingStyleRefresh) {
+      clearTimeout(pendingStyleRefresh)
+      pendingStyleRefresh = null
+    }
+  }
+
+  const scheduleStyleRefresh = (attempt = 1) => {
+    cancelScheduledStyleRefresh()
+    pendingStyleRefresh = setTimeout(
+      function () {
+        pendingStyleRefresh = null
+        applyVisibility()
+
+        if (attempt < STYLE_REFRESH_MAX_ATTEMPTS) {
+          scheduleStyleRefresh(attempt + 1)
+        }
+      },
+      attempt === 1 ? 0 : STYLE_REFRESH_DELAY_MS
+    )
   }
 
   const applyVisibility = () => {
@@ -328,37 +399,66 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
       return
     }
 
+    if (!state.mapInstance.isStyleLoaded?.()) {
+      return
+    }
+
     state.styleVariant = resolveLayerPanelStyleVariant(
       layerControlOptions,
       state.mapInstance
     )
+    const shouldUpdatePaint =
+      state.lastAppliedStyleVariant !== state.styleVariant
 
     layerDefinitions.forEach((layer) => {
       ensureVectorTileOverlay(state.mapInstance, layer)
-      applyVectorTileOverlayPaint(state.mapInstance, layer, state.styleVariant)
+      const visible = !!state.visibleByLayer[layer.sourceId]
+      const addedLayer = applyVectorTileOverlayPaint(
+        state.mapInstance,
+        layer,
+        state.styleVariant,
+        shouldUpdatePaint
+      )
       setVectorTileOverlayVisibility(
         state.mapInstance,
         layer,
-        !!state.visibleByLayer[layer.sourceId]
+        visible,
+        addedLayer ||
+          state.lastAppliedVisibilityByLayer[layer.sourceId] !== visible
       )
+      state.lastAppliedVisibilityByLayer[layer.sourceId] = visible
     })
 
-    updateLayerLegendSwatches({
-      mapElementId,
-      layerDefinitions,
-      styleVariant: state.styleVariant
-    })
+    if (shouldUpdatePaint) {
+      updateLayerLegendSwatches({
+        mapElementId,
+        layerDefinitions,
+        styleVariant: state.styleVariant
+      })
+    }
+
+    state.lastAppliedStyleVariant = state.styleVariant
   }
 
   map.on('map:ready', function (event) {
     state.mapInstance = event.map
+    state.mapInstance.on('style.load', function () {
+      applyVisibility()
+    })
     state.mapInstance.on('styledata', function () {
       applyVisibility()
     })
+    runWhenMapStyleReady(state.mapInstance, applyVisibility)
+  })
 
-    if (state.mapInstance.isStyleLoaded()) {
-      applyVisibility()
-    }
+  map.on('map:loaded', function () {
+    resetAppliedState()
+    applyVisibility()
+  })
+
+  map.on('map:stylechange', function () {
+    resetAppliedState()
+    scheduleStyleRefresh()
   })
 
   map.on('app:panelopened', function ({ panelId } = {}) {
@@ -374,6 +474,8 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
 }
 
 export function wireLayerControls(map, { mapElementId, layerControlOptions }) {
+  wireLayerPanel(map, { mapElementId, layerControlOptions })
+
   map.on('app:ready', function () {
     map.addButton(LAYERS_PANEL_ID, {
       label: 'Layers',
@@ -401,7 +503,5 @@ export function wireLayerControls(map, { mapElementId, layerControlOptions }) {
         open: false
       }
     })
-
-    wireLayerPanel(map, { mapElementId, layerControlOptions })
   })
 }
