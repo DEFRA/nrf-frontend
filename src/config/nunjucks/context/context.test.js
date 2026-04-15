@@ -73,7 +73,8 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: '/',
           phaseBanner: {
-            feedbackUrl: '#'
+            feedbackUrl:
+              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
           },
           user: null
         })
@@ -183,7 +184,8 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: '/',
           phaseBanner: {
-            feedbackUrl: '#'
+            feedbackUrl:
+              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
           },
           user: null
         })

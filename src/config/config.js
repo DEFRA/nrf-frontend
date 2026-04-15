@@ -50,7 +50,8 @@ export const config = convict({
     feedbackUrl: {
       doc: 'URL for the phase banner feedback link',
       format: String,
-      default: '#',
+      default:
+        'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86',
       env: 'PHASE_BANNER_FEEDBACK_URL'
     }
   },
