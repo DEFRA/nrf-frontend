@@ -354,6 +354,84 @@ function registerLayerPanelToggleHandler({
   layerPanelToggleHandlers.set(mapElementId, handleChange)
 }
 
+function applyLayerVisibility({
+  state,
+  layerControlOptions,
+  layerDefinitions,
+  mapElementId
+}) {
+  if (!state.mapInstance) {
+    return
+  }
+
+  if (!state.mapInstance.isStyleLoaded?.()) {
+    return
+  }
+
+  state.styleVariant = resolveLayerPanelStyleVariant(
+    layerControlOptions,
+    state.mapInstance
+  )
+  const shouldUpdatePaint = state.lastAppliedStyleVariant !== state.styleVariant
+
+  layerDefinitions.forEach((layer) => {
+    ensureVectorTileOverlay(state.mapInstance, layer)
+    const visible = !!state.visibleByLayer[layer.sourceId]
+    const addedLayer = applyVectorTileOverlayPaint(
+      state.mapInstance,
+      layer,
+      state.styleVariant,
+      shouldUpdatePaint
+    )
+    setVectorTileOverlayVisibility(
+      state.mapInstance,
+      layer,
+      visible,
+      addedLayer ||
+        state.lastAppliedVisibilityByLayer[layer.sourceId] !== visible
+    )
+    state.lastAppliedVisibilityByLayer[layer.sourceId] = visible
+  })
+
+  if (shouldUpdatePaint) {
+    updateLayerLegendSwatches({
+      mapElementId,
+      layerDefinitions,
+      styleVariant: state.styleVariant
+    })
+  }
+
+  state.lastAppliedStyleVariant = state.styleVariant
+}
+
+function createStyleRefreshScheduler(applyVisibility) {
+  let pendingStyleRefresh = null
+
+  const cancel = () => {
+    if (pendingStyleRefresh) {
+      clearTimeout(pendingStyleRefresh)
+      pendingStyleRefresh = null
+    }
+  }
+
+  const schedule = (attempt = 1) => {
+    cancel()
+    pendingStyleRefresh = setTimeout(
+      function () {
+        pendingStyleRefresh = null
+        applyVisibility()
+
+        if (attempt < STYLE_REFRESH_MAX_ATTEMPTS) {
+          schedule(attempt + 1)
+        }
+      },
+      attempt === 1 ? 0 : STYLE_REFRESH_DELAY_MS
+    )
+  }
+
+  return { schedule, cancel }
+}
+
 function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
   const layerDefinitions = resolveLayerDefinitions(layerControlOptions)
   const state = {
@@ -365,80 +443,21 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
     lastAppliedStyleVariant: null,
     lastAppliedVisibilityByLayer: {}
   }
-  let pendingStyleRefresh = null
 
   const resetAppliedState = () => {
     state.lastAppliedStyleVariant = null
     state.lastAppliedVisibilityByLayer = {}
   }
 
-  const cancelScheduledStyleRefresh = () => {
-    if (pendingStyleRefresh) {
-      clearTimeout(pendingStyleRefresh)
-      pendingStyleRefresh = null
-    }
-  }
-
-  const scheduleStyleRefresh = (attempt = 1) => {
-    cancelScheduledStyleRefresh()
-    pendingStyleRefresh = setTimeout(
-      function () {
-        pendingStyleRefresh = null
-        applyVisibility()
-
-        if (attempt < STYLE_REFRESH_MAX_ATTEMPTS) {
-          scheduleStyleRefresh(attempt + 1)
-        }
-      },
-      attempt === 1 ? 0 : STYLE_REFRESH_DELAY_MS
-    )
-  }
-
-  const applyVisibility = () => {
-    if (!state.mapInstance) {
-      return
-    }
-
-    if (!state.mapInstance.isStyleLoaded?.()) {
-      return
-    }
-
-    state.styleVariant = resolveLayerPanelStyleVariant(
+  const applyVisibility = () =>
+    applyLayerVisibility({
+      state,
       layerControlOptions,
-      state.mapInstance
-    )
-    const shouldUpdatePaint =
-      state.lastAppliedStyleVariant !== state.styleVariant
-
-    layerDefinitions.forEach((layer) => {
-      ensureVectorTileOverlay(state.mapInstance, layer)
-      const visible = !!state.visibleByLayer[layer.sourceId]
-      const addedLayer = applyVectorTileOverlayPaint(
-        state.mapInstance,
-        layer,
-        state.styleVariant,
-        shouldUpdatePaint
-      )
-      setVectorTileOverlayVisibility(
-        state.mapInstance,
-        layer,
-        visible,
-        addedLayer ||
-          state.lastAppliedVisibilityByLayer[layer.sourceId] !== visible
-      )
-      state.lastAppliedVisibilityByLayer[layer.sourceId] = visible
+      layerDefinitions,
+      mapElementId
     })
 
-    if (shouldUpdatePaint) {
-      updateLayerLegendSwatches({
-        mapElementId,
-        layerDefinitions,
-        styleVariant: state.styleVariant
-      })
-    }
-
-    state.lastAppliedStyleVariant = state.styleVariant
-  }
+  const styleRefresh = createStyleRefreshScheduler(applyVisibility)
 
   map.on('map:ready', function (event) {
     state.mapInstance = event.map
@@ -458,7 +477,7 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
 
   map.on('map:stylechange', function () {
     resetAppliedState()
-    scheduleStyleRefresh()
+    styleRefresh.schedule()
   })
 
   map.on('app:panelopened', function ({ panelId } = {}) {
