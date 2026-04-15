@@ -33,9 +33,9 @@ const formatters = {
 
 export const loggerOptions = {
   enabled: logConfig.enabled,
-  ignorePaths: ['/health'],
-  ignoreFunc(_req, request) {
+  ignoreFunc(_options, request) {
     return (
+      request.path === '/health' ||
       request.route.path.startsWith('/assets') ||
       /\.(js|css|map|ico|png|jpg|jpeg|svg|woff|woff2|ttf|eot|json)$/i.test(
         request.path
