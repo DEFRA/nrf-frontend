@@ -462,6 +462,8 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
   map.on('map:ready', function (event) {
     state.mapInstance = event.map
     state.mapInstance.on('style.load', function () {
+      resetAppliedState()
+      styleRefresh.cancel()
       applyVisibility()
     })
     state.mapInstance.on('styledata', function () {
@@ -476,7 +478,6 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
   })
 
   map.on('map:stylechange', function () {
-    resetAppliedState()
     styleRefresh.schedule()
   })
 

@@ -392,12 +392,12 @@ describe('layer-controls', () => {
     )
   })
 
-  it('skips redundant paint and visibility updates when style.load fires without changes', () => {
+  it('skips redundant paint and visibility updates when styledata fires without changes', () => {
     const { map, handlers } = createMapHarness()
     const mapInstance = createMapInstance('dark')
 
     wireLayerControls(map, {
-      mapElementId: 'map-noop-style-load',
+      mapElementId: 'map-noop-styledata',
       layerControlOptions: {
         layers: [
           {
@@ -428,7 +428,7 @@ describe('layer-controls', () => {
     mapInstance.setPaintProperty.mockClear()
     mapInstance.setLayoutProperty.mockClear()
 
-    mapInstance._styleHandlers['style.load']?.()
+    mapInstance._styleHandlers.styledata?.()
 
     expect(mapInstance.addSource).not.toHaveBeenCalled()
     expect(mapInstance.addLayer).not.toHaveBeenCalled()
@@ -560,8 +560,7 @@ describe('layer-controls', () => {
     )
   })
 
-  it('forces a full overlay reapply when the base map style changes', async () => {
-    vi.useFakeTimers()
+  it('forces a full overlay reapply when the base map style changes', () => {
     const { map, handlers } = createMapHarness()
     const mapInstance = createMapInstance('dark')
 
@@ -596,8 +595,7 @@ describe('layer-controls', () => {
     mapInstance.setPaintProperty.mockClear()
     mapInstance.setLayoutProperty.mockClear()
 
-    handlers['map:stylechange']?.()
-    await vi.runAllTimersAsync()
+    mapInstance._styleHandlers['style.load']?.()
 
     expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
       'style-change-tiles-fill',
