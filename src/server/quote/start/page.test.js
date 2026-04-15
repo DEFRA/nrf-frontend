@@ -16,4 +16,19 @@ describe('Start page', () => {
       'Nature Restoration Fund'
     )
   })
+
+  it('should link to a feedback survey from the beta banner', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer()
+    })
+    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
+    const feedbackLink = getByRole(betaBanner, 'link', {
+      name: 'give your feedback (opens in new tab)'
+    })
+    expect(feedbackLink).toHaveAttribute(
+      'href',
+      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+    )
+  })
 })
