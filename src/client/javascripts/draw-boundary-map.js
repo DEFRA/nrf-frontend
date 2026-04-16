@@ -9,7 +9,7 @@ const UK_SOUTH_LAT = 49.8
 const UK_EAST_LNG = 2.1
 const UK_NORTH_LAT = 60.95
 const UK_BOUNDS = [UK_WEST_LNG, UK_SOUTH_LAT, UK_EAST_LNG, UK_NORTH_LAT]
-const DEFAULT_LAYER_FILL_OPACITY = 0.08
+const DEFAULT_LAYER_FILL_OPACITY = 0.15
 const DARK_LAYER_FILL_OPACITY = 0.16
 const DEFAULT_LAYER_LINE_WIDTH = 2
 const EMPTY_FEATURE_PROPERTIES = Object.freeze({})
@@ -23,8 +23,8 @@ const DEFAULT_IMPACT_ASSESSOR_LAYERS = [
 
 const LAYER_COLOR_CONFIG = {
   edp_boundaries: {
-    fillColor: '#00703c',
-    lineColor: '#00703c',
+    fillColor: '#feca57',
+    lineColor: '#feca57',
     dark: { fillColor: '#9ddfa6', lineColor: '#9ddfa6' }
   },
   lpa_boundaries: {

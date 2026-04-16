@@ -18,7 +18,7 @@ const contentSecurityPolicy = {
     fontSrc: ['self'],
     connectSrc: ['self', 'wss', ...mapExternalOrigins],
     mediaSrc: ['self'],
-    styleSrc: ['self'],
+    styleSrc: ['self', 'unsafe-inline'],
     scriptSrc: ['self'],
     imgSrc: ['self', 'data:', ...mapExternalOrigins],
     frameSrc: ['self'],
@@ -29,7 +29,7 @@ const contentSecurityPolicy = {
     // blob: is required by maplibre-gl which creates web workers from blob URLs
     workerSrc: ['self', 'blob:'],
     childSrc: ['self', 'blob:'],
-    generateNonces: true
+    generateNonces: 'script'
   }
 }
 
