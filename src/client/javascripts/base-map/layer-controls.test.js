@@ -32,6 +32,7 @@ function createMapInstance(styleName = 'dark') {
     }),
     setPaintProperty: vi.fn(),
     setLayoutProperty: vi.fn(),
+    isStyleLoaded: vi.fn(() => true),
     getStyle: vi.fn(() => ({ name: styleName, sources: {} })),
     on: vi.fn((eventName, callback) => {
       styleHandlers[eventName] = callback
@@ -162,6 +163,54 @@ describe('layer-controls', () => {
       'lpa_boundaries-tiles-line',
       'visibility',
       'visible'
+    )
+  })
+
+  it('defers layer application until styledata fires when style is not loaded at map:ready', () => {
+    const { map, handlers } = createMapHarness()
+    const mapInstance = createMapInstance('dark')
+    mapInstance.isStyleLoaded.mockReturnValue(false)
+
+    wireLayerControls(map, {
+      mapElementId: 'map-deferred',
+      layerControlOptions: {
+        layers: [
+          {
+            sourceId: 'edp_boundaries-tiles',
+            sourceLayer: 'edp_boundaries',
+            tilesUrl:
+              '/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt',
+            label: 'EDP',
+            defaultVisible: true,
+            fillColor: '#00703c',
+            lineColor: '#00703c',
+            fillOpacity: 0.08
+          }
+        ]
+      }
+    })
+
+    handlers['app:ready']?.()
+    const panelConfig = map.addPanel.mock.calls[0][1]
+    document.body.insertAdjacentHTML('beforeend', panelConfig.html)
+
+    handlers['map:ready']?.({ map: mapInstance })
+
+    expect(mapInstance.addSource).not.toHaveBeenCalled()
+    expect(mapInstance.addLayer).not.toHaveBeenCalled()
+
+    mapInstance.isStyleLoaded.mockReturnValue(true)
+    mapInstance._styleHandlers.styledata?.()
+
+    expect(mapInstance.addSource).toHaveBeenCalledWith(
+      'edp_boundaries-tiles',
+      expect.objectContaining({ type: 'vector' })
+    )
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'edp_boundaries-tiles-fill' })
+    )
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'edp_boundaries-tiles-line' })
     )
   })
 

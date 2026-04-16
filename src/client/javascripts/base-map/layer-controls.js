@@ -356,7 +356,9 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
       applyVisibility()
     })
 
-    applyVisibility()
+    if (state.mapInstance.isStyleLoaded()) {
+      applyVisibility()
+    }
   })
 
   map.on('app:panelopened', function ({ panelId } = {}) {

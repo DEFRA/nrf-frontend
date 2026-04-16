@@ -1071,6 +1071,7 @@ describe('base-map config', () => {
         addLayer: vi.fn(),
         setPaintProperty: vi.fn(),
         setLayoutProperty: vi.fn(),
+        isStyleLoaded: vi.fn().mockReturnValue(true),
         on: vi.fn((eventName, callback) => {
           mapEventHandlers[eventName] = callback
         })
@@ -1272,6 +1273,7 @@ describe('base-map config', () => {
         addLayer: vi.fn(),
         setPaintProperty: vi.fn(),
         setLayoutProperty: vi.fn(),
+        isStyleLoaded: vi.fn().mockReturnValue(true),
         on: vi.fn((eventName, callback) => {
           mapEventHandlers[eventName] = callback
         })
