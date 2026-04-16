@@ -159,6 +159,29 @@ function inferStyleVariant(mapInstance) {
   return 'default'
 }
 
+function applyOverlaySublayer(
+  mapInstance,
+  { layerId, type, source, sourceLayer, paint, shouldUpdatePaint }
+) {
+  if (mapInstance.getLayer(layerId)) {
+    if (shouldUpdatePaint) {
+      Object.entries(paint).forEach(([property, value]) => {
+        mapInstance.setPaintProperty?.(layerId, property, value)
+      })
+    }
+    return false
+  }
+
+  mapInstance.addLayer({
+    id: layerId,
+    type,
+    source,
+    'source-layer': sourceLayer,
+    paint
+  })
+  return true
+}
+
 function applyVectorTileOverlayPaint(
   mapInstance,
   layerControlOptions,
@@ -175,63 +198,30 @@ function applyVectorTileOverlayPaint(
     return false
   }
 
-  let addedLayer = false
-
-  if (mapInstance.getLayer(`${sourceId}-fill`)) {
-    if (shouldUpdatePaint) {
-      mapInstance.setPaintProperty?.(
-        `${sourceId}-fill`,
-        'fill-color',
-        fillColor
-      )
-      mapInstance.setPaintProperty?.(
-        `${sourceId}-fill`,
-        'fill-opacity',
-        fillOpacity
-      )
-    }
-  } else {
-    mapInstance.addLayer({
-      id: `${sourceId}-fill`,
+  const sublayers = [
+    {
+      layerId: `${sourceId}-fill`,
       type: 'fill',
       source: sourceId,
-      'source-layer': sourceLayer,
-      paint: {
-        'fill-color': fillColor,
-        'fill-opacity': fillOpacity
-      }
-    })
-    addedLayer = true
-  }
-
-  if (mapInstance.getLayer(`${sourceId}-line`)) {
-    if (shouldUpdatePaint) {
-      mapInstance.setPaintProperty?.(
-        `${sourceId}-line`,
-        'line-color',
-        lineColor
-      )
-      mapInstance.setPaintProperty?.(
-        `${sourceId}-line`,
-        'line-width',
-        lineWidth
-      )
-    }
-  } else {
-    mapInstance.addLayer({
-      id: `${sourceId}-line`,
+      sourceLayer,
+      paint: { 'fill-color': fillColor, 'fill-opacity': fillOpacity },
+      shouldUpdatePaint
+    },
+    {
+      layerId: `${sourceId}-line`,
       type: 'line',
       source: sourceId,
-      'source-layer': sourceLayer,
-      paint: {
-        'line-color': lineColor,
-        'line-width': lineWidth
-      }
-    })
-    addedLayer = true
-  }
+      sourceLayer,
+      paint: { 'line-color': lineColor, 'line-width': lineWidth },
+      shouldUpdatePaint
+    }
+  ]
 
-  return addedLayer
+  return sublayers.reduce(
+    (addedLayer, sublayer) =>
+      applyOverlaySublayer(mapInstance, sublayer) || addedLayer,
+    false
+  )
 }
 
 function updateLayerLegendSwatches({
