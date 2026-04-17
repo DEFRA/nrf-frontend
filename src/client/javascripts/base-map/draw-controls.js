@@ -4,16 +4,14 @@ import {
   DRAW_ACTION_DRAW,
   DRAW_ACTION_EDIT,
   DRAW_EVENT_CREATED,
-  DRAW_PANEL_ID,
-  PENCIL_SVG
+  DRAW_PANEL_ID
 } from './constants.js'
 
 function buildDrawPanelHtml(mapElementId) {
   return `
     <div class="app-draw-panel" data-map-element-id="${mapElementId}">
-      <p class="govuk-body-s govuk-!-margin-bottom-3">Manage the boundary using draw tools.</p>
       <div class="govuk-button-group govuk-!-margin-bottom-0">
-        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-draw-action="${DRAW_ACTION_DRAW}" type="button">Draw</button>
+        <button class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" data-draw-action="${DRAW_ACTION_DRAW}" type="button">Draw</button>
         <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-draw-action="${DRAW_ACTION_EDIT}" type="button">Edit</button>
         <button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" data-draw-action="${DRAW_ACTION_DELETE}" type="button">Delete</button>
       </div>
@@ -241,30 +239,33 @@ export function wireDrawControls(
   { drawPlugin, mapElementId, drawControlOptions }
 ) {
   map.on('app:ready', function () {
-    map.addButton(DRAW_PANEL_ID, {
-      label: 'Draw',
-      panelId: DRAW_PANEL_ID,
-      iconSvgContent: PENCIL_SVG,
-      mobile: { slot: 'top-left', showLabel: false, order: 2 },
-      tablet: { slot: 'top-left', showLabel: false, order: 2 },
-      desktop: { slot: 'top-left', showLabel: false, order: 2 }
-    })
+    // DRAW PANEL SHOWN ALWAYS, NO TOGGLE
+    // map.addButton(DRAW_PANEL_ID, {
+    //   label: 'Draw',
+    //   panelId: DRAW_PANEL_ID,
+    //   iconSvgContent: PENCIL_SVG,
+    //   mobile: { slot: 'top-left', showLabel: false, order: 2 },
+    //   tablet: { slot: 'top-left', showLabel: false, order: 2 },
+    //   desktop: { slot: 'top-left', showLabel: false, order: 2 }
+    // })
 
     map.addPanel(DRAW_PANEL_ID, {
-      label: 'Draw',
+      label: 'Draw a red line boundary',
       html: buildDrawPanelHtml(mapElementId),
-      mobile: { slot: 'bottom', modal: true, open: false },
+      mobile: { slot: 'drawer', modal: false, open: true, dismissible: false },
       tablet: {
         slot: 'left-bottom',
         modal: false,
-        width: '340px',
-        open: false
+        dismissible: false,
+        width: 'auto',
+        open: true
       },
       desktop: {
         slot: 'left-bottom',
         modal: false,
-        width: '340px',
-        open: false
+        dismissible: false,
+        width: 'auto',
+        open: true
       }
     })
 

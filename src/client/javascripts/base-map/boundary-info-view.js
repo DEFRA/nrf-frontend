@@ -7,7 +7,6 @@ import {
 export function buildBoundaryInfoPanelHtml(mapElementId) {
   return `
     <div class="app-boundary-info-panel" data-map-element-id="${mapElementId}">
-      <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Boundary information</h3>
       <p class="govuk-body-s govuk-!-margin-bottom-2" data-boundary-info-summary>Draw a boundary to validate it.</p>
       <p class="govuk-body-s govuk-!-margin-bottom-2" data-boundary-info-loading hidden aria-live="polite">Checking boundary...</p>
       <p class="govuk-error-message govuk-!-margin-bottom-2" data-boundary-info-error hidden></p>
@@ -17,7 +16,7 @@ export function buildBoundaryInfoPanelHtml(mapElementId) {
           <dd class="govuk-summary-list__value govuk-!-font-size-16" data-boundary-info-bounds>${NOT_AVAILABLE_TEXT}</dd>
         </div>
         <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key govuk-!-font-size-16">Intersections</dt>
+          <dt class="govuk-summary-list__key govuk-!-font-size-16">EDPs in your red line boundary</dt>
           <dd class="govuk-summary-list__value govuk-!-font-size-16" data-boundary-info-intersections>${NOT_AVAILABLE_TEXT}</dd>
         </div>
       </dl>

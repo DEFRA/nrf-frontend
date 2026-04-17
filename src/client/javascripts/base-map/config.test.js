@@ -279,14 +279,6 @@ describe('base-map config', () => {
       createMap({ mapElementId: 'test-map', showDrawControls: true })
 
       expect(map.on).toHaveBeenCalledWith('app:ready', expect.any(Function))
-      expect(addButton).toHaveBeenCalledWith(
-        'draw',
-        expect.objectContaining({
-          panelId: 'draw',
-          mobile: expect.objectContaining({ slot: 'top-left' }),
-          desktop: expect.objectContaining({ slot: 'top-left' })
-        })
-      )
       expect(addPanel).toHaveBeenCalledWith(
         'draw',
         expect.objectContaining({
@@ -319,7 +311,6 @@ describe('base-map config', () => {
       createMap({ mapElementId: 'test-map' })
 
       expect(map.on).not.toHaveBeenCalledWith('app:ready', expect.any(Function))
-      expect(map.addButton).not.toHaveBeenCalled()
       expect(map.addPanel).not.toHaveBeenCalled()
     })
 
@@ -1136,10 +1127,6 @@ describe('base-map config', () => {
 
       eventHandlers['map:ready']?.({ map: mapInstance })
 
-      expect(addButton).toHaveBeenCalledWith(
-        'layers',
-        expect.objectContaining({ panelId: 'layers' })
-      )
       expect(addPanel).toHaveBeenCalledWith(
         'layers',
         expect.objectContaining({

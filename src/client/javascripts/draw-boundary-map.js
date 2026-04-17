@@ -6,20 +6,16 @@ import {
 
 const UK_WEST_LNG = -8.75
 const UK_SOUTH_LAT = 49.8
-const UK_EAST_LNG = 2.1
+const UK_EAST_LNG = 2.3
 const UK_NORTH_LAT = 60.95
 const UK_BOUNDS = [UK_WEST_LNG, UK_SOUTH_LAT, UK_EAST_LNG, UK_NORTH_LAT]
 const DEFAULT_LAYER_FILL_OPACITY = 0.15
 const DARK_LAYER_FILL_OPACITY = 0.16
 const DEFAULT_LAYER_LINE_WIDTH = 2
 const EMPTY_FEATURE_PROPERTIES = Object.freeze({})
-const DEFAULT_IMPACT_ASSESSOR_LAYERS = [
-  'edp_boundaries',
-  'lpa_boundaries',
-  'nn_catchments',
-  'subcatchments',
-  'wwtw_catchments'
-]
+const DEFAULT_IMPACT_ASSESSOR_LAYERS = ['edp_boundaries']
+const DEFAULT_CENTER = [0.942829, 52.71718] // Norfolk
+const DEFAULT_ZOOM = 8.5
 
 const LAYER_COLOR_CONFIG = {
   edp_boundaries: {
@@ -151,8 +147,10 @@ document.addEventListener('DOMContentLoaded', function () {
       layers: buildLayerDefinitions(impactAssessorLayers)
     },
     options: {
-      bounds: UK_BOUNDS,
-      maxBounds: UK_BOUNDS
+      maxBounds: UK_BOUNDS,
+      bounds: null,
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM
     }
   })
 })

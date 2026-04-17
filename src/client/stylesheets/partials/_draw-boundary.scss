@@ -5,11 +5,16 @@
   padding-bottom: 0;
   min-height: 0;
 
-  .govuk-width-container {
-    max-width: none;
-    margin: 0;
-    padding: 0 15px;
-    min-height: 100%;
+}
+
+.govuk-width-container:has(.app-draw-boundary) {
+  max-width: none;
+  margin: 0;
+  padding: 0 15px;
+  min-height: 100%;
+
+  .govuk-main-wrapper {
+    padding-top: 0;
   }
 }
 

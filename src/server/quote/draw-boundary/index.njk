@@ -16,11 +16,11 @@
   <link href="{{ getAssetPath('interactive-map/plugins/draw-ml/index.css') }}" rel="stylesheet">
 {% endblock %}
 
-{% block beforeContent %}
-  {{ backLink({href: backLinkPath}) }}
-{% endblock %}
 
 {% block content %}
+  <p class="govuk-body govuk-!-margin-top-1">
+    <a href="/quote/upload-boundary" class="govuk-link govuk-!-font-size-16">Upload a red line boundary file instead</a>
+  </p>
   <div class="app-draw-boundary">
     <h1 class="govuk-visually-hidden">{{ pageHeading }}</h1>
     <div
@@ -36,9 +36,6 @@
       <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available.</p>
     </div>
   </div>
-  <p class="govuk-body govuk-!-margin-top-4">
-    <a href="/quote/upload-boundary" class="govuk-link">Upload a red line boundary file instead</a>
-  </p>
 {% endblock %}
 
 {% block govukFooter %}{% endblock %}
