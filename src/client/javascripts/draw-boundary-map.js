@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
     containerHeight: getDrawMapContainerHeight,
     showStyleControls: true,
     showDrawControls: true,
+    showSearch: true,
     drawControlOptions: {
       ...(initialDrawFeature ? { initialFeature: initialDrawFeature } : {})
     },

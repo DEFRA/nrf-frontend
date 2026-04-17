@@ -250,6 +250,98 @@ describe('base-map config', () => {
       )
     })
 
+    it('adds search plugin when showSearch is true, before map styles', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      const searchPluginInstance = { id: 'search' }
+      const mapStylesInstance = { id: 'mapStyles' }
+      const searchPlugin = vi.fn().mockReturnValue(searchPluginInstance)
+      const mapStylesPlugin = vi.fn().mockReturnValue(mapStylesInstance)
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return { on: vi.fn() }
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        mapStylesPlugin,
+        searchPlugin
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        showSearch: true,
+        showStyleControls: true
+      })
+
+      expect(searchPlugin).toHaveBeenCalledWith(
+        expect.objectContaining({
+          osNamesURL: '/os-names-search?query={query}',
+          regions: ['england']
+        })
+      )
+      const options = constructorSpy.mock.calls[0][1]
+      expect(options.plugins).toEqual([searchPluginInstance, mapStylesInstance])
+    })
+
+    it('does not add search plugin when showSearch is false', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      const searchPlugin = vi.fn().mockReturnValue({ id: 'search' })
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        searchPlugin
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      expect(searchPlugin).not.toHaveBeenCalled()
+    })
+
+    it('merges searchPluginOptions over defaults', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const searchPlugin = vi.fn().mockReturnValue({ id: 'search' })
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return { on: vi.fn() }
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        searchPlugin
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        showSearch: true,
+        searchPluginOptions: { regions: ['england', 'wales'], expanded: true }
+      })
+
+      expect(searchPlugin).toHaveBeenCalledWith(
+        expect.objectContaining({
+          osNamesURL: '/os-names-search?query={query}',
+          regions: ['england', 'wales'],
+          expanded: true
+        })
+      )
+    })
+
     it('wires draw controls when showDrawControls is true', () => {
       const el = document.createElement('div')
       el.id = 'test-map'

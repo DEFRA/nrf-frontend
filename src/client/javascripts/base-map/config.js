@@ -1,9 +1,12 @@
 import {
   getDefraApi,
   logWarning,
+  patchFetchForSearchPlugin,
   resolveDrawPlugin,
   resolveMapStylesPlugin,
-  wireMapErrorLogging
+  resolveSearchPlugin,
+  wireMapErrorLogging,
+  wireSearchLabels
 } from './helpers.js'
 import { DRAW_PANEL_ID, ENGLAND_BOUNDS, ENGLAND_MIN_ZOOM } from './constants.js'
 import { wireBoundaryInfoControls } from './boundary-info-controls.js'
@@ -43,11 +46,32 @@ function resolvePlugins({
   options = {},
   showStyleControls,
   showDrawControls,
+  showSearch,
   defraApi,
   mapStyles,
-  drawPluginOptions = {}
+  drawPluginOptions = {},
+  searchPluginOptions = {}
 }) {
   const plugins = [...(options.plugins || [])]
+
+  if (showSearch) {
+    patchFetchForSearchPlugin()
+    const searchPlugin = resolveSearchPlugin(defraApi)
+    if (searchPlugin) {
+      plugins.push(
+        searchPlugin({
+          osNamesURL: '/os-names-search?query={query}',
+          regions: ['england'],
+          // Always-expanded input so the search never enters the plugin's
+          // "exclusive control" mode (which fades out sibling buttons).
+          // With expanded=true, the plugin moves mobile to a banner slot and
+          // keeps tablet/desktop on top-left — styles/draw buttons stay beside it.
+          expanded: true,
+          ...searchPluginOptions
+        })
+      )
+    }
+  }
 
   if (showStyleControls) {
     const mapStylesPlugin = resolveMapStylesPlugin(defraApi)
@@ -102,6 +126,7 @@ function wireOptionalMapFeatures({
   showDrawControls,
   showBoundaryInfoPanel,
   showLayerControls,
+  showSearch,
   plugins,
   elementId,
   drawControlOptions,
@@ -135,6 +160,10 @@ function wireOptionalMapFeatures({
       layerControlOptions
     })
   }
+
+  if (showSearch) {
+    wireSearchLabels(map, elementId)
+  }
 }
 
 export function createMap(mapElementId, mapOptions = {}) {
@@ -150,7 +179,9 @@ export function createMap(mapElementId, mapOptions = {}) {
     showDrawControls = false,
     showBoundaryInfoPanel = false,
     showLayerControls = false,
+    showSearch = false,
     drawPluginOptions,
+    searchPluginOptions,
     drawControlOptions,
     boundaryInfoOptions,
     layerControlOptions,
@@ -176,9 +207,11 @@ export function createMap(mapElementId, mapOptions = {}) {
     options,
     showStyleControls,
     showDrawControls,
+    showSearch,
     defraApi,
     mapStyles,
-    drawPluginOptions
+    drawPluginOptions,
+    searchPluginOptions
   })
   const baseOptions = buildBaseOptions({
     defraApi,
@@ -199,6 +232,7 @@ export function createMap(mapElementId, mapOptions = {}) {
     showDrawControls,
     showBoundaryInfoPanel,
     showLayerControls,
+    showSearch,
     plugins,
     elementId,
     drawControlOptions,

@@ -4,8 +4,10 @@ import {
   getDefraApi,
   logWarning,
   parseDatasetJson,
+  patchFetchForSearchPlugin,
   runWhenMapStyleReady,
-  wireMapErrorLogging
+  wireMapErrorLogging,
+  wireSearchLabels
 } from './helpers.js'
 
 describe('base-map helpers', () => {
@@ -152,6 +154,104 @@ describe('base-map helpers', () => {
       errorHandler({ detail: 'detail message' })
 
       expect(warnSpy).toHaveBeenCalledWith('Custom map error', 'detail message')
+    })
+  })
+
+  describe('patchFetchForSearchPlugin', () => {
+    let originalFetch
+
+    beforeEach(() => {
+      originalFetch = vi.fn().mockResolvedValue({ ok: true })
+      globalThis.fetch = originalFetch
+    })
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch
+    })
+
+    it('unwraps { url, options } objects before calling native fetch', async () => {
+      patchFetchForSearchPlugin()
+      await globalThis.fetch({ url: '/test', options: { method: 'GET' } })
+      expect(originalFetch).toHaveBeenCalledWith('/test', { method: 'GET' })
+    })
+
+    it('passes string URLs through unchanged', async () => {
+      patchFetchForSearchPlugin()
+      await globalThis.fetch('/plain', { method: 'POST' })
+      expect(originalFetch).toHaveBeenCalledWith('/plain', { method: 'POST' })
+    })
+
+    it('does not unwrap a Request instance', async () => {
+      patchFetchForSearchPlugin()
+      const req = new Request('https://example.com/req')
+      await globalThis.fetch(req)
+      expect(originalFetch).toHaveBeenCalledWith(req, undefined)
+    })
+  })
+
+  describe('wireSearchLabels', () => {
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    function mountSearchDom(containerId) {
+      const container = document.createElement('div')
+      container.id = containerId
+      container.innerHTML = `
+        <label for="map-search" class="im-u-visually-hidden">Search</label>
+        <input id="map-search" class="im-c-search__input" placeholder="Search" />
+      `
+      document.body.appendChild(container)
+      return container
+    }
+
+    function makeMap() {
+      const handlers = {}
+      return {
+        on: vi.fn((event, cb) => {
+          handlers[event] = cb
+        }),
+        fire: (event) => handlers[event]?.()
+      }
+    }
+
+    it('overrides placeholder, aria-label and hidden label on app:ready', () => {
+      mountSearchDom('test-map')
+      const map = makeMap()
+
+      wireSearchLabels(map, 'test-map')
+      map.fire('app:ready')
+
+      const input = document.querySelector('.im-c-search__input')
+      expect(input.placeholder).toBe('Search for an address or postcode')
+      expect(input.getAttribute('aria-label')).toBe(
+        'Search for an address or postcode'
+      )
+      expect(
+        document.querySelector('label.im-u-visually-hidden').textContent
+      ).toBe('Search for an address or postcode')
+    })
+
+    it('accepts a custom label', () => {
+      mountSearchDom('test-map')
+      const map = makeMap()
+
+      wireSearchLabels(map, 'test-map', 'Find a place')
+      map.fire('app:ready')
+
+      expect(document.querySelector('.im-c-search__input').placeholder).toBe(
+        'Find a place'
+      )
+    })
+
+    it('does not throw when the search input has not yet mounted', () => {
+      const container = document.createElement('div')
+      container.id = 'test-map'
+      document.body.appendChild(container)
+      const map = makeMap()
+
+      wireSearchLabels(map, 'test-map')
+      expect(() => map.fire('app:ready')).not.toThrow()
     })
   })
 })
