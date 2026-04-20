@@ -25,26 +25,29 @@ export function buildBoundaryInfoPanelHtml(mapElementId) {
   `
 }
 
-function submitSaveAndContinue(saveAndContinueUrl, csrfToken) {
+async function submitSaveAndContinue(
+  saveAndContinueUrl,
+  csrfToken,
+  boundaryGeojson
+) {
   if (!saveAndContinueUrl) {
     return
   }
 
-  const form = document.createElement('form')
-  form.method = 'POST'
-  form.action = saveAndContinueUrl
-  form.style.display = 'none'
-
+  const headers = { 'Content-Type': 'application/json' }
   if (csrfToken) {
-    const tokenInput = document.createElement('input')
-    tokenInput.type = 'hidden'
-    tokenInput.name = 'csrfToken'
-    tokenInput.value = csrfToken
-    form.appendChild(tokenInput)
+    headers['x-csrf-token'] = csrfToken
   }
 
-  document.body.appendChild(form)
-  form.submit()
+  const response = await fetch(saveAndContinueUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ boundaryGeojson })
+  })
+
+  if (response.redirected) {
+    window.location.assign(response.url)
+  }
 }
 
 function getBoundaryPanelRoot(mapElementId) {
@@ -131,6 +134,10 @@ export function registerBoundaryInfoSaveHandler({
       return
     }
 
-    submitSaveAndContinue(saveAndContinueUrl, csrfToken)
+    submitSaveAndContinue(
+      saveAndContinueUrl,
+      csrfToken,
+      state.latestResponse?.raw
+    )
   })
 }

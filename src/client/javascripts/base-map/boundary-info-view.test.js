@@ -75,16 +75,21 @@ describe('boundary-info-view', () => {
     })
   })
 
-  it('submits fallback form with csrf token when callback is not provided', () => {
+  it('POSTs geojson via fetch with csrf header when callback is not provided', async () => {
     document.body.innerHTML = buildBoundaryInfoPanelHtml('map-4')
-    const formPrototype = Object.getPrototypeOf(document.createElement('form'))
-    const submitSpy = vi
-      .spyOn(formPrototype, 'submit')
-      .mockImplementation(() => {})
+
+    const mockResponse = { redirected: false }
+    globalThis.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+    const boundaryGeojson = {
+      boundaryGeometryWgs84: { type: 'Polygon' },
+      intersectingEdps: []
+    }
+    const state = { latestResponse: { raw: boundaryGeojson } }
 
     registerBoundaryInfoSaveHandler({
       mapElementId: 'map-4',
-      state: {},
+      state,
       saveAndContinueUrl: '/quote/continue',
       csrfToken: 'token-123'
     })
@@ -96,10 +101,17 @@ describe('boundary-info-view', () => {
     button.disabled = false
     button.click()
 
-    const form = document.querySelector('form[action="/quote/continue"]')
-    const tokenInput = form.querySelector('input[name="csrfToken"]')
+    await Promise.resolve()
 
-    expect(tokenInput.value).toBe('token-123')
-    expect(submitSpy).toHaveBeenCalled()
+    expect(globalThis.fetch).toHaveBeenCalledWith('/quote/continue', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': 'token-123'
+      },
+      body: JSON.stringify({ boundaryGeojson })
+    })
+
+    delete globalThis.fetch
   })
 })

@@ -22,7 +22,7 @@ export function handler(request, h) {
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
   const viewModel = getViewModel(
-    boundaryGeojson,
+    boundaryGeojson || quoteCache.boundaryGeojson,
     boundaryError,
     boundaryFilename
   )

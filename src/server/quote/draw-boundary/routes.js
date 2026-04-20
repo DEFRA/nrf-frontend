@@ -50,7 +50,12 @@ export default [
     path: savePath,
     options: {
       plugins: {
-        crumb: true
+        crumb: { restful: true }
+      },
+      validate: {
+        payload: joi.object({
+          boundaryGeojson: joi.object().required()
+        })
       }
     },
     handler: saveBoundaryHandler
