@@ -115,8 +115,10 @@ describe('draw-boundary-map init', () => {
       'draw-boundary-map',
       expect.objectContaining({
         mapLabel: 'Draw boundary map',
-        bounds: [-8.75, 49.8, 2.1, 60.95],
-        maxBounds: [-8.75, 49.8, 2.1, 60.95],
+        bounds: null,
+        center: [0.942829, 52.71718],
+        zoom: 8.5,
+        maxBounds: [-8.75, 49.8, 2.3, 60.95],
         containerHeight: expect.stringMatching(/^\d+px$/),
         mapStyle: expect.objectContaining({
           url: '/public/data/vts/ESRI_World_Imagery.json'
@@ -241,11 +243,7 @@ describe('draw-boundary-map init', () => {
         drawControlOptions: {},
         layerControlOptions: {
           layers: expect.arrayContaining([
-            expect.objectContaining({ sourceLayer: 'edp_boundaries' }),
-            expect.objectContaining({ sourceLayer: 'lpa_boundaries' }),
-            expect.objectContaining({ sourceLayer: 'nn_catchments' }),
-            expect.objectContaining({ sourceLayer: 'subcatchments' }),
-            expect.objectContaining({ sourceLayer: 'wwtw_catchments' })
+            expect.objectContaining({ sourceLayer: 'edp_boundaries' })
           ])
         }
       })

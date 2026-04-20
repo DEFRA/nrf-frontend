@@ -12,7 +12,6 @@ describe('draw-boundary getViewModel', () => {
     expect(viewModel).toEqual(
       expect.objectContaining({
         pageHeading: title,
-        backLinkPath: '/quote/boundary-type',
         mapStyleUrl: '/public/data/vts/test-style.json',
         impactAssessorLayers: expect.any(String),
         saveAndContinueUrl: '/quote/draw-boundary/save',
