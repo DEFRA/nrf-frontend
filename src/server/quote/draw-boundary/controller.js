@@ -44,7 +44,7 @@ export function saveBoundaryHandler(request, h) {
 
   const intersectsEdp = (boundaryGeojson?.intersectingEdps?.length ?? 0) > 0
 
-  saveQuoteDataToCache(request, { boundaryGeojson }, { boundaryChanged: true })
+  saveQuoteDataToCache(request, { boundaryGeojson })
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
 

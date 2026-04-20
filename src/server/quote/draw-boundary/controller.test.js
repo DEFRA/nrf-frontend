@@ -280,11 +280,9 @@ describe('saveBoundaryHandler', () => {
 
     saveBoundaryHandler(request, h)
 
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
-      request,
-      { boundaryGeojson },
-      { boundaryChanged: true }
-    )
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+      boundaryGeojson
+    })
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
     expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
@@ -300,11 +298,9 @@ describe('saveBoundaryHandler', () => {
 
     saveBoundaryHandler(request, h)
 
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
-      request,
-      { boundaryGeojson },
-      { boundaryChanged: true }
-    )
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+      boundaryGeojson
+    })
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
     expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
