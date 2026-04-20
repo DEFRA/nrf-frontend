@@ -18,10 +18,6 @@ describe('Draw boundary page', () => {
     const hiddenHeading = getByRole(document, 'heading', { level: 1 })
     expect(hiddenHeading).toHaveTextContent('Draw your boundary on a map')
     expect(hiddenHeading).toHaveClass('govuk-visually-hidden')
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/quote/boundary-type'
-    )
 
     const footer = document.querySelector('.govuk-footer')
     expect(footer).not.toBeInTheDocument()

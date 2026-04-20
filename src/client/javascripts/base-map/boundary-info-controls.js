@@ -65,18 +65,25 @@ export function wireBoundaryInfoControls(
     map.addPanel(BOUNDARY_INFO_PANEL_ID, {
       label: 'Boundary information',
       html: buildBoundaryInfoPanelHtml(mapElementId),
-      mobile: { slot: 'bottom', modal: true, open: false },
+      mobile: {
+        slot: 'left-top',
+        modal: false,
+        open: false,
+        dismissible: false
+      },
       tablet: {
         slot: 'right-bottom',
         modal: false,
         width: '520px',
-        open: false
+        open: false,
+        dismissible: false
       },
       desktop: {
         slot: 'right-bottom',
         modal: false,
         width: '520px',
-        open: false
+        open: false,
+        dismissible: false
       }
     })
 

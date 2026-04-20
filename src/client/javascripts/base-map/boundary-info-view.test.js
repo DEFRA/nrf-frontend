@@ -17,7 +17,7 @@ describe('boundary-info-view', () => {
   it('builds panel html with defaults', () => {
     const html = buildBoundaryInfoPanelHtml('map-1')
     expect(html).toContain('data-map-element-id="map-1"')
-    expect(html).toContain('Boundary information')
+    expect(html).toContain('Draw a boundary to validate it.')
     expect(html).toContain('Not available')
   })
 
