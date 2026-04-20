@@ -4,10 +4,11 @@ import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
-  saveQuoteDataToCache: vi.fn()
+  saveQuoteDataToCache: vi.fn(),
+  getQuoteDataFromCache: vi.fn().mockReturnValue({})
 }))
 
-const { saveQuoteDataToCache } =
+const { saveQuoteDataToCache, getQuoteDataFromCache } =
   await import('../helpers/quote-session-cache/index.js')
 
 describe('map controller', () => {
@@ -65,18 +66,33 @@ describe('map controller', () => {
   })
 
   describe('handler (GET)', () => {
-    it('should redirect to upload-boundary when no geojson or error in session', () => {
+    it('should redirect to upload-boundary when no geojson, no error, and no cached boundary', () => {
       const h = createMockH()
       const request = createMockRequest(null, null)
+      getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
+    it('should render the view when geojson is absent from session but present in quote cache', () => {
+      const h = createMockH()
+      const request = createMockRequest(null, null)
+      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockGeojson })
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.any(Object)
+      )
+    })
+
     it('should render the view with boundary data', () => {
       const h = createMockH()
       const request = createMockRequest(mockGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 
@@ -94,6 +110,7 @@ describe('map controller', () => {
     it('should render the view with error and geojson when both exist', () => {
       const h = createMockH()
       const request = createMockRequest(mockGeojson, 'Invalid geometry')
+      getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 
@@ -111,6 +128,7 @@ describe('map controller', () => {
     it('should render the view with error and no geojson', () => {
       const h = createMockH()
       const request = createMockRequest(null, 'Unable to check boundary')
+      getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 

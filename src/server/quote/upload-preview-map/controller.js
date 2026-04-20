@@ -1,5 +1,8 @@
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
+import {
+  saveQuoteDataToCache,
+  getQuoteDataFromCache
+} from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 import getViewModel from './get-view-model.js'
@@ -9,9 +12,10 @@ const logger = createLogger()
 export function handler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
   const boundaryError = request.yar.get('boundaryError')
+  const quoteCache = getQuoteDataFromCache(request)
 
   // Session may be missing if it expired or the user navigated here directly
-  if (!boundaryGeojson && !boundaryError) {
+  if (!boundaryGeojson && !quoteCache.boundaryGeojson && !boundaryError) {
     logger.info('map - no boundary data in session')
     return h.redirect(uploadBoundaryPath)
   }

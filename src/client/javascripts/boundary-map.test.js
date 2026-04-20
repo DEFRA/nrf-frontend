@@ -2,14 +2,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   validGeojson,
-  validEdpBoundaryGeojson,
-  validEdpIntersectionGeojson
+  validEdpBoundaryGeojson
 } from './__fixtures__/boundary-map-fixtures.js'
 
 function createMapElement(
   geojson,
   styleUrl = 'https://example.com/style.json',
-  { edpBoundary, edpIntersection } = {}
+  { edpBoundary } = {}
 ) {
   const el = document.createElement('div')
   el.id = 'boundary-map'
@@ -22,12 +21,6 @@ function createMapElement(
       typeof edpBoundary === 'string'
         ? edpBoundary
         : JSON.stringify(edpBoundary)
-  }
-  if (edpIntersection !== undefined) {
-    el.dataset.edpIntersectionGeojson =
-      typeof edpIntersection === 'string'
-        ? edpIntersection
-        : JSON.stringify(edpIntersection)
   }
   el.dataset.mapStyleUrl = styleUrl
   document.body.appendChild(el)
@@ -212,8 +205,7 @@ describe('boundary-map init', () => {
 
   it('adds all layers when style is already loaded', async () => {
     createMapElement(validGeojson, 'https://example.com/style.json', {
-      edpBoundary: validEdpBoundaryGeojson,
-      edpIntersection: validEdpIntersectionGeojson
+      edpBoundary: validEdpBoundaryGeojson
     })
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -222,8 +214,8 @@ describe('boundary-map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.addSource).toHaveBeenCalledTimes(3)
-    expect(mapInstance.addLayer).toHaveBeenCalledTimes(6)
+    expect(mapInstance.addSource).toHaveBeenCalledTimes(2)
+    expect(mapInstance.addLayer).toHaveBeenCalledTimes(4)
   })
 
   it('adds boundary source and layers with correct data when style is loaded', async () => {
