@@ -72,10 +72,14 @@ describe('Draw boundary page', () => {
       'src',
       expect.stringContaining('draw-boundary-map')
     )
+    const uploadButton = getByRole(document, 'button', {
+      name: 'Upload a red line boundary file instead'
+    })
+    expect(uploadButton).toBeInTheDocument()
+    const uploadForm = uploadButton.closest('form')
+    expect(uploadForm).toHaveAttribute('action', '/quote/boundary-type')
     expect(
-      getByRole(document, 'link', {
-        name: 'Upload a red line boundary file instead'
-      })
-    ).toHaveAttribute('href', '/quote/upload-boundary')
+      uploadForm.querySelector('input[name="boundaryEntryType"]')
+    ).toHaveValue('upload')
   })
 })

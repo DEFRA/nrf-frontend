@@ -96,10 +96,17 @@
         <p class="govuk-body">
             <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
         </p>
-        <p class="govuk-body">
-            <a href="{{ drawBoundaryPath }}" class="govuk-link">Draw the red line boundary on a map instead</a>
-        </p>
 
+      <p class="govuk-body govuk-!-margin-top-1">
+      <form method="post" novalidate action="/quote/boundary-type">
+        {% include "partials/csrf-token.njk" %}
+        <input type="hidden" name="boundaryEntryType" value="draw" />
+        {{ govukButton({
+          text: "Draw the boundary on a map instead",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form>
+      </p>
     </div>
 </div>
 {% endblock %}
