@@ -33,17 +33,21 @@ async function submitSaveAndContinue(
   if (!saveAndContinueUrl) {
     return
   }
+  let response
+  try {
+    const headers = { 'Content-Type': 'application/json' }
+    if (csrfToken) {
+      headers['x-csrf-token'] = csrfToken
+    }
 
-  const headers = { 'Content-Type': 'application/json' }
-  if (csrfToken) {
-    headers['x-csrf-token'] = csrfToken
+    response = await fetch(saveAndContinueUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ boundaryGeojson })
+    })
+  } catch (err) {
+    console.error(`submitSaveAndContinue error: ${err.message}`)
   }
-
-  const response = await fetch(saveAndContinueUrl, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ boundaryGeojson })
-  })
 
   if (response.redirected) {
     window.location.assign(response.url)
