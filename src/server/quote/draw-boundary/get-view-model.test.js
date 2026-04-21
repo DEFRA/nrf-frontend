@@ -45,4 +45,31 @@ describe('draw-boundary getViewModel', () => {
       JSON.stringify(quoteData.boundaryGeojson.boundaryGeometryWgs84)
     )
   })
+
+  test('returns existing boundary metadata from quote cache when present', () => {
+    const boundaryMetadata = {
+      bounds: {
+        bottomLeft: [-1.2, 51.8],
+        topRight: [-1.1, 51.9]
+      },
+      centre: [-1.15, 51.85]
+    }
+    const quoteData = {
+      boundaryGeojson: {
+        boundaryMetadata
+      }
+    }
+
+    const viewModel = getViewModel(quoteData)
+
+    expect(viewModel.existingBoundaryMetadata).toBe(
+      JSON.stringify(boundaryMetadata)
+    )
+  })
+
+  test('returns JSON-stringified null as existingBoundaryMetadata when not present', () => {
+    const viewModel = getViewModel()
+
+    expect(viewModel.existingBoundaryMetadata).toBe(JSON.stringify(null))
+  })
 })

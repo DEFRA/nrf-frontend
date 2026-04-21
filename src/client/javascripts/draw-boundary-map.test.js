@@ -116,9 +116,9 @@ describe('draw-boundary-map init', () => {
       expect.objectContaining({
         mapLabel: 'Draw boundary map',
         bounds: null,
-        center: [0.942829, 52.71718],
+        center: [1.1405503, 52.7089441],
         zoom: 8.5,
-        maxBounds: [-8.75, 49.8, 2.3, 60.95],
+        maxBounds: [-8.75, 49.8, 2.5, 60.95],
         containerHeight: expect.stringMatching(/^\d+px$/),
         mapStyle: expect.objectContaining({
           url: '/public/data/vts/ESRI_World_Imagery.json'
@@ -290,6 +290,82 @@ describe('draw-boundary-map init', () => {
             properties: { persisted: true }
           })
         }
+      })
+    )
+  })
+
+  it('uses bounds and centre from existingBoundaryMetadata when present', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryMetadata = JSON.stringify({
+      bounds: {
+        bottomLeft: [-1.2, 51.8],
+        topRight: [-1.1, 51.9]
+      },
+      centre: [-1.15, 51.85]
+    })
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          bounds: [-1.2, 51.8, -1.1, 51.9],
+          center: [-1.15, 51.85]
+        })
+      })
+    )
+  })
+
+  it('falls back to null bounds and default center when metadata has no bounds or centre', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryMetadata = JSON.stringify({})
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          bounds: null,
+          center: [1.1405503, 52.7089441]
+        })
+      })
+    )
+  })
+
+  it('warns and falls back when existingBoundaryMetadata is invalid JSON', async () => {
+    const mapEl = createMapElement('/public/data/vts/OS_VTS_3857_Outdoor.json')
+    mapEl.dataset.existingBoundaryMetadata = '{invalid-json}'
+
+    const createMapMock = vi.fn()
+    vi.doMock('./base-map/config.js', () => ({
+      createMap: createMapMock
+    }))
+
+    await import('./draw-boundary-map.js')
+    initFn?.()
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to parse existing boundary metadata',
+      expect.any(Error)
+    )
+    expect(createMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          bounds: null,
+          center: [1.1405503, 52.7089441]
+        })
       })
     )
   })
