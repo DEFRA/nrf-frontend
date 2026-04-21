@@ -1,8 +1,7 @@
 import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
-import { checkPath } from './routes.js'
-import { saveBoundaryHandler } from './controller.js'
+import { checkPath, savePath } from './routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
@@ -244,69 +243,55 @@ describe('POST /quote/draw-boundary/check', () => {
   })
 })
 
-describe('saveBoundaryHandler', () => {
-  const createMockH = () => ({
-    redirect: vi.fn().mockReturnThis()
-  })
+describe('POST /quote/draw-boundary/save', () => {
+  const getServer = setupTestServer()
 
-  const createMockRequest = (boundaryGeojson = null) => ({
-    yar: {
-      get: vi.fn().mockImplementation((key) => {
-        if (key === 'boundaryGeojson') {
-          return boundaryGeojson
-        }
-        return null
-      }),
-      clear: vi.fn()
-    }
-  })
+  const validBoundaryGeojson = {
+    boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
+    intersectingEdps: []
+  }
 
-  it('redirects back to draw page when no boundary geojson is in session', () => {
-    const h = createMockH()
-    const request = createMockRequest()
-
-    saveBoundaryHandler(request, h)
-
-    expect(h.redirect).toHaveBeenCalledWith('/quote/draw-boundary')
-  })
-
-  it('saves and redirects to development types when there are intersections', () => {
-    const h = createMockH()
+  it('saves and redirects to development types when there are intersections', async () => {
     const boundaryGeojson = {
       boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
       intersectingEdps: [{ code: 'EDP-1' }]
     }
-    const request = createMockRequest(boundaryGeojson)
 
-    saveBoundaryHandler(request, h)
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: { boundaryGeojson }
+    })
 
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
-      request,
-      { boundaryGeojson },
-      { boundaryChanged: true }
-    )
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
+      boundaryGeojson
+    })
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/quote/development-types')
   })
 
-  it('saves and redirects to no-edp when there are no intersections', () => {
-    const h = createMockH()
-    const boundaryGeojson = {
-      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
-      intersectingEdps: []
-    }
-    const request = createMockRequest(boundaryGeojson)
+  it('saves and redirects to no-edp when there are no intersections', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: { boundaryGeojson: validBoundaryGeojson }
+    })
 
-    saveBoundaryHandler(request, h)
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
+      boundaryGeojson: validBoundaryGeojson
+    })
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(noEdpPath)
+  })
 
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(
-      request,
-      { boundaryGeojson },
-      { boundaryChanged: true }
-    )
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
-    expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
+  it('rejects a request with no boundaryGeojson', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: {}
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(saveQuoteDataToCache).not.toHaveBeenCalled()
   })
 })

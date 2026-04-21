@@ -15,7 +15,7 @@ vi.mock('../../common/services/boundary.js')
 
 const boundaryCheckPath = checkBoundaryPath.replace('{id}', 'test-upload-id')
 const uploadLinkText = 'Upload a different red line boundary file'
-const drawLinkText = 'Draw the red line boundary on a map instead'
+const drawButtonText = 'Draw the boundary on a map instead'
 
 describe('Boundary map page', () => {
   const getServer = setupTestServer()
@@ -122,11 +122,13 @@ describe('Boundary map page', () => {
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
 
+      const drawButton = getByRole(document, 'button', { name: drawButtonText })
+      expect(drawButton).toBeInTheDocument()
+      const drawForm = drawButton.closest('form')
+      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
       expect(
-        getByRole(document, 'link', {
-          name: drawLinkText
-        })
-      ).toHaveAttribute('href', '/quote/draw-boundary')
+        drawForm.querySelector('input[name="boundaryEntryType"]')
+      ).toHaveValue('draw')
     })
 
     it('should redirect to no-edp page on save and continue', async () => {
@@ -196,11 +198,13 @@ describe('Boundary map page', () => {
       })
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
 
+      const drawButton = getByRole(document, 'button', { name: drawButtonText })
+      expect(drawButton).toBeInTheDocument()
+      const drawForm = drawButton.closest('form')
+      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
       expect(
-        getByRole(document, 'link', {
-          name: drawLinkText
-        })
-      ).toHaveAttribute('href', '/quote/draw-boundary')
+        drawForm.querySelector('input[name="boundaryEntryType"]')
+      ).toHaveValue('draw')
     })
 
     it('should redirect to development-types on save and continue', async () => {
@@ -258,7 +262,7 @@ describe('Boundary map page', () => {
       expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
     })
 
-    it('should show draw boundary link', async () => {
+    it('should show draw boundary button', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -266,11 +270,13 @@ describe('Boundary map page', () => {
         cookie
       })
 
+      const drawButton = getByRole(document, 'button', { name: drawButtonText })
+      expect(drawButton).toBeInTheDocument()
+      const drawForm = drawButton.closest('form')
+      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
       expect(
-        getByRole(document, 'link', {
-          name: drawLinkText
-        })
-      ).toHaveAttribute('href', '/quote/draw-boundary')
+        drawForm.querySelector('input[name="boundaryEntryType"]')
+      ).toHaveValue('draw')
     })
 
     it('should still render the map container', async () => {

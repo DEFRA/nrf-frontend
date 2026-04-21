@@ -18,9 +18,6 @@
 
 
 {% block content %}
-  <p class="govuk-body govuk-!-margin-top-1">
-    <a href="/quote/upload-boundary" class="govuk-link govuk-!-font-size-16">Upload a red line boundary file instead</a>
-  </p>
   <div class="app-draw-boundary">
     <h1 class="govuk-visually-hidden">{{ pageHeading }}</h1>
     <div
@@ -33,9 +30,18 @@
       data-existing-boundary-geojson='{{ existingBoundaryGeojson | safe }}'
       data-csrf-token="{{ csrfToken }}"
     >
-      <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available.</p>
     </div>
   </div>
+  <p class="govuk-body govuk-!-margin-top-1">
+  <form method="post" novalidate action="/quote/boundary-type">
+    {% include "partials/csrf-token.njk" %}
+    <input type="hidden" name="boundaryEntryType" value="upload" />
+    {{ govukButton({
+      text: "Upload a red line boundary file instead",
+      classes: "govuk-button--secondary"
+    }) }}
+  </form>
+  </p>
 {% endblock %}
 
 {% block govukFooter %}{% endblock %}

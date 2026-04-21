@@ -22,7 +22,7 @@ export function handler(request, h) {
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
   const viewModel = getViewModel(
-    boundaryGeojson,
+    boundaryGeojson || quoteCache.boundaryGeojson,
     boundaryError,
     boundaryFilename
   )
@@ -46,11 +46,7 @@ export function postHandler(request, h) {
   // top-level column rather than a buried property.
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
 
-  saveQuoteDataToCache(
-    request,
-    { boundaryGeojson, boundaryFilename },
-    { boundaryChanged: true }
-  )
+  saveQuoteDataToCache(request, { boundaryGeojson, boundaryFilename })
   request.yar.clear('boundaryGeojson')
   request.yar.clear('boundaryError')
 

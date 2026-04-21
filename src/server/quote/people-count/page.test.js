@@ -1,5 +1,6 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { routePath as developmentTypesPath } from '../development-types/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -39,11 +40,17 @@ describe('People count page', () => {
   })
 
   it("should remember the user's previously entered value", async () => {
+    const { cookie: cookieWithDevelopmentTypes } = await submitForm({
+      requestUrl: developmentTypesPath,
+      server: getServer(),
+      formData: { developmentTypes: ['other-residential'] },
+      cookie: sessionCookie
+    })
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: { peopleCount: '42' },
-      cookie: sessionCookie
+      cookie: cookieWithDevelopmentTypes
     })
     const document = await loadPage({
       requestUrl: routePath,
