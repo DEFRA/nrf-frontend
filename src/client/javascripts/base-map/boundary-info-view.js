@@ -49,7 +49,7 @@ async function submitSaveAndContinue(
     console.error(`submitSaveAndContinue error: ${err.message}`)
   }
 
-  if (response.redirected) {
+  if (response?.redirected) {
     window.location.assign(response.url)
   }
 }

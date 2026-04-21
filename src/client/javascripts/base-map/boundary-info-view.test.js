@@ -114,4 +114,69 @@ describe('boundary-info-view', () => {
 
     delete globalThis.fetch
   })
+
+  it('redirects to response URL when fetch response is redirected', async () => {
+    document.body.innerHTML = buildBoundaryInfoPanelHtml('map-5')
+
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValue({ redirected: true, url: '/redirected-url' })
+
+    const assignMock = vi.fn()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { assign: assignMock }
+    })
+
+    const state = { latestResponse: { raw: {} } }
+
+    registerBoundaryInfoSaveHandler({
+      mapElementId: 'map-5',
+      state,
+      saveAndContinueUrl: '/quote/continue'
+    })
+
+    const button = document.querySelector(
+      '[data-map-element-id="map-5"] [data-boundary-action="save"]'
+    )
+    button.hidden = false
+    button.disabled = false
+    button.click()
+
+    await Promise.resolve()
+
+    expect(assignMock).toHaveBeenCalledWith('/redirected-url')
+
+    delete globalThis.fetch
+  })
+
+  it('logs error and does not throw when fetch rejects', async () => {
+    document.body.innerHTML = buildBoundaryInfoPanelHtml('map-6')
+
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'))
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const state = { latestResponse: { raw: {} } }
+
+    registerBoundaryInfoSaveHandler({
+      mapElementId: 'map-6',
+      state,
+      saveAndContinueUrl: '/quote/continue'
+    })
+
+    const button = document.querySelector(
+      '[data-map-element-id="map-6"] [data-boundary-action="save"]'
+    )
+    button.hidden = false
+    button.disabled = false
+    button.click()
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'submitSaveAndContinue error: Network failure'
+    )
+
+    delete globalThis.fetch
+  })
 })
