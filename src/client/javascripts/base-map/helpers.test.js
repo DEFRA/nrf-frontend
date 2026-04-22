@@ -5,9 +5,8 @@ import {
   logWarning,
   parseDatasetJson,
   patchFetchForSearchPlugin,
-  setControlPlacement,
   runWhenMapStyleReady,
-  setControlOrder,
+  setControlPlacement,
   wireMapErrorLogging,
   wireSearchLabels
 } from './helpers.js'
@@ -189,6 +188,17 @@ describe('base-map helpers', () => {
       await globalThis.fetch(req)
       expect(originalFetch).toHaveBeenCalledWith(req, undefined)
     })
+
+    it('is idempotent — does not stack wrappers on repeat calls', async () => {
+      patchFetchForSearchPlugin()
+      const firstPatched = globalThis.fetch
+      patchFetchForSearchPlugin()
+      expect(globalThis.fetch).toBe(firstPatched)
+
+      await globalThis.fetch({ url: '/test', options: { method: 'GET' } })
+      expect(originalFetch).toHaveBeenCalledTimes(1)
+      expect(originalFetch).toHaveBeenCalledWith('/test', { method: 'GET' })
+    })
   })
 
   describe('wireSearchLabels', () => {
@@ -254,114 +264,6 @@ describe('base-map helpers', () => {
 
       wireSearchLabels(map, 'test-map')
       expect(() => map.fire('app:ready')).not.toThrow()
-    })
-  })
-
-  describe('setControlOrder', () => {
-    function makeSearchPlugin() {
-      return {
-        manifest: {
-          controls: [
-            {
-              id: 'search',
-              mobile: { slot: 'top-right', showLabel: false },
-              tablet: { slot: 'top-left', showLabel: false },
-              desktop: { slot: 'top-left', showLabel: false }
-            }
-          ]
-        }
-      }
-    }
-
-    function makeStylesPlugin() {
-      return {
-        manifest: {
-          buttons: [
-            {
-              id: 'mapStyles',
-              mobile: { slot: 'top-left' },
-              tablet: { slot: 'top-left' },
-              desktop: { slot: 'top-left' }
-            }
-          ]
-        }
-      }
-    }
-
-    it('sets order on all breakpoint descriptors of a matching control id', () => {
-      const plugin = makeSearchPlugin()
-
-      setControlOrder(plugin, 'search', 1)
-
-      expect(plugin.manifest.controls[0].mobile.order).toBe(1)
-      expect(plugin.manifest.controls[0].tablet.order).toBe(1)
-      expect(plugin.manifest.controls[0].desktop.order).toBe(1)
-    })
-
-    it('sets order on all breakpoint descriptors of a matching button id', () => {
-      const plugin = makeStylesPlugin()
-
-      setControlOrder(plugin, 'mapStyles', 2)
-
-      expect(plugin.manifest.buttons[0].mobile.order).toBe(2)
-      expect(plugin.manifest.buttons[0].tablet.order).toBe(2)
-      expect(plugin.manifest.buttons[0].desktop.order).toBe(2)
-    })
-
-    it('preserves existing breakpoint descriptor fields', () => {
-      const plugin = makeSearchPlugin()
-
-      setControlOrder(plugin, 'search', 1)
-
-      expect(plugin.manifest.controls[0].mobile).toEqual(
-        expect.objectContaining({ slot: 'top-right', showLabel: false })
-      )
-    })
-
-    it('does not mutate the original breakpoint descriptor objects', () => {
-      const plugin = makeSearchPlugin()
-      const originalMobile = plugin.manifest.controls[0].mobile
-      const originalTablet = plugin.manifest.controls[0].tablet
-      const originalDesktop = plugin.manifest.controls[0].desktop
-
-      setControlOrder(plugin, 'search', 1)
-
-      expect(originalMobile).not.toHaveProperty('order')
-      expect(originalTablet).not.toHaveProperty('order')
-      expect(originalDesktop).not.toHaveProperty('order')
-    })
-
-    it('is a no-op when plugin is null or has no manifest', () => {
-      expect(() => setControlOrder(null, 'search', 1)).not.toThrow()
-      expect(() => setControlOrder({}, 'search', 1)).not.toThrow()
-      expect(() => setControlOrder({ manifest: {} }, 'search', 1)).not.toThrow()
-    })
-
-    it('is a no-op when no entry matches the id', () => {
-      const plugin = makeSearchPlugin()
-      const snapshot = JSON.stringify(plugin)
-
-      setControlOrder(plugin, 'does-not-exist', 1)
-
-      expect(JSON.stringify(plugin)).toBe(snapshot)
-    })
-
-    it('only sets order on breakpoint descriptors that exist', () => {
-      const plugin = {
-        manifest: {
-          controls: [
-            {
-              id: 'search',
-              desktop: { slot: 'top-left' }
-            }
-          ]
-        }
-      }
-
-      expect(() => setControlOrder(plugin, 'search', 1)).not.toThrow()
-      expect(plugin.manifest.controls[0].desktop.order).toBe(1)
-      expect(plugin.manifest.controls[0].mobile).toBeUndefined()
-      expect(plugin.manifest.controls[0].tablet).toBeUndefined()
     })
   })
 

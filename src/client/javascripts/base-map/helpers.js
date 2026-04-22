@@ -64,11 +64,13 @@ export function resolveDrawPlugin(defraApi) {
 // The search plugin calls fetch({ url, options }) — a plain object — rather
 // than fetch(url, options). Native fetch rejects plain objects so we patch it
 // once to unwrap that specific shape before it hits the network stack.
+// Guarded so re-initialising a map in the same session does not stack wrappers.
 export function patchFetchForSearchPlugin() {
+  if (globalThis.fetch?.__patchedForSearchPlugin) return
   const original = globalThis.fetch?.bind(globalThis)
   if (!original) return
 
-  globalThis.fetch = function (input, init) {
+  const patched = function (input, init) {
     if (
       input !== null &&
       typeof input === 'object' &&
@@ -80,6 +82,8 @@ export function patchFetchForSearchPlugin() {
     }
     return original(input, init)
   }
+  patched.__patchedForSearchPlugin = true
+  globalThis.fetch = patched
 }
 
 export function resolveSearchPlugin(defraApi) {
@@ -134,30 +138,6 @@ export function wireSearchLabels(
   }
 
   map.on('app:ready', tryApply)
-}
-
-// Clones each breakpoint descriptor before assigning `order` to avoid mutating
-// the plugin's module-level shared manifest.
-export function setControlOrder(plugin, id, order) {
-  const manifest = plugin?.manifest
-  if (!manifest) return
-
-  const breakpoints = ['mobile', 'tablet', 'desktop']
-
-  for (const key of ['controls', 'buttons']) {
-    const list = manifest[key]
-    if (!Array.isArray(list)) continue
-
-    const entry = list.find((item) => item?.id === id)
-    if (!entry) continue
-
-    for (const breakpoint of breakpoints) {
-      const descriptor = entry[breakpoint]
-      if (descriptor && typeof descriptor === 'object') {
-        entry[breakpoint] = { ...descriptor, order }
-      }
-    }
-  }
 }
 
 // Applies explicit slot/order placement per breakpoint so controls render in a
