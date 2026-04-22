@@ -1,3 +1,24 @@
-.app-boundary-info-panel [data-boundary-info-intersections] .govuk-list {
-  white-space: nowrap;
+.app-boundary-info-panel [data-boundary-info-summary][hidden],
+.app-boundary-info-panel [data-boundary-info-error][hidden] {
+  display: none;
+}
+
+.app-boundary-info-panel .govuk-summary-list__key {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.app-boundary-info-panel__edp-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-boundary-info-panel__edp-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  background-color: #feca57;
+  border: 1px solid #0b0c0c;
 }

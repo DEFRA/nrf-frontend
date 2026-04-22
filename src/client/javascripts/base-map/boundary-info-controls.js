@@ -74,14 +74,14 @@ export function wireBoundaryInfoControls(
       tablet: {
         slot: 'right-bottom',
         modal: false,
-        width: '520px',
+        width: '340px',
         open: false,
         dismissible: false
       },
       desktop: {
         slot: 'right-bottom',
         modal: false,
-        width: '520px',
+        width: '340px',
         open: false,
         dismissible: false
       }

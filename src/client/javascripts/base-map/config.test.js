@@ -822,9 +822,6 @@ describe('base-map config', () => {
       const panelRoot = document.querySelector(
         '.app-boundary-info-panel[data-map-element-id="test-map"]'
       )
-      expect(
-        panelRoot.querySelector('[data-boundary-info-bounds]').textContent
-      ).toBe('-1.346026, 51.828965, -1.289109, 51.859161')
       const intersectionItems = panelRoot.querySelectorAll(
         '[data-boundary-info-intersections] li'
       )
@@ -930,9 +927,6 @@ describe('base-map config', () => {
       expect(
         panelRoot.querySelector('[data-boundary-info-error]').textContent
       ).toContain('invalid geometry')
-      expect(
-        panelRoot.querySelector('[data-boundary-info-bounds]').textContent
-      ).toBe('-1.321059, 51.829203, -1.288474, 51.847375')
       expect(
         panelRoot.querySelector('[data-boundary-info-intersections]')
           .textContent

@@ -25,14 +25,13 @@ function beginBoundaryValidation({
 
   map.showPanel?.(BOUNDARY_INFO_PANEL_ID)
   renderBoundaryPanel(mapElementId, {
-    summary: 'Validating boundary with backend',
-    loading: true
+    summary: 'Checking boundary...',
+    announce: 'Checking boundary'
   })
 
   if (!endpoint) {
     renderBoundaryPanel(mapElementId, {
-      summary: 'Boundary captured. Validation endpoint is not configured yet.',
-      loading: false
+      summary: 'Boundary captured. Validation endpoint is not configured yet.'
     })
     return false
   }
@@ -49,6 +48,8 @@ function renderBoundaryValidationResult({
   if (!validationResult.ok) {
     renderBoundaryPanel(mapElementId, {
       summary: 'Boundary validation failed.',
+      announce: 'Boundary validation failed',
+      focusHeading: true,
       error:
         validationResult.normalized.error ||
         `Validation request failed with status ${validationResult.status}`,
@@ -57,10 +58,15 @@ function renderBoundaryValidationResult({
     return
   }
 
+  const isValid = validationResult.normalized.isValid
   renderBoundaryPanel(mapElementId, {
-    summary: validationResult.normalized.isValid
+    summary: isValid
       ? 'Boundary validation passed.'
       : 'Boundary validation failed.',
+    announce: isValid
+      ? 'Boundary validation passed'
+      : 'Boundary validation failed',
+    focusHeading: true,
     results: validationResult.normalized,
     canContinue: Boolean(saveAndContinueUrl || onSaveAndContinue)
   })
@@ -125,6 +131,8 @@ export function createBoundaryValidationRunner({
 
       renderBoundaryPanel(mapElementId, {
         summary: 'Boundary validation could not be completed.',
+        announce: 'Boundary validation could not be completed',
+        focusHeading: true,
         error: error?.message || 'Unexpected validation error'
       })
     } finally {
