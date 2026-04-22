@@ -160,6 +160,38 @@ export function setControlOrder(plugin, id, order) {
   }
 }
 
+// Applies explicit slot/order placement per breakpoint so controls render in a
+// predictable visual position on every screen, not just within their current
+// slot.
+export function setControlPlacement(plugin, id, placementByBreakpoint = {}) {
+  const manifest = plugin?.manifest
+  if (!manifest) return
+
+  const breakpoints = ['mobile', 'tablet', 'desktop']
+
+  for (const key of ['controls', 'buttons']) {
+    const list = manifest[key]
+    if (!Array.isArray(list)) continue
+
+    const entry = list.find((item) => item?.id === id)
+    if (!entry) continue
+
+    for (const breakpoint of breakpoints) {
+      const descriptor = entry[breakpoint]
+      const placement = placementByBreakpoint[breakpoint]
+
+      if (!descriptor && !placement) {
+        continue
+      }
+
+      entry[breakpoint] = {
+        ...(descriptor || {}),
+        ...(placement || {})
+      }
+    }
+  }
+}
+
 export function runWhenMapStyleReady(mapInstance, callback) {
   if (mapInstance.isStyleLoaded()) {
     callback()

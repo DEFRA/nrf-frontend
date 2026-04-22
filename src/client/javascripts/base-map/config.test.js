@@ -311,7 +311,7 @@ describe('base-map config', () => {
       expect(searchPlugin).not.toHaveBeenCalled()
     })
 
-    it('sets an explicit order on the search control so it renders first in its slot', () => {
+    it('sets explicit breakpoint placement on the search control so it renders first on every screen', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
       document.body.appendChild(el)
@@ -343,12 +343,15 @@ describe('base-map config', () => {
       createMap({ mapElementId: 'test-map', showSearch: true })
 
       const control = searchPluginInstance.manifest.controls[0]
+      expect(control.mobile.slot).toBe('banner')
+      expect(control.tablet.slot).toBe('top-left')
+      expect(control.desktop.slot).toBe('top-left')
       expect(control.mobile.order).toBe(1)
       expect(control.tablet.order).toBe(1)
       expect(control.desktop.order).toBe(1)
     })
 
-    it('sets a higher order on the map-styles button than the search control when both are shown', () => {
+    it('keeps the map-styles button after the search control when both are shown', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
       document.body.appendChild(el)
@@ -398,11 +401,20 @@ describe('base-map config', () => {
 
       const searchControl = searchPluginInstance.manifest.controls[0]
       const stylesButton = mapStylesInstance.manifest.buttons[0]
-      for (const breakpoint of ['mobile', 'tablet', 'desktop']) {
-        expect(stylesButton[breakpoint].order).toBeGreaterThan(
-          searchControl[breakpoint].order
-        )
-      }
+      expect(searchControl.mobile.slot).toBe('banner')
+      expect(searchControl.mobile.order).toBe(1)
+      expect(stylesButton.mobile.slot).toBe('top-left')
+      expect(stylesButton.mobile.order).toBe(2)
+
+      expect(searchControl.tablet.slot).toBe('top-left')
+      expect(searchControl.tablet.order).toBe(1)
+      expect(stylesButton.tablet.slot).toBe('top-left')
+      expect(stylesButton.tablet.order).toBe(2)
+
+      expect(searchControl.desktop.slot).toBe('top-left')
+      expect(searchControl.desktop.order).toBe(1)
+      expect(stylesButton.desktop.slot).toBe('top-left')
+      expect(stylesButton.desktop.order).toBe(2)
     })
 
     it('does not re-order the map-styles button when search is not shown', () => {

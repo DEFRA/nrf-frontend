@@ -5,7 +5,7 @@ import {
   resolveDrawPlugin,
   resolveMapStylesPlugin,
   resolveSearchPlugin,
-  setControlOrder,
+  setControlPlacement,
   wireMapErrorLogging,
   wireSearchLabels
 } from './helpers.js'
@@ -22,11 +22,20 @@ import { wireLayerControls } from './layer-controls.js'
 import { createMapStyleRequestHooks } from './style-utils.js'
 import { getMapStyles, getStyleControlsManifest } from './styles.js'
 
-// Keeps search first in the `top-left` slot; both controls need an explicit
-// order so the library's slot sort is deterministic rather than registration-
-// order dependent.
+// Keeps search visually first on every screen by setting both its slot and
+// order explicitly for each breakpoint.
 const SEARCH_CONTROL_ORDER = 1
 const MAP_STYLES_BUTTON_ORDER = 2
+const SEARCH_CONTROL_PLACEMENT = {
+  mobile: { slot: 'banner', order: SEARCH_CONTROL_ORDER },
+  tablet: { slot: 'top-left', order: SEARCH_CONTROL_ORDER },
+  desktop: { slot: 'top-left', order: SEARCH_CONTROL_ORDER }
+}
+const MAP_STYLES_BUTTON_PLACEMENT = {
+  mobile: { slot: 'top-left', order: MAP_STYLES_BUTTON_ORDER },
+  tablet: { slot: 'top-left', order: MAP_STYLES_BUTTON_ORDER },
+  desktop: { slot: 'top-left', order: MAP_STYLES_BUTTON_ORDER }
+}
 
 export {
   DEFAULT_MAP_BOUNDS,
@@ -81,10 +90,10 @@ function resolvePlugins({
         expanded: true,
         ...searchPluginOptions
       })
-      setControlOrder(
+      setControlPlacement(
         searchPluginInstance,
         SEARCH_CONTROL_ID,
-        SEARCH_CONTROL_ORDER
+        SEARCH_CONTROL_PLACEMENT
       )
       plugins.push(searchPluginInstance)
     }
@@ -98,10 +107,10 @@ function resolvePlugins({
         manifest: getStyleControlsManifest()
       })
       if (showSearch) {
-        setControlOrder(
+        setControlPlacement(
           mapStylesInstance,
           MAP_STYLES_BUTTON_ID,
-          MAP_STYLES_BUTTON_ORDER
+          MAP_STYLES_BUTTON_PLACEMENT
         )
       }
       plugins.push(mapStylesInstance)

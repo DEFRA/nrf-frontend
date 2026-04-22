@@ -5,6 +5,7 @@ import {
   logWarning,
   parseDatasetJson,
   patchFetchForSearchPlugin,
+  setControlPlacement,
   runWhenMapStyleReady,
   setControlOrder,
   wireMapErrorLogging,
@@ -361,6 +362,132 @@ describe('base-map helpers', () => {
       expect(plugin.manifest.controls[0].desktop.order).toBe(1)
       expect(plugin.manifest.controls[0].mobile).toBeUndefined()
       expect(plugin.manifest.controls[0].tablet).toBeUndefined()
+    })
+  })
+
+  describe('setControlPlacement', () => {
+    function makeSearchPlugin() {
+      return {
+        manifest: {
+          controls: [
+            {
+              id: 'search',
+              mobile: { slot: 'top-right', showLabel: false },
+              tablet: { slot: 'top-left', showLabel: false },
+              desktop: { slot: 'top-left', showLabel: false }
+            }
+          ]
+        }
+      }
+    }
+
+    function makeStylesPlugin() {
+      return {
+        manifest: {
+          buttons: [
+            {
+              id: 'mapStyles',
+              mobile: { slot: 'top-left' },
+              tablet: { slot: 'top-left' },
+              desktop: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+    }
+
+    it('overrides slot and order on all breakpoint descriptors of a matching control id', () => {
+      const plugin = makeSearchPlugin()
+
+      setControlPlacement(plugin, 'search', {
+        mobile: { slot: 'banner', order: 1 },
+        tablet: { slot: 'top-left', order: 1 },
+        desktop: { slot: 'top-left', order: 1 }
+      })
+
+      expect(plugin.manifest.controls[0].mobile).toEqual(
+        expect.objectContaining({ slot: 'banner', showLabel: false, order: 1 })
+      )
+      expect(plugin.manifest.controls[0].tablet).toEqual(
+        expect.objectContaining({
+          slot: 'top-left',
+          showLabel: false,
+          order: 1
+        })
+      )
+      expect(plugin.manifest.controls[0].desktop).toEqual(
+        expect.objectContaining({
+          slot: 'top-left',
+          showLabel: false,
+          order: 1
+        })
+      )
+    })
+
+    it('overrides slot and order on all breakpoint descriptors of a matching button id', () => {
+      const plugin = makeStylesPlugin()
+
+      setControlPlacement(plugin, 'mapStyles', {
+        mobile: { slot: 'top-left', order: 2 },
+        tablet: { slot: 'top-left', order: 2 },
+        desktop: { slot: 'top-left', order: 2 }
+      })
+
+      expect(plugin.manifest.buttons[0].mobile).toEqual(
+        expect.objectContaining({ slot: 'top-left', order: 2 })
+      )
+      expect(plugin.manifest.buttons[0].tablet).toEqual(
+        expect.objectContaining({ slot: 'top-left', order: 2 })
+      )
+      expect(plugin.manifest.buttons[0].desktop).toEqual(
+        expect.objectContaining({ slot: 'top-left', order: 2 })
+      )
+    })
+
+    it('adds missing breakpoint descriptors from the provided placement', () => {
+      const plugin = {
+        manifest: {
+          controls: [
+            {
+              id: 'search',
+              tablet: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+
+      setControlPlacement(plugin, 'search', {
+        mobile: { slot: 'banner', order: 1 },
+        tablet: { slot: 'top-left', order: 1 },
+        desktop: { slot: 'top-left', order: 1 }
+      })
+
+      expect(plugin.manifest.controls[0].mobile).toEqual({
+        slot: 'banner',
+        order: 1
+      })
+      expect(plugin.manifest.controls[0].tablet).toEqual({
+        slot: 'top-left',
+        order: 1
+      })
+      expect(plugin.manifest.controls[0].desktop).toEqual({
+        slot: 'top-left',
+        order: 1
+      })
+    })
+
+    it('is a no-op when plugin is null or has no manifest', () => {
+      expect(() =>
+        setControlPlacement(null, 'search', { mobile: { slot: 'banner' } })
+      ).not.toThrow()
+      expect(() =>
+        setControlPlacement({}, 'search', { mobile: { slot: 'banner' } })
+      ).not.toThrow()
+      expect(() =>
+        setControlPlacement({ manifest: {} }, 'search', {
+          mobile: { slot: 'banner' }
+        })
+      ).not.toThrow()
     })
   })
 })
