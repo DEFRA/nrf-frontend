@@ -1,4 +1,5 @@
 import { createMap } from './base-map/config.js'
+import { BOUNDARY_MAP_MAX_ZOOM } from './base-map/constants.js'
 import {
   getDrawMapContainerHeight,
   parseDatasetJson
@@ -165,7 +166,8 @@ document.addEventListener('DOMContentLoaded', function () {
       maxBounds: UK_BOUNDS,
       bounds: bounds || null,
       center: existingBoundaryMetadata?.centre || DEFAULT_CENTER,
-      zoom: DEFAULT_ZOOM
+      zoom: DEFAULT_ZOOM,
+      maxZoom: BOUNDARY_MAP_MAX_ZOOM
     }
   })
 })

@@ -124,7 +124,7 @@ describe('boundary-map init', () => {
     )
   })
 
-  it('creates map and fits to UK bounds when geojson parses to null', async () => {
+  it('creates map without boundary source when geojson parses to null', async () => {
     createMapElement('null')
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -138,13 +138,7 @@ describe('boundary-map init', () => {
       'boundary',
       expect.anything()
     )
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-5.75, 49.95],
-        [1.8, 55.85]
-      ],
-      { padding: 20 }
-    )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
   it('does nothing when defra global is undefined', async () => {
@@ -232,13 +226,7 @@ describe('boundary-map init', () => {
       data: validGeojson
     })
     expect(mapInstance.addLayer).toHaveBeenCalledTimes(2)
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-1.5, 52.0],
-        [-1.4, 52.1]
-      ],
-      { padding: 40, maxZoom: 15 }
-    )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
   it('waits for style.load when style is not yet loaded', async () => {
@@ -293,13 +281,11 @@ describe('boundary-map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-1.5, 52.0],
-        [-1.5, 52.0]
-      ],
-      { padding: 40, maxZoom: 15 }
+    expect(mapInstance.addSource).toHaveBeenCalledWith(
+      'boundary',
+      expect.objectContaining({ type: 'geojson', data: singleGeometry })
     )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
   it('handles nested coordinate arrays (MultiPolygon)', async () => {
@@ -334,13 +320,11 @@ describe('boundary-map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-2.0, 51.0],
-        [-1.0, 53.0]
-      ],
-      { padding: 40, maxZoom: 15 }
+    expect(mapInstance.addSource).toHaveBeenCalledWith(
+      'boundary',
+      expect.objectContaining({ type: 'geojson', data: multiPolygon })
     )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
   it('handles empty features array without calling fitBounds', async () => {
@@ -495,13 +479,11 @@ describe('boundary-map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-3.0, 50.0],
-        [0.0, 53.0]
-      ],
-      { maxZoom: 15, padding: 40 }
+    expect(mapInstance.addSource).toHaveBeenCalledWith(
+      'boundary',
+      expect.objectContaining({ type: 'geojson', data: multiFeature })
     )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
   it('handles bare geometry object without features or geometry wrapper', async () => {
@@ -525,12 +507,10 @@ describe('boundary-map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.fitBounds).toHaveBeenCalledWith(
-      [
-        [-1.0, 51.0],
-        [-0.5, 51.5]
-      ],
-      { maxZoom: 15, padding: 40 }
+    expect(mapInstance.addSource).toHaveBeenCalledWith(
+      'boundary',
+      expect.objectContaining({ type: 'geojson', data: bareGeometry })
     )
+    expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 })
