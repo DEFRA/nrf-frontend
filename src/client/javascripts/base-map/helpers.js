@@ -1,5 +1,6 @@
 const MIN_MAP_HEIGHT = 320
 const MAP_BOTTOM_GAP = 16
+const EMPTY_OBJECT = {}
 
 export function logWarning(message, error = '') {
   console.warn(message, error)
@@ -87,6 +88,9 @@ export function patchFetchForSearchPlugin() {
     return original(input, init)
   }
   patched.__patchedForSearchPlugin = true
+  if (globalThis.fetch?.__searchErrorWatcher) {
+    patched.__searchErrorWatcher = true
+  }
   globalThis.fetch = patched
 }
 
@@ -111,7 +115,7 @@ export function wireSearchLabels(
 ) {
   const applyLabels = () => {
     const mapEl = document.getElementById(mapElementId)
-    const input = mapEl?.querySelector('.im-c-search__input')
+    const input = mapEl?.querySelector(SEARCH_INPUT_SELECTOR)
     if (!input) {
       return false
     }
@@ -148,32 +152,47 @@ export function wireSearchLabels(
   map.on('app:ready', tryApply)
 }
 
-// Shows a plain-English error banner when the /os-names-search proxy returns a
-// non-OK response or the network call rejects.
-export function wireSearchErrorBanner(
-  map,
-  mapElementId,
-  errorText = 'Sorry, we could not search for that location. Try again later.',
-  searchPath = '/os-names-search'
-) {
-  const BANNER_CLASS = 'app-c-search-error'
-  const BANNER_ID = 'app-c-search-error'
+const SEARCH_INPUT_SELECTOR = '.im-c-search__input'
+const SEARCH_BANNER_CLASS = 'app-c-search-error'
+const SEARCH_BANNER_ID = 'app-c-search-error'
+const SEARCH_BANNER_REGISTRY_KEY = '__searchErrorBannerRegistry'
 
+function getSearchBannerRegistry() {
+  if (!(globalThis[SEARCH_BANNER_REGISTRY_KEY] instanceof Map)) {
+    globalThis[SEARCH_BANNER_REGISTRY_KEY] = new Map()
+  }
+  return globalThis[SEARCH_BANNER_REGISTRY_KEY]
+}
+
+function resolveSearchRequestUrl(input) {
+  if (typeof input === 'string') {
+    return input
+  }
+  if (input instanceof Request) {
+    return input.url
+  }
+  if (input && typeof input === 'object' && typeof input.url === 'string') {
+    return input.url
+  }
+  return null
+}
+
+function createBannerEntry(mapElementId, errorText) {
   // Screen readers announce aria-describedby text when the referenced control
   // is focused.
   const linkInputToBanner = (mapEl, link) => {
-    const input = mapEl.querySelector('.im-c-search__input')
+    const input = mapEl.querySelector(SEARCH_INPUT_SELECTOR)
     if (!input) {
       return
     }
     const existing = input.getAttribute('aria-describedby')
     const ids = existing ? existing.split(/\s+/).filter(Boolean) : []
-    const hasId = ids.includes(BANNER_ID)
+    const hasId = ids.includes(SEARCH_BANNER_ID)
     if (link && !hasId) {
-      ids.push(BANNER_ID)
+      ids.push(SEARCH_BANNER_ID)
       input.setAttribute('aria-describedby', ids.join(' '))
     } else if (!link && hasId) {
-      const next = ids.filter((id) => id !== BANNER_ID)
+      const next = ids.filter((id) => id !== SEARCH_BANNER_ID)
       if (next.length) {
         input.setAttribute('aria-describedby', next.join(' '))
       } else {
@@ -182,37 +201,20 @@ export function wireSearchErrorBanner(
     }
   }
 
-  const resolveUrl = (input) => {
-    if (typeof input === 'string') {
-      return input
-    }
-    if (input instanceof Request) {
-      return input.url
-    }
-    if (input && typeof input === 'object' && typeof input.url === 'string') {
-      return input.url
-    }
-    return null
-  }
-
-  const isSearchUrl = (url) =>
-    typeof url === 'string' &&
-    (url === searchPath || url.startsWith(`${searchPath}?`))
-
   const ensureBanner = () => {
     const mapEl = document.getElementById(mapElementId)
     if (!mapEl) {
       return null
     }
-    let banner = mapEl.querySelector(`.${BANNER_CLASS}`)
+    let banner = mapEl.querySelector(`.${SEARCH_BANNER_CLASS}`)
     if (banner) {
       return banner
     }
     banner = document.createElement('div')
-    banner.id = BANNER_ID
+    banner.id = SEARCH_BANNER_ID
     banner.setAttribute('role', 'alert')
     banner.setAttribute('aria-live', 'polite')
-    banner.className = BANNER_CLASS
+    banner.className = SEARCH_BANNER_CLASS
     banner.hidden = true
     banner.textContent = errorText
     const form = mapEl.querySelector('.im-c-search-form')
@@ -226,18 +228,19 @@ export function wireSearchErrorBanner(
 
   const showError = () => {
     const banner = ensureBanner()
-    if (banner) {
-      banner.hidden = false
-      const mapEl = document.getElementById(mapElementId)
-      if (mapEl) {
-        linkInputToBanner(mapEl, true)
-      }
+    if (!banner) {
+      return
+    }
+    banner.hidden = false
+    const mapEl = document.getElementById(mapElementId)
+    if (mapEl) {
+      linkInputToBanner(mapEl, true)
     }
   }
 
   const hideError = () => {
     const mapEl = document.getElementById(mapElementId)
-    const banner = mapEl?.querySelector(`.${BANNER_CLASS}`)
+    const banner = mapEl?.querySelector(`.${SEARCH_BANNER_CLASS}`)
     if (banner) {
       banner.hidden = true
     }
@@ -246,35 +249,75 @@ export function wireSearchErrorBanner(
     }
   }
 
-  if (!globalThis.fetch?.__searchErrorWatcher) {
-    const original = globalThis.fetch?.bind(globalThis)
-    if (original) {
-      const watcher = async function (input, init) {
-        const url = resolveUrl(input)
-        const watched = isSearchUrl(url)
-        try {
-          const res = await original(input, init)
-          if (watched) {
-            if (res.ok) {
-              hideError()
-            } else {
-              showError()
-            }
-          }
-          return res
-        } catch (err) {
-          if (watched) {
-            showError()
-          }
-          throw err
-        }
-      }
-      watcher.__searchErrorWatcher = true
-      globalThis.fetch = watcher
-    }
+  return { mapElementId, ensureBanner, showError, hideError }
+}
+
+function installSearchErrorWatcher(searchPath) {
+  if (globalThis.fetch?.__searchErrorWatcher) {
+    return
+  }
+  const original = globalThis.fetch?.bind(globalThis)
+  if (!original) {
+    return
   }
 
-  map.on('app:ready', ensureBanner)
+  const isSearchUrl = (url) =>
+    typeof url === 'string' &&
+    (url === searchPath || url.startsWith(`${searchPath}?`))
+
+  const watcher = async function (input, init) {
+    const url = resolveSearchRequestUrl(input)
+    const watched = isSearchUrl(url)
+    const entries = [...getSearchBannerRegistry().values()]
+    const activeElement = document.activeElement
+    const targetEntry =
+      entries.find((e) =>
+        document.getElementById(e.mapElementId)?.contains(activeElement)
+      ) || null
+
+    const notifyError = () =>
+      targetEntry
+        ? targetEntry.showError()
+        : entries.forEach((e) => e.showError())
+    const notifyHide = () =>
+      targetEntry
+        ? targetEntry.hideError()
+        : entries.forEach((e) => e.hideError())
+
+    let res
+    try {
+      res = await original(input, init)
+    } catch (err) {
+      if (watched) {
+        notifyError()
+      }
+      throw err
+    }
+
+    if (watched) {
+      res.ok ? notifyHide() : notifyError()
+    }
+    return res
+  }
+  watcher.__searchErrorWatcher = true
+  if (globalThis.fetch?.__patchedForSearchPlugin) {
+    watcher.__patchedForSearchPlugin = true
+  }
+  globalThis.fetch = watcher
+}
+
+// Shows a plain-English error banner when the /os-names-search proxy returns a
+// non-OK response or the network call rejects.
+export function wireSearchErrorBanner(
+  map,
+  mapElementId,
+  errorText = 'Sorry, we could not search for that location. Try again later.',
+  searchPath = '/os-names-search'
+) {
+  const entry = createBannerEntry(mapElementId, errorText)
+  getSearchBannerRegistry().set(mapElementId, entry)
+  installSearchErrorWatcher(searchPath)
+  map.on('app:ready', entry.ensureBanner)
 }
 
 // Removes the active search marker as soon as the user starts editing.
@@ -292,7 +335,7 @@ export function wireSearchMarkerReset(map, mapElementId) {
 
   const bindInputListener = () => {
     const mapEl = document.getElementById(mapElementId)
-    const input = mapEl?.querySelector('.im-c-search__input')
+    const input = mapEl?.querySelector(SEARCH_INPUT_SELECTOR)
     if (!input || input.__searchMarkerResetBound) {
       return Boolean(input)
     }
@@ -312,7 +355,7 @@ export function wireSearchMarkerReset(map, mapElementId) {
     hasActiveSearchMarker = false
   })
 
-  map.on('app:ready', function (event = {}) {
+  map.on('app:ready', function (event = EMPTY_OBJECT) {
     removeSearchMarker =
       event?.mapProvider?.markers?.remove?.bind(event.mapProvider.markers) ||
       null
@@ -336,10 +379,11 @@ export function wireSearchMarkerReset(map, mapElementId) {
   })
 }
 
-// Applies explicit slot/order placement per breakpoint so controls render in a
-// predictable visual position on every screen, not just within their current
-// slot.
-export function setControlPlacement(plugin, id, placementByBreakpoint = {}) {
+export function setControlPlacement(
+  plugin,
+  id,
+  placementByBreakpoint = EMPTY_OBJECT
+) {
   const manifest = plugin?.manifest
   if (!manifest) {
     return
@@ -367,8 +411,8 @@ export function setControlPlacement(plugin, id, placementByBreakpoint = {}) {
       }
 
       entry[breakpoint] = {
-        ...(descriptor || {}),
-        ...(placement || {})
+        ...(descriptor || EMPTY_OBJECT),
+        ...(placement || EMPTY_OBJECT)
       }
     }
   }
@@ -377,10 +421,9 @@ export function setControlPlacement(plugin, id, placementByBreakpoint = {}) {
 export function runWhenMapStyleReady(mapInstance, callback) {
   if (mapInstance.isStyleLoaded()) {
     callback()
-    return
+  } else {
+    mapInstance.once('style.load', callback)
   }
-
-  mapInstance.once('style.load', callback)
 }
 
 export function wireMapErrorLogging(

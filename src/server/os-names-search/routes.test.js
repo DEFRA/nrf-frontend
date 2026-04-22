@@ -85,6 +85,24 @@ describe('os-names-search proxy routes', () => {
     expect(h._response.type).toHaveBeenCalledWith('application/json')
   })
 
+  it('does not log the raw search query on successful upstream responses', async () => {
+    server.use(
+      http.get('https://api.os.uk/search/names/v1/find', () =>
+        HttpResponse.json({ results: [] })
+      )
+    )
+
+    const h = createMockH()
+    await handler(createMockRequest({ query: '10 Downing Street, London' }), h)
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('OS Names proxy:')
+    )
+    expect(mockLogger.info).not.toHaveBeenCalledWith(
+      expect.stringContaining('10 Downing Street, London')
+    )
+  })
+
   it('returns a stable error shape for upstream errors, not upstream body', async () => {
     server.use(
       http.get('https://api.os.uk/search/names/v1/find', () =>

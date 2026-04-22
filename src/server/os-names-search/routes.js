@@ -60,7 +60,7 @@ const searchHandler = {
       }
 
       logger.info(
-        `OS Names proxy: "${query}" ${res.status} ${body.length} chars (${duration}ms)`
+        `OS Names proxy: ${res.status} ${body.length} chars (${duration}ms)`
       )
       return h
         .response(body)

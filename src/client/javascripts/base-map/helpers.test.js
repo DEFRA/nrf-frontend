@@ -166,10 +166,12 @@ describe('base-map helpers', () => {
     beforeEach(() => {
       originalFetch = vi.fn().mockResolvedValue({ ok: true })
       globalThis.fetch = originalFetch
+      delete globalThis.__searchErrorBannerRegistry
     })
 
     afterEach(() => {
       globalThis.fetch = originalFetch
+      delete globalThis.__searchErrorBannerRegistry
     })
 
     it('unwraps { url, options } objects before calling native fetch', async () => {
@@ -200,6 +202,20 @@ describe('base-map helpers', () => {
       await globalThis.fetch({ url: '/test', options: { method: 'GET' } })
       expect(originalFetch).toHaveBeenCalledTimes(1)
       expect(originalFetch).toHaveBeenCalledWith('/test', { method: 'GET' })
+    })
+
+    it('does not wrap again after the search error watcher has been attached', async () => {
+      const map = {
+        on: vi.fn()
+      }
+
+      patchFetchForSearchPlugin()
+      wireSearchErrorBanner(map, 'test-map')
+      const watchedFetch = globalThis.fetch
+
+      patchFetchForSearchPlugin()
+
+      expect(globalThis.fetch).toBe(watchedFetch)
     })
   })
 
@@ -274,11 +290,13 @@ describe('base-map helpers', () => {
 
     beforeEach(() => {
       originalFetch = globalThis.fetch
+      delete globalThis.__searchErrorBannerRegistry
     })
 
     afterEach(() => {
       document.body.innerHTML = ''
       globalThis.fetch = originalFetch
+      delete globalThis.__searchErrorBannerRegistry
     })
 
     function mountSearchContainer(containerId, { withInput = false } = {}) {
@@ -398,6 +416,45 @@ describe('base-map helpers', () => {
       const firstPatched = globalThis.fetch
       wireSearchErrorBanner(map, 'test-map')
       expect(globalThis.fetch).toBe(firstPatched)
+    })
+
+    it('shows the banner on the active map when more than one searchable map exists', async () => {
+      const first = mountSearchContainer('first-map', { withInput: true })
+      const second = mountSearchContainer('second-map', { withInput: true })
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 })
+
+      const firstMap = makeMap()
+      const secondMap = makeMap()
+      wireSearchErrorBanner(firstMap, 'first-map')
+      wireSearchErrorBanner(secondMap, 'second-map')
+      firstMap.fire('app:ready')
+      secondMap.fire('app:ready')
+
+      second.querySelector('.im-c-search__input').focus()
+      await globalThis.fetch('/os-names-search?query=york')
+
+      expect(first.querySelector('.app-c-search-error').hidden).toBe(true)
+      expect(second.querySelector('.app-c-search-error').hidden).toBe(false)
+    })
+
+    it('reuses the current registry when a second map is initialised later', async () => {
+      const first = mountSearchContainer('first-map', { withInput: true })
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 })
+
+      const firstMap = makeMap()
+      wireSearchErrorBanner(firstMap, 'first-map')
+      firstMap.fire('app:ready')
+
+      const second = mountSearchContainer('second-map', { withInput: true })
+      const secondMap = makeMap()
+      wireSearchErrorBanner(secondMap, 'second-map')
+      secondMap.fire('app:ready')
+
+      second.querySelector('.im-c-search__input').focus()
+      await globalThis.fetch('/os-names-search?query=york')
+
+      expect(first.querySelector('.app-c-search-error').hidden).toBe(true)
+      expect(second.querySelector('.app-c-search-error').hidden).toBe(false)
     })
 
     it('accepts a custom error message', async () => {
