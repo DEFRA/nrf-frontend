@@ -387,7 +387,7 @@ export function wireLayerControls(map, { mapElementId, layerControlOptions }) {
     map.addPanel(LAYERS_PANEL_ID, {
       label: 'Layers',
       html: buildLayersPanelHtml(mapElementId, layerControlOptions),
-      mobile: { slot: 'bottom', modal: true, open: false },
+      mobile: { slot: 'drawer', modal: true, open: false },
       tablet: {
         slot: 'left-top',
         modal: false,

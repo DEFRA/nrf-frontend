@@ -210,9 +210,8 @@ export function wireSearchErrorBanner(
     }
     banner = document.createElement('div')
     banner.id = BANNER_ID
-    // role="alert" implies aria-live="assertive"; don't also set aria-live,
-    // otherwise some screen readers announce twice or contradict the role.
     banner.setAttribute('role', 'alert')
+    banner.setAttribute('aria-live', 'polite')
     banner.className = BANNER_CLASS
     banner.hidden = true
     banner.textContent = errorText
@@ -276,6 +275,65 @@ export function wireSearchErrorBanner(
   }
 
   map.on('app:ready', ensureBanner)
+}
+
+// Removes the active search marker as soon as the user starts editing.
+export function wireSearchMarkerReset(map, mapElementId) {
+  let hasActiveSearchMarker = false
+  let removeSearchMarker = null
+
+  const clearActiveSearchMarker = () => {
+    if (!hasActiveSearchMarker) {
+      return
+    }
+    removeSearchMarker?.('search')
+    hasActiveSearchMarker = false
+  }
+
+  const bindInputListener = () => {
+    const mapEl = document.getElementById(mapElementId)
+    const input = mapEl?.querySelector('.im-c-search__input')
+    if (!input || input.__searchMarkerResetBound) {
+      return Boolean(input)
+    }
+
+    input.addEventListener('input', () => {
+      clearActiveSearchMarker()
+    })
+    input.__searchMarkerResetBound = true
+    return true
+  }
+
+  map.on('search:match', () => {
+    hasActiveSearchMarker = true
+  })
+
+  map.on('search:clear', () => {
+    hasActiveSearchMarker = false
+  })
+
+  map.on('app:ready', function (event = {}) {
+    removeSearchMarker =
+      event?.mapProvider?.markers?.remove?.bind(event.mapProvider.markers) ||
+      null
+
+    if (bindInputListener()) {
+      return
+    }
+
+    const mapEl = document.getElementById(mapElementId)
+    const MO = globalThis.MutationObserver
+    if (!mapEl || typeof MO !== 'function') {
+      return
+    }
+
+    const observer = new MO(() => {
+      if (bindInputListener()) {
+        observer.disconnect()
+      }
+    })
+    observer.observe(mapEl, { childList: true, subtree: true })
+  })
 }
 
 // Applies explicit slot/order placement per breakpoint so controls render in a

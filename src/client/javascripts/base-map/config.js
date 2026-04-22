@@ -8,6 +8,7 @@ import {
   setControlPlacement,
   wireMapErrorLogging,
   wireSearchErrorBanner,
+  wireSearchMarkerReset,
   wireSearchLabels
 } from './helpers.js'
 import {
@@ -197,6 +198,7 @@ function wireOptionalMapFeatures({
   if (showSearch) {
     wireSearchLabels(map, elementId)
     wireSearchErrorBanner(map, elementId)
+    wireSearchMarkerReset(map, elementId)
   }
 }
 

@@ -9,6 +9,7 @@ import {
   setControlPlacement,
   wireMapErrorLogging,
   wireSearchErrorBanner,
+  wireSearchMarkerReset,
   wireSearchLabels
 } from './helpers.js'
 
@@ -320,6 +321,7 @@ describe('base-map helpers', () => {
       expect(banner).not.toBeNull()
       expect(banner.hidden).toBe(false)
       expect(banner.getAttribute('role')).toBe('alert')
+      expect(banner.getAttribute('aria-live')).toBe('polite')
       expect(banner.textContent).toContain('could not search')
     })
 
@@ -462,6 +464,114 @@ describe('base-map helpers', () => {
       expect(input.getAttribute('aria-describedby')).toBe(
         'other-hint app-c-search-error'
       )
+    })
+  })
+
+  describe('wireSearchMarkerReset', () => {
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    function mountSearchContainer(containerId) {
+      const container = document.createElement('div')
+      container.id = containerId
+      container.innerHTML = `
+        <form class="im-c-search-form">
+          <input class="im-c-search__input" id="map-search" />
+        </form>
+      `
+      document.body.appendChild(container)
+      return container
+    }
+
+    function makeMap() {
+      const handlers = {}
+      return {
+        on: vi.fn((event, cb) => {
+          handlers[event] = cb
+        }),
+        fire: (event, payload) => handlers[event]?.(payload)
+      }
+    }
+
+    it('removes the active search marker when the user clears the search input', () => {
+      mountSearchContainer('test-map')
+      const remove = vi.fn()
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'test-map')
+      map.fire('app:ready', {
+        mapProvider: {
+          markers: { remove }
+        }
+      })
+      map.fire('search:match', { query: 'York' })
+
+      const input = document.querySelector('.im-c-search__input')
+      input.value = ''
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(remove).toHaveBeenCalledWith('search')
+    })
+
+    it('removes the active search marker when the user types a new query', () => {
+      mountSearchContainer('test-map')
+      const remove = vi.fn()
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'test-map')
+      map.fire('app:ready', {
+        mapProvider: {
+          markers: { remove }
+        }
+      })
+      map.fire('search:match', { query: 'York' })
+
+      const input = document.querySelector('.im-c-search__input')
+      input.value = 'Leeds'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(remove).toHaveBeenCalledWith('search')
+    })
+
+    it('does not remove the marker before any result has been selected', () => {
+      mountSearchContainer('test-map')
+      const remove = vi.fn()
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'test-map')
+      map.fire('app:ready', {
+        mapProvider: {
+          markers: { remove }
+        }
+      })
+
+      const input = document.querySelector('.im-c-search__input')
+      input.value = 'Leeds'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(remove).not.toHaveBeenCalled()
+    })
+
+    it('resets its active state when the plugin emits search:clear', () => {
+      mountSearchContainer('test-map')
+      const remove = vi.fn()
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'test-map')
+      map.fire('app:ready', {
+        mapProvider: {
+          markers: { remove }
+        }
+      })
+      map.fire('search:match', { query: 'York' })
+      map.fire('search:clear')
+
+      const input = document.querySelector('.im-c-search__input')
+      input.value = 'Leeds'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(remove).not.toHaveBeenCalled()
     })
   })
 
