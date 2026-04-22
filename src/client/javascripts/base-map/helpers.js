@@ -200,6 +200,8 @@ function createBannerEntry(mapElementId, errorText) {
       } else {
         input.removeAttribute(ARIA_DESCRIBEDBY)
       }
+    } else {
+      // already in the desired state
     }
   }
 
@@ -394,24 +396,27 @@ export function setControlPlacement(
 
   const breakpoints = ['mobile', 'tablet', 'desktop']
 
+  const applyBreakpoints = (entry) => {
+    for (const breakpoint of breakpoints) {
+      const descriptor = entry[breakpoint]
+      const placement = placementByBreakpoint[breakpoint]
+      if (descriptor || placement) {
+        entry[breakpoint] = {
+          ...(descriptor || EMPTY_OBJECT),
+          ...(placement || EMPTY_OBJECT)
+        }
+      }
+    }
+  }
+
   for (const key of ['controls', 'buttons']) {
     const list = manifest[key]
     if (!Array.isArray(list)) {
       continue
     }
-
     const entry = list.find((item) => item?.id === id)
     if (entry) {
-      for (const breakpoint of breakpoints) {
-        const descriptor = entry[breakpoint]
-        const placement = placementByBreakpoint[breakpoint]
-        if (descriptor || placement) {
-          entry[breakpoint] = {
-            ...(descriptor || EMPTY_OBJECT),
-            ...(placement || EMPTY_OBJECT)
-          }
-        }
-      }
+      applyBreakpoints(entry)
     }
   }
 }
