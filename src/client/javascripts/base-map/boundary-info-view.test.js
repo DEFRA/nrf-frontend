@@ -19,32 +19,76 @@ describe('boundary-info-view', () => {
     expect(html).toContain('data-map-element-id="map-1"')
     expect(html).toContain('Draw a boundary to validate it.')
     expect(html).toContain('Not available')
+    expect(html).toContain('role="status"')
   })
 
-  it('renders panel with results and enables save when continuation is allowed', () => {
-    document.body.innerHTML = buildBoundaryInfoPanelHtml('map-2')
+  it('renders panel with results, announces status, and focuses heading', () => {
+    document.body.innerHTML = `
+      <div id="test-panel-boundary-info">
+        <h2>Boundary information</h2>
+        ${buildBoundaryInfoPanelHtml('map-2')}
+      </div>`
+
+    const panel = document.querySelector('[data-map-element-id="map-2"]')
+    const headingEl = document.querySelector('#test-panel-boundary-info h2')
+    const focusSpy = vi.spyOn(headingEl, 'focus')
 
     renderBoundaryPanel('map-2', {
-      summary: 'Boundary validation passed.',
+      summary: '',
+      announce: 'Boundary is valid',
+      focusHeading: true,
       results: {
         isValid: true,
-        bounds: [1, 2, 3, 4],
+        area: { hectares: 3897.19, acres: 9630.2 },
+        perimeter: { kilometres: 29.26, miles: 18.18 },
         intersectingEdps: ['EDP 1']
       },
       canContinue: true
     })
 
-    const panel = document.querySelector('[data-map-element-id="map-2"]')
     const summary = panel.querySelector('[data-boundary-info-summary]')
+    const statusEl = panel.querySelector('[data-boundary-info-status]')
     const saveButton = panel.querySelector(
       `[data-boundary-action="${BOUNDARY_ACTION_SAVE}"]`
     )
     const listItems = panel.querySelectorAll('li')
+    const edpsEl = panel.querySelector('[data-boundary-info-edps]')
 
-    expect(summary.textContent).toContain('Boundary validation passed.')
+    expect(summary.hidden).toBe(true)
+    expect(statusEl.textContent).toBe('Boundary is valid')
+    expect(focusSpy).toHaveBeenCalled()
     expect(saveButton.hidden).toBe(false)
     expect(saveButton.disabled).toBe(false)
     expect(listItems).toHaveLength(1)
+    expect(edpsEl.hidden).toBe(false)
+    expect(panel.querySelector('[data-boundary-info-area]').textContent).toBe(
+      '3897.19ha (9630.2acres)'
+    )
+    expect(
+      panel.querySelector('[data-boundary-info-perimeter]').textContent
+    ).toBe('29.26km (18.18mi)')
+  })
+
+  it('announces status without focusing heading when focusHeading is not set', () => {
+    document.body.innerHTML = `
+      <div id="test-panel-boundary-info">
+        <h2>Boundary information</h2>
+        ${buildBoundaryInfoPanelHtml('map-2b')}
+      </div>`
+
+    const headingEl = document.querySelector('#test-panel-boundary-info h2')
+    const focusSpy = vi.spyOn(headingEl, 'focus')
+
+    renderBoundaryPanel('map-2b', {
+      summary: 'Checking boundary...',
+      announce: 'Checking boundary'
+    })
+
+    const panel = document.querySelector('[data-map-element-id="map-2b"]')
+    expect(panel.querySelector('[data-boundary-info-status]').textContent).toBe(
+      'Checking boundary'
+    )
+    expect(focusSpy).not.toHaveBeenCalled()
   })
 
   it('invokes custom onSaveAndContinue callback with state', () => {

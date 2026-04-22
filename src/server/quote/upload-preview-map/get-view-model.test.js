@@ -176,4 +176,38 @@ describe('getViewModel', () => {
 
     expect(result.boundaryFilename).toBeNull()
   })
+
+  it('should JSON-stringify boundaryMetadata as existingBoundaryMetadata', () => {
+    const boundaryMetadata = {
+      centre: [1.29, 51.2],
+      bounds: {
+        topLeft: [1.29, 51.0],
+        topRight: [1.44, 52.69],
+        bottomRight: [1.3, 50.59],
+        bottomLeft: [1.43, 52.68]
+      }
+    }
+
+    const result = getViewModel({
+      boundaryGeometryWgs84: null,
+      intersectingEdps: [],
+      boundaryMetadata
+    })
+
+    expect(result.existingBoundaryMetadata).toBe(
+      JSON.stringify(boundaryMetadata)
+    )
+  })
+
+  it('should return JSON-stringified null as existingBoundaryMetadata when not present', () => {
+    const result = getViewModel({})
+
+    expect(result.existingBoundaryMetadata).toBe(JSON.stringify(null))
+  })
+
+  it('should return JSON-stringified null as existingBoundaryMetadata when boundaryGeojson is null', () => {
+    const result = getViewModel(null)
+
+    expect(result.existingBoundaryMetadata).toBe(JSON.stringify(null))
+  })
 })
