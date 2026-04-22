@@ -66,9 +66,13 @@ export function resolveDrawPlugin(defraApi) {
 // once to unwrap that specific shape before it hits the network stack.
 // Guarded so re-initialising a map in the same session does not stack wrappers.
 export function patchFetchForSearchPlugin() {
-  if (globalThis.fetch?.__patchedForSearchPlugin) return
+  if (globalThis.fetch?.__patchedForSearchPlugin) {
+    return
+  }
   const original = globalThis.fetch?.bind(globalThis)
-  if (!original) return
+  if (!original) {
+    return
+  }
 
   const patched = function (input, init) {
     if (
@@ -123,12 +127,16 @@ export function wireSearchLabels(
   }
 
   const tryApply = () => {
-    if (applyLabels()) return
+    if (applyLabels()) {
+      return
+    }
     // Plugin may mount the input lazily (expanded=false renders an "Open search"
     // button first). Observe the map container for its arrival.
     const mapEl = document.getElementById(mapElementId)
     const MO = globalThis.MutationObserver
-    if (!mapEl || typeof MO !== 'function') return
+    if (!mapEl || typeof MO !== 'function') {
+      return
+    }
     const observer = new MO(() => {
       if (applyLabels()) {
         observer.disconnect()
@@ -145,16 +153,22 @@ export function wireSearchLabels(
 // slot.
 export function setControlPlacement(plugin, id, placementByBreakpoint = {}) {
   const manifest = plugin?.manifest
-  if (!manifest) return
+  if (!manifest) {
+    return
+  }
 
   const breakpoints = ['mobile', 'tablet', 'desktop']
 
   for (const key of ['controls', 'buttons']) {
     const list = manifest[key]
-    if (!Array.isArray(list)) continue
+    if (!Array.isArray(list)) {
+      continue
+    }
 
     const entry = list.find((item) => item?.id === id)
-    if (!entry) continue
+    if (!entry) {
+      continue
+    }
 
     for (const breakpoint of breakpoints) {
       const descriptor = entry[breakpoint]
