@@ -160,6 +160,26 @@ describe('Boundary map page', () => {
       mockCheckBoundary({ geojson: boundaryGeojsonWithEdp })
     })
 
+    it('populates map element dataset attributes from cached boundaryGeojson session data', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const mapEl = document.getElementById('boundary-map')
+      expect(mapEl).toBeInTheDocument()
+      expect(mapEl).toHaveAttribute(
+        'data-geojson',
+        JSON.stringify(boundaryGeojsonWithEdp.boundaryGeometryWgs84)
+      )
+      expect(mapEl).toHaveAttribute(
+        'data-existing-boundary-metadata',
+        JSON.stringify(boundaryGeojsonWithEdp.boundaryMetadata)
+      )
+    })
+
     it('should display EDP information', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({

@@ -2,8 +2,9 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
 import {
-  formatBounds,
+  formatArea,
   formatIntersections,
+  formatPerimeter,
   normalizeBoundaryInfoResponse,
   renderIntersections
 } from './boundary-info-normalization.js'
@@ -13,11 +14,20 @@ afterEach(() => {
 })
 
 describe('boundary-info-normalization', () => {
-  it('formats bounds using fixed precision', () => {
-    expect(formatBounds([-1.23456, 2.1, 3.98765, 4])).toBe(
-      '-1.234560, 2.100000, 3.987650, 4.000000'
+  it('formats area as hectares and acres', () => {
+    expect(formatArea({ hectares: 3897.19, acres: 9630.2 })).toBe(
+      '3897.19ha (9630.2acres)'
     )
-    expect(formatBounds(null)).toBe('Not available')
+    expect(formatArea(null)).toBe('Not available')
+    expect(formatArea({ hectares: 1.2 })).toBe('Not available')
+  })
+
+  it('formats perimeter as kilometres and miles', () => {
+    expect(formatPerimeter({ kilometres: 29.26, miles: 18.18 })).toBe(
+      '29.26km (18.18mi)'
+    )
+    expect(formatPerimeter(null)).toBe('Not available')
+    expect(formatPerimeter({ kilometres: 14.15 })).toBe('Not available')
   })
 
   it('formats intersections for empty and object values', () => {
@@ -40,11 +50,12 @@ describe('boundary-info-normalization', () => {
     ).toEqual(['Name only', 'Code only', '{"other":"value"}', '42', 'null'])
   })
 
-  it('renders intersections as text for None and as a list for multiple values', () => {
-    const container = document.createElement('div')
+  it('renders intersections as li items into the container', () => {
+    const container = document.createElement('ul')
 
     renderIntersections(container, [])
-    expect(container.textContent).toBe('None')
+    expect(container.querySelectorAll('li')).toHaveLength(1)
+    expect(container.querySelector('li').textContent).toBe('None')
 
     renderIntersections(container, ['EDP 1', { label: 'EDP 2', id: '2' }])
 
@@ -54,88 +65,19 @@ describe('boundary-info-normalization', () => {
     expect(items).toEqual(['EDP 1', 'EDP 2 (2)'])
   })
 
-  it('normalizes bounds from nested polygon geometry', () => {
+  it('extracts area and perimeter from boundaryMetadata', () => {
     const payload = {
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [-2, -3],
-            [3, -1],
-            [1, 5],
-            [-2, -3]
-          ]
-        ]
-      },
-      intersectingEdps: []
-    }
-
-    const result = normalizeBoundaryInfoResponse(payload)
-
-    expect(result.bounds).toEqual([-2, -3, 3, 5])
-    expect(result.isValid).toBe(true)
-  })
-
-  it('normalizes bounds from a feature collection payload', () => {
-    const payload = {
-      geometry: {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [
-                [
-                  [1, 1],
-                  [2, 5],
-                  [4, 2],
-                  [1, 1]
-                ]
-              ]
-            }
-          },
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [
-                [
-                  [-3, -2],
-                  [-1, -4],
-                  [0, -1],
-                  [-3, -2]
-                ]
-              ]
-            }
-          }
-        ]
-      },
-      intersections: {
-        edps: ['EDP-1']
+      intersectingEdps: [],
+      boundaryMetadata: {
+        area: { hectares: 1.2, acres: 3.5 },
+        perimeter: { kilometres: 14.15, miles: 9.3 }
       }
     }
 
     const result = normalizeBoundaryInfoResponse(payload)
 
-    expect(result.bounds).toEqual([-3, -4, 4, 5])
-    expect(result.intersectingEdps).toEqual(['EDP-1'])
-    expect(result.isValid).toBe(true)
-  })
-
-  it('returns null bounds and invalid result when geometry is not usable', () => {
-    const payload = {
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[['x', 'y']]]
-      },
-      intersectingEdps: null
-    }
-
-    const result = normalizeBoundaryInfoResponse(payload)
-
-    expect(result.bounds).toBeNull()
-    expect(result.isValid).toBe(false)
+    expect(result.area).toEqual({ hectares: 1.2, acres: 3.5 })
+    expect(result.perimeter).toEqual({ kilometres: 14.15, miles: 9.3 })
   })
 
   it('respects explicit validity and error fields', () => {

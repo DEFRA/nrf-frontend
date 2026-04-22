@@ -16,8 +16,8 @@ export const DEFAULT_MAP_BOUNDS = [
   [ENGLAND_EAST_LNG, ENGLAND_NORTH_LAT]
 ]
 export const ENGLAND_MIN_ZOOM = 4
+export const BOUNDARY_MAP_MAX_ZOOM = 18
 
-export const BOUNDS_DECIMAL_PLACES = 6
 export const DEFAULT_LAYER_FILL_OPACITY = 0.08
 export const DEFAULT_LAYER_LINE_WIDTH = 2
 export const LEGEND_OPACITY_MULTIPLIER = 4
@@ -33,11 +33,6 @@ export const BOUNDARY_ACTION_SAVE = 'save'
 export const LAYER_ACTION_TOGGLE = 'toggle-layer'
 export const DRAW_EVENT_CREATED = 'draw:created'
 export const NOT_AVAILABLE_TEXT = 'Not available'
-
-export const BOUNDS_MIN_X_INDEX = 0
-export const BOUNDS_MIN_Y_INDEX = 1
-export const BOUNDS_MAX_X_INDEX = 2
-export const BOUNDS_MAX_Y_INDEX = 3
 
 export const PENCIL_SVG =
   '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'
