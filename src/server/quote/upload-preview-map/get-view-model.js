@@ -15,6 +15,7 @@ export default function getViewModel(
   boundaryFilename = null
 ) {
   const geometry = boundaryGeojson?.boundaryGeometryWgs84 ?? null
+  const existingBoundaryMetadata = boundaryGeojson?.boundaryMetadata ?? null
   const intersectingEdps = boundaryGeojson?.intersectingEdps ?? []
   const intersectsEdp = intersectingEdps.length > 0
   const featureCount = 1
@@ -54,6 +55,7 @@ export default function getViewModel(
     pageTitle: getPageTitle(title),
     pageHeading: title,
     boundaryGeojson: JSON.stringify(geometry),
+    existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata),
     intersectingEdps: mappedEdps,
     intersectsEdp,
     edpBoundaryGeojson,

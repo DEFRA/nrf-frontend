@@ -45,6 +45,7 @@
         <div id="boundary-map" class="govuk-!-margin-bottom-6"
              data-geojson='{{ boundaryGeojson | safe }}'
              data-edp-boundary-geojson='{{ edpBoundaryGeojson | safe }}'
+             data-existing-boundary-metadata='{{ existingBoundaryMetadata | safe }}'
              data-map-style-url="{{ mapStyleUrl }}">
         </div>
         {% if intersectsEdp %}
