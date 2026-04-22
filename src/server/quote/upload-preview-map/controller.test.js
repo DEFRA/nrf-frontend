@@ -22,6 +22,11 @@ describe('map controller', () => {
     intersectingEdps: []
   }
 
+  const mockGeojsonWithFilename = {
+    ...mockGeojson,
+    boundaryFilename: 'site-boundary.shp'
+  }
+
   const mockEdpGeojson = {
     boundaryGeometryWgs84: mockGeometry,
     intersectingEdps: [
@@ -102,7 +107,23 @@ describe('map controller', () => {
           pageHeading: 'Boundary Map',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry),
-          boundaryError: null
+          boundaryError: null,
+          boundaryFilename: null
+        })
+      )
+    })
+
+    it('should pass boundaryFilename from session geojson to the view', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockGeojsonWithFilename)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.objectContaining({
+          boundaryFilename: 'site-boundary.shp'
         })
       )
     })
@@ -145,9 +166,10 @@ describe('map controller', () => {
   })
 
   describe('postHandler (POST)', () => {
-    it('should redirect to upload-boundary when no geojson in session', () => {
+    it('should redirect to upload-boundary when no geojson in session or cache', () => {
       const h = createMockH()
       const request = createMockRequest(null)
+      getQuoteDataFromCache.mockReturnValue({})
 
       postHandler(request, h)
 
@@ -157,6 +179,7 @@ describe('map controller', () => {
     it('should save and redirect to no-edp when boundary does not intersect EDP', () => {
       const h = createMockH()
       const request = createMockRequest(mockGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
 
       postHandler(request, h)
 
@@ -172,6 +195,7 @@ describe('map controller', () => {
     it('should save and redirect to development-types when boundary intersects EDP', () => {
       const h = createMockH()
       const request = createMockRequest(mockEdpGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
 
       postHandler(request, h)
 
@@ -186,18 +210,38 @@ describe('map controller', () => {
 
     it('should lift boundaryFilename from boundaryGeojson when saving to cache', () => {
       const h = createMockH()
-      const geojsonWithFilename = {
-        ...mockGeojson,
-        boundaryFilename: 'site-boundary.shp'
-      }
-      const request = createMockRequest(geojsonWithFilename)
+      const request = createMockRequest(mockGeojsonWithFilename)
+      getQuoteDataFromCache.mockReturnValue({})
 
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: geojsonWithFilename,
+        boundaryGeojson: mockGeojsonWithFilename,
         boundaryFilename: 'site-boundary.shp'
       })
+    })
+
+    it('should not save to cache and should redirect based on cached boundary when session geojson is absent', () => {
+      const h = createMockH()
+      const request = createMockRequest(null)
+      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockGeojson })
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+      expect(request.yar.clear).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
+    })
+
+    it('should redirect to development-types based on cached boundary intersecting EDP when session geojson is absent', () => {
+      const h = createMockH()
+      const request = createMockRequest(null)
+      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockEdpGeojson })
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
     })
   })
 })
