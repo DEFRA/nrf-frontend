@@ -51,7 +51,7 @@ describe('waste-water getViewModel', () => {
     const viewModel = await getViewModel()
     expect(viewModel.wasteWaterItems).toEqual([
       {
-        value: 'i-dont-know',
+        value: 'not_known',
         text: "I don't know the waste water treatment works yet"
       }
     ])
@@ -76,7 +76,7 @@ describe('waste-water getViewModel', () => {
       },
       { divider: 'or' },
       {
-        value: 'i-dont-know',
+        value: 'not_known',
         text: "I don't know the waste water treatment works yet"
       }
     ])
@@ -120,7 +120,7 @@ describe('waste-water getViewModel', () => {
       },
       { divider: 'or' },
       {
-        value: 'i-dont-know',
+        value: 'not_known',
         text: "I don't know the waste water treatment works yet"
       }
     ])

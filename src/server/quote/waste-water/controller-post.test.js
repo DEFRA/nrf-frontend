@@ -65,20 +65,20 @@ describe('wasteWaterPostController', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/email')
   })
 
-  it('should save null name when the user selects i-dont-know', () => {
+  it('should save "Not known" name when the user selects not_known', () => {
     vi.mocked(saveQuoteDataToCache).mockReturnValue({})
     const controller = wasteWaterPostController({
       formValidation,
       getNextPage: buildGetNextPage()
     })
-    const request = buildRequest({ wasteWaterTreatmentWorks: 'i-dont-know' })
+    const request = buildRequest({ wasteWaterTreatmentWorks: 'not_known' })
     const h = buildH()
 
     controller.handler(request, h)
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-      wasteWaterTreatmentWorksId: null,
-      wasteWaterTreatmentWorksName: null
+      wasteWaterTreatmentWorksId: 'not_known',
+      wasteWaterTreatmentWorksName: 'Not known'
     })
   })
 
@@ -122,7 +122,7 @@ describe('wasteWaterPostController', () => {
       formValidation,
       getNextPage: buildGetNextPage()
     })
-    const request = buildRequest({ wasteWaterTreatmentWorks: 'i-dont-know' })
+    const request = buildRequest({ wasteWaterTreatmentWorks: 'not_known' })
     const codeMock = vi.fn()
     const h = {
       redirect: vi.fn().mockReturnValue({ code: codeMock })

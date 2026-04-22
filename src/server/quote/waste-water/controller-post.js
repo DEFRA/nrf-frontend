@@ -33,15 +33,16 @@ export const wasteWaterPostController = ({ formValidation, getNextPage }) => ({
     const selectedId = request.payload.wasteWaterTreatmentWorks
 
     let wasteWaterTreatmentWorksName = null
-    if (selectedId !== iDontKnowValue) {
+    if (selectedId === iDontKnowValue) {
+      wasteWaterTreatmentWorksName = 'Not known'
+    } else {
       const cachedOptions = request.yar.get(nearbyOptionsCacheKey) ?? []
       const match = cachedOptions.find((opt) => String(opt.id) === selectedId)
       wasteWaterTreatmentWorksName = match?.name ?? null
     }
 
     const quoteData = saveQuoteDataToCache(request, {
-      wasteWaterTreatmentWorksId:
-        selectedId === iDontKnowValue ? null : selectedId,
+      wasteWaterTreatmentWorksId: selectedId,
       wasteWaterTreatmentWorksName
     })
     const nextPage = getNextPage(quoteData)
