@@ -52,8 +52,7 @@ function renderBoundaryValidationResult({
       focusHeading: true,
       error:
         validationResult.normalized.error ||
-        `Validation request failed with status ${validationResult.status}`,
-      results: validationResult.normalized
+        `Validation request failed with status ${validationResult.status}`
     })
     return
   }
@@ -133,7 +132,7 @@ export function createBoundaryValidationRunner({
         summary: 'Boundary validation could not be completed.',
         announce: 'Boundary validation could not be completed',
         focusHeading: true,
-        error: error?.message || 'Unexpected validation error'
+        error: 'An error occurred checking the boundary'
       })
     } finally {
       if (state.inFlightRequest === controller) {
