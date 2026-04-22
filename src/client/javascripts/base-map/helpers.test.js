@@ -5,6 +5,7 @@ import {
   logWarning,
   parseDatasetJson,
   patchFetchForSearchPlugin,
+  resolveSearchPlugin,
   runWhenMapStyleReady,
   setControlPlacement,
   wireMapErrorLogging,
@@ -754,6 +755,182 @@ describe('base-map helpers', () => {
         setControlPlacement({ manifest: {} }, 'search', {
           mobile: { slot: 'banner' }
         })
+      ).not.toThrow()
+    })
+  })
+
+  describe('resolveSearchPlugin', () => {
+    it('returns the searchPlugin function when available', () => {
+      const searchPlugin = vi.fn()
+      const defraApi = { searchPlugin }
+
+      const result = resolveSearchPlugin(defraApi)
+
+      expect(result).toBe(searchPlugin)
+      expect(warnSpy).not.toHaveBeenCalled()
+    })
+
+    it('returns null and logs a warning when searchPlugin is not a function', () => {
+      const result = resolveSearchPlugin({ searchPlugin: undefined })
+
+      expect(result).toBeNull()
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Search plugin not available, location search disabled',
+        ''
+      )
+    })
+  })
+
+  describe('patchFetchForSearchPlugin (additional branches)', () => {
+    let originalFetch
+
+    beforeEach(() => {
+      originalFetch = globalThis.fetch
+    })
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch
+    })
+
+    it('is a no-op when globalThis.fetch is not defined', () => {
+      delete globalThis.fetch
+      expect(() => patchFetchForSearchPlugin()).not.toThrow()
+    })
+
+    it('copies the __searchErrorWatcher flag onto the patched function when already set', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true })
+      globalThis.fetch = mockFetch
+      globalThis.fetch.__searchErrorWatcher = true
+
+      patchFetchForSearchPlugin()
+
+      expect(globalThis.fetch.__searchErrorWatcher).toBe(true)
+    })
+  })
+
+  describe('wireSearchLabels (additional branches)', () => {
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    function makeMap() {
+      const handlers = {}
+      return {
+        on: vi.fn((event, cb) => {
+          handlers[event] = cb
+        }),
+        fire: (event) => handlers[event]?.()
+      }
+    }
+
+    it('applies labels via MutationObserver when the input mounts after app:ready', async () => {
+      const container = document.createElement('div')
+      container.id = 'lazy-map'
+      document.body.appendChild(container)
+      const map = makeMap()
+
+      wireSearchLabels(map, 'lazy-map')
+      map.fire('app:ready')
+
+      const input = document.createElement('input')
+      input.className = 'im-c-search__input'
+      input.id = 'map-search'
+      container.appendChild(input)
+
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(input.placeholder).toBe('Search for an address or postcode')
+      expect(input.getAttribute('aria-label')).toBe(
+        'Search for an address or postcode'
+      )
+    })
+
+    it('is a no-op when the map container does not exist in the DOM', () => {
+      const map = makeMap()
+      wireSearchLabels(map, 'does-not-exist')
+      expect(() => map.fire('app:ready')).not.toThrow()
+    })
+
+    it('updates placeholder and aria-label without requiring a hidden label element', () => {
+      const container = document.createElement('div')
+      container.id = 'no-label-map'
+      const input = document.createElement('input')
+      input.id = 'map-search'
+      input.className = 'im-c-search__input'
+      container.appendChild(input)
+      document.body.appendChild(container)
+      const map = makeMap()
+
+      wireSearchLabels(map, 'no-label-map')
+      map.fire('app:ready')
+
+      expect(input.placeholder).toBe('Search for an address or postcode')
+      expect(input.getAttribute('aria-label')).toBe(
+        'Search for an address or postcode'
+      )
+    })
+  })
+
+  describe('wireSearchMarkerReset (additional branches)', () => {
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    function makeMap() {
+      const handlers = {}
+      return {
+        on: vi.fn((event, cb) => {
+          handlers[event] = cb
+        }),
+        fire: (event, payload) => handlers[event]?.(payload)
+      }
+    }
+
+    it('binds the input listener via MutationObserver when the input mounts after app:ready', async () => {
+      const container = document.createElement('div')
+      container.id = 'lazy-marker-map'
+      document.body.appendChild(container)
+      const remove = vi.fn()
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'lazy-marker-map')
+      map.fire('app:ready', { mapProvider: { markers: { remove } } })
+
+      const input = document.createElement('input')
+      input.className = 'im-c-search__input'
+      container.appendChild(input)
+
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      map.fire('search:match', { query: 'York' })
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(remove).toHaveBeenCalledWith('search')
+    })
+
+    it('is a no-op on app:ready when the map container does not exist', () => {
+      const map = makeMap()
+      wireSearchMarkerReset(map, 'does-not-exist')
+      expect(() =>
+        map.fire('app:ready', { mapProvider: { markers: { remove: vi.fn() } } })
+      ).not.toThrow()
+    })
+
+    it('does not call removeSearchMarker when event has no mapProvider', () => {
+      const container = document.createElement('div')
+      container.id = 'no-provider-map'
+      const input = document.createElement('input')
+      input.className = 'im-c-search__input'
+      container.appendChild(input)
+      document.body.appendChild(container)
+      const map = makeMap()
+
+      wireSearchMarkerReset(map, 'no-provider-map')
+      map.fire('app:ready', {})
+      map.fire('search:match', { query: 'York' })
+
+      expect(() =>
+        input.dispatchEvent(new Event('input', { bubbles: true }))
       ).not.toThrow()
     })
   })
