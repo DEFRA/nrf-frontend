@@ -311,6 +311,136 @@ describe('base-map config', () => {
       expect(searchPlugin).not.toHaveBeenCalled()
     })
 
+    it('sets an explicit order on the search control so it renders first in its slot', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const searchPluginInstance = {
+        id: 'search',
+        manifest: {
+          controls: [
+            {
+              id: 'search',
+              mobile: { slot: 'top-right' },
+              tablet: { slot: 'top-left' },
+              desktop: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+      const searchPlugin = vi.fn().mockReturnValue(searchPluginInstance)
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return { on: vi.fn() }
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        searchPlugin
+      }
+
+      createMap({ mapElementId: 'test-map', showSearch: true })
+
+      const control = searchPluginInstance.manifest.controls[0]
+      expect(control.mobile.order).toBe(1)
+      expect(control.tablet.order).toBe(1)
+      expect(control.desktop.order).toBe(1)
+    })
+
+    it('sets a higher order on the map-styles button than the search control when both are shown', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const searchPluginInstance = {
+        id: 'search',
+        manifest: {
+          controls: [
+            {
+              id: 'search',
+              mobile: { slot: 'top-right' },
+              tablet: { slot: 'top-left' },
+              desktop: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+      const mapStylesInstance = {
+        id: 'mapStyles',
+        manifest: {
+          buttons: [
+            {
+              id: 'mapStyles',
+              mobile: { slot: 'top-left' },
+              tablet: { slot: 'top-left' },
+              desktop: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return { on: vi.fn() }
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        mapStylesPlugin: vi.fn().mockReturnValue(mapStylesInstance),
+        searchPlugin: vi.fn().mockReturnValue(searchPluginInstance)
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        showSearch: true,
+        showStyleControls: true
+      })
+
+      const searchControl = searchPluginInstance.manifest.controls[0]
+      const stylesButton = mapStylesInstance.manifest.buttons[0]
+      for (const breakpoint of ['mobile', 'tablet', 'desktop']) {
+        expect(stylesButton[breakpoint].order).toBeGreaterThan(
+          searchControl[breakpoint].order
+        )
+      }
+    })
+
+    it('does not re-order the map-styles button when search is not shown', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const mapStylesInstance = {
+        id: 'mapStyles',
+        manifest: {
+          buttons: [
+            {
+              id: 'mapStyles',
+              mobile: { slot: 'top-left' },
+              tablet: { slot: 'top-left' },
+              desktop: { slot: 'top-left' }
+            }
+          ]
+        }
+      }
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return { on: vi.fn() }
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        mapStylesPlugin: vi.fn().mockReturnValue(mapStylesInstance)
+      }
+
+      createMap({ mapElementId: 'test-map', showStyleControls: true })
+
+      const stylesButton = mapStylesInstance.manifest.buttons[0]
+      expect(stylesButton.mobile).not.toHaveProperty('order')
+      expect(stylesButton.tablet).not.toHaveProperty('order')
+      expect(stylesButton.desktop).not.toHaveProperty('order')
+    })
+
     it('merges searchPluginOptions over defaults', () => {
       const el = document.createElement('div')
       el.id = 'test-map'

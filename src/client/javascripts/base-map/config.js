@@ -5,15 +5,28 @@ import {
   resolveDrawPlugin,
   resolveMapStylesPlugin,
   resolveSearchPlugin,
+  setControlOrder,
   wireMapErrorLogging,
   wireSearchLabels
 } from './helpers.js'
-import { DRAW_PANEL_ID, ENGLAND_BOUNDS, ENGLAND_MIN_ZOOM } from './constants.js'
+import {
+  DRAW_PANEL_ID,
+  ENGLAND_BOUNDS,
+  ENGLAND_MIN_ZOOM,
+  MAP_STYLES_BUTTON_ID,
+  SEARCH_CONTROL_ID
+} from './constants.js'
 import { wireBoundaryInfoControls } from './boundary-info-controls.js'
 import { wireDrawControls } from './draw-controls.js'
 import { wireLayerControls } from './layer-controls.js'
 import { createMapStyleRequestHooks } from './style-utils.js'
 import { getMapStyles, getStyleControlsManifest } from './styles.js'
+
+// Keeps search first in the `top-left` slot; both controls need an explicit
+// order so the library's slot sort is deterministic rather than registration-
+// order dependent.
+const SEARCH_CONTROL_ORDER = 1
+const MAP_STYLES_BUTTON_ORDER = 2
 
 export {
   DEFAULT_MAP_BOUNDS,
@@ -58,30 +71,40 @@ function resolvePlugins({
     patchFetchForSearchPlugin()
     const searchPlugin = resolveSearchPlugin(defraApi)
     if (searchPlugin) {
-      plugins.push(
-        searchPlugin({
-          osNamesURL: '/os-names-search?query={query}',
-          regions: ['england'],
-          // Always-expanded input so the search never enters the plugin's
-          // "exclusive control" mode (which fades out sibling buttons).
-          // With expanded=true, the plugin moves mobile to a banner slot and
-          // keeps tablet/desktop on top-left — styles/draw buttons stay beside it.
-          expanded: true,
-          ...searchPluginOptions
-        })
+      const searchPluginInstance = searchPlugin({
+        osNamesURL: '/os-names-search?query={query}',
+        regions: ['england'],
+        // Always-expanded input so the search never enters the plugin's
+        // "exclusive control" mode (which fades out sibling buttons).
+        // With expanded=true, the plugin moves mobile to a banner slot and
+        // keeps tablet/desktop on top-left — styles/draw buttons stay beside it.
+        expanded: true,
+        ...searchPluginOptions
+      })
+      setControlOrder(
+        searchPluginInstance,
+        SEARCH_CONTROL_ID,
+        SEARCH_CONTROL_ORDER
       )
+      plugins.push(searchPluginInstance)
     }
   }
 
   if (showStyleControls) {
     const mapStylesPlugin = resolveMapStylesPlugin(defraApi)
     if (mapStylesPlugin) {
-      plugins.push(
-        mapStylesPlugin({
-          mapStyles,
-          manifest: getStyleControlsManifest()
-        })
-      )
+      const mapStylesInstance = mapStylesPlugin({
+        mapStyles,
+        manifest: getStyleControlsManifest()
+      })
+      if (showSearch) {
+        setControlOrder(
+          mapStylesInstance,
+          MAP_STYLES_BUTTON_ID,
+          MAP_STYLES_BUTTON_ORDER
+        )
+      }
+      plugins.push(mapStylesInstance)
     }
   }
 

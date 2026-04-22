@@ -136,6 +136,30 @@ export function wireSearchLabels(
   map.on('app:ready', tryApply)
 }
 
+// Clones each breakpoint descriptor before assigning `order` to avoid mutating
+// the plugin's module-level shared manifest.
+export function setControlOrder(plugin, id, order) {
+  const manifest = plugin?.manifest
+  if (!manifest) return
+
+  const breakpoints = ['mobile', 'tablet', 'desktop']
+
+  for (const key of ['controls', 'buttons']) {
+    const list = manifest[key]
+    if (!Array.isArray(list)) continue
+
+    const entry = list.find((item) => item?.id === id)
+    if (!entry) continue
+
+    for (const breakpoint of breakpoints) {
+      const descriptor = entry[breakpoint]
+      if (descriptor && typeof descriptor === 'object') {
+        entry[breakpoint] = { ...descriptor, order }
+      }
+    }
+  }
+}
+
 export function runWhenMapStyleReady(mapInstance, callback) {
   if (mapInstance.isStyleLoaded()) {
     callback()
