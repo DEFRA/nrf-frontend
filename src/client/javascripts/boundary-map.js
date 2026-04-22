@@ -6,10 +6,7 @@ import {
   parseGeojson,
   runWhenMapStyleReady
 } from './base-map/helpers.js'
-import {
-  addEdpBoundaryLayer,
-  addEdpIntersectionLayer
-} from './boundary-map/layers.js'
+import { addEdpBoundaryLayer } from './boundary-map/layers.js'
 
 document.addEventListener('DOMContentLoaded', function () {
   const mapEl = document.getElementById('boundary-map')
@@ -23,11 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
     mapEl,
     'edpBoundaryGeojson',
     'Failed to parse EDP boundary GeoJSON'
-  )
-  const edpIntersectionGeojson = parseDatasetJson(
-    mapEl,
-    'edpIntersectionGeojson',
-    'Failed to parse EDP intersection GeoJSON'
   )
 
   const map = createMap({
@@ -59,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fallbackBounds: DEFAULT_MAP_BOUNDS
       })
       addEdpBoundaryLayer(mapInstance, edpBoundaryGeojson)
-      addEdpIntersectionLayer(mapInstance, edpIntersectionGeojson)
     })
   })
 })

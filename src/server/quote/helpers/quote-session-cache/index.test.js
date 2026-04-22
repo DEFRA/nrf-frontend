@@ -9,7 +9,7 @@ describe('Save and retrieve quote data from session cache', () => {
   describe('Save quote data to session cache', () => {
     it('saves new data if the existing cache is empty', () => {
       const request = {
-        yar: { get: vi.fn().mockReturnValue(), set: vi.fn() },
+        yar: { get: vi.fn().mockReturnValue(), set: vi.fn(), clear: vi.fn() },
         logger: { error: vi.fn() }
       }
       const quoteData = { boundaryEntryType: 'draw' }
@@ -77,11 +77,7 @@ describe('Save and retrieve quote data from session cache', () => {
         },
         logger: { error: vi.fn() }
       }
-      saveQuoteDataToCache(
-        request,
-        { boundaryGeojson: { type: 'NewPolygon' } },
-        { boundaryChanged: true }
-      )
+      saveQuoteDataToCache(request, { boundaryGeojson: { type: 'NewPolygon' } })
       expect(request.yar.set).toHaveBeenCalledWith(
         'quote',
         expect.objectContaining({
@@ -94,7 +90,7 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
     })
 
-    it('does not clear dependent answers without boundaryChanged flag', () => {
+    it('does not clear dependent answers when saving a non-boundary property', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
@@ -111,13 +107,11 @@ describe('Save and retrieve quote data from session cache', () => {
         },
         logger: { error: vi.fn() }
       }
-      saveQuoteDataToCache(request, {
-        boundaryGeojson: { type: 'NewPolygon' }
-      })
+      saveQuoteDataToCache(request, { email: 'new@example.com' })
       expect(request.yar.set).toHaveBeenCalledWith(
         'quote',
         expect.objectContaining({
-          boundaryGeojson: { type: 'NewPolygon' },
+          email: 'new@example.com',
           developmentTypes: ['housing'],
           wasteWaterTreatmentWorksId: '101',
           wasteWaterTreatmentWorksName: 'Great Billing WRC'
@@ -130,7 +124,8 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({}),
-          set: vi.fn()
+          set: vi.fn(),
+          clear: vi.fn()
         },
         logger: { error: vi.fn() }
       }
@@ -142,7 +137,8 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({}),
-          set: vi.fn()
+          set: vi.fn(),
+          clear: vi.fn()
         },
         logger: { error: vi.fn() }
       }

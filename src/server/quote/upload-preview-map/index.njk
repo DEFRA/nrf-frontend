@@ -45,9 +45,7 @@
         <div id="boundary-map" class="govuk-!-margin-bottom-6"
              data-geojson='{{ boundaryGeojson | safe }}'
              data-edp-boundary-geojson='{{ edpBoundaryGeojson | safe }}'
-             data-edp-intersection-geojson='{{ edpIntersectionGeojson | safe }}'
              data-map-style-url="{{ mapStyleUrl }}">
-            <p class="govuk-body govuk-!-margin-bottom-0">Map view is not available. The boundary data has been validated.</p>
         </div>
         {% if intersectsEdp %}
         <p class="govuk-body">
@@ -97,10 +95,17 @@
         <p class="govuk-body">
             <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
         </p>
-        <p class="govuk-body">
-            <a href="{{ drawBoundaryPath }}" class="govuk-link">Draw the red line boundary on a map instead</a>
-        </p>
 
+      <p class="govuk-body govuk-!-margin-top-1">
+      <form method="post" novalidate action="/quote/boundary-type">
+        {% include "partials/csrf-token.njk" %}
+        <input type="hidden" name="boundaryEntryType" value="draw" />
+        {{ govukButton({
+          text: "Draw the boundary on a map instead",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form>
+      </p>
     </div>
 </div>
 {% endblock %}

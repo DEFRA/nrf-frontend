@@ -2,7 +2,6 @@ import {
   DEFAULT_LAYER_FILL_OPACITY,
   DEFAULT_LAYER_LINE_WIDTH,
   LAYERS_PANEL_ID,
-  LAYERS_SVG,
   LAYER_ACTION_TOGGLE,
   LEGEND_MIN_OPACITY,
   LEGEND_OPACITY_MULTIPLIER
@@ -375,14 +374,15 @@ function wireLayerPanel(map, { mapElementId, layerControlOptions = {} }) {
 
 export function wireLayerControls(map, { mapElementId, layerControlOptions }) {
   map.on('app:ready', function () {
-    map.addButton(LAYERS_PANEL_ID, {
-      label: 'Layers',
-      panelId: LAYERS_PANEL_ID,
-      iconSvgContent: LAYERS_SVG,
-      mobile: { slot: 'top-left', showLabel: false, order: 3 },
-      tablet: { slot: 'top-left', showLabel: false, order: 3 },
-      desktop: { slot: 'top-left', showLabel: false, order: 3 }
-    })
+    // HIDDEN UNTIL MORE LAYERS ARE ADDED
+    // map.addButton(LAYERS_PANEL_ID, {
+    //   label: 'Layers',
+    //   panelId: LAYERS_PANEL_ID,
+    //   iconSvgContent: LAYERS_SVG,
+    //   mobile: { slot: 'top-left', showLabel: false, order: 3 },
+    //   tablet: { slot: 'top-left', showLabel: false, order: 3 },
+    //   desktop: { slot: 'top-left', showLabel: false, order: 3 }
+    // })
 
     map.addPanel(LAYERS_PANEL_ID, {
       label: 'Layers',

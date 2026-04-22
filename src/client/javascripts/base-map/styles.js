@@ -24,16 +24,16 @@ export function getStyleControlsManifest() {
         id: 'mapStyles',
         mobile: {
           slot: 'top-left',
-          showLabel: false
+          showLabel: true
         },
         tablet: {
           slot: 'top-left',
-          showLabel: false,
+          showLabel: true,
           order: 1
         },
         desktop: {
           slot: 'top-left',
-          showLabel: false,
+          showLabel: true,
           order: 1
         }
       }

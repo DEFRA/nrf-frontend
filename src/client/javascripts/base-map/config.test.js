@@ -371,14 +371,6 @@ describe('base-map config', () => {
       createMap({ mapElementId: 'test-map', showDrawControls: true })
 
       expect(map.on).toHaveBeenCalledWith('app:ready', expect.any(Function))
-      expect(addButton).toHaveBeenCalledWith(
-        'draw',
-        expect.objectContaining({
-          panelId: 'draw',
-          mobile: expect.objectContaining({ slot: 'top-left' }),
-          desktop: expect.objectContaining({ slot: 'top-left' })
-        })
-      )
       expect(addPanel).toHaveBeenCalledWith(
         'draw',
         expect.objectContaining({
@@ -411,7 +403,6 @@ describe('base-map config', () => {
       createMap({ mapElementId: 'test-map' })
 
       expect(map.on).not.toHaveBeenCalledWith('app:ready', expect.any(Function))
-      expect(map.addButton).not.toHaveBeenCalled()
       expect(map.addPanel).not.toHaveBeenCalled()
     })
 
@@ -1047,7 +1038,7 @@ describe('base-map config', () => {
       delete globalThis.fetch
     })
 
-    it('submits save and continue as a POST form with csrf token', async () => {
+    it('POSTs geojson via fetch with csrf header when save button is clicked', async () => {
       const el = document.createElement('div')
       el.id = 'test-map'
       document.body.appendChild(el)
@@ -1063,24 +1054,29 @@ describe('base-map config', () => {
         hidePanel: vi.fn()
       }
 
-      globalThis.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          boundaryGeometryWgs84: {
-            type: 'Polygon',
-            coordinates: [
-              [
-                [-1.3191546171725879, 51.85916129554659],
-                [-1.3460261914845242, 51.84190872189816],
-                [-1.3265601691618827, 51.82896495118416],
-                [-1.289109234889739, 51.84177799534028],
-                [-1.3191546171725879, 51.85916129554659]
-              ]
+      const checkGeojson = {
+        boundaryGeometryWgs84: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-1.3191546171725879, 51.85916129554659],
+              [-1.3460261914845242, 51.84190872189816],
+              [-1.3265601691618827, 51.82896495118416],
+              [-1.289109234889739, 51.84177799534028],
+              [-1.3191546171725879, 51.85916129554659]
             ]
-          },
-          intersectingEdps: [{ name: 'South Oxford', code: 'EDP-001' }]
+          ]
+        },
+        intersectingEdps: [{ name: 'South Oxford', code: 'EDP-001' }]
+      }
+
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue(checkGeojson)
         })
-      })
+        .mockResolvedValueOnce({ redirected: false })
 
       globalThis.defra = {
         InteractiveMap: new Proxy(function () {}, {
@@ -1090,10 +1086,6 @@ describe('base-map config', () => {
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
       }
-
-      const submitSpy = vi
-        .spyOn(globalThis.HTMLFormElement.prototype, 'submit')
-        .mockImplementation(() => {})
 
       createMap({
         mapElementId: 'test-map',
@@ -1128,19 +1120,21 @@ describe('base-map config', () => {
       )
       saveButton.click()
 
-      expect(submitSpy).toHaveBeenCalledTimes(1)
+      await Promise.resolve()
 
-      const saveForm = document.querySelector(
-        'form[action="/quote/draw-boundary/save"]'
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+      expect(globalThis.fetch).toHaveBeenLastCalledWith(
+        '/quote/draw-boundary/save',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': 'csrf-token-123'
+          },
+          body: JSON.stringify({ boundaryGeojson: checkGeojson })
+        }
       )
-      expect(saveForm).toBeTruthy()
-      expect(saveForm.method).toBe('post')
 
-      const csrfInput = saveForm.querySelector('input[name="csrfToken"]')
-      expect(csrfInput).toBeTruthy()
-      expect(csrfInput.value).toBe('csrf-token-123')
-
-      submitSpy.mockRestore()
       delete globalThis.fetch
     })
 
@@ -1228,10 +1222,6 @@ describe('base-map config', () => {
 
       eventHandlers['map:ready']?.({ map: mapInstance })
 
-      expect(addButton).toHaveBeenCalledWith(
-        'layers',
-        expect.objectContaining({ panelId: 'layers' })
-      )
       expect(addPanel).toHaveBeenCalledWith(
         'layers',
         expect.objectContaining({
@@ -1686,7 +1676,7 @@ describe('base-map config', () => {
       delete globalThis.fetch
     })
 
-    it('submits form without csrf input when saveAndContinueUrl provided but no csrfToken', async () => {
+    it('POSTs geojson via fetch without csrf header when no csrfToken provided', async () => {
       const el = document.createElement('div')
       el.id = 'test-map-nocsrf'
       document.body.appendChild(el)
@@ -1702,24 +1692,29 @@ describe('base-map config', () => {
         hidePanel: vi.fn()
       }
 
-      globalThis.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          boundaryGeometryWgs84: {
-            type: 'Polygon',
-            coordinates: [
-              [
-                [-1.3191546171725879, 51.85916129554659],
-                [-1.3460261914845242, 51.84190872189816],
-                [-1.3265601691618827, 51.82896495118416],
-                [-1.289109234889739, 51.84177799534028],
-                [-1.3191546171725879, 51.85916129554659]
-              ]
+      const checkGeojson = {
+        boundaryGeometryWgs84: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-1.3191546171725879, 51.85916129554659],
+              [-1.3460261914845242, 51.84190872189816],
+              [-1.3265601691618827, 51.82896495118416],
+              [-1.289109234889739, 51.84177799534028],
+              [-1.3191546171725879, 51.85916129554659]
             ]
-          },
-          intersectingEdps: [{ name: 'Test EDP', code: 'EDP-999' }]
+          ]
+        },
+        intersectingEdps: [{ name: 'Test EDP', code: 'EDP-999' }]
+      }
+
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue(checkGeojson)
         })
-      })
+        .mockResolvedValueOnce({ redirected: false })
 
       globalThis.defra = {
         InteractiveMap: new Proxy(function () {}, {
@@ -1729,10 +1724,6 @@ describe('base-map config', () => {
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
       }
-
-      const submitSpy = vi
-        .spyOn(globalThis.HTMLFormElement.prototype, 'submit')
-        .mockImplementation(() => {})
 
       createMap({
         mapElementId: 'test-map-nocsrf',
@@ -1766,15 +1757,18 @@ describe('base-map config', () => {
       )
       saveButton.click()
 
-      expect(submitSpy).toHaveBeenCalledTimes(1)
+      await Promise.resolve()
 
-      const saveForm = document.querySelector(
-        'form[action="/quote/draw-boundary/save"]'
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+      expect(globalThis.fetch).toHaveBeenLastCalledWith(
+        '/quote/draw-boundary/save',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ boundaryGeojson: checkGeojson })
+        }
       )
-      expect(saveForm).toBeTruthy()
-      expect(saveForm.querySelector('input[name="csrfToken"]')).toBeNull()
 
-      submitSpy.mockRestore()
       delete globalThis.fetch
     })
 

@@ -12,7 +12,6 @@ describe('draw-boundary getViewModel', () => {
     expect(viewModel).toEqual(
       expect.objectContaining({
         pageHeading: title,
-        backLinkPath: '/quote/boundary-type',
         mapStyleUrl: '/public/data/vts/test-style.json',
         impactAssessorLayers: expect.any(String),
         saveAndContinueUrl: '/quote/draw-boundary/save',
@@ -45,5 +44,32 @@ describe('draw-boundary getViewModel', () => {
     expect(viewModel.existingBoundaryGeojson).toBe(
       JSON.stringify(quoteData.boundaryGeojson.boundaryGeometryWgs84)
     )
+  })
+
+  test('returns existing boundary metadata from quote cache when present', () => {
+    const boundaryMetadata = {
+      bounds: {
+        bottomLeft: [-1.2, 51.8],
+        topRight: [-1.1, 51.9]
+      },
+      centre: [-1.15, 51.85]
+    }
+    const quoteData = {
+      boundaryGeojson: {
+        boundaryMetadata
+      }
+    }
+
+    const viewModel = getViewModel(quoteData)
+
+    expect(viewModel.existingBoundaryMetadata).toBe(
+      JSON.stringify(boundaryMetadata)
+    )
+  })
+
+  test('returns JSON-stringified null as existingBoundaryMetadata when not present', () => {
+    const viewModel = getViewModel()
+
+    expect(viewModel.existingBoundaryMetadata).toBe(JSON.stringify(null))
   })
 })

@@ -17,7 +17,7 @@ describe('boundary-info-view', () => {
   it('builds panel html with defaults', () => {
     const html = buildBoundaryInfoPanelHtml('map-1')
     expect(html).toContain('data-map-element-id="map-1"')
-    expect(html).toContain('Boundary information')
+    expect(html).toContain('Draw a boundary to validate it.')
     expect(html).toContain('Not available')
   })
 
@@ -75,16 +75,21 @@ describe('boundary-info-view', () => {
     })
   })
 
-  it('submits fallback form with csrf token when callback is not provided', () => {
+  it('POSTs geojson via fetch with csrf header when callback is not provided', async () => {
     document.body.innerHTML = buildBoundaryInfoPanelHtml('map-4')
-    const formPrototype = Object.getPrototypeOf(document.createElement('form'))
-    const submitSpy = vi
-      .spyOn(formPrototype, 'submit')
-      .mockImplementation(() => {})
+
+    const mockResponse = { redirected: false }
+    globalThis.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+    const boundaryGeojson = {
+      boundaryGeometryWgs84: { type: 'Polygon' },
+      intersectingEdps: []
+    }
+    const state = { latestResponse: { raw: boundaryGeojson } }
 
     registerBoundaryInfoSaveHandler({
       mapElementId: 'map-4',
-      state: {},
+      state,
       saveAndContinueUrl: '/quote/continue',
       csrfToken: 'token-123'
     })
@@ -96,10 +101,82 @@ describe('boundary-info-view', () => {
     button.disabled = false
     button.click()
 
-    const form = document.querySelector('form[action="/quote/continue"]')
-    const tokenInput = form.querySelector('input[name="csrfToken"]')
+    await Promise.resolve()
 
-    expect(tokenInput.value).toBe('token-123')
-    expect(submitSpy).toHaveBeenCalled()
+    expect(globalThis.fetch).toHaveBeenCalledWith('/quote/continue', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': 'token-123'
+      },
+      body: JSON.stringify({ boundaryGeojson })
+    })
+
+    delete globalThis.fetch
+  })
+
+  it('redirects to response URL when fetch response is redirected', async () => {
+    document.body.innerHTML = buildBoundaryInfoPanelHtml('map-5')
+
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValue({ redirected: true, url: '/redirected-url' })
+
+    const assignMock = vi.fn()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { assign: assignMock }
+    })
+
+    const state = { latestResponse: { raw: {} } }
+
+    registerBoundaryInfoSaveHandler({
+      mapElementId: 'map-5',
+      state,
+      saveAndContinueUrl: '/quote/continue'
+    })
+
+    const button = document.querySelector(
+      '[data-map-element-id="map-5"] [data-boundary-action="save"]'
+    )
+    button.hidden = false
+    button.disabled = false
+    button.click()
+
+    await Promise.resolve()
+
+    expect(assignMock).toHaveBeenCalledWith('/redirected-url')
+
+    delete globalThis.fetch
+  })
+
+  it('logs error and does not throw when fetch rejects', async () => {
+    document.body.innerHTML = buildBoundaryInfoPanelHtml('map-6')
+
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'))
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const state = { latestResponse: { raw: {} } }
+
+    registerBoundaryInfoSaveHandler({
+      mapElementId: 'map-6',
+      state,
+      saveAndContinueUrl: '/quote/continue'
+    })
+
+    const button = document.querySelector(
+      '[data-map-element-id="map-6"] [data-boundary-action="save"]'
+    )
+    button.hidden = false
+    button.disabled = false
+    button.click()
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'submitSaveAndContinue error: Network failure'
+    )
+
+    delete globalThis.fetch
   })
 })

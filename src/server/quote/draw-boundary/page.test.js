@@ -1,8 +1,10 @@
 import { getByRole } from '@testing-library/dom'
-import { routePath } from './routes.js'
+import { routePath, savePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
 
 describe('Draw boundary page', () => {
   const getServer = setupTestServer()
@@ -18,10 +20,6 @@ describe('Draw boundary page', () => {
     const hiddenHeading = getByRole(document, 'heading', { level: 1 })
     expect(hiddenHeading).toHaveTextContent('Draw your boundary on a map')
     expect(hiddenHeading).toHaveClass('govuk-visually-hidden')
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/quote/boundary-type'
-    )
 
     const footer = document.querySelector('.govuk-footer')
     expect(footer).not.toBeInTheDocument()
@@ -76,10 +74,41 @@ describe('Draw boundary page', () => {
       'src',
       expect.stringContaining('draw-boundary-map')
     )
+    const uploadButton = getByRole(document, 'button', {
+      name: 'Upload a red line boundary file instead'
+    })
+    expect(uploadButton).toBeInTheDocument()
+    const uploadForm = uploadButton.closest('form')
+    expect(uploadForm).toHaveAttribute('action', '/quote/boundary-type')
     expect(
-      getByRole(document, 'link', {
-        name: 'Upload a red line boundary file instead'
-      })
-    ).toHaveAttribute('href', '/quote/upload-boundary')
+      uploadForm.querySelector('input[name="boundaryEntryType"]')
+    ).toHaveValue('upload')
+  })
+
+  it('populates map element dataset attributes from cached boundaryGeojson session data', async () => {
+    let cookie = await withValidQuoteSession(getServer())
+    ;({ cookie } = await submitForm({
+      requestUrl: savePath,
+      server: getServer(),
+      formData: { boundaryGeojson: boundaryGeojsonWithEdp },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    const mapEl = document.getElementById('draw-boundary-map')
+    expect(mapEl).toBeInTheDocument()
+    expect(mapEl).toHaveAttribute(
+      'data-existing-boundary-geojson',
+      JSON.stringify(boundaryGeojsonWithEdp.boundaryGeometryWgs84)
+    )
+    expect(mapEl).toHaveAttribute(
+      'data-existing-boundary-metadata',
+      JSON.stringify(boundaryGeojsonWithEdp.boundaryMetadata)
+    )
   })
 })

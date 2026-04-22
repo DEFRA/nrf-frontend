@@ -1,5 +1,8 @@
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
+import {
+  saveQuoteDataToCache,
+  getQuoteDataFromCache
+} from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 import getViewModel from './get-view-model.js'
@@ -9,16 +12,17 @@ const logger = createLogger()
 export function handler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
   const boundaryError = request.yar.get('boundaryError')
+  const quoteCache = getQuoteDataFromCache(request)
 
   // Session may be missing if it expired or the user navigated here directly
-  if (!boundaryGeojson && !boundaryError) {
+  if (!boundaryGeojson && !quoteCache.boundaryGeojson && !boundaryError) {
     logger.info('map - no boundary data in session')
     return h.redirect(uploadBoundaryPath)
   }
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
   const viewModel = getViewModel(
-    boundaryGeojson,
+    boundaryGeojson || quoteCache.boundaryGeojson,
     boundaryError,
     boundaryFilename
   )
@@ -30,25 +34,27 @@ export function handler(request, h) {
 
 export function postHandler(request, h) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
+  const quoteCache = getQuoteDataFromCache(request)
 
-  // Session may be missing if it expired or the user navigated here directly
-  if (!boundaryGeojson) {
+  // if the user has previously saved from this screen and come back to it, the boundaryGeojson session key will have been cleared by this handler; so also check for the main quote session cache
+  if (!boundaryGeojson && !quoteCache.boundaryGeojson) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const intersectsEdp = boundaryGeojson?.intersectingEdps?.length ?? false
+  const intersectsEdp =
+    boundaryGeojson?.intersectingEdps?.length ??
+    quoteCache.boundaryGeojson?.intersectingEdps?.length ??
+    false
   // Lift the filename out of the geojson blob so it lives at the top of the
   // quote cache alongside other submit fields, and posts to the backend as a
   // top-level column rather than a buried property.
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
 
-  saveQuoteDataToCache(
-    request,
-    { boundaryGeojson, boundaryFilename },
-    { boundaryChanged: true }
-  )
-  request.yar.clear('boundaryGeojson')
-  request.yar.clear('boundaryError')
+  if (boundaryGeojson) {
+    saveQuoteDataToCache(request, { boundaryGeojson, boundaryFilename })
+    request.yar.clear('boundaryGeojson')
+    request.yar.clear('boundaryError')
+  }
 
   if (intersectsEdp) {
     return h.redirect('/quote/development-types')
