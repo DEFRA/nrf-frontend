@@ -7,6 +7,8 @@ export const title = 'Draw your boundary on a map'
 export default function getViewModel(quoteData = {}) {
   const existingBoundaryGeojson =
     quoteData?.boundaryGeojson?.boundaryGeometryWgs84 ?? null
+  const existingBoundaryMetadata =
+    quoteData.boundaryGeojson?.boundaryMetadata ?? null
 
   return {
     pageTitle: getPageTitle(title),
@@ -15,6 +17,7 @@ export default function getViewModel(quoteData = {}) {
     impactAssessorLayers: config.get('map.impactAssessorLayers'),
     boundaryValidationUrl: checkPath,
     saveAndContinueUrl: savePath,
-    existingBoundaryGeojson: JSON.stringify(existingBoundaryGeojson)
+    existingBoundaryGeojson: JSON.stringify(existingBoundaryGeojson),
+    existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata)
   }
 }

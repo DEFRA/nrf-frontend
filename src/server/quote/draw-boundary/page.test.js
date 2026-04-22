@@ -1,8 +1,10 @@
 import { getByRole } from '@testing-library/dom'
-import { routePath } from './routes.js'
+import { routePath, savePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
 
 describe('Draw boundary page', () => {
   const getServer = setupTestServer()
@@ -81,5 +83,32 @@ describe('Draw boundary page', () => {
     expect(
       uploadForm.querySelector('input[name="boundaryEntryType"]')
     ).toHaveValue('upload')
+  })
+
+  it('populates map element dataset attributes from cached boundaryGeojson session data', async () => {
+    let cookie = await withValidQuoteSession(getServer())
+    ;({ cookie } = await submitForm({
+      requestUrl: savePath,
+      server: getServer(),
+      formData: { boundaryGeojson: boundaryGeojsonWithEdp },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    const mapEl = document.getElementById('draw-boundary-map')
+    expect(mapEl).toBeInTheDocument()
+    expect(mapEl).toHaveAttribute(
+      'data-existing-boundary-geojson',
+      JSON.stringify(boundaryGeojsonWithEdp.boundaryGeometryWgs84)
+    )
+    expect(mapEl).toHaveAttribute(
+      'data-existing-boundary-metadata',
+      JSON.stringify(boundaryGeojsonWithEdp.boundaryMetadata)
+    )
   })
 })
