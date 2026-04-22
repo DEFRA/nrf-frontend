@@ -153,7 +153,9 @@ export function wireSearchLabels(
 }
 
 const SEARCH_INPUT_SELECTOR = '.im-c-search__input'
+const SEARCH_FORM_SELECTOR = '.im-c-search-form'
 const SEARCH_BANNER_CLASS = 'app-c-search-error'
+const ARIA_DESCRIBEDBY = 'aria-describedby'
 const SEARCH_BANNER_ID = 'app-c-search-error'
 const SEARCH_BANNER_REGISTRY_KEY = '__searchErrorBannerRegistry'
 
@@ -185,18 +187,18 @@ function createBannerEntry(mapElementId, errorText) {
     if (!input) {
       return
     }
-    const existing = input.getAttribute('aria-describedby')
+    const existing = input.getAttribute(ARIA_DESCRIBEDBY)
     const ids = existing ? existing.split(/\s+/).filter(Boolean) : []
     const hasId = ids.includes(SEARCH_BANNER_ID)
     if (link && !hasId) {
       ids.push(SEARCH_BANNER_ID)
-      input.setAttribute('aria-describedby', ids.join(' '))
+      input.setAttribute(ARIA_DESCRIBEDBY, ids.join(' '))
     } else if (!link && hasId) {
       const next = ids.filter((id) => id !== SEARCH_BANNER_ID)
       if (next.length) {
-        input.setAttribute('aria-describedby', next.join(' '))
+        input.setAttribute(ARIA_DESCRIBEDBY, next.join(' '))
       } else {
-        input.removeAttribute('aria-describedby')
+        input.removeAttribute(ARIA_DESCRIBEDBY)
       }
     }
   }
@@ -209,21 +211,22 @@ function createBannerEntry(mapElementId, errorText) {
     let banner = mapEl.querySelector(`.${SEARCH_BANNER_CLASS}`)
     if (banner) {
       return banner
-    }
-    banner = document.createElement('div')
-    banner.id = SEARCH_BANNER_ID
-    banner.setAttribute('role', 'alert')
-    banner.setAttribute('aria-live', 'polite')
-    banner.className = SEARCH_BANNER_CLASS
-    banner.hidden = true
-    banner.textContent = errorText
-    const form = mapEl.querySelector('.im-c-search-form')
-    if (form?.parentNode) {
-      form.parentNode.insertBefore(banner, form.nextSibling)
     } else {
-      mapEl.appendChild(banner)
+      banner = document.createElement('div')
+      banner.id = SEARCH_BANNER_ID
+      banner.setAttribute('role', 'alert')
+      banner.setAttribute('aria-live', 'polite')
+      banner.className = SEARCH_BANNER_CLASS
+      banner.hidden = true
+      banner.textContent = errorText
+      const form = mapEl.querySelector(SEARCH_FORM_SELECTOR)
+      if (form?.parentNode) {
+        form.parentNode.insertBefore(banner, form.nextSibling)
+      } else {
+        mapEl.appendChild(banner)
+      }
+      return banner
     }
-    return banner
   }
 
   const showError = () => {
@@ -398,21 +401,16 @@ export function setControlPlacement(
     }
 
     const entry = list.find((item) => item?.id === id)
-    if (!entry) {
-      continue
-    }
-
-    for (const breakpoint of breakpoints) {
-      const descriptor = entry[breakpoint]
-      const placement = placementByBreakpoint[breakpoint]
-
-      if (!descriptor && !placement) {
-        continue
-      }
-
-      entry[breakpoint] = {
-        ...(descriptor || EMPTY_OBJECT),
-        ...(placement || EMPTY_OBJECT)
+    if (entry) {
+      for (const breakpoint of breakpoints) {
+        const descriptor = entry[breakpoint]
+        const placement = placementByBreakpoint[breakpoint]
+        if (descriptor || placement) {
+          entry[breakpoint] = {
+            ...(descriptor || EMPTY_OBJECT),
+            ...(placement || EMPTY_OBJECT)
+          }
+        }
       }
     }
   }
