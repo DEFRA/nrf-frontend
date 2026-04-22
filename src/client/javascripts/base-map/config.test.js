@@ -926,10 +926,13 @@ describe('base-map config', () => {
       ).toBe('Boundary validation failed.')
       expect(
         panelRoot.querySelector('[data-boundary-info-error]').textContent
-      ).toContain('invalid geometry')
+      ).toBe('An error occurred checking the boundary')
       expect(
         panelRoot.querySelector('[data-boundary-info-results]').hidden
       ).toBe(true)
+      expect(panelRoot.querySelector('[data-boundary-info-edps]').hidden).toBe(
+        true
+      )
 
       const saveButton = panelRoot.querySelector(
         '[data-boundary-action="save"]'
@@ -1953,7 +1956,7 @@ describe('base-map config', () => {
       )
       expect(
         panelRoot.querySelector('[data-boundary-info-error]').textContent
-      ).toBe('Validation request failed with status 503')
+      ).toBe('An error occurred checking the boundary')
 
       delete globalThis.fetch
     })
@@ -2019,6 +2022,121 @@ describe('base-map config', () => {
       expect(
         panelRoot.querySelector('[data-boundary-info-results]').hidden
       ).toBe(true)
+      expect(panelRoot.querySelector('[data-boundary-info-edps]').hidden).toBe(
+        true
+      )
+
+      delete globalThis.fetch
+    })
+
+    it('hides results and edps after a successful draw followed by a non-2xx response', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-success-then-non2xx'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      const successPayload = {
+        boundaryGeometryWgs84: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-1.32, 51.85],
+              [-1.34, 51.84],
+              [-1.33, 51.83],
+              [-1.29, 51.84],
+              [-1.32, 51.85]
+            ]
+          ]
+        },
+        intersectingEdps: [],
+        boundaryMetadata: {
+          area: { hectares: 100, acres: 247 },
+          perimeter: { kilometres: 5, miles: 3.1 }
+        }
+      }
+
+      const fetchSpy = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue(successPayload)
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 400,
+          json: vi.fn().mockResolvedValue({ error: 'Unable to check boundary' })
+        })
+
+      globalThis.fetch = fetchSpy
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-success-then-non2xx',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: { endpoint: '/boundary/validate' }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      // First draw - succeeds, rows become visible
+      eventHandlers['draw:created']?.({
+        id: 'feature-success',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-success-then-non2xx"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-results]').hidden
+      ).toBe(false)
+
+      // Second draw - non-2xx, rows must be hidden
+      eventHandlers['draw:created']?.({
+        id: 'feature-error',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(
+        panelRoot.querySelector('[data-boundary-info-error]').textContent
+      ).toBe('An error occurred checking the boundary')
+      expect(
+        panelRoot.querySelector('[data-boundary-info-results]').hidden
+      ).toBe(true)
+      expect(panelRoot.querySelector('[data-boundary-info-edps]').hidden).toBe(
+        true
+      )
 
       delete globalThis.fetch
     })
@@ -2121,6 +2239,94 @@ describe('base-map config', () => {
       ).toBe('An error occurred checking the boundary')
       expect(
         panelRoot.querySelector('[data-boundary-info-results]').hidden
+      ).toBe(true)
+      expect(panelRoot.querySelector('[data-boundary-info-edps]').hidden).toBe(
+        true
+      )
+
+      delete globalThis.fetch
+    })
+
+    it('keeps save button disabled when response is ok but intersectingEdps is missing', async () => {
+      const el = document.createElement('div')
+      el.id = 'test-map-no-edp-data'
+      document.body.appendChild(el)
+
+      const eventHandlers = {}
+      const addPanel = vi.fn()
+      const map = {
+        on: vi.fn((eventName, callback) => {
+          eventHandlers[eventName] = callback
+        }),
+        addPanel,
+        showPanel: vi.fn(),
+        hidePanel: vi.fn()
+      }
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          isValid: true,
+          boundaryGeometryWgs84: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-1.32, 51.85],
+                [-1.34, 51.84],
+                [-1.33, 51.83],
+                [-1.29, 51.84],
+                [-1.32, 51.85]
+              ]
+            ]
+          }
+        })
+      })
+
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct() {
+            return map
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({})
+      }
+
+      createMap({
+        mapElementId: 'test-map-no-edp-data',
+        showBoundaryInfoPanel: true,
+        boundaryInfoOptions: {
+          endpoint: '/boundary/validate',
+          saveAndContinueUrl: '/quote/draw-boundary/save'
+        }
+      })
+
+      eventHandlers['app:ready']?.()
+
+      const panelOptions = addPanel.mock.calls.find(
+        (call) => call[0] === 'boundary-info'
+      )?.[1]
+      document.body.insertAdjacentHTML('beforeend', panelOptions.html)
+
+      eventHandlers['draw:created']?.({
+        id: 'feature-no-edp-data',
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [] },
+        properties: {}
+      })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      const panelRoot = document.querySelector(
+        '.app-boundary-info-panel[data-map-element-id="test-map-no-edp-data"]'
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-info-results]').hidden
+      ).toBe(true)
+      expect(panelRoot.querySelector('[data-boundary-info-edps]').hidden).toBe(
+        true
+      )
+      expect(
+        panelRoot.querySelector('[data-boundary-action="save"]').hidden
       ).toBe(true)
 
       delete globalThis.fetch

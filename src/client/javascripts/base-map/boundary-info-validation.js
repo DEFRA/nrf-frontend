@@ -50,14 +50,13 @@ function renderBoundaryValidationResult({
       summary: 'Boundary validation failed.',
       announce: 'Boundary validation failed',
       focusHeading: true,
-      error:
-        validationResult.normalized.error ||
-        `Validation request failed with status ${validationResult.status}`
+      error: 'An error occurred checking the boundary'
     })
     return
   }
 
-  const isValid = validationResult.normalized.isValid
+  const { isValid, intersectingEdps } = validationResult.normalized
+  const hasEdpData = Array.isArray(intersectingEdps)
   renderBoundaryPanel(mapElementId, {
     summary: isValid
       ? 'Boundary validation passed.'
@@ -66,8 +65,8 @@ function renderBoundaryValidationResult({
       ? 'Boundary validation passed'
       : 'Boundary validation failed',
     focusHeading: true,
-    results: validationResult.normalized,
-    canContinue: Boolean(saveAndContinueUrl || onSaveAndContinue)
+    results: hasEdpData ? validationResult.normalized : null,
+    canContinue: hasEdpData && Boolean(saveAndContinueUrl || onSaveAndContinue)
   })
 }
 

@@ -1,5 +1,7 @@
 .app-boundary-info-panel [data-boundary-info-summary][hidden],
-.app-boundary-info-panel [data-boundary-info-error][hidden] {
+.app-boundary-info-panel [data-boundary-info-error][hidden],
+.app-boundary-info-panel [data-boundary-info-results][hidden],
+.app-boundary-info-panel [data-boundary-info-edps][hidden] {
   display: none;
 }
 
