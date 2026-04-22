@@ -148,6 +148,136 @@ export function wireSearchLabels(
   map.on('app:ready', tryApply)
 }
 
+// Shows a plain-English error banner when the /os-names-search proxy returns a
+// non-OK response or the network call rejects.
+export function wireSearchErrorBanner(
+  map,
+  mapElementId,
+  errorText = 'Sorry, we could not search for that location. Try again later.',
+  searchPath = '/os-names-search'
+) {
+  const BANNER_CLASS = 'app-c-search-error'
+  const BANNER_ID = 'app-c-search-error'
+
+  // Screen readers announce aria-describedby text when the referenced control
+  // is focused.
+  const linkInputToBanner = (mapEl, link) => {
+    const input = mapEl.querySelector('.im-c-search__input')
+    if (!input) {
+      return
+    }
+    const existing = input.getAttribute('aria-describedby')
+    const ids = existing ? existing.split(/\s+/).filter(Boolean) : []
+    const hasId = ids.includes(BANNER_ID)
+    if (link && !hasId) {
+      ids.push(BANNER_ID)
+      input.setAttribute('aria-describedby', ids.join(' '))
+    } else if (!link && hasId) {
+      const next = ids.filter((id) => id !== BANNER_ID)
+      if (next.length) {
+        input.setAttribute('aria-describedby', next.join(' '))
+      } else {
+        input.removeAttribute('aria-describedby')
+      }
+    }
+  }
+
+  const resolveUrl = (input) => {
+    if (typeof input === 'string') {
+      return input
+    }
+    if (input instanceof Request) {
+      return input.url
+    }
+    if (input && typeof input === 'object' && typeof input.url === 'string') {
+      return input.url
+    }
+    return null
+  }
+
+  const isSearchUrl = (url) =>
+    typeof url === 'string' &&
+    (url === searchPath || url.startsWith(`${searchPath}?`))
+
+  const ensureBanner = () => {
+    const mapEl = document.getElementById(mapElementId)
+    if (!mapEl) {
+      return null
+    }
+    let banner = mapEl.querySelector(`.${BANNER_CLASS}`)
+    if (banner) {
+      return banner
+    }
+    banner = document.createElement('div')
+    banner.id = BANNER_ID
+    // role="alert" implies aria-live="assertive"; don't also set aria-live,
+    // otherwise some screen readers announce twice or contradict the role.
+    banner.setAttribute('role', 'alert')
+    banner.className = BANNER_CLASS
+    banner.hidden = true
+    banner.textContent = errorText
+    const form = mapEl.querySelector('.im-c-search-form')
+    if (form?.parentNode) {
+      form.parentNode.insertBefore(banner, form.nextSibling)
+    } else {
+      mapEl.appendChild(banner)
+    }
+    return banner
+  }
+
+  const showError = () => {
+    const banner = ensureBanner()
+    if (banner) {
+      banner.hidden = false
+      const mapEl = document.getElementById(mapElementId)
+      if (mapEl) {
+        linkInputToBanner(mapEl, true)
+      }
+    }
+  }
+
+  const hideError = () => {
+    const mapEl = document.getElementById(mapElementId)
+    const banner = mapEl?.querySelector(`.${BANNER_CLASS}`)
+    if (banner) {
+      banner.hidden = true
+    }
+    if (mapEl) {
+      linkInputToBanner(mapEl, false)
+    }
+  }
+
+  if (!globalThis.fetch?.__searchErrorWatcher) {
+    const original = globalThis.fetch?.bind(globalThis)
+    if (original) {
+      const watcher = async function (input, init) {
+        const url = resolveUrl(input)
+        const watched = isSearchUrl(url)
+        try {
+          const res = await original(input, init)
+          if (watched) {
+            if (res.ok) {
+              hideError()
+            } else {
+              showError()
+            }
+          }
+          return res
+        } catch (err) {
+          if (watched) {
+            showError()
+          }
+          throw err
+        }
+      }
+      watcher.__searchErrorWatcher = true
+      globalThis.fetch = watcher
+    }
+  }
+
+  map.on('app:ready', ensureBanner)
+}
+
 // Applies explicit slot/order placement per breakpoint so controls render in a
 // predictable visual position on every screen, not just within their current
 // slot.

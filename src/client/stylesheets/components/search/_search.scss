@@ -1,0 +1,46 @@
+.app-c-search-error {
+  display: block;
+  margin: 5px 0 10px;
+  padding: 10px;
+  font-family: 'GDS Transport', arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
+  background-color: #d4351c;
+  border: 2px solid #d4351c;
+  border-radius: 0;
+}
+
+.app-c-search-error[hidden] {
+  display: none;
+}
+
+.im-c-search__input:focus,
+.im-c-search-submit-button:focus,
+.im-c-search-close-button:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 3px #0b0c0c;
+}
+
+// The combobox pattern keeps DOM focus on the input and highlights the
+// "active" option via aria-activedescendant, so [role="option"]:focus never
+// matches. Style the aria-selected option instead.
+.im-c-search-suggestions [role='option'][aria-selected='true'] {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 3px #0b0c0c;
+}
+
+// Windows High Contrast / forced-colors: box-shadow is ignored by the UA, so
+// fall back to a system-color outline that always paints.
+@media (forced-colors: active) {
+  .im-c-search__input:focus,
+  .im-c-search-submit-button:focus,
+  .im-c-search-close-button:focus,
+  .im-c-search-suggestions [role='option'][aria-selected='true'] {
+    outline: 3px solid CanvasText;
+    box-shadow: none;
+  }
+}

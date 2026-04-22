@@ -8,6 +8,7 @@ import {
   runWhenMapStyleReady,
   setControlPlacement,
   wireMapErrorLogging,
+  wireSearchErrorBanner,
   wireSearchLabels
 } from './helpers.js'
 
@@ -264,6 +265,203 @@ describe('base-map helpers', () => {
 
       wireSearchLabels(map, 'test-map')
       expect(() => map.fire('app:ready')).not.toThrow()
+    })
+  })
+
+  describe('wireSearchErrorBanner', () => {
+    let originalFetch
+
+    beforeEach(() => {
+      originalFetch = globalThis.fetch
+    })
+
+    afterEach(() => {
+      document.body.innerHTML = ''
+      globalThis.fetch = originalFetch
+    })
+
+    function mountSearchContainer(containerId, { withInput = false } = {}) {
+      const container = document.createElement('div')
+      container.id = containerId
+      const form = document.createElement('form')
+      form.className = 'im-c-search-form'
+      if (withInput) {
+        const input = document.createElement('input')
+        input.className = 'im-c-search__input'
+        input.id = 'map-search'
+        form.appendChild(input)
+      }
+      container.appendChild(form)
+      document.body.appendChild(container)
+      return container
+    }
+
+    function makeMap() {
+      const handlers = {}
+      return {
+        on: vi.fn((event, cb) => {
+          handlers[event] = cb
+        }),
+        fire: (event) => handlers[event]?.()
+      }
+    }
+
+    it('shows an alert banner after a proxy request returns a non-OK response', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+
+      const banner = document.querySelector('.app-c-search-error')
+      expect(banner).not.toBeNull()
+      expect(banner.hidden).toBe(false)
+      expect(banner.getAttribute('role')).toBe('alert')
+      expect(banner.textContent).toContain('could not search')
+    })
+
+    it('shows the banner when the proxy request rejects (network error)', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('offline'))
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await expect(
+        globalThis.fetch('/os-names-search?query=york')
+      ).rejects.toThrow('offline')
+
+      const banner = document.querySelector('.app-c-search-error')
+      expect(banner.hidden).toBe(false)
+    })
+
+    it('hides the banner on the next successful proxy response', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: false, status: 502 })
+        .mockResolvedValueOnce({ ok: true, status: 200 })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+      expect(document.querySelector('.app-c-search-error').hidden).toBe(false)
+
+      await globalThis.fetch('/os-names-search?query=york')
+      expect(document.querySelector('.app-c-search-error').hidden).toBe(true)
+    })
+
+    it('ignores non-search fetch calls', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/some/other/endpoint')
+
+      const banner = document.querySelector('.app-c-search-error')
+      expect(banner.hidden).toBe(true)
+    })
+
+    it('recognises the { url, options } shape used by the search plugin', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch({
+        url: '/os-names-search?query=york',
+        options: {}
+      })
+
+      expect(document.querySelector('.app-c-search-error').hidden).toBe(false)
+    })
+
+    it('does not stack watchers on repeat calls', () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      const firstPatched = globalThis.fetch
+      wireSearchErrorBanner(map, 'test-map')
+      expect(globalThis.fetch).toBe(firstPatched)
+    })
+
+    it('accepts a custom error message', async () => {
+      mountSearchContainer('test-map')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map', 'Something went wrong')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+
+      expect(document.querySelector('.app-c-search-error').textContent).toBe(
+        'Something went wrong'
+      )
+    })
+
+    it('links the search input to the banner via aria-describedby on error', async () => {
+      mountSearchContainer('test-map', { withInput: true })
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+
+      const input = document.querySelector('.im-c-search__input')
+      const banner = document.querySelector('.app-c-search-error')
+      expect(banner.id).toBe('app-c-search-error')
+      expect(input.getAttribute('aria-describedby')).toBe('app-c-search-error')
+    })
+
+    it('removes aria-describedby once a subsequent request succeeds', async () => {
+      mountSearchContainer('test-map', { withInput: true })
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: false })
+        .mockResolvedValueOnce({ ok: true })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+      await globalThis.fetch('/os-names-search?query=york')
+
+      const input = document.querySelector('.im-c-search__input')
+      expect(input.hasAttribute('aria-describedby')).toBe(false)
+    })
+
+    it('preserves pre-existing aria-describedby ids when linking the banner', async () => {
+      const container = mountSearchContainer('test-map', { withInput: true })
+      const input = container.querySelector('.im-c-search__input')
+      input.setAttribute('aria-describedby', 'other-hint')
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false })
+
+      const map = makeMap()
+      wireSearchErrorBanner(map, 'test-map')
+      map.fire('app:ready')
+
+      await globalThis.fetch('/os-names-search?query=york')
+
+      expect(input.getAttribute('aria-describedby')).toBe(
+        'other-hint app-c-search-error'
+      )
     })
   })
 
