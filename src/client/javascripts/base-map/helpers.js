@@ -1,6 +1,6 @@
 const MIN_MAP_HEIGHT = 320
 const MAP_BOTTOM_GAP = 16
-const EMPTY_OBJECT = {}
+export const EMPTY_OBJECT = {}
 
 export function logWarning(message, error = '') {
   console.warn(message, error)

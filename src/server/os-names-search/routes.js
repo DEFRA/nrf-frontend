@@ -5,10 +5,10 @@ import { statusCodes } from '../common/constants/status-codes.js'
 const logger = createLogger()
 
 const osNamesApiUrl = 'https://api.os.uk/search/names/v1/find'
+const osApiKey = config.get('map.osApiKey')
 
 export const routePath = '/os-names-search'
 
-// Matches UK postcodes with or without internal whitespace, any case.
 // GDS: postcode input must accept any case and spacing.
 // Will be removed when search plugin provides same functionality.
 
@@ -25,7 +25,7 @@ export function normalizePostcode(query) {
 function buildUpstreamUrl(query) {
   const params = new URLSearchParams()
   params.set('query', normalizePostcode(query))
-  params.set('key', config.get('map.osApiKey'))
+  params.set('key', osApiKey)
   return `${osNamesApiUrl}?${params.toString()}`
 }
 

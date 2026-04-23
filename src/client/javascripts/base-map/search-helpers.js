@@ -1,12 +1,11 @@
-import { logWarning } from './helpers.js'
+import { logWarning, EMPTY_OBJECT } from './helpers.js'
 
-const EMPTY_OBJECT = {}
 const SEARCH_INPUT_SELECTOR = '.im-c-search__input'
 const SEARCH_FORM_SELECTOR = '.im-c-search-form'
-const SEARCH_BANNER_CLASS = 'app-c-search-error'
 const ARIA_DESCRIBEDBY = 'aria-describedby'
 const SEARCH_BANNER_ID = 'app-c-search-error'
 const SEARCH_BANNER_REGISTRY_KEY = '__searchErrorBannerRegistry'
+const SEARCH_PATH = '/os-names-search'
 
 function afterCurrentEvent(callback) {
   globalThis.setTimeout(callback, 0)
@@ -53,6 +52,8 @@ function createBannerEntry(mapElementId, errorText) {
       } else {
         input.removeAttribute(ARIA_DESCRIBEDBY)
       }
+    } else {
+      // no-op: link state already matches
     }
   }
 
@@ -61,7 +62,7 @@ function createBannerEntry(mapElementId, errorText) {
     if (!mapEl) {
       return null
     }
-    let banner = mapEl.querySelector(`.${SEARCH_BANNER_CLASS}`)
+    let banner = mapEl.querySelector(`.${SEARCH_BANNER_ID}`)
     if (banner) {
       return banner
     }
@@ -69,7 +70,7 @@ function createBannerEntry(mapElementId, errorText) {
     banner.id = SEARCH_BANNER_ID
     banner.setAttribute('role', 'alert')
     banner.setAttribute('aria-live', 'polite')
-    banner.className = SEARCH_BANNER_CLASS
+    banner.className = SEARCH_BANNER_ID
     banner.hidden = true
     banner.textContent = errorText
     const form = mapEl.querySelector(SEARCH_FORM_SELECTOR)
@@ -87,7 +88,9 @@ function createBannerEntry(mapElementId, errorText) {
       return
     }
     banner.hidden = false
-    const mapEl = document.getElementById(mapElementId)
+    const mapEl =
+      banner.closest(`#${mapElementId}`) ??
+      document.getElementById(mapElementId)
     if (mapEl) {
       linkInputToBanner(mapEl, true)
     }
@@ -95,7 +98,7 @@ function createBannerEntry(mapElementId, errorText) {
 
   const hideError = () => {
     const mapEl = document.getElementById(mapElementId)
-    const banner = mapEl?.querySelector(`.${SEARCH_BANNER_CLASS}`)
+    const banner = mapEl?.querySelector(`.${SEARCH_BANNER_ID}`)
     if (banner) {
       banner.hidden = true
     }
@@ -123,34 +126,41 @@ function installSearchErrorWatcher(searchPath) {
   const watcher = async function (input, init) {
     const url = resolveSearchRequestUrl(input)
     const watched = isSearchUrl(url)
-    const entries = [...getSearchBannerRegistry().values()]
-    const activeElement = document.activeElement
-    const targetEntry =
-      entries.find((e) =>
-        document.getElementById(e.mapElementId)?.contains(activeElement)
-      ) || null
-
-    const notifyError = () =>
-      targetEntry
-        ? targetEntry.showError()
-        : entries.forEach((e) => e.showError())
-    const notifyHide = () =>
-      targetEntry
-        ? targetEntry.hideError()
-        : entries.forEach((e) => e.hideError())
 
     let res
     try {
       res = await original(input, init)
     } catch (err) {
       if (watched) {
-        notifyError()
+        const entries = [...getSearchBannerRegistry().values()]
+        const activeElement = document.activeElement
+        const targetEntry =
+          entries.find((e) =>
+            document.getElementById(e.mapElementId)?.contains(activeElement)
+          ) || null
+        targetEntry
+          ? targetEntry.showError()
+          : entries.forEach((e) => e.showError())
       }
       throw err
     }
 
     if (watched) {
-      res.ok ? notifyHide() : notifyError()
+      const entries = [...getSearchBannerRegistry().values()]
+      const activeElement = document.activeElement
+      const targetEntry =
+        entries.find((e) =>
+          document.getElementById(e.mapElementId)?.contains(activeElement)
+        ) || null
+      if (res.ok) {
+        targetEntry
+          ? targetEntry.hideError()
+          : entries.forEach((e) => e.hideError())
+      } else {
+        targetEntry
+          ? targetEntry.showError()
+          : entries.forEach((e) => e.showError())
+      }
     }
     return res
   }
@@ -175,7 +185,7 @@ export function wireSearchErrorBanner(
   map,
   mapElementId,
   errorText = 'Sorry, we could not search for that location. Try again later.',
-  searchPath = '/os-names-search'
+  searchPath = SEARCH_PATH
 ) {
   const entry = createBannerEntry(mapElementId, errorText)
   getSearchBannerRegistry().set(mapElementId, entry)
