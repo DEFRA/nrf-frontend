@@ -2423,8 +2423,8 @@ describe('base-map config', () => {
         '.app-boundary-info-panel[data-map-element-id="test-map-abort"]'
       )
       expect(
-        panelRoot.querySelector('[data-boundary-info-summary]').textContent
-      ).toBe('Boundary validation passed.')
+        panelRoot.querySelector('[data-boundary-info-status]').textContent
+      ).toBe('Boundary validation passed')
 
       delete globalThis.fetch
     })
