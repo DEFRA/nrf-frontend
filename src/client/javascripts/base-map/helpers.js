@@ -80,6 +80,10 @@ const ARIA_DESCRIBEDBY = 'aria-describedby'
 const SEARCH_BANNER_ID = 'app-c-search-error'
 const SEARCH_BANNER_REGISTRY_KEY = '__searchErrorBannerRegistry'
 
+function afterCurrentEvent(callback) {
+  globalThis.setTimeout(callback, 0)
+}
+
 function getSearchBannerRegistry() {
   if (!(globalThis[SEARCH_BANNER_REGISTRY_KEY] instanceof Map)) {
     globalThis[SEARCH_BANNER_REGISTRY_KEY] = new Map()
@@ -243,17 +247,20 @@ export function wireSearchErrorBanner(
   map.on('app:ready', entry.ensureBanner)
 }
 
-// Removes the active search marker as soon as the user starts editing.
+// Keeps the marker as long as the input value still extends the matched query,
+// so typos can be corrected without losing the pinned result.
 export function wireSearchMarkerReset(map, mapElementId) {
   let hasActiveSearchMarker = false
   let removeSearchMarker = null
+  let lastMatchedValue = ''
 
   const clearActiveSearchMarker = () => {
     if (!hasActiveSearchMarker) {
       return
     }
-    removeSearchMarker?.('search')
+    const remove = removeSearchMarker
     hasActiveSearchMarker = false
+    afterCurrentEvent(() => remove?.('search'))
   }
 
   const bindInputListener = () => {
@@ -263,15 +270,18 @@ export function wireSearchMarkerReset(map, mapElementId) {
       return Boolean(input)
     }
 
-    input.addEventListener('input', () => {
-      clearActiveSearchMarker()
+    input.addEventListener('input', (event) => {
+      if (!event.target.value.startsWith(lastMatchedValue)) {
+        clearActiveSearchMarker()
+      }
     })
     input.__searchMarkerResetBound = true
     return true
   }
 
-  map.on('search:match', () => {
+  map.on('search:match', (payload) => {
     hasActiveSearchMarker = true
+    lastMatchedValue = payload?.query ?? ''
   })
 
   map.on('search:clear', () => {
@@ -281,6 +291,7 @@ export function wireSearchMarkerReset(map, mapElementId) {
   map.on('app:ready', function (event = EMPTY_OBJECT) {
     removeSearchMarker =
       event?.mapProvider?.markers?.remove?.bind(event.mapProvider.markers) ||
+      map.removeMarker?.bind(map) ||
       null
 
     if (bindInputListener()) {
