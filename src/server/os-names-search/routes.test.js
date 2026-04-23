@@ -96,7 +96,8 @@ describe('os-names-search proxy routes', () => {
     await handler(createMockRequest({ query: '10 Downing Street, London' }), h)
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('OS Names proxy:')
+      expect.objectContaining({ status: 200 }),
+      'OS Names proxy'
     )
     expect(mockLogger.info).not.toHaveBeenCalledWith(
       expect.stringContaining('10 Downing Street, London')

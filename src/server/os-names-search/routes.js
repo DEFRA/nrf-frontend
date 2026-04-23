@@ -60,15 +60,14 @@ const searchHandler = {
       }
 
       logger.info(
-        `OS Names proxy: ${res.status} ${body.length} chars (${duration}ms)`
+        { status: res.status, bodyLength: body.length, duration },
+        'OS Names proxy'
       )
       return h
         .response(body)
         .type(res.headers.get('content-type') || 'application/json')
     } catch (err) {
-      logger.error(
-        `OS Names proxy error: ${err.message} (${err.code || 'no error code'})`
-      )
+      logger.error(err, 'OS Names proxy error')
       return upstreamError(h, statusCodes.badGateway)
     }
   }
