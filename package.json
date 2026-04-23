@@ -75,7 +75,7 @@
     "semver": "^7.7.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.32.1",
-    "undici": "^7.24.4"
+    "undici": "^8.1.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.2",
