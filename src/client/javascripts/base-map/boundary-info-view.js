@@ -68,6 +68,20 @@ function getBoundaryPanelRoot(mapElementId) {
   )
 }
 
+export function setBoundarySaveButtonDisabled(mapElementId, disabled) {
+  const panelRoot = getBoundaryPanelRoot(mapElementId)
+  if (!panelRoot) {
+    return
+  }
+  const saveButton = panelRoot.querySelector(
+    `[data-boundary-action="${BOUNDARY_ACTION_SAVE}"]`
+  )
+  if (!saveButton) {
+    return
+  }
+  saveButton.disabled = disabled
+}
+
 export function renderBoundaryPanel(mapElementId, viewModel) {
   const {
     summary,

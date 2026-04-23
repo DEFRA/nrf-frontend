@@ -1,5 +1,12 @@
-import { BOUNDARY_INFO_PANEL_ID, DRAW_EVENT_CREATED } from './constants.js'
-import { renderBoundaryPanel } from './boundary-info-view.js'
+import {
+  BOUNDARY_INFO_PANEL_ID,
+  DRAW_ACTION_EDIT,
+  DRAW_EVENT_CREATED
+} from './constants.js'
+import {
+  renderBoundaryPanel,
+  setBoundarySaveButtonDisabled
+} from './boundary-info-view.js'
 
 export function abortBoundaryRequest(state) {
   state.inFlightRequest?.abort()
@@ -149,8 +156,29 @@ export function registerBoundaryInfoMapEvents({
     runValidation(feature)
   })
 
+  document.addEventListener('click', function (event) {
+    const button = event.target.closest(
+      `[data-draw-action="${DRAW_ACTION_EDIT}"]`
+    )
+    if (!button || button.disabled) {
+      return
+    }
+    if (
+      !button.closest(`.app-draw-panel[data-map-element-id="${mapElementId}"]`)
+    ) {
+      return
+    }
+    setBoundarySaveButtonDisabled(mapElementId, true)
+  })
+
   map.on('draw:edited', function (feature) {
     runValidation(feature)
+  })
+
+  map.on('draw:cancelled', function () {
+    if (state.latestResponse?.isValid) {
+      setBoundarySaveButtonDisabled(mapElementId, false)
+    }
   })
 
   map.on('draw:delete', function () {
