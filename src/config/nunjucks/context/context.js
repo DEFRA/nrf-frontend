@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 
 import { config } from '../../config.js'
 import { buildNavigation } from './build-navigation.js'
@@ -12,13 +12,21 @@ const manifestPath = path.join(
   config.get('root'),
   '.public/assets-manifest.json'
 )
+const isProduction = config.get('isProduction')
 
 let webpackManifest
+let webpackManifestMtimeMs
 
 export function context(request) {
-  if (!webpackManifest) {
+  const shouldReload =
+    !webpackManifest ||
+    (!isProduction && statSync(manifestPath).mtimeMs !== webpackManifestMtimeMs)
+
+  if (shouldReload) {
     try {
+      const stats = statSync(manifestPath)
       webpackManifest = JSON.parse(readFileSync(manifestPath, 'utf-8'))
+      webpackManifestMtimeMs = stats.mtimeMs
     } catch (error) {
       logger.error(error, `Webpack ${path.basename(manifestPath)} not found`)
     }
