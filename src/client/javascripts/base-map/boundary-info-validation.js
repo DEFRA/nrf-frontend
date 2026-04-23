@@ -58,9 +58,7 @@ function renderBoundaryValidationResult({
   const { isValid, intersectingEdps } = validationResult.normalized
   const hasEdpData = Array.isArray(intersectingEdps)
   renderBoundaryPanel(mapElementId, {
-    summary: isValid
-      ? 'Boundary validation passed.'
-      : 'Boundary validation failed.',
+    summary: isValid ? '' : 'Boundary validation failed.',
     announce: isValid
       ? 'Boundary validation passed'
       : 'Boundary validation failed',
