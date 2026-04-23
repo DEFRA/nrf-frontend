@@ -152,15 +152,8 @@ function installSearchErrorWatcher(searchPath) {
         entries.find((e) =>
           document.getElementById(e.mapElementId)?.contains(activeElement)
         ) || null
-      if (res.ok) {
-        targetEntry
-          ? targetEntry.hideError()
-          : entries.forEach((e) => e.hideError())
-      } else {
-        targetEntry
-          ? targetEntry.showError()
-          : entries.forEach((e) => e.showError())
-      }
+      const action = res.ok ? 'hideError' : 'showError'
+      targetEntry ? targetEntry[action]() : entries.forEach((e) => e[action]())
     }
     return res
   }
