@@ -62,38 +62,6 @@ export function resolveDrawPlugin(defraApi) {
   return drawPlugin
 }
 
-// The search plugin calls fetch({ url, options }) — a plain object — rather
-// than fetch(url, options). Native fetch rejects plain objects so we patch it
-// once to unwrap that specific shape before it hits the network stack.
-// Guarded so re-initialising a map in the same session does not stack wrappers.
-export function patchFetchForSearchPlugin() {
-  if (globalThis.fetch?.__patchedForSearchPlugin) {
-    return
-  }
-  const original = globalThis.fetch?.bind(globalThis)
-  if (!original) {
-    return
-  }
-
-  const patched = function (input, init) {
-    if (
-      input !== null &&
-      typeof input === 'object' &&
-      !(input instanceof Request) &&
-      'url' in input &&
-      'options' in input
-    ) {
-      return original(input.url, input.options)
-    }
-    return original(input, init)
-  }
-  patched.__patchedForSearchPlugin = true
-  if (globalThis.fetch?.__searchErrorWatcher) {
-    patched.__searchErrorWatcher = true
-  }
-  globalThis.fetch = patched
-}
-
 export function resolveSearchPlugin(defraApi) {
   const searchPlugin =
     typeof defraApi.searchPlugin === 'function' ? defraApi.searchPlugin : null
@@ -103,53 +71,6 @@ export function resolveSearchPlugin(defraApi) {
   }
 
   return searchPlugin
-}
-
-// Overrides the search plugin's hardcoded "Search" placeholder/label with
-// GDS-compliant copy. The plugin renders its own DOM after app:ready, so we
-// wait for that event and also poll briefly in case the input mounts later.
-export function wireSearchLabels(
-  map,
-  mapElementId,
-  labelText = 'Search for an address or postcode'
-) {
-  const applyLabels = () => {
-    const mapEl = document.getElementById(mapElementId)
-    const input = mapEl?.querySelector(SEARCH_INPUT_SELECTOR)
-    if (!input) {
-      return false
-    }
-    input.placeholder = labelText
-    input.setAttribute('aria-label', labelText)
-    const hiddenLabel = mapEl.querySelector(
-      `label[for="${input.id}"].im-u-visually-hidden`
-    )
-    if (hiddenLabel) {
-      hiddenLabel.textContent = labelText
-    }
-    return true
-  }
-
-  const tryApply = () => {
-    if (applyLabels()) {
-      return
-    }
-    // Plugin may mount the input lazily (expanded=false renders an "Open search"
-    // button first). Observe the map container for its arrival.
-    const mapEl = document.getElementById(mapElementId)
-    const MO = globalThis.MutationObserver
-    if (!mapEl || typeof MO !== 'function') {
-      return
-    }
-    const observer = new MO(() => {
-      if (applyLabels()) {
-        observer.disconnect()
-      }
-    })
-    observer.observe(mapEl, { childList: true, subtree: true })
-  }
-
-  map.on('app:ready', tryApply)
 }
 
 const SEARCH_INPUT_SELECTOR = '.im-c-search__input'
@@ -305,9 +226,6 @@ function installSearchErrorWatcher(searchPath) {
     return res
   }
   watcher.__searchErrorWatcher = true
-  if (globalThis.fetch?.__patchedForSearchPlugin) {
-    watcher.__patchedForSearchPlugin = true
-  }
   globalThis.fetch = watcher
 }
 

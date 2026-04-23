@@ -1,15 +1,13 @@
 import {
   getDefraApi,
   logWarning,
-  patchFetchForSearchPlugin,
   resolveDrawPlugin,
   resolveMapStylesPlugin,
   resolveSearchPlugin,
   setControlPlacement,
   wireMapErrorLogging,
   wireSearchErrorBanner,
-  wireSearchMarkerReset,
-  wireSearchLabels
+  wireSearchMarkerReset
 } from './helpers.js'
 import {
   DRAW_PANEL_ID,
@@ -79,7 +77,6 @@ function resolvePlugins({
   const plugins = [...(options.plugins || [])]
 
   if (showSearch) {
-    patchFetchForSearchPlugin()
     const searchPlugin = resolveSearchPlugin(defraApi)
     if (searchPlugin) {
       const searchPluginInstance = searchPlugin({
@@ -196,7 +193,6 @@ function wireOptionalMapFeatures({
   }
 
   if (showSearch) {
-    wireSearchLabels(map, elementId)
     wireSearchErrorBanner(map, elementId)
     wireSearchMarkerReset(map, elementId)
   }
