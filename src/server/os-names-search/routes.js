@@ -56,7 +56,8 @@ const searchHandler = {
 
       if (!res.ok) {
         logger.warn(
-          `OS Names proxy upstream error: ${res.status} (${duration}ms)`
+          { status: res.status, duration },
+          'OS Names proxy upstream error'
         )
         return upstreamError(h, res.status)
       }
