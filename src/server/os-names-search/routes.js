@@ -10,6 +10,8 @@ export const routePath = '/os-names-search'
 
 // Matches UK postcodes with or without internal whitespace, any case.
 // GDS: postcode input must accept any case and spacing.
+// Will be removed when search plugin provides same functionality.
+
 const UK_POSTCODE_PATTERN = /^\s*([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\s*$/i
 
 export function normalizePostcode(query) {

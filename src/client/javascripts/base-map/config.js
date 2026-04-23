@@ -3,12 +3,14 @@ import {
   logWarning,
   resolveDrawPlugin,
   resolveMapStylesPlugin,
-  resolveSearchPlugin,
   setControlPlacement,
-  wireMapErrorLogging,
+  wireMapErrorLogging
+} from './helpers.js'
+import {
+  resolveSearchPlugin,
   wireSearchErrorBanner,
   wireSearchMarkerReset
-} from './helpers.js'
+} from './search-helpers.js'
 import {
   DRAW_PANEL_ID,
   ENGLAND_BOUNDS,
