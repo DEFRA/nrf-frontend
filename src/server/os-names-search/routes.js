@@ -9,22 +9,9 @@ const osApiKey = config.get('map.osApiKey')
 
 export const routePath = '/os-names-search'
 
-// GDS: postcode input must accept any case and spacing.
-// Will be removed when search plugin provides same functionality.
-
-const UK_POSTCODE_PATTERN = /^\s*([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\s*$/i
-
-export function normalizePostcode(query) {
-  const match = query.match(UK_POSTCODE_PATTERN)
-  if (!match) {
-    return query
-  }
-  return `${match[1].toUpperCase()} ${match[2].toUpperCase()}`
-}
-
 function buildUpstreamUrl(query) {
   const params = new URLSearchParams()
-  params.set('query', normalizePostcode(query))
+  params.set('query', query)
   params.set('key', osApiKey)
   return `${osNamesApiUrl}?${params.toString()}`
 }

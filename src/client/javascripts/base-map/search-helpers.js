@@ -62,7 +62,7 @@ function createBannerEntry(mapElementId, errorText) {
     if (!mapEl) {
       return null
     }
-    let banner = mapEl.querySelector(`.${SEARCH_BANNER_ID}`)
+    let banner = mapEl.querySelector(`#${SEARCH_BANNER_ID}`)
     if (banner) {
       return banner
     }
@@ -70,7 +70,7 @@ function createBannerEntry(mapElementId, errorText) {
     banner.id = SEARCH_BANNER_ID
     banner.setAttribute('role', 'alert')
     banner.setAttribute('aria-live', 'polite')
-    banner.className = SEARCH_BANNER_ID
+    banner.className = 'govuk-error-message'
     banner.hidden = true
     banner.textContent = errorText
     const form = mapEl.querySelector(SEARCH_FORM_SELECTOR)
@@ -98,7 +98,7 @@ function createBannerEntry(mapElementId, errorText) {
 
   const hideError = () => {
     const mapEl = document.getElementById(mapElementId)
-    const banner = mapEl?.querySelector(`.${SEARCH_BANNER_ID}`)
+    const banner = mapEl?.querySelector(`#${SEARCH_BANNER_ID}`)
     if (banner) {
       banner.hidden = true
     }

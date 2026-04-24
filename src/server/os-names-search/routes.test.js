@@ -134,41 +134,4 @@ describe('os-names-search proxy routes', () => {
     expect(h._response.code).toHaveBeenCalledWith(502)
     expect(mockLogger.error).toHaveBeenCalled()
   })
-
-  describe('postcode normalization (GDS)', () => {
-    const captureQuery = () => {
-      let captured
-      server.use(
-        http.get(
-          'https://api.os.uk/search/names/v1/find',
-          ({ request: req }) => {
-            captured = new URL(req.url).searchParams.get('query')
-            return HttpResponse.json({ results: [] })
-          }
-        )
-      )
-      return () => captured
-    }
-
-    it.each([
-      ['SW1A 2AA', 'SW1A 2AA'],
-      ['sw1a2aa', 'SW1A 2AA'],
-      ['SW1A2AA', 'SW1A 2AA'],
-      ['sw1a 2aa', 'SW1A 2AA'],
-      ['m11ae', 'M1 1AE'],
-      ['  M1   1AE  ', 'M1 1AE']
-    ])('normalizes "%s" → "%s"', async (input, expected) => {
-      const getQuery = captureQuery()
-      const h = createMockH()
-      await handler(createMockRequest({ query: input }), h)
-      expect(getQuery()).toBe(expected)
-    })
-
-    it('passes non-postcode queries through unchanged', async () => {
-      const getQuery = captureQuery()
-      const h = createMockH()
-      await handler(createMockRequest({ query: '10 Downing Street' }), h)
-      expect(getQuery()).toBe('10 Downing Street')
-    })
-  })
 })

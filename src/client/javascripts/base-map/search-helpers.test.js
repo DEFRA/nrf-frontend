@@ -89,7 +89,7 @@ describe('search-helper', () => {
 
       await globalThis.fetch('/os-names-search?query=york')
 
-      const banner = document.querySelector('.app-c-search-error')
+      const banner = document.querySelector('.govuk-error-message')
       expect(banner).not.toBeNull()
       expect(banner.hidden).toBe(false)
       expect(banner.getAttribute('role')).toBe('alert')
@@ -109,7 +109,7 @@ describe('search-helper', () => {
         globalThis.fetch('/os-names-search?query=york')
       ).rejects.toThrow('offline')
 
-      const banner = document.querySelector('.app-c-search-error')
+      const banner = document.querySelector('.govuk-error-message')
       expect(banner.hidden).toBe(false)
     })
 
@@ -125,10 +125,10 @@ describe('search-helper', () => {
       map.fire('app:ready')
 
       await globalThis.fetch('/os-names-search?query=york')
-      expect(document.querySelector('.app-c-search-error').hidden).toBe(false)
+      expect(document.querySelector('.govuk-error-message').hidden).toBe(false)
 
       await globalThis.fetch('/os-names-search?query=york')
-      expect(document.querySelector('.app-c-search-error').hidden).toBe(true)
+      expect(document.querySelector('.govuk-error-message').hidden).toBe(true)
     })
 
     it('ignores non-search fetch calls', async () => {
@@ -141,7 +141,7 @@ describe('search-helper', () => {
 
       await globalThis.fetch('/some/other/endpoint')
 
-      const banner = document.querySelector('.app-c-search-error')
+      const banner = document.querySelector('.govuk-error-message')
       expect(banner.hidden).toBe(true)
     })
 
@@ -158,7 +158,7 @@ describe('search-helper', () => {
         options: {}
       })
 
-      expect(document.querySelector('.app-c-search-error').hidden).toBe(false)
+      expect(document.querySelector('.govuk-error-message').hidden).toBe(false)
     })
 
     it('does not stack watchers on repeat calls', () => {
@@ -187,8 +187,8 @@ describe('search-helper', () => {
       second.querySelector('.im-c-search__input').focus()
       await globalThis.fetch('/os-names-search?query=york')
 
-      expect(first.querySelector('.app-c-search-error').hidden).toBe(true)
-      expect(second.querySelector('.app-c-search-error').hidden).toBe(false)
+      expect(first.querySelector('.govuk-error-message').hidden).toBe(true)
+      expect(second.querySelector('.govuk-error-message').hidden).toBe(false)
     })
 
     it('reuses the current registry when a second map is initialised later', async () => {
@@ -207,8 +207,8 @@ describe('search-helper', () => {
       second.querySelector('.im-c-search__input').focus()
       await globalThis.fetch('/os-names-search?query=york')
 
-      expect(first.querySelector('.app-c-search-error').hidden).toBe(true)
-      expect(second.querySelector('.app-c-search-error').hidden).toBe(false)
+      expect(first.querySelector('.govuk-error-message').hidden).toBe(true)
+      expect(second.querySelector('.govuk-error-message').hidden).toBe(false)
     })
 
     it('accepts a custom error message', async () => {
@@ -221,7 +221,7 @@ describe('search-helper', () => {
 
       await globalThis.fetch('/os-names-search?query=york')
 
-      expect(document.querySelector('.app-c-search-error').textContent).toBe(
+      expect(document.querySelector('.govuk-error-message').textContent).toBe(
         'Something went wrong'
       )
     })
@@ -237,7 +237,7 @@ describe('search-helper', () => {
       await globalThis.fetch('/os-names-search?query=york')
 
       const input = document.querySelector('.im-c-search__input')
-      const banner = document.querySelector('.app-c-search-error')
+      const banner = document.querySelector('.govuk-error-message')
       expect(banner.id).toBe('app-c-search-error')
       expect(input.getAttribute('aria-describedby')).toBe('app-c-search-error')
     })

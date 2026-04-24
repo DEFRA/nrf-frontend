@@ -1,19 +1,6 @@
 // Search plugin related changes can be removed once upstream changes merged.
-.app-c-search-error {
-  display: block;
-  margin: 5px 0 10px;
-  padding: 10px;
-  font-family: 'GDS Transport', arial, sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: #ffffff;
-  background-color: #d4351c;
-  border: 2px solid #d4351c;
-  border-radius: 0;
-}
-
-.app-c-search-error[hidden] {
+// govuk-error-message sets display:block, so [hidden] needs an explicit override.
+.govuk-error-message[hidden] {
   display: none;
 }
 
