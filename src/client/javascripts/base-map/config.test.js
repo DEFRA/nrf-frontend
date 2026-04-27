@@ -218,12 +218,12 @@ describe('base-map config', () => {
 
       createMap({
         mapElementId: 'test-map',
-        showSearchPlugin: true,
-        searchPluginOptions: { osNamesURL: '/os-names-search?query={query}' }
+        showSearchPlugin: true
       })
 
       expect(searchPlugin).toHaveBeenCalledWith({
-        osNamesURL: '/os-names-search?query={query}'
+        osNamesURL: '/os-names-search?query={query}',
+        regions: ['england']
       })
       expect(constructorSpy).toHaveBeenCalledWith(
         'test-map',

@@ -74,7 +74,13 @@ function resolvePlugins({
   if (showSearchPlugin) {
     const searchPlugin = resolveSearchPlugin(defraApi)
     if (searchPlugin) {
-      plugins.push(searchPlugin(searchPluginOptions))
+      plugins.push(
+        searchPlugin({
+          osNamesURL: '/os-names-search?query={query}',
+          regions: ['england'],
+          ...searchPluginOptions
+        })
+      )
     }
   }
 
