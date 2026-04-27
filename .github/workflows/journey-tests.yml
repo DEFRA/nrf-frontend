@@ -14,3 +14,5 @@ jobs:
       checks: write
       pull-requests: write
     uses: DEFRA/nrf-journey-tests/.github/workflows/journey-tests.yml@main
+    secrets:
+      MAILINATOR_API_KEY: ${{ secrets.MAILINATOR_API_KEY }}
