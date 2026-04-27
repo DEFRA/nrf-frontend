@@ -150,7 +150,16 @@ document.addEventListener('DOMContentLoaded', function () {
     showDrawControls: true,
     showSearchPlugin: true,
     searchPluginOptions: {
-      ...(osNamesUrl ? { osNamesURL: osNamesUrl } : {})
+      ...(osNamesUrl ? { osNamesURL: osNamesUrl } : {}),
+      manifest: {
+        controls: [
+          {
+            id: 'search',
+            tablet: { slot: 'top-left', showLabel: false, order: 1 },
+            desktop: { slot: 'top-left', showLabel: false, order: 1 }
+          }
+        ]
+      }
     },
     drawControlOptions: {
       ...(initialDrawFeature ? { initialFeature: initialDrawFeature } : {})
