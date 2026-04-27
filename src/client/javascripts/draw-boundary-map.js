@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const initialDrawFeature = normalizeInitialDrawFeature(
     existingBoundaryGeojson
   )
+  const osNamesUrl = mapElement?.dataset?.osNamesUrl
   const layerParams = mapElement?.dataset?.impactAssessorLayers
     ?.split(',')
     .map((value) => value.trim())
@@ -147,6 +148,10 @@ document.addEventListener('DOMContentLoaded', function () {
     containerHeight: getDrawMapContainerHeight,
     showStyleControls: true,
     showDrawControls: true,
+    showSearchPlugin: true,
+    searchPluginOptions: {
+      ...(osNamesUrl ? { osNamesURL: osNamesUrl } : {})
+    },
     drawControlOptions: {
       ...(initialDrawFeature ? { initialFeature: initialDrawFeature } : {})
     },

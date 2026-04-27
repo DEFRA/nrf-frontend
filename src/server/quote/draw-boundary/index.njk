@@ -10,10 +10,12 @@
   <script src="{{ getAssetPath('interactive-map/maplibre/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('interactive-map/plugins/map-styles/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('interactive-map/plugins/draw-ml/index.js') }}" defer nonce="{{ nonce }}"></script>
+  <script src="{{ getAssetPath('interactive-map/plugins/search/index.js') }}" defer nonce="{{ nonce }}"></script>
   <script src="{{ getAssetPath('draw-boundary-map.js') }}" defer nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/map-styles/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/draw-ml/index.css') }}" rel="stylesheet">
+  <link href="{{ getAssetPath('interactive-map/plugins/search/index.css') }}" rel="stylesheet">
 {% endblock %}
 
 
@@ -30,6 +32,7 @@
       data-existing-boundary-geojson='{{ existingBoundaryGeojson | safe }}'
       data-existing-boundary-metadata='{{ existingBoundaryMetadata | safe }}'
       data-csrf-token="{{ csrfToken }}"
+      data-os-names-url="{{ osNamesUrl }}"
     >
     </div>
   </div>

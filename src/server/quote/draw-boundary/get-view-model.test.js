@@ -22,6 +22,12 @@ describe('draw-boundary getViewModel', () => {
     config.set('map.defaultStyleUrl', originalStyleUrl)
   })
 
+  test('returns osNamesUrl for the search proxy endpoint', () => {
+    const viewModel = getViewModel()
+
+    expect(viewModel.osNamesUrl).toBe('/os-names-search?query={query}')
+  })
+
   test('returns existing boundary geometry from quote cache when present', () => {
     const quoteData = {
       boundaryGeojson: {
