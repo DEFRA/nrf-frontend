@@ -24,13 +24,24 @@ export default [
       auth: false
     },
     async handler(request, h) {
-      const url = buildOsNamesUrl(request.query.query)
+      const query = (request.query?.query || '').trim()
+
+      if (!query) {
+        return h.response({ results: [] }).code(statusCodes.ok)
+      }
+
+      const url = buildOsNamesUrl(query)
+      const startTime = Date.now()
 
       try {
         const res = await fetch(url)
+        const duration = Date.now() - startTime
 
         if (!res.ok) {
-          logger.warn(`OS Names search upstream error: ${res.status}`)
+          logger.warn(
+            { status: res.status, duration },
+            'OS Names proxy upstream error'
+          )
           return h.response(null).code(res.status)
         }
 

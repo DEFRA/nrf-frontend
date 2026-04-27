@@ -85,7 +85,48 @@ describe('os-names-search proxy routes', () => {
       expect(h._response.type).toHaveBeenCalledWith('application/json')
     })
 
-    it('returns 502 when OS Names API request fails', async () => {
+    it('returns empty results without calling the API when query is blank', async () => {
+      const request = createMockRequest({ query: { query: '   ' } })
+      const h = createMockH()
+
+      await handler(request, h)
+
+      expect(h.response).toHaveBeenCalledWith({ results: [] })
+      expect(h._response.code).toHaveBeenCalledWith(200)
+    })
+
+    it('returns empty results without calling the API when query param is missing', async () => {
+      const request = createMockRequest({ query: {} })
+      const h = createMockH()
+
+      await handler(request, h)
+
+      expect(h.response).toHaveBeenCalledWith({ results: [] })
+      expect(h._response.code).toHaveBeenCalledWith(200)
+    })
+
+    it('trims whitespace from query before sending to OS Names API', async () => {
+      const osNamesResponse = { results: [] }
+
+      server.use(
+        http.get('https://api.os.uk/search/names/v1/find', ({ request }) => {
+          const url = new URL(request.url)
+          if (url.searchParams.get('query') === 'London') {
+            return HttpResponse.json(osNamesResponse)
+          }
+          return new HttpResponse(null, { status: 400 })
+        })
+      )
+
+      const request = createMockRequest({ query: { query: '  London  ' } })
+      const h = createMockH()
+
+      await handler(request, h)
+
+      expect(h.response).toHaveBeenCalledWith(osNamesResponse)
+    })
+
+    it('returns upstream status and logs warn when OS Names API returns non-ok', async () => {
       server.use(
         http.get('https://api.os.uk/search/names/v1/find', () => {
           return new HttpResponse(null, { status: 503 })
@@ -98,6 +139,10 @@ describe('os-names-search proxy routes', () => {
       await handler(request, h)
 
       expect(h._response.code).toHaveBeenCalledWith(503)
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 503, duration: expect.any(Number) }),
+        'OS Names proxy upstream error'
+      )
     })
 
     it('returns 502 and logs error when fetch throws', async () => {
