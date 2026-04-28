@@ -4,6 +4,7 @@ import {
   getDefraApi,
   logWarning,
   parseDatasetJson,
+  resolveSearchPlugin,
   runWhenMapStyleReady,
   wireMapErrorLogging
 } from './helpers.js'
@@ -108,6 +109,27 @@ describe('base-map helpers', () => {
 
       expect(mapInstance.once).toHaveBeenCalledWith('style.load', callback)
       expect(callback).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('resolveSearchPlugin', () => {
+    it('returns null and logs warning when searchPlugin is not available', () => {
+      const result = resolveSearchPlugin({})
+
+      expect(result).toBeNull()
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Search plugin not available, search disabled',
+        ''
+      )
+    })
+
+    it('returns searchPlugin function when available', () => {
+      const searchPlugin = vi.fn()
+
+      const result = resolveSearchPlugin({ searchPlugin })
+
+      expect(result).toBe(searchPlugin)
+      expect(warnSpy).not.toHaveBeenCalled()
     })
   })
 

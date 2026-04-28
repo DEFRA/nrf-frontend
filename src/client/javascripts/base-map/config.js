@@ -3,6 +3,7 @@ import {
   logWarning,
   resolveDrawPlugin,
   resolveMapStylesPlugin,
+  resolveSearchPlugin,
   wireMapErrorLogging
 } from './helpers.js'
 import { DRAW_PANEL_ID, ENGLAND_BOUNDS, ENGLAND_MIN_ZOOM } from './constants.js'
@@ -43,9 +44,11 @@ function resolvePlugins({
   options = {},
   showStyleControls,
   showDrawControls,
+  showSearchPlugin,
   defraApi,
   mapStyles,
-  drawPluginOptions = {}
+  drawPluginOptions = {},
+  searchPluginOptions = {}
 }) {
   const plugins = [...(options.plugins || [])]
 
@@ -65,6 +68,19 @@ function resolvePlugins({
     const drawPlugin = resolveDrawPlugin(defraApi)
     if (drawPlugin) {
       plugins.push(drawPlugin(drawPluginOptions))
+    }
+  }
+
+  if (showSearchPlugin) {
+    const searchPlugin = resolveSearchPlugin(defraApi)
+    if (searchPlugin) {
+      plugins.push(
+        searchPlugin({
+          osNamesURL: '/os-names-search?query={query}',
+          regions: ['england'],
+          ...searchPluginOptions
+        })
+      )
     }
   }
 
@@ -150,8 +166,10 @@ export function createMap(mapElementId, mapOptions = {}) {
     showDrawControls = false,
     showBoundaryInfoPanel = false,
     showLayerControls = false,
+    showSearchPlugin = false,
     drawPluginOptions,
     drawControlOptions,
+    searchPluginOptions,
     boundaryInfoOptions,
     layerControlOptions,
     options = {}
@@ -176,9 +194,11 @@ export function createMap(mapElementId, mapOptions = {}) {
     options,
     showStyleControls,
     showDrawControls,
+    showSearchPlugin,
     defraApi,
     mapStyles,
-    drawPluginOptions
+    drawPluginOptions,
+    searchPluginOptions
   })
   const baseOptions = buildBaseOptions({
     defraApi,

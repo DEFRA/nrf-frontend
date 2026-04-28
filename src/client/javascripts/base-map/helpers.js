@@ -50,6 +50,17 @@ export function resolveMapStylesPlugin(defraApi) {
   return mapStylesPlugin
 }
 
+export function resolveSearchPlugin(defraApi) {
+  const searchPlugin =
+    typeof defraApi.searchPlugin === 'function' ? defraApi.searchPlugin : null
+
+  if (!searchPlugin) {
+    logWarning('Search plugin not available, search disabled')
+  }
+
+  return searchPlugin
+}
+
 export function resolveDrawPlugin(defraApi) {
   const drawPlugin =
     typeof defraApi.drawMLPlugin === 'function' ? defraApi.drawMLPlugin : null

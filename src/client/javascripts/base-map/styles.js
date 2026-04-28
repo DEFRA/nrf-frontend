@@ -29,12 +29,12 @@ export function getStyleControlsManifest() {
         tablet: {
           slot: 'top-left',
           showLabel: true,
-          order: 1
+          order: 2
         },
         desktop: {
           slot: 'top-left',
           showLabel: true,
-          order: 1
+          order: 2
         }
       }
     ]
