@@ -147,6 +147,18 @@ document.addEventListener('DOMContentLoaded', function () {
     containerHeight: getDrawMapContainerHeight,
     showStyleControls: true,
     showDrawControls: true,
+    showSearchPlugin: true,
+    searchPluginOptions: {
+      manifest: {
+        controls: [
+          {
+            id: 'search',
+            tablet: { slot: 'top-left', showLabel: false, order: 1 },
+            desktop: { slot: 'top-left', showLabel: false, order: 1 }
+          }
+        ]
+      }
+    },
     drawControlOptions: {
       ...(initialDrawFeature ? { initialFeature: initialDrawFeature } : {})
     },

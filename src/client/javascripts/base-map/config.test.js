@@ -198,6 +198,66 @@ describe('base-map config', () => {
       )
     })
 
+    it('adds search plugin when showSearchPlugin is true', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      const searchPlugin = vi.fn().mockReturnValue({ id: 'search' })
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        searchPlugin
+      }
+
+      createMap({
+        mapElementId: 'test-map',
+        showSearchPlugin: true
+      })
+
+      expect(searchPlugin).toHaveBeenCalledWith({
+        osNamesURL: '/os-names-search?query={query}',
+        regions: ['england']
+      })
+      expect(constructorSpy).toHaveBeenCalledWith(
+        'test-map',
+        expect.objectContaining({
+          plugins: [expect.objectContaining({ id: 'search' })]
+        })
+      )
+    })
+
+    it('does not add search plugin when showSearchPlugin is false', () => {
+      const el = document.createElement('div')
+      el.id = 'test-map'
+      document.body.appendChild(el)
+
+      const constructorSpy = vi.fn()
+      const searchPlugin = vi.fn()
+      globalThis.defra = {
+        InteractiveMap: new Proxy(function () {}, {
+          construct(target, args) {
+            constructorSpy(...args)
+            return {}
+          }
+        }),
+        maplibreProvider: vi.fn().mockReturnValue({}),
+        searchPlugin
+      }
+
+      createMap({ mapElementId: 'test-map' })
+
+      expect(searchPlugin).not.toHaveBeenCalled()
+      const options = constructorSpy.mock.calls[0][1]
+      expect(options.plugins).toBeUndefined()
+    })
+
     it('does not add plugins when style controls requested but plugin unavailable', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
@@ -2423,8 +2483,8 @@ describe('base-map config', () => {
         '.app-boundary-info-panel[data-map-element-id="test-map-abort"]'
       )
       expect(
-        panelRoot.querySelector('[data-boundary-info-summary]').textContent
-      ).toBe('Boundary validation passed.')
+        panelRoot.querySelector('[data-boundary-info-status]').textContent
+      ).toBe('Boundary validation passed')
 
       delete globalThis.fetch
     })

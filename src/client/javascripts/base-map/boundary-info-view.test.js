@@ -5,7 +5,8 @@ import { BOUNDARY_ACTION_SAVE } from './constants.js'
 import {
   buildBoundaryInfoPanelHtml,
   registerBoundaryInfoSaveHandler,
-  renderBoundaryPanel
+  renderBoundaryPanel,
+  setBoundarySaveButtonDisabled
 } from './boundary-info-view.js'
 
 afterEach(() => {
@@ -192,6 +193,28 @@ describe('boundary-info-view', () => {
     expect(assignMock).toHaveBeenCalledWith('/redirected-url')
 
     delete globalThis.fetch
+  })
+
+  describe('setBoundarySaveButtonDisabled', () => {
+    it('toggles the save button disabled state', () => {
+      document.body.innerHTML = buildBoundaryInfoPanelHtml('map-disable')
+      const button = document.querySelector(
+        `[data-map-element-id="map-disable"] [data-boundary-action="${BOUNDARY_ACTION_SAVE}"]`
+      )
+      button.disabled = false
+
+      setBoundarySaveButtonDisabled('map-disable', true)
+      expect(button.disabled).toBe(true)
+
+      setBoundarySaveButtonDisabled('map-disable', false)
+      expect(button.disabled).toBe(false)
+    })
+
+    it('is a no-op when the panel is not in the DOM', () => {
+      expect(() =>
+        setBoundarySaveButtonDisabled('missing-map', true)
+      ).not.toThrow()
+    })
   })
 
   it('logs error and does not throw when fetch rejects', async () => {
