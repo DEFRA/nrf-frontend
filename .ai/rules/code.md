@@ -4,7 +4,7 @@
 
 - Use short, single-purpose functions. Any over 75 lines will be failed by SonarQube, but aim to make them shorter.
 - If there are multiple function params, use an object param instead
-- Generate JSDoc for function signatures? (use a skill for this?)
+- For functions that accept params that are structured objects, add JSDoc annotations to help the agent. No need to add JSDoc everywhere as for params with primitive types it can infer.
 
 ## Config
 
@@ -13,7 +13,7 @@
 
 ## Functional / classes
 
-- Favour functional over classes (unless creating a stateful local component? To follow gov.uk pattern)
+- Favour functional over classes
 
 ## Observability
 
