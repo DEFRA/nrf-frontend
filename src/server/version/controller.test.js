@@ -1,6 +1,13 @@
 import { createServer } from '../server.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 
+vi.mock('../plugins/cookies.js', () => ({
+  cookies: {
+    name: 'cookie-policy',
+    register() {}
+  }
+}))
+
 describe('#versionController', () => {
   let server
 

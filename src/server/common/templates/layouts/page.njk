@@ -27,6 +27,15 @@
 
 {% block head %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
+  {% if analyticsEnabled %}
+    <script nonce="{{ cspNonce }}" data-testid="script-analytics">
+      console.log('Analytics enabled')
+    </script>
+  {% endif %}
+{% endblock %}
+
+{% block headerStart %}
+  {% include "partials/cookie-banner.njk" %}
 {% endblock %}
 
 {% block govukHeader %}
@@ -74,7 +83,7 @@
           text: "Privacy"
         },
         {
-          href: "https://www.gov.uk/help/cookies",
+          href: "/cookies",
           text: "Cookies"
         },
         {

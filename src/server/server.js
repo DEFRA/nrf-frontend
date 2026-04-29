@@ -15,6 +15,7 @@ import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
 import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 import { defraIdentity } from './plugins/defra-identity.js'
+import { cookies } from './plugins/cookies.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import Bell from '@hapi/bell'
 import { csrf } from './common/helpers/csrf.js'
@@ -70,7 +71,8 @@ export async function createServer() {
     csrf,
     nunjucksConfig,
     Scooter,
-    contentSecurityPolicy
+    contentSecurityPolicy,
+    cookies
   ])
 
   // Store session cache on server app for auth plugin access
