@@ -26,11 +26,15 @@
 {% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}
+  {% if analyticsEnabled and gtmId %}
+    {% include "partials/google-tag-manager-head.njk" %}
+  {% endif %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
-  {% if analyticsEnabled %}
-    <script nonce="{{ cspNonce }}" data-testid="script-analytics">
-      console.log('Analytics enabled')
-    </script>
+{% endblock %}
+
+{% block bodyStart %}
+  {% if analyticsEnabled and gtmId %}
+    {% include "partials/google-tag-manager.body.njk" %}
   {% endif %}
 {% endblock %}
 

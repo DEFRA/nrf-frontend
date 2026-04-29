@@ -49,6 +49,7 @@ export function context(request) {
     isAuthenticated,
     user,
     analyticsEnabled: areAnalyticsCookiesAccepted(request),
+    gtmId: config.get('gtmId'),
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`
