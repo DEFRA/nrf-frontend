@@ -44,7 +44,7 @@ describe('Upload boundary page', () => {
       requestUrl: routePath,
       server: getServer()
     })
-    const form = document.querySelector('form')
+    const form = document.querySelector('main form')
     expect(form).toHaveAttribute('action', '/upload-and-scan/test-upload-id')
     expect(form).toHaveAttribute('method', 'post')
     expect(form).toHaveAttribute('enctype', 'multipart/form-data')
@@ -96,6 +96,6 @@ describe('Upload boundary page', () => {
         'Unable to start file upload. Please try again later.'
       )
     ).toBeInTheDocument()
-    expect(document.querySelector('form')).not.toBeInTheDocument()
+    expect(document.querySelector('main form')).not.toBeInTheDocument()
   })
 })

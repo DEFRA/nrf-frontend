@@ -7,6 +7,13 @@ import { config } from '../../../config/config.js'
 import * as createServerImport from '../../server.js'
 import * as startServerImport from './start-server.js'
 
+vi.mock('../../plugins/cookies.js', () => ({
+  cookies: {
+    name: 'cookie-policy',
+    register() {}
+  }
+}))
+
 describe('#startServer', () => {
   let createServerSpy
   let hapiServerSpy

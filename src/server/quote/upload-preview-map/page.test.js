@@ -82,7 +82,7 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const body = document.querySelector('.govuk-body')
+      const body = document.querySelector('main .govuk-body')
       expect(body.textContent).toContain('1 feature found')
     })
 

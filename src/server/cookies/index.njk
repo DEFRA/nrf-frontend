@@ -1,0 +1,186 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if showSuccessBanner %}
+        {% set successHtml %}
+          <p class="govuk-notification-banner__heading">
+            Your cookie preferences were saved. <a class="govuk-notification-banner__link" href="{{ backUrl or '/' }}">Go back to the previous page</a>
+          </p>
+        {% endset %}
+
+        {{ govukNotificationBanner({
+          html: successHtml,
+          type: "success"
+        }) }}
+      {% endif %}
+
+      {% if validationErrors %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList:  validationErrors.summary
+        }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-xl">{{ pageTitle }}</h1>
+
+      <p class="govuk-body">Cookies are small files saved on your phone, tablet or computer when you visit a website.</p>
+
+      <p class="govuk-body">We use cookies to make this site work and collect information about how you use our service.</p>
+
+      <h2 class="govuk-heading-l">Essential cookies</h2>
+
+      <p class="govuk-body">Essential cookies keep your information secure while you use this service. We do not need to ask permission to use them.</p>
+
+      {{ govukTable({
+        head: [
+          {
+            text: "Name"
+          },
+          {
+            text: "Purpose"
+          },
+          {
+            text: "Expires"
+          }
+        ],
+        rows: [
+          [
+            {
+              text: "session"
+            },
+            {
+              text: "Set to remember information you've entered into a form when using the service"
+            },
+            {
+              text: "4 hours"
+            }
+          ],
+          [
+            {
+              text: "userSession"
+            },
+            {
+              text: "Confirms you’re signed in while you use the service"
+            },
+            {
+              text: "4 hours"
+            }
+          ],
+          [
+            {
+              text: "csrfToken"
+            },
+            {
+              text: "Helps keep your information secure when you submit forms"
+            },
+            {
+              text: "When the browser closes"
+            }
+          ],
+          [
+            {
+              text: "cookies_preferences_set"
+            },
+            {
+              text: "Remembers that you’ve set your cookie preferences"
+            },
+            {
+              text: "1 year"
+            }
+          ],
+          [
+            {
+              text: "cookies_policy"
+            },
+            {
+              text: "Saves your cookie consent preferences"
+            },
+            {
+              text: "1 year"
+            }
+          ]
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l">Analytics cookies (optional)</h2>
+
+      <p class="govuk-body">With your permission, we use analytics cookies to collect data about how you use the Nature Restoration Fund service. This information helps us to improve our service.</p>
+
+      <h3 class="govuk-heading-m">Google Analytics</h3>
+      <p class="govuk-body">We use Google Analytics to understand how you use the service. It uses the following cookies:</p>
+
+      {{ govukTable({
+        head: [
+          {
+            text: "Name"
+          },
+          {
+            text: "Purpose"
+          },
+          {
+            text: "Expires"
+          }
+        ],
+        rows: [
+          [
+            {
+              text: "<name>"
+            },
+            {
+              text: "<desc>"
+            },
+            {
+              text: "1 year"
+            }
+          ]
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l">Change your cookie settings</h2>
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+        <input type="hidden" name="source" value="page">
+        {% if redirectUrl %}
+          <input type="hidden" name="redirectUrl" value="{{ redirectUrl }}">
+        {% endif %}
+        {{ govukRadios({
+          name: "analytics",
+          fieldset: {
+            legend: {
+              text: "Do you want to accept analytics cookies?",
+              isPageHeading: false,
+              classes: "govuk-fieldset__legend--m"
+            }
+          },
+          items: [
+            {
+              value: "yes",
+              text: "Yes",
+              checked: payload.analytics === "yes"
+            },
+            {
+              value: "no",
+              text: "No",
+              checked: payload.analytics === "no"
+            }
+          ],
+          errorMessage: validationErrors.messagesByFormField.analytics if validationErrors
+        }) }}
+
+        {{ govukButton({
+          text: "Save cookie settings",
+          type: "submit"
+        }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -5,6 +5,7 @@ import { config } from '../../config.js'
 import { buildNavigation } from './build-navigation.js'
 import { gitHash } from '../../../server/common/helpers/git-hash.js'
 import { createLogger } from '../../../server/common/helpers/logging/logger.js'
+import { areAnalyticsCookiesAccepted } from '../../../server/cookies/helpers/cookie-service.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -47,6 +48,7 @@ export function context(request) {
     navigation: buildNavigation(request),
     isAuthenticated,
     user,
+    analyticsEnabled: areAnalyticsCookiesAccepted(request),
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`
