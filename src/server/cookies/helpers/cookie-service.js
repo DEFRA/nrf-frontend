@@ -1,3 +1,4 @@
+import Joi from 'joi'
 import { COOKIE_NAMES, COOKIE_OPTIONS } from './constants.js'
 import { COOKIE_POLICY_VERSION } from './version.js'
 import { config } from '../../../config/config.js'
@@ -37,6 +38,13 @@ const defaultPreferences = () => ({
   timestamp: null
 })
 
+const cookiePolicySchema = Joi.object({
+  essential: Joi.boolean().required(),
+  analytics: Joi.boolean().allow(null).required(),
+  version: Joi.number().integer().positive().required(),
+  timestamp: Joi.number().integer().positive().required()
+}).unknown(true)
+
 export function getCookiePreferences(request) {
   const cookiesPolicy = request.state?.cookies_policy
 
@@ -44,7 +52,16 @@ export function getCookiePreferences(request) {
     return defaultPreferences()
   }
 
-  const parsed = JSON.parse(cookiesPolicy)
+  let parsed
+  try {
+    parsed = JSON.parse(cookiesPolicy)
+  } catch {
+    return defaultPreferences()
+  }
+
+  if (cookiePolicySchema.validate(parsed).error) {
+    return defaultPreferences()
+  }
 
   if (parsed.version !== COOKIE_POLICY_VERSION) {
     return defaultPreferences()

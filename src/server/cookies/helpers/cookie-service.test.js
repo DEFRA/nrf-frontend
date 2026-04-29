@@ -197,6 +197,61 @@ describe('cookie-service', () => {
         defaultPreferences
       )
     })
+
+    test('returns default preferences when cookies_policy is invalid JSON', () => {
+      const request = createMockRequest({ cookies_policy: 'not-json{' })
+
+      expect(getCookiePreferences(request)).toEqual(defaultPreferences)
+    })
+
+    test('returns default preferences when cookies_policy is a JSON string (not an object)', () => {
+      const request = createMockRequest({
+        cookies_policy: JSON.stringify('a string')
+      })
+
+      expect(getCookiePreferences(request)).toEqual(defaultPreferences)
+    })
+
+    test('returns default preferences when cookies_policy is a JSON array', () => {
+      const request = createMockRequest({ cookies_policy: JSON.stringify([]) })
+
+      expect(getCookiePreferences(request)).toEqual(defaultPreferences)
+    })
+
+    test('returns default preferences when required fields have wrong types', () => {
+      const policy = {
+        essential: 'yes',
+        analytics: 'yes',
+        version: '1',
+        timestamp: '123'
+      }
+
+      expect(
+        getCookiePreferences(
+          createMockRequest({ cookies_policy: JSON.stringify(policy) })
+        )
+      ).toEqual(defaultPreferences)
+    })
+
+    test.each([
+      { version: 0, timestamp: 1 },
+      { version: -1, timestamp: 1 },
+      { version: 1.5, timestamp: 1 },
+      { version: 1, timestamp: 0 },
+      { version: 1, timestamp: -1 },
+      { version: 1, timestamp: 1.5 }
+    ])(
+      'returns default preferences when version=$version timestamp=$timestamp',
+      ({ version, timestamp }) => {
+        const policy = { essential: true, analytics: true, version, timestamp }
+
+        expect(
+          getCookiePreferences(
+            createMockRequest({ cookies_policy: JSON.stringify(policy) })
+          )
+        ).toEqual(defaultPreferences)
+      }
+    )
   })
 
   describe('isCookiePolicyVersionStale', () => {
