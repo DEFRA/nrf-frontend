@@ -71,13 +71,11 @@ export function getCookiePreferences(request) {
 }
 
 export function isCookiePolicyVersionStale(request) {
-  const cookiesPolicy = request.state?.cookies_policy
-
-  if (!cookiesPolicy) {
+  if (!request.state?.cookies_policy) {
     return false
   }
 
-  return JSON.parse(cookiesPolicy).version !== COOKIE_POLICY_VERSION
+  return getCookiePreferences(request).version !== COOKIE_POLICY_VERSION
 }
 
 export function clearCookiePreferences(response) {
