@@ -8,7 +8,7 @@ export function createCookiePolicy(analytics) {
     essential: true,
     analytics,
     version: COOKIE_POLICY_VERSION,
-    timestamp: Math.floor(Date.now() / 1000)
+    createdAt: new Date().toISOString()
   })
 }
 
@@ -35,14 +35,14 @@ const defaultPreferences = () => ({
   essential: true,
   analytics: null,
   version: null,
-  timestamp: null
+  createdAt: null
 })
 
 const cookiePolicySchema = Joi.object({
   essential: Joi.boolean().required(),
   analytics: Joi.boolean().allow(null).required(),
   version: Joi.number().integer().positive().required(),
-  timestamp: Joi.number().integer().positive().required()
+  createdAt: Joi.string().isoDate().required()
 }).unknown(true)
 
 export function getCookiePreferences(request) {

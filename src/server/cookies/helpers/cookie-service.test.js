@@ -28,12 +28,12 @@ describe('cookie-service', () => {
 
   beforeEach(() => {
     mockResponse = createMockResponse()
-    vi.spyOn(Date, 'now').mockReturnValue(1234567890000)
+    vi.setSystemTime(new Date('2009-02-13T23:31:30.000Z'))
     config.get.mockReturnValue(false)
   })
 
   afterEach(() => {
-    Date.now.mockRestore()
+    vi.useRealTimers()
   })
 
   describe('createCookiePolicy', () => {
@@ -42,7 +42,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1234567890
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
     })
 
@@ -51,13 +51,15 @@ describe('cookie-service', () => {
         essential: true,
         analytics: false,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1234567890
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
     })
 
-    test('uses Unix seconds for the timestamp', () => {
-      Date.now.mockReturnValue(1634567890123)
-      expect(JSON.parse(createCookiePolicy(true)).timestamp).toBe(1634567890)
+    test('uses an ISO UTC datetime for createdAt', () => {
+      vi.setSystemTime(new Date('2021-10-18T14:58:10.123Z'))
+      expect(JSON.parse(createCookiePolicy(true)).createdAt).toBe(
+        '2021-10-18T14:58:10.123Z'
+      )
     })
 
     test('embeds the current cookie policy version', () => {
@@ -78,7 +80,7 @@ describe('cookie-service', () => {
           essential: true,
           analytics: true,
           version: COOKIE_POLICY_VERSION,
-          timestamp: 1234567890
+          createdAt: '2009-02-13T23:31:30.000Z'
         }),
         {
           ttl: COOKIE_OPTIONS.TTL,
@@ -125,7 +127,7 @@ describe('cookie-service', () => {
           essential: true,
           analytics: false,
           version: COOKIE_POLICY_VERSION,
-          timestamp: 1234567890
+          createdAt: '2009-02-13T23:31:30.000Z'
         }),
         expect.any(Object)
       )
@@ -137,7 +139,7 @@ describe('cookie-service', () => {
       essential: true,
       analytics: null,
       version: null,
-      timestamp: null
+      createdAt: null
     }
 
     test('returns parsed policy when cookies_policy cookie exists', () => {
@@ -145,7 +147,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1234567890
+        createdAt: '2009-02-13T23:31:30.000Z'
       }
 
       expect(getCookiePreferences(createMockRequestWithPolicy(policy))).toEqual(
@@ -168,7 +170,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: false,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1,
+        createdAt: '2009-02-13T23:31:30.000Z',
         extra: 'value'
       }
 
@@ -182,7 +184,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION - 1,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       }
 
       expect(getCookiePreferences(createMockRequestWithPolicy(policy))).toEqual(
@@ -191,7 +193,11 @@ describe('cookie-service', () => {
     })
 
     test('returns default preferences when policy has no version', () => {
-      const policy = { essential: true, analytics: true, timestamp: 1 }
+      const policy = {
+        essential: true,
+        analytics: true,
+        createdAt: '2009-02-13T23:31:30.000Z'
+      }
 
       expect(getCookiePreferences(createMockRequestWithPolicy(policy))).toEqual(
         defaultPreferences
@@ -223,7 +229,7 @@ describe('cookie-service', () => {
         essential: 'yes',
         analytics: 'yes',
         version: '1',
-        timestamp: '123'
+        createdAt: 12345
       }
 
       expect(
@@ -234,16 +240,16 @@ describe('cookie-service', () => {
     })
 
     test.each([
-      { version: 0, timestamp: 1 },
-      { version: -1, timestamp: 1 },
-      { version: 1.5, timestamp: 1 },
-      { version: 1, timestamp: 0 },
-      { version: 1, timestamp: -1 },
-      { version: 1, timestamp: 1.5 }
+      { version: 0, createdAt: '2009-02-13T23:31:30.000Z' },
+      { version: -1, createdAt: '2009-02-13T23:31:30.000Z' },
+      { version: 1.5, createdAt: '2009-02-13T23:31:30.000Z' },
+      { version: 1, createdAt: 'not-a-date' },
+      { version: 1, createdAt: '' },
+      { version: 1, createdAt: null }
     ])(
-      'returns default preferences when version=$version timestamp=$timestamp',
-      ({ version, timestamp }) => {
-        const policy = { essential: true, analytics: true, version, timestamp }
+      'returns default preferences when version=$version createdAt=$createdAt',
+      ({ version, createdAt }) => {
+        const policy = { essential: true, analytics: true, version, createdAt }
 
         expect(
           getCookiePreferences(
@@ -264,7 +270,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(isCookiePolicyVersionStale(request)).toBe(false)
@@ -275,7 +281,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION - 1,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(isCookiePolicyVersionStale(request)).toBe(true)
@@ -285,7 +291,7 @@ describe('cookie-service', () => {
       const request = createMockRequestWithPolicy({
         essential: true,
         analytics: true,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(isCookiePolicyVersionStale(request)).toBe(true)
@@ -312,7 +318,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(areAnalyticsCookiesAccepted(request)).toBe(true)
@@ -323,7 +329,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: false,
         version: COOKIE_POLICY_VERSION,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(areAnalyticsCookiesAccepted(request)).toBe(false)
@@ -338,7 +344,7 @@ describe('cookie-service', () => {
         essential: true,
         analytics: true,
         version: COOKIE_POLICY_VERSION - 1,
-        timestamp: 1
+        createdAt: '2009-02-13T23:31:30.000Z'
       })
 
       expect(areAnalyticsCookiesAccepted(request)).toBe(false)
