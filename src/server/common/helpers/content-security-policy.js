@@ -6,6 +6,11 @@ import { config } from '../../../config/config.js'
  * @satisfies {import('@hapi/hapi').Plugin}
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
+const gtmId = config.get('gtmId')
+const gtmOrigin = 'https://www.googletagmanager.com'
+const gaOrigin = 'https://www.google-analytics.com'
+const gaRegion1Origin = 'https://region1.google-analytics.com'
+
 const mapExternalOrigins = [
   'https://raw.githubusercontent.com',
   'https://server.arcgisonline.com'
@@ -16,12 +21,17 @@ const contentSecurityPolicy = {
   options: {
     defaultSrc: ['self'],
     fontSrc: ['self'],
-    connectSrc: ['self', 'wss', ...mapExternalOrigins],
+    connectSrc: [
+      'self',
+      'wss',
+      ...mapExternalOrigins,
+      ...(gtmId ? [gtmOrigin, gaOrigin, gaRegion1Origin] : [])
+    ],
     mediaSrc: ['self'],
     styleSrc: ['self', 'unsafe-inline'],
-    scriptSrc: ['self'],
+    scriptSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     imgSrc: ['self', 'data:', ...mapExternalOrigins],
-    frameSrc: ['self'],
+    frameSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     objectSrc: ['none'],
     frameAncestors: ['none'],
     formAction: ['self', ...(cdpUploaderUrl ? [cdpUploaderUrl] : [])],

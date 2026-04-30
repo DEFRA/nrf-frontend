@@ -52,6 +52,7 @@ describe('context and cache', () => {
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
+          gtmId: null,
           isAuthenticated: false,
           navigation: [
             {
@@ -164,6 +165,7 @@ describe('context and cache', () => {
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
+          gtmId: null,
           isAuthenticated: false,
           navigation: [
             {

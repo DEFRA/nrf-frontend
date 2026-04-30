@@ -59,4 +59,53 @@ describe('#contentSecurityPolicy config variations', () => {
     ])
     expect(contentSecurityPolicy.options.formAction).toEqual(['self'])
   })
+
+  test('should include googletagmanager.com in scriptSrc, frameSrc and connectSrc when gtmId is configured', async () => {
+    mockConfigGet.mockImplementation((key) => {
+      if (key === 'gtmId') return 'GTM-TEST123'
+      return null
+    })
+
+    const { contentSecurityPolicy } =
+      await import('./content-security-policy.js')
+
+    expect(contentSecurityPolicy.options.scriptSrc).toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.frameSrc).toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).toContain(
+      'https://www.google-analytics.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).toContain(
+      'https://region1.google-analytics.com'
+    )
+  })
+
+  test('should exclude googletagmanager.com from scriptSrc, frameSrc and connectSrc when gtmId is not configured', async () => {
+    mockConfigGet.mockImplementation(() => null)
+
+    const { contentSecurityPolicy } =
+      await import('./content-security-policy.js')
+
+    expect(contentSecurityPolicy.options.scriptSrc).not.toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.frameSrc).not.toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).not.toContain(
+      'https://www.googletagmanager.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).not.toContain(
+      'https://www.google-analytics.com'
+    )
+    expect(contentSecurityPolicy.options.connectSrc).not.toContain(
+      'https://region1.google-analytics.com'
+    )
+  })
 })
