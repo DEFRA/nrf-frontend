@@ -4,7 +4,9 @@ import {
   getDrawMapContainerHeight,
   parseDatasetJson
 } from './base-map/helpers.js'
+import { wireHideLayerOnZoom } from './base-map/hide-layer-on-zoom.js'
 
+const MAP_ELEMENT_ID = 'draw-boundary-map'
 const UK_WEST_LNG = -8.75
 const UK_SOUTH_LAT = 49.8
 const UK_EAST_LNG = 2.5
@@ -13,15 +15,20 @@ const UK_BOUNDS = [UK_WEST_LNG, UK_SOUTH_LAT, UK_EAST_LNG, UK_NORTH_LAT]
 const DEFAULT_LAYER_FILL_OPACITY = 0.15
 const DARK_LAYER_FILL_OPACITY = 0.16
 const DEFAULT_LAYER_LINE_WIDTH = 2
+const HIDE_FILL_AT_ZOOM = 12
 const EMPTY_FEATURE_PROPERTIES = Object.freeze({})
 const DEFAULT_IMPACT_ASSESSOR_LAYERS = ['edp_boundaries']
 const DEFAULT_CENTER = [1.1405503, 52.7089441] // Norfolk
 const DEFAULT_ZOOM = 8.5
 
+const LAYER_AREA_LABELS = {
+  edp_boundaries: 'Nature Restoration Fund nutrients levy'
+}
+
 const LAYER_COLOR_CONFIG = {
   edp_boundaries: {
-    fillColor: '#feca57',
-    lineColor: '#feca57',
+    fillColor: '#FD0',
+    lineColor: '#FD0',
     dark: { fillColor: '#9ddfa6', lineColor: '#9ddfa6' }
   },
   lpa_boundaries: {
@@ -57,11 +64,13 @@ function buildLayerDefinitions(layerParams) {
   return layerParams.map((layerParam, index) => ({
     ...LAYER_COLOR_CONFIG[layerParam],
     label: formatLayerLabel(layerParam),
+    areaLabel: LAYER_AREA_LABELS[layerParam] || formatLayerLabel(layerParam),
     sourceId: `${layerParam}-tiles`,
     sourceLayer: layerParam,
     tilesUrl: `/impact-assessor-map/tiles/${layerParam}/{z}/{x}/{y}.mvt`,
     fillOpacity: DEFAULT_LAYER_FILL_OPACITY,
     lineWidth: DEFAULT_LAYER_LINE_WIDTH,
+    hideAtZoom: HIDE_FILL_AT_ZOOM,
     paintByStyle: {
       dark: {
         ...(LAYER_COLOR_CONFIG[layerParam]?.dark || {}),
@@ -109,39 +118,53 @@ function getExistingBoundaryBounds(bounds) {
     : null
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  const mapElement = document.getElementById('draw-boundary-map')
-  const boundaryValidationUrl = mapElement?.dataset?.boundaryValidationUrl
-  const saveAndContinueUrl = mapElement?.dataset?.saveAndContinueUrl
-  const csrfToken = mapElement?.dataset?.csrfToken
-  const existingBoundaryGeojson = mapElement
-    ? parseDatasetJson(
-        mapElement,
-        'existingBoundaryGeojson',
-        'Failed to parse existing boundary GeoJSON'
-      )
-    : null
-  const existingBoundaryMetadata = mapElement
-    ? parseDatasetJson(
-        mapElement,
-        'existingBoundaryMetadata',
-        'Failed to parse existing boundary metadata'
-      )
-    : null
-  const bounds = getExistingBoundaryBounds(existingBoundaryMetadata?.bounds)
-  const initialDrawFeature = normalizeInitialDrawFeature(
-    existingBoundaryGeojson
-  )
-  const layerParams = mapElement?.dataset?.impactAssessorLayers
+function readMapDataset(mapElement) {
+  if (!mapElement) {
+    return {
+      boundaryValidationUrl: undefined,
+      saveAndContinueUrl: undefined,
+      csrfToken: undefined,
+      existingBoundaryGeojson: null,
+      existingBoundaryMetadata: null,
+      impactAssessorLayers: DEFAULT_IMPACT_ASSESSOR_LAYERS
+    }
+  }
+
+  const layerParams = mapElement.dataset?.impactAssessorLayers
     ?.split(',')
     .map((value) => value.trim())
     .filter(Boolean)
-  const impactAssessorLayers = layerParams?.length
-    ? layerParams
-    : DEFAULT_IMPACT_ASSESSOR_LAYERS
 
-  createMap({
-    mapElementId: 'draw-boundary-map',
+  return {
+    boundaryValidationUrl: mapElement.dataset?.boundaryValidationUrl,
+    saveAndContinueUrl: mapElement.dataset?.saveAndContinueUrl,
+    csrfToken: mapElement.dataset?.csrfToken,
+    existingBoundaryGeojson: parseDatasetJson(
+      mapElement,
+      'existingBoundaryGeojson',
+      'Failed to parse existing boundary GeoJSON'
+    ),
+    existingBoundaryMetadata: parseDatasetJson(
+      mapElement,
+      'existingBoundaryMetadata',
+      'Failed to parse existing boundary metadata'
+    ),
+    impactAssessorLayers: layerParams?.length
+      ? layerParams
+      : DEFAULT_IMPACT_ASSESSOR_LAYERS
+  }
+}
+
+function buildCreateMapArgs({ dataset, layerDefinitions }) {
+  const initialDrawFeature = normalizeInitialDrawFeature(
+    dataset.existingBoundaryGeojson
+  )
+  const bounds = getExistingBoundaryBounds(
+    dataset.existingBoundaryMetadata?.bounds
+  )
+
+  return {
+    mapElementId: MAP_ELEMENT_ID,
     mapLabel: 'Draw boundary map',
     mapErrorMessage: 'Draw boundary map error',
     containerHeight: getDrawMapContainerHeight,
@@ -165,20 +188,40 @@ document.addEventListener('DOMContentLoaded', function () {
     showBoundaryInfoPanel: true,
     showLayerControls: true,
     boundaryInfoOptions: {
-      ...(boundaryValidationUrl ? { endpoint: boundaryValidationUrl } : {}),
+      ...(dataset.boundaryValidationUrl
+        ? { endpoint: dataset.boundaryValidationUrl }
+        : {}),
       requestBuilder: (feature) => ({ geometry: feature?.geometry ?? feature }),
-      ...(csrfToken ? { csrfToken } : {}),
-      ...(saveAndContinueUrl ? { saveAndContinueUrl } : {})
+      ...(dataset.csrfToken ? { csrfToken: dataset.csrfToken } : {}),
+      ...(dataset.saveAndContinueUrl
+        ? { saveAndContinueUrl: dataset.saveAndContinueUrl }
+        : {})
     },
     layerControlOptions: {
-      layers: buildLayerDefinitions(impactAssessorLayers)
+      layers: layerDefinitions
     },
     options: {
       maxBounds: UK_BOUNDS,
       bounds: bounds || null,
-      center: existingBoundaryMetadata?.centre || DEFAULT_CENTER,
+      center: dataset.existingBoundaryMetadata?.centre || DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
       maxZoom: BOUNDARY_MAP_MAX_ZOOM
     }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const mapElement = document.getElementById(MAP_ELEMENT_ID)
+  const dataset = readMapDataset(mapElement)
+  const layerDefinitions = buildLayerDefinitions(dataset.impactAssessorLayers)
+  const map = createMap(buildCreateMapArgs({ dataset, layerDefinitions }))
+
+  map?.on?.('map:ready', function (event) {
+    wireHideLayerOnZoom({
+      mapInstance: event.map,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions
+    })
   })
 })

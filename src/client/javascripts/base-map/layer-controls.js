@@ -30,7 +30,8 @@ function resolveLayerDefinitions(layerControlOptions = {}) {
         mapLayerPaint(mergeLayerPaint(layer, paint))
       ])
     ),
-    defaultVisible: !!layer.defaultVisible
+    defaultVisible: !!layer.defaultVisible,
+    hideAtZoom: layer.hideAtZoom
   })
 
   if (Array.isArray(layerControlOptions.layers)) {
@@ -153,15 +154,26 @@ function inferStyleVariant(mapInstance) {
   return 'default'
 }
 
+function buildFillOpacityExpression(fillOpacity, hideAtZoom) {
+  if (typeof hideAtZoom !== 'number') {
+    return fillOpacity
+  }
+  return ['step', ['zoom'], fillOpacity, hideAtZoom, 0]
+}
+
 function applyVectorTileOverlayPaint(
   mapInstance,
   layerControlOptions,
   styleVariant
 ) {
-  const { sourceId, sourceLayer } = layerControlOptions
+  const { sourceId, sourceLayer, hideAtZoom } = layerControlOptions
   const { fillColor, fillOpacity, lineColor, lineWidth } = resolveLayerPaint(
     layerControlOptions,
     styleVariant
+  )
+  const fillOpacityExpression = buildFillOpacityExpression(
+    fillOpacity,
+    hideAtZoom
   )
 
   if (!mapInstance || !sourceId || !sourceLayer) {
@@ -173,7 +185,7 @@ function applyVectorTileOverlayPaint(
     mapInstance.setPaintProperty?.(
       `${sourceId}-fill`,
       'fill-opacity',
-      fillOpacity
+      fillOpacityExpression
     )
   } else {
     mapInstance.addLayer({
@@ -183,7 +195,7 @@ function applyVectorTileOverlayPaint(
       'source-layer': sourceLayer,
       paint: {
         'fill-color': fillColor,
-        'fill-opacity': fillOpacity
+        'fill-opacity': fillOpacityExpression
       }
     })
   }
