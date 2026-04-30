@@ -350,6 +350,13 @@ export const config = convict({
       env: 'MAP_DEFAULT_STYLE_URL'
     }
   },
+  gtmId: {
+    doc: 'Google Tag Manager container ID (e.g. GTM-XXXXXXX)',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'GTM_ID'
+  },
   cdpUploader: {
     url: {
       doc: 'Browser-facing base URL for the CDP uploader form action. Required locally where the frontend and uploader are on different origins. Not needed in CDP cloud where the platform proxy routes /upload-and-scan/* requests.',

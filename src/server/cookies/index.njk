@@ -132,19 +132,41 @@
         rows: [
           [
             {
-              text: "<name>"
+              text: "_ga"
             },
             {
-              text: "<desc>"
+              text: "Identifies your browser so we can distinguish unique visitors"
             },
             {
-              text: "1 year"
+              text: "2 years"
+            }
+          ],
+          [
+            {
+              text: "_gid"
+            },
+            {
+              text: "Identifies your browser session so we can distinguish visits"
+            },
+            {
+              text: "24 hours"
+            }
+          ],
+          [
+            {
+              text: "_ga_*"
+            },
+            {
+              text: "Stores session state for Google Analytics"
+            },
+            {
+              text: "2 years"
             }
           ]
         ]
       }) }}
 
-      <h2 class="govuk-heading-l">Change your cookie settings</h2>
+      <h3 class="govuk-heading-m">Change your analytics cookie preference</h3>
 
       <form method="post" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
@@ -158,7 +180,7 @@
             legend: {
               text: "Do you want to accept analytics cookies?",
               isPageHeading: false,
-              classes: "govuk-fieldset__legend--m"
+              classes: "govuk-fieldset__legend--s"
             }
           },
           items: [
