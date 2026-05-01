@@ -14,5 +14,19 @@
     "command": "./.claude/statusline.sh",
     "padding": 0
   },
-  "commands": {}
+  "commands": {},
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run format && npm run lint:js:fix",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
 }
