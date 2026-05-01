@@ -326,4 +326,78 @@ describe('layer-controls', () => {
 
     expect(mapInstance.setLayoutProperty).toHaveBeenCalled()
   })
+
+  it('emits a step zoom expression for fill-opacity when hideAtZoom is set', () => {
+    const { map, handlers } = createMapHarness()
+    const mapInstance = createMapInstance('default')
+
+    wireLayerControls(map, {
+      mapElementId: 'map-hide-at-zoom',
+      layerControlOptions: {
+        layers: [
+          {
+            sourceId: 'edp_boundaries-tiles',
+            sourceLayer: 'edp_boundaries',
+            tilesUrl:
+              '/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt',
+            defaultVisible: true,
+            fillColor: '#FD0',
+            lineColor: '#FD0',
+            fillOpacity: 0.15,
+            hideAtZoom: 12
+          }
+        ]
+      }
+    })
+
+    handlers['app:ready']?.()
+    const panelConfig = map.addPanel.mock.calls[0][1]
+    document.body.insertAdjacentHTML('beforeend', panelConfig.html)
+
+    handlers['map:ready']?.({ map: mapInstance })
+
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'edp_boundaries-tiles-fill',
+        paint: expect.objectContaining({
+          'fill-opacity': ['step', ['zoom'], 0.15, 12, 0]
+        })
+      })
+    )
+  })
+
+  it('uses a numeric fill-opacity when hideAtZoom is omitted', () => {
+    const { map, handlers } = createMapHarness()
+    const mapInstance = createMapInstance('default')
+
+    wireLayerControls(map, {
+      mapElementId: 'map-no-hide',
+      layerControlOptions: {
+        layers: [
+          {
+            sourceId: 'no-hide-tiles',
+            sourceLayer: 'no_hide',
+            tilesUrl: '/impact-assessor-map/tiles/no_hide/{z}/{x}/{y}.mvt',
+            defaultVisible: true,
+            fillColor: '#FD0',
+            lineColor: '#FD0',
+            fillOpacity: 0.2
+          }
+        ]
+      }
+    })
+
+    handlers['app:ready']?.()
+    const panelConfig = map.addPanel.mock.calls[0][1]
+    document.body.insertAdjacentHTML('beforeend', panelConfig.html)
+
+    handlers['map:ready']?.({ map: mapInstance })
+
+    expect(mapInstance.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'no-hide-tiles-fill',
+        paint: expect.objectContaining({ 'fill-opacity': 0.2 })
+      })
+    )
+  })
 })
