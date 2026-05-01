@@ -1,4 +1,4 @@
-@use "govuk-frontend" as *;
+@use "../../../../node_modules/govuk-frontend/dist/govuk/index" as *;
 
 .app-area-indicator-border,
 .app-area-indicator-label {
