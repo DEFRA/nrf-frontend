@@ -14,3 +14,4 @@ tsconfig.tsbuildinfo
 .git-hash
 test-data/*
 !test-data/.gitkeep
+.playwright-mcp
