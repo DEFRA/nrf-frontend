@@ -26,6 +26,9 @@
 {% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}
+  {% if not analyticsEnabled %}
+    {% include "partials/google-analytics-cookie-clear.njk" %}
+  {% endif %}
   {% if analyticsEnabled and gtmId %}
     {% include "partials/google-tag-manager-head.njk" %}
   {% endif %}
