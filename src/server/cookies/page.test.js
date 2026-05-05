@@ -72,6 +72,49 @@ describe('Analytics cookie table', () => {
   })
 })
 
+describe('GA cookie clearing script', () => {
+  const getServer = setupTestServer()
+
+  it('renders GA cookie clearing script when analytics rejected', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: { analytics: 'no', source: 'page' }
+    })
+    const document = await loadPage({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      cookie
+    })
+    const { getByTestId } = within(document.documentElement)
+    expect(getByTestId('ga-cookie-clear')).toBeTruthy()
+  })
+
+  it('renders GA cookie clearing script when no cookie preference is set', async () => {
+    const document = await loadPage({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer()
+    })
+    const { getByTestId } = within(document.documentElement)
+    expect(getByTestId('ga-cookie-clear')).toBeTruthy()
+  })
+
+  it('does not render GA cookie clearing script when analytics accepted', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: { analytics: 'yes', source: 'page' }
+    })
+    const document = await loadPage({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      cookie
+    })
+    const { queryByTestId } = within(document.documentElement)
+    expect(queryByTestId('ga-cookie-clear')).toBeNull()
+  })
+})
+
 describe('GTM script rendering', () => {
   const getServer = setupTestServer()
   const TEST_GTM_ID = 'GTM-TEST123'

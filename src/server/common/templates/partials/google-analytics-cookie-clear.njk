@@ -1,0 +1,17 @@
+<!-- Clear any existing Google Analytics cookies -->
+<script nonce="{{ cspNonce }}" data-testid="ga-cookie-clear">
+  ;(function () {
+    var pattern = /^(_ga|_gid)/
+    document.cookie.split(';').forEach(function (c) {
+      var name = c.split('=')[0].trim()
+      if (!pattern.test(name)) return
+      var domain = location.hostname
+      while (domain.indexOf('.') !== -1) {
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + domain
+        domain = domain.replace(/^[^.]+\./, '')
+      }
+      document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'
+    })
+  })()
+</script>
+<!-- End clear Google Analytics cookies -->
