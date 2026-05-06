@@ -1,5 +1,5 @@
 import {
-  COOKIE_NAMES,
+  COOKIE_NAME_PREFERENCES,
   COOKIE_OPTIONS,
   COOKIE_ROUTE,
   CONFIRMATION_QUERY_PARAM
@@ -28,7 +28,7 @@ function buildCurrentUrl(request) {
 export const cookies = {
   name: 'cookie-policy',
   register(server) {
-    server.state(COOKIE_NAMES.POLICY, {
+    server.state(COOKIE_NAME_PREFERENCES, {
       clearInvalid: true,
       ttl: COOKIE_OPTIONS.TTL,
       path: COOKIE_OPTIONS.PATH,
@@ -48,7 +48,7 @@ export const cookies = {
 
         const cookiePolicy = getCookiePreferences(request)
         const hasSetCookiePreferences =
-          !isStale && request.state?.[COOKIE_NAMES.PREFERENCES_SET] === 'true'
+          !isStale && cookiePolicy.analytics !== null
 
         const showCookieBanner = !hasSetCookiePreferences
         const isOnCookiesPage = request.path === COOKIE_ROUTE

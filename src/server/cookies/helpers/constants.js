@@ -1,10 +1,7 @@
 const oneYearInDaysForSonar = 365
 const oneYearInMilliseconds = 60 * 60 * 24 * oneYearInDaysForSonar * 1000
 
-export const COOKIE_NAMES = {
-  POLICY: 'cookies_policy',
-  PREFERENCES_SET: 'cookies_preferences_set'
-}
+export const COOKIE_NAME_PREFERENCES = 'cookie_preferences'
 
 export const CONFIRMATION_QUERY_PARAM = 'cookies_updated'
 
