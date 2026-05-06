@@ -3,6 +3,7 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn()
@@ -247,24 +248,31 @@ describe('POST /quote/draw-boundary/save', () => {
   const getServer = setupTestServer()
 
   const validBoundaryGeojson = {
+    intersectingEdps: [],
     boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
-    intersectingEdps: []
+    boundaryMetadata: { areaHa: 1 },
+    boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] }
   }
 
-  it('saves and redirects to development types when there are intersections', async () => {
-    const boundaryGeojson = {
-      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
-      intersectingEdps: [{ code: 'EDP-1' }]
-    }
+  const persistedFields = ({
+    boundaryGeometryWgs84,
+    boundaryMetadata,
+    boundaryGeometryOriginal
+  }) => ({
+    boundaryGeometryWgs84,
+    boundaryMetadata,
+    boundaryGeometryOriginal
+  })
 
+  it('saves and redirects to development types when there are intersections', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: savePath,
-      payload: { boundaryGeojson }
+      payload: { boundaryGeojson: boundaryGeojsonWithEdp }
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson
+      boundaryGeojson: persistedFields(boundaryGeojsonWithEdp)
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/development-types')
@@ -278,7 +286,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: validBoundaryGeojson
+      boundaryGeojson: persistedFields(validBoundaryGeojson)
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe(noEdpPath)
@@ -289,6 +297,24 @@ describe('POST /quote/draw-boundary/save', () => {
       method: 'POST',
       url: savePath,
       payload: {}
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    'intersectingEdps',
+    'boundaryGeometryWgs84',
+    'boundaryMetadata',
+    'boundaryGeometryOriginal'
+  ])('rejects a request with missing %s', async (missingKey) => {
+    const { [missingKey]: _omitted, ...partial } = validBoundaryGeojson
+
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: { boundaryGeojson: partial }
     })
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
