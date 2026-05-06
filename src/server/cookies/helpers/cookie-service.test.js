@@ -7,7 +7,7 @@ import {
   getCookiePreferences,
   isCookiePolicyVersionStale
 } from './cookie-service.js'
-import { COOKIE_NAMES, COOKIE_OPTIONS } from './constants.js'
+import { COOKIE_NAME_PREFERENCES, COOKIE_OPTIONS } from './constants.js'
 import { COOKIE_POLICY_VERSION } from './version.js'
 import { config } from '../../../config/config.js'
 
@@ -21,7 +21,7 @@ const createMockResponse = () => ({
 const createMockRequest = (state) => ({ state })
 
 const createMockRequestWithPolicy = (policy) =>
-  createMockRequest({ cookies_policy: JSON.stringify(policy) })
+  createMockRequest({ cookie_preferences: JSON.stringify(policy) })
 
 describe('cookie-service', () => {
   let mockResponse
@@ -70,28 +70,18 @@ describe('cookie-service', () => {
   })
 
   describe('setCookiePreferences', () => {
-    test('sets policy and preferences-set cookies in development', () => {
+    test('sets the policy cookie in development', () => {
       setCookiePreferences(mockResponse, true)
 
-      expect(mockResponse.state).toHaveBeenCalledTimes(2)
+      expect(mockResponse.state).toHaveBeenCalledTimes(1)
       expect(mockResponse.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.POLICY,
+        COOKIE_NAME_PREFERENCES,
         JSON.stringify({
           essential: true,
           analytics: true,
           version: COOKIE_POLICY_VERSION,
           createdAt: '2009-02-13T23:31:30.000Z'
         }),
-        {
-          ttl: COOKIE_OPTIONS.TTL,
-          path: COOKIE_OPTIONS.PATH,
-          isSecure: false,
-          isSameSite: COOKIE_OPTIONS.IS_SAME_SITE
-        }
-      )
-      expect(mockResponse.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.PREFERENCES_SET,
-        'true',
         {
           ttl: COOKIE_OPTIONS.TTL,
           path: COOKIE_OPTIONS.PATH,
@@ -107,13 +97,8 @@ describe('cookie-service', () => {
       setCookiePreferences(mockResponse, false)
 
       expect(mockResponse.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.POLICY,
+        COOKIE_NAME_PREFERENCES,
         expect.any(String),
-        expect.objectContaining({ isSecure: true })
-      )
-      expect(mockResponse.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.PREFERENCES_SET,
-        'true',
         expect.objectContaining({ isSecure: true })
       )
     })
@@ -122,7 +107,7 @@ describe('cookie-service', () => {
       setCookiePreferences(mockResponse, false)
 
       expect(mockResponse.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.POLICY,
+        COOKIE_NAME_PREFERENCES,
         JSON.stringify({
           essential: true,
           analytics: false,
@@ -142,7 +127,7 @@ describe('cookie-service', () => {
       createdAt: null
     }
 
-    test('returns parsed policy when cookies_policy cookie exists', () => {
+    test('returns parsed policy when cookie_preferences cookie exists', () => {
       const policy = {
         essential: true,
         analytics: true,
@@ -155,7 +140,7 @@ describe('cookie-service', () => {
       )
     })
 
-    test('returns default preferences when cookies_policy is absent', () => {
+    test('returns default preferences when cookie_preferences is absent', () => {
       expect(getCookiePreferences(createMockRequest({}))).toEqual(
         defaultPreferences
       )
@@ -204,22 +189,24 @@ describe('cookie-service', () => {
       )
     })
 
-    test('returns default preferences when cookies_policy is invalid JSON', () => {
-      const request = createMockRequest({ cookies_policy: 'not-json{' })
+    test('returns default preferences when cookie_preferences is invalid JSON', () => {
+      const request = createMockRequest({ cookie_preferences: 'not-json{' })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
     })
 
-    test('returns default preferences when cookies_policy is a JSON string (not an object)', () => {
+    test('returns default preferences when cookie_preferences is a JSON string (not an object)', () => {
       const request = createMockRequest({
-        cookies_policy: JSON.stringify('a string')
+        cookie_preferences: JSON.stringify('a string')
       })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
     })
 
-    test('returns default preferences when cookies_policy is a JSON array', () => {
-      const request = createMockRequest({ cookies_policy: JSON.stringify([]) })
+    test('returns default preferences when cookie_preferences is a JSON array', () => {
+      const request = createMockRequest({
+        cookie_preferences: JSON.stringify([])
+      })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
     })
@@ -234,7 +221,7 @@ describe('cookie-service', () => {
 
       expect(
         getCookiePreferences(
-          createMockRequest({ cookies_policy: JSON.stringify(policy) })
+          createMockRequest({ cookie_preferences: JSON.stringify(policy) })
         )
       ).toEqual(defaultPreferences)
     })
@@ -253,7 +240,7 @@ describe('cookie-service', () => {
 
         expect(
           getCookiePreferences(
-            createMockRequest({ cookies_policy: JSON.stringify(policy) })
+            createMockRequest({ cookie_preferences: JSON.stringify(policy) })
           )
         ).toEqual(defaultPreferences)
       }
@@ -299,15 +286,15 @@ describe('cookie-service', () => {
   })
 
   describe('clearCookiePreferences', () => {
-    test('unsets both the policy and preferences-set cookies', () => {
+    test('unsets the policy cookie', () => {
       clearCookiePreferences(mockResponse)
 
-      expect(mockResponse.unstate).toHaveBeenCalledWith(COOKIE_NAMES.POLICY, {
-        path: COOKIE_OPTIONS.PATH
-      })
+      expect(mockResponse.unstate).toHaveBeenCalledTimes(1)
       expect(mockResponse.unstate).toHaveBeenCalledWith(
-        COOKIE_NAMES.PREFERENCES_SET,
-        { path: COOKIE_OPTIONS.PATH }
+        COOKIE_NAME_PREFERENCES,
+        {
+          path: COOKIE_OPTIONS.PATH
+        }
       )
     })
   })
@@ -335,7 +322,7 @@ describe('cookie-service', () => {
       expect(areAnalyticsCookiesAccepted(request)).toBe(false)
     })
 
-    test('returns false when no cookies_policy cookie exists', () => {
+    test('returns false when no cookie_preferences cookie exists', () => {
       expect(areAnalyticsCookiesAccepted(createMockRequest({}))).toBe(false)
     })
 

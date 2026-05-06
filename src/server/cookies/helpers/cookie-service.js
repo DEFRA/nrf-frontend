@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { COOKIE_NAMES, COOKIE_OPTIONS } from './constants.js'
+import { COOKIE_NAME_PREFERENCES, COOKIE_OPTIONS } from './constants.js'
 import { COOKIE_POLICY_VERSION } from './version.js'
 import { config } from '../../../config/config.js'
 
@@ -16,14 +16,7 @@ export function setCookiePreferences(response, analytics) {
   const cookiesPolicy = createCookiePolicy(analytics)
   const isSecure = config.get('isProduction')
 
-  response.state(COOKIE_NAMES.POLICY, cookiesPolicy, {
-    ttl: COOKIE_OPTIONS.TTL,
-    path: COOKIE_OPTIONS.PATH,
-    isSecure,
-    isSameSite: COOKIE_OPTIONS.IS_SAME_SITE
-  })
-
-  response.state(COOKIE_NAMES.PREFERENCES_SET, 'true', {
+  response.state(COOKIE_NAME_PREFERENCES, cookiesPolicy, {
     ttl: COOKIE_OPTIONS.TTL,
     path: COOKIE_OPTIONS.PATH,
     isSecure,
@@ -46,7 +39,7 @@ const cookiePolicySchema = Joi.object({
 }).unknown(true)
 
 export function getCookiePreferences(request) {
-  const cookiesPolicy = request.state?.cookies_policy
+  const cookiesPolicy = request.state?.cookie_preferences
 
   if (!cookiesPolicy) {
     return defaultPreferences()
@@ -71,7 +64,7 @@ export function getCookiePreferences(request) {
 }
 
 export function isCookiePolicyVersionStale(request) {
-  if (!request.state?.cookies_policy) {
+  if (!request.state?.cookie_preferences) {
     return false
   }
 
@@ -79,10 +72,7 @@ export function isCookiePolicyVersionStale(request) {
 }
 
 export function clearCookiePreferences(response) {
-  response.unstate(COOKIE_NAMES.POLICY, {
-    path: COOKIE_OPTIONS.PATH
-  })
-  response.unstate(COOKIE_NAMES.PREFERENCES_SET, {
+  response.unstate(COOKIE_NAME_PREFERENCES, {
     path: COOKIE_OPTIONS.PATH
   })
 }

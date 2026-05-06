@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import { cookies } from './cookies.js'
 import {
-  COOKIE_NAMES,
+  COOKIE_NAME_PREFERENCES,
   COOKIE_OPTIONS,
   CONFIRMATION_QUERY_PARAM
 } from '../cookies/helpers/constants.js'
@@ -38,9 +38,9 @@ const createMockResponse = (variety = 'view', context = {}) => ({
 
 const DEFAULT_POLICY = {
   essential: true,
-  analytics: false,
+  analytics: null,
   version: null,
-  timestamp: null
+  createdAt: null
 }
 
 describe('Cookies Plugin', () => {
@@ -65,7 +65,7 @@ describe('Cookies Plugin', () => {
     test('registers cookie state with insecure config in development', () => {
       cookies.register(mockServer)
 
-      expect(mockServer.state).toHaveBeenCalledWith(COOKIE_NAMES.POLICY, {
+      expect(mockServer.state).toHaveBeenCalledWith(COOKIE_NAME_PREFERENCES, {
         clearInvalid: true,
         ttl: COOKIE_OPTIONS.TTL,
         path: COOKIE_OPTIONS.PATH,
@@ -80,7 +80,7 @@ describe('Cookies Plugin', () => {
       cookies.register(mockServer)
 
       expect(mockServer.state).toHaveBeenCalledWith(
-        COOKIE_NAMES.POLICY,
+        COOKIE_NAME_PREFERENCES,
         expect.objectContaining({ isSecure: true })
       )
     })
@@ -136,14 +136,20 @@ describe('Cookies Plugin', () => {
       })
     })
 
-    test('hides banner when preferences cookie is set', () => {
-      mockRequest.response = mockResponse
-      mockRequest.state = { [COOKIE_NAMES.PREFERENCES_SET]: 'true' }
+    test.each([true, false])(
+      'hides banner when analytics preference is set (analytics=%s)',
+      (analyticsValue) => {
+        mockRequest.response = mockResponse
+        getCookiePreferences.mockReturnValue({
+          ...DEFAULT_POLICY,
+          analytics: analyticsValue
+        })
 
-      onPreResponse(mockRequest, mockH)
+        onPreResponse(mockRequest, mockH)
 
-      expect(mockResponse.source.context.showCookieBanner).toBe(false)
-    })
+        expect(mockResponse.source.context.showCookieBanner).toBe(false)
+      }
+    )
 
     test('hides banner on the cookies page', () => {
       mockRequest.response = mockResponse
@@ -240,7 +246,6 @@ describe('Cookies Plugin', () => {
 
     test('clears cookie preferences when policy version is stale', () => {
       mockRequest.response = mockResponse
-      mockRequest.state = { [COOKIE_NAMES.PREFERENCES_SET]: 'true' }
       isCookiePolicyVersionStale.mockReturnValue(true)
 
       onPreResponse(mockRequest, mockH)
@@ -250,7 +255,6 @@ describe('Cookies Plugin', () => {
 
     test('shows cookie banner when policy version is stale', () => {
       mockRequest.response = mockResponse
-      mockRequest.state = { [COOKIE_NAMES.PREFERENCES_SET]: 'true' }
       isCookiePolicyVersionStale.mockReturnValue(true)
 
       onPreResponse(mockRequest, mockH)
