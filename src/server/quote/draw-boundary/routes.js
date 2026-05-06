@@ -54,7 +54,14 @@ export default [
       },
       validate: {
         payload: joi.object({
-          boundaryGeojson: joi.object().required()
+          boundaryGeojson: joi
+            .object({
+              intersectingEdps: joi.array().items(joi.object()).required(),
+              boundaryGeometryWgs84: joi.object().required(),
+              boundaryMetadata: joi.object().required(),
+              boundaryGeometryOriginal: joi.object().required()
+            })
+            .required()
         })
       }
     },

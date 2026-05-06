@@ -26,11 +26,24 @@ export async function checkBoundaryHandler(request, h) {
 }
 
 export function saveBoundaryHandler(request, h) {
-  const { boundaryGeojson } = request.payload
+  const {
+    boundaryGeojson: {
+      intersectingEdps,
+      boundaryGeometryWgs84,
+      boundaryMetadata,
+      boundaryGeometryOriginal
+    }
+  } = request.payload
 
-  const intersectsEdp = (boundaryGeojson?.intersectingEdps?.length ?? 0) > 0
+  const intersectsEdp = intersectingEdps.length > 0
 
-  saveQuoteDataToCache(request, { boundaryGeojson })
+  saveQuoteDataToCache(request, {
+    boundaryGeojson: {
+      boundaryGeometryWgs84,
+      boundaryMetadata,
+      boundaryGeometryOriginal
+    }
+  })
 
   if (intersectsEdp) {
     return h.redirect(developmentTypesPath)
