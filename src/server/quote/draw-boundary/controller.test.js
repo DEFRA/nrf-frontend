@@ -3,6 +3,7 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn()
@@ -264,21 +265,14 @@ describe('POST /quote/draw-boundary/save', () => {
   })
 
   it('saves and redirects to development types when there are intersections', async () => {
-    const boundaryGeojson = {
-      intersectingEdps: [{ code: 'EDP-1' }],
-      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
-      boundaryMetadata: { areaHa: 1 },
-      boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] }
-    }
-
     const response = await getServer().inject({
       method: 'POST',
       url: savePath,
-      payload: { boundaryGeojson }
+      payload: { boundaryGeojson: boundaryGeojsonWithEdp }
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: persistedFields(boundaryGeojson)
+      boundaryGeojson: persistedFields(boundaryGeojsonWithEdp)
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/development-types')
