@@ -8,6 +8,7 @@ const ACTION_VALUES = [
   'error',
   'info',
   'warning',
+  'debug',
   'map-load',
   'map-element-missing',
   'plugin-unavailable',
