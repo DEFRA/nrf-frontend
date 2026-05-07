@@ -697,9 +697,7 @@ describe('base-map config', () => {
 
       const eventHandlers = {}
       const addPanel = vi.fn()
-      const consoleWarnSpy = vi
-        .spyOn(console, 'warn')
-        .mockImplementation(() => {})
+      globalThis.fetch = vi.fn().mockResolvedValue({})
       const map = {
         on: vi.fn((eventName, callback) => {
           eventHandlers[eventName] = callback
@@ -736,12 +734,15 @@ describe('base-map config', () => {
         )
         .click()
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Draw plugin not available, action ignored',
-        ''
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        '/api/browser-logs',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining(
+            'Draw plugin not available, action ignored'
+          )
+        })
       )
-
-      consoleWarnSpy.mockRestore()
     })
 
     it('wires map instance error logging when mapErrorMessage is provided', () => {
@@ -2136,6 +2137,7 @@ describe('base-map config', () => {
           status: 400,
           json: vi.fn().mockResolvedValue({ error: 'Unable to check boundary' })
         })
+        .mockResolvedValue({})
 
       globalThis.fetch = fetchSpy
 
@@ -2242,6 +2244,7 @@ describe('base-map config', () => {
           })
         })
         .mockRejectedValueOnce(new Error('Network offline'))
+        .mockResolvedValue({})
 
       globalThis.fetch = fetchSpy
 

@@ -1,11 +1,11 @@
 import {
   getDefraApi,
-  logWarning,
   resolveDrawPlugin,
   resolveMapStylesPlugin,
   resolveSearchPlugin,
   wireMapErrorLogging
 } from './helpers.js'
+import { logger } from '../logger/index.js'
 import { DRAW_PANEL_ID, ENGLAND_BOUNDS, ENGLAND_MIN_ZOOM } from './constants.js'
 import { wireBoundaryInfoControls } from './boundary-info-controls.js'
 import { wireDrawControls } from './draw-controls.js'
@@ -182,7 +182,10 @@ export function createMap(mapElementId, mapOptions = {}) {
 
   const defraApi = getDefraApi()
   if (!defraApi) {
-    logWarning('DEFRA interactive map dependencies not available')
+    logger.info(
+      { action: 'deps-unavailable' },
+      'DEFRA interactive map dependencies not available'
+    )
     return null
   }
 

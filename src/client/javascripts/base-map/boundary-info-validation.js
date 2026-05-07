@@ -1,3 +1,4 @@
+import { logger } from '../logger/index.js'
 import {
   BOUNDARY_INFO_PANEL_ID,
   DRAW_ACTION_EDIT,
@@ -113,6 +114,15 @@ export function createBoundaryValidationRunner({
         payload = null
       }
 
+      if (!response.ok) {
+        logger.error(
+          new Error(
+            `Boundary validation request failed with status ${response.status}`
+          ),
+          'Boundary validation request failed'
+        )
+      }
+
       const validationResult = {
         ok: response.ok,
         status: response.status,
@@ -131,6 +141,8 @@ export function createBoundaryValidationRunner({
       if (error?.name === 'AbortError') {
         return
       }
+
+      logger.error(error, 'Boundary validation request failed')
 
       renderBoundaryPanel(mapElementId, {
         summary: 'Boundary validation could not be completed.',

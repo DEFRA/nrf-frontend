@@ -2,11 +2,11 @@ import { createMap } from './base-map/config.js'
 import { BOUNDARY_MAP_MAX_ZOOM } from './base-map/constants.js'
 import { addSourceAndLayers } from './base-map/features.js'
 import {
-  logWarning,
   parseDatasetJson,
   parseGeojson,
   runWhenMapStyleReady
 } from './base-map/helpers.js'
+import { logger } from './logger/index.js'
 import { addEdpBoundaryLayer } from './boundary-map/layers.js'
 
 const DEFAULT_CENTER = [1.1405503, 52.7089441] // Norfolk
@@ -24,7 +24,10 @@ function getExistingBoundaryBounds(bounds) {
 document.addEventListener('DOMContentLoaded', function () {
   const mapEl = document.getElementById('boundary-map')
   if (!mapEl) {
-    logWarning('Boundary map element not found')
+    logger.info(
+      { action: 'map-element-missing' },
+      'Boundary map element not found'
+    )
     return
   }
 
