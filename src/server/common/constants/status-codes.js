@@ -7,6 +7,7 @@ export const statusCodes = {
   forbidden: 403,
   notFound: 404,
   payloadTooLarge: 413,
+  tooManyRequests: 429,
   imATeapot: 418,
   internalServerError: 500,
   badGateway: 502

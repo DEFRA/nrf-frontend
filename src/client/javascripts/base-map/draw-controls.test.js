@@ -168,8 +168,8 @@ describe('draw-controls', () => {
   })
 
   it('logs a warning when draw action is clicked without a draw plugin', () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({})
     const { map, handlers } = createMapHarness()
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     wireDrawControls(map, {
       drawPlugin: null,
@@ -203,9 +203,14 @@ describe('draw-controls', () => {
     drawButton.click()
     handlers['draw:ready']?.()
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Draw plugin not available, action ignored',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'Draw plugin not available, action ignored'
+        )
+      })
     )
     expect(map.fitToBounds).not.toHaveBeenCalled()
   })

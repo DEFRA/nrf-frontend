@@ -220,8 +220,11 @@ describe('boundary-info-view', () => {
   it('logs error and does not throw when fetch rejects', async () => {
     document.body.innerHTML = buildBoundaryInfoPanelHtml('map-6')
 
-    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'))
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const loggerFetch = vi.fn().mockResolvedValue({})
+    globalThis.fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Network failure'))
+      .mockImplementation(loggerFetch)
 
     const state = { latestResponse: { raw: {} } }
 
@@ -240,8 +243,12 @@ describe('boundary-info-view', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0))
 
-    expect(errorSpy).toHaveBeenCalledWith(
-      'submitSaveAndContinue error: Network failure'
+    expect(loggerFetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('submitSaveAndContinue error')
+      })
     )
 
     delete globalThis.fetch

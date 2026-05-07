@@ -1,4 +1,4 @@
-import { logWarning } from './helpers.js'
+import { logger } from '../logger/index.js'
 import {
   DRAW_ACTION_DELETE,
   DRAW_ACTION_DRAW,
@@ -58,7 +58,10 @@ function runDrawPanelAction({
   refreshButtonState
 }) {
   if (!drawPlugin) {
-    logWarning('Draw plugin not available, action ignored')
+    logger.info(
+      { action: 'plugin-unavailable' },
+      'Draw plugin not available, action ignored'
+    )
     return
   }
 

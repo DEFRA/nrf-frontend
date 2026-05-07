@@ -1,9 +1,8 @@
+import { logger } from '../logger/index.js'
+
 const MIN_MAP_HEIGHT = 320
 const MAP_BOTTOM_GAP = 16
-
-export function logWarning(message, error = '') {
-  console.warn(message, error)
-}
+const ACTION_PLUGIN_UNAVAILABLE = 'plugin-unavailable'
 
 export function getDefraApi() {
   const defraApi = globalThis?.defra
@@ -19,7 +18,7 @@ export function parseDatasetJson(element, datasetKey, errorMessage) {
   try {
     return JSON.parse(element.dataset[datasetKey])
   } catch (error) {
-    logWarning(errorMessage, error)
+    logger.error(error, errorMessage)
     return null
   }
 }
@@ -44,7 +43,10 @@ export function resolveMapStylesPlugin(defraApi) {
       : null
 
   if (!mapStylesPlugin) {
-    logWarning('Map styles plugin not available, using single style')
+    logger.info(
+      { action: ACTION_PLUGIN_UNAVAILABLE },
+      'Map styles plugin not available, using single style'
+    )
   }
 
   return mapStylesPlugin
@@ -55,7 +57,10 @@ export function resolveSearchPlugin(defraApi) {
     typeof defraApi.searchPlugin === 'function' ? defraApi.searchPlugin : null
 
   if (!searchPlugin) {
-    logWarning('Search plugin not available, search disabled')
+    logger.info(
+      { action: ACTION_PLUGIN_UNAVAILABLE },
+      'Search plugin not available, search disabled'
+    )
   }
 
   return searchPlugin
@@ -66,7 +71,10 @@ export function resolveDrawPlugin(defraApi) {
     typeof defraApi.drawMLPlugin === 'function' ? defraApi.drawMLPlugin : null
 
   if (!drawPlugin) {
-    logWarning('Draw plugin not available, draw controls disabled')
+    logger.info(
+      { action: ACTION_PLUGIN_UNAVAILABLE },
+      'Draw plugin not available, draw controls disabled'
+    )
   }
 
   return drawPlugin
@@ -81,12 +89,8 @@ export function runWhenMapStyleReady(mapInstance, callback) {
   mapInstance.once('style.load', callback)
 }
 
-export function wireMapErrorLogging(
-  mapInstance,
-  message = 'Map error',
-  extractError = (err) => err?.error || err
-) {
-  mapInstance.on('error', function (err) {
-    logWarning(message, extractError(err))
-  })
+export function wireMapErrorLogging(mapInstance) {
+  // MapLibre 'error' events include tile fetch failures which are non-fatal
+  // (network blips, missing tiles) — suppress to avoid log noise
+  mapInstance.on('error', function () {})
 }

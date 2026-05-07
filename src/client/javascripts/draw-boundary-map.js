@@ -166,7 +166,6 @@ function buildCreateMapArgs({ dataset, layerDefinitions }) {
   return {
     mapElementId: MAP_ELEMENT_ID,
     mapLabel: 'Draw boundary map',
-    mapErrorMessage: 'Draw boundary map error',
     containerHeight: getDrawMapContainerHeight,
     showStyleControls: true,
     showDrawControls: true,

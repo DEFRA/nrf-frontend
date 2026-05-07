@@ -46,6 +46,7 @@ describe('draw-boundary-map init', () => {
     document.body.innerHTML = ''
     delete globalThis.defra
     vi.resetModules()
+    globalThis.fetch = vi.fn().mockResolvedValue({})
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     vi.spyOn(document, 'addEventListener').mockImplementation(
@@ -79,9 +80,14 @@ describe('draw-boundary-map init', () => {
   it('warns when map dependencies are unavailable', async () => {
     createMapElement()
     await loadModule()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'DEFRA interactive map dependencies not available',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'DEFRA interactive map dependencies not available'
+        )
+      })
     )
   })
 
@@ -139,9 +145,14 @@ describe('draw-boundary-map init', () => {
 
     await loadModule()
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Map styles plugin not available, using single style',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'Map styles plugin not available, using single style'
+        )
+      })
     )
   })
 
@@ -234,9 +245,14 @@ describe('draw-boundary-map init', () => {
     await import('./draw-boundary-map.js')
     initFn?.()
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to parse existing boundary GeoJSON',
-      expect.any(Error)
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'Failed to parse existing boundary GeoJSON'
+        )
+      })
     )
     expect(createMapMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -356,9 +372,14 @@ describe('draw-boundary-map init', () => {
     await import('./draw-boundary-map.js')
     initFn?.()
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to parse existing boundary metadata',
-      expect.any(Error)
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'Failed to parse existing boundary metadata'
+        )
+      })
     )
     expect(createMapMock).toHaveBeenCalledWith(
       expect.objectContaining({
