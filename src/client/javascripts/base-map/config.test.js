@@ -45,7 +45,7 @@ describe('base-map config', () => {
       document.body.appendChild(el)
 
       const constructorSpy = vi.fn()
-      const mockMap = {}
+      const mockMap = { on: vi.fn() }
       globalThis.defra = {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
@@ -84,7 +84,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn()
@@ -117,7 +117,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -147,7 +147,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -175,7 +175,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({}),
@@ -209,7 +209,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({}),
@@ -244,7 +244,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({}),
@@ -268,7 +268,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -291,7 +291,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -745,7 +745,7 @@ describe('base-map config', () => {
       )
     })
 
-    it('wires map instance error logging when mapErrorMessage is provided', () => {
+    it('wires map error handler on map:ready', () => {
       const el = document.createElement('div')
       el.id = 'test-map'
       document.body.appendChild(el)
@@ -761,10 +761,7 @@ describe('base-map config', () => {
         maplibreProvider: vi.fn().mockReturnValue({})
       }
 
-      createMap({
-        mapElementId: 'test-map',
-        mapErrorMessage: 'Boundary map error'
-      })
+      createMap({ mapElementId: 'test-map' })
 
       const readyCallback = map.on.mock.calls.find(
         (c) => c[0] === 'map:ready'
@@ -1383,7 +1380,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -1411,7 +1408,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -1457,7 +1454,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -1499,7 +1496,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})
@@ -1524,7 +1521,7 @@ describe('base-map config', () => {
         InteractiveMap: new Proxy(function () {}, {
           construct(target, args) {
             constructorSpy(...args)
-            return {}
+            return { on: vi.fn() }
           }
         }),
         maplibreProvider: vi.fn().mockReturnValue({})

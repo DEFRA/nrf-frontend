@@ -127,60 +127,16 @@ describe('base-map helpers', () => {
   })
 
   describe('wireMapErrorLogging', () => {
-    it('sends error log when err.error is present', () => {
+    it('suppresses map errors without sending browser logs', () => {
       const mapInstance = { on: vi.fn() }
 
-      wireMapErrorLogging(mapInstance, 'Boundary map error')
+      wireMapErrorLogging(mapInstance)
 
       const errorHandler = mapInstance.on.mock.calls[0][1]
       errorHandler({ error: new Error('tile load failed') })
 
       expect(mapInstance.on).toHaveBeenCalledWith('error', expect.any(Function))
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/browser-logs',
-        expect.objectContaining({
-          method: 'POST',
-          body: expect.stringContaining('Boundary map error')
-        })
-      )
-    })
-
-    it('falls back to the event object when err.error is missing', () => {
-      const mapInstance = { on: vi.fn() }
-
-      wireMapErrorLogging(mapInstance, 'Boundary map error')
-
-      const errorHandler = mapInstance.on.mock.calls[0][1]
-      errorHandler({ message: 'something went wrong' })
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/browser-logs',
-        expect.objectContaining({
-          method: 'POST',
-          body: expect.stringContaining('Boundary map error')
-        })
-      )
-    })
-
-    it('supports custom error extraction', () => {
-      const mapInstance = { on: vi.fn() }
-
-      wireMapErrorLogging(
-        mapInstance,
-        'Custom map error',
-        (err) => err?.detail || err
-      )
-
-      const errorHandler = mapInstance.on.mock.calls[0][1]
-      errorHandler({ detail: 'detail message' })
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/browser-logs',
-        expect.objectContaining({
-          method: 'POST',
-          body: expect.stringContaining('Custom map error')
-        })
-      )
+      expect(globalThis.fetch).not.toHaveBeenCalled()
     })
   })
 })

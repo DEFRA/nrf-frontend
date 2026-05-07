@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const map = createMap({
     mapElementId: 'boundary-map',
     mapLabel: 'Red line boundary',
-    mapErrorMessage: 'Boundary map error',
     containerHeight: '400px',
     options: {
       // Ensure the OS copyright attribution overlay renders on this map.

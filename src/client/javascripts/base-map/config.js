@@ -114,7 +114,6 @@ function buildBaseOptions({
 
 function wireOptionalMapFeatures({
   map,
-  mapErrorMessage,
   showDrawControls,
   showBoundaryInfoPanel,
   showLayerControls,
@@ -124,11 +123,9 @@ function wireOptionalMapFeatures({
   boundaryInfoOptions,
   layerControlOptions
 }) {
-  if (mapErrorMessage) {
-    map.on('map:ready', function (event) {
-      wireMapErrorLogging(event.map, mapErrorMessage)
-    })
-  }
+  map.on('map:ready', function (event) {
+    wireMapErrorLogging(event.map)
+  })
 
   if (showDrawControls) {
     wireDrawControls(map, {
@@ -161,7 +158,6 @@ export function createMap(mapElementId, mapOptions = {}) {
     mapLabel,
     mapStyles = getMapStyles(),
     containerHeight,
-    mapErrorMessage,
     showStyleControls = false,
     showDrawControls = false,
     showBoundaryInfoPanel = false,
@@ -218,7 +214,6 @@ export function createMap(mapElementId, mapOptions = {}) {
 
   wireOptionalMapFeatures({
     map,
-    mapErrorMessage,
     showDrawControls,
     showBoundaryInfoPanel,
     showLayerControls,

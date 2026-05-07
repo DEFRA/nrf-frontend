@@ -89,15 +89,8 @@ export function runWhenMapStyleReady(mapInstance, callback) {
   mapInstance.once('style.load', callback)
 }
 
-export function wireMapErrorLogging(
-  mapInstance,
-  message = 'Map error',
-  extractError = (err) => err?.error || err
-) {
-  mapInstance.on('error', function (err) {
-    const extracted = extractError(err)
-    const error =
-      extracted instanceof Error ? extracted : new Error(String(extracted))
-    logger.error(error, message)
-  })
+export function wireMapErrorLogging(mapInstance) {
+  // MapLibre 'error' events include tile fetch failures which are non-fatal
+  // (network blips, missing tiles) — suppress to avoid log noise
+  mapInstance.on('error', function () {})
 }

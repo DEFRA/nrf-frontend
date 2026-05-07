@@ -365,7 +365,7 @@ describe('boundary-map init', () => {
     expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
-  it('registers an error handler on the map instance', async () => {
+  it('suppresses map tile errors without sending browser logs', async () => {
     createMapElement(validGeojson)
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -377,35 +377,9 @@ describe('boundary-map init', () => {
     const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
     expect(errorCall).toBeTruthy()
 
-    // Trigger the error handler with an error object
+    const callsBefore = globalThis.fetch.mock.calls.length
     errorCall[1]({ error: new Error('tile load failed') })
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      '/api/browser-logs',
-      expect.objectContaining({
-        method: 'POST',
-        body: expect.stringContaining('Boundary map error')
-      })
-    )
-  })
-
-  it('error handler falls back to the event itself when err.error is missing', async () => {
-    createMapElement(validGeojson)
-    const mapInstance = createMockMapInstance(true)
-    const mockDefra = createMockDefra(mapInstance)
-    globalThis.defra = mockDefra
-
-    await loadModule()
-    mockDefra._triggerReady()
-
-    const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
-    errorCall[1]({ message: 'something went wrong' })
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      '/api/browser-logs',
-      expect.objectContaining({
-        method: 'POST',
-        body: expect.stringContaining('Boundary map error')
-      })
-    )
+    expect(globalThis.fetch.mock.calls.length).toBe(callsBefore)
   })
 
   it('adds fill and line layers with correct paint properties', async () => {
