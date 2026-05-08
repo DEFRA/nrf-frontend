@@ -327,12 +327,12 @@ describe('layer-controls', () => {
     expect(mapInstance.setLayoutProperty).toHaveBeenCalled()
   })
 
-  it('emits a step zoom expression for fill-opacity when hideAtZoom is set', () => {
+  it('uses a numeric fill-opacity when adding the fill layer', () => {
     const { map, handlers } = createMapHarness()
     const mapInstance = createMapInstance('default')
 
     wireLayerControls(map, {
-      mapElementId: 'map-hide-at-zoom',
+      mapElementId: 'map-fill-opacity',
       layerControlOptions: {
         layers: [
           {
@@ -359,29 +359,29 @@ describe('layer-controls', () => {
     expect(mapInstance.addLayer).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'edp_boundaries-tiles-fill',
-        paint: expect.objectContaining({
-          'fill-opacity': ['step', ['zoom'], 0.15, 12, 0]
-        })
+        paint: expect.objectContaining({ 'fill-opacity': 0.15 })
       })
     )
   })
 
-  it('uses a numeric fill-opacity when hideAtZoom is omitted', () => {
+  it('does not reset fill-opacity once the fill layer exists, so the indicator can own it', () => {
     const { map, handlers } = createMapHarness()
     const mapInstance = createMapInstance('default')
+    mapInstance.getLayer.mockReturnValue(true)
 
     wireLayerControls(map, {
-      mapElementId: 'map-no-hide',
+      mapElementId: 'map-no-reset',
       layerControlOptions: {
         layers: [
           {
-            sourceId: 'no-hide-tiles',
-            sourceLayer: 'no_hide',
-            tilesUrl: '/impact-assessor-map/tiles/no_hide/{z}/{x}/{y}.mvt',
+            sourceId: 'edp_boundaries-tiles',
+            sourceLayer: 'edp_boundaries',
+            tilesUrl:
+              '/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt',
             defaultVisible: true,
             fillColor: '#FD0',
             lineColor: '#FD0',
-            fillOpacity: 0.2
+            fillOpacity: 0.15
           }
         ]
       }
@@ -393,11 +393,10 @@ describe('layer-controls', () => {
 
     handlers['map:ready']?.({ map: mapInstance })
 
-    expect(mapInstance.addLayer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'no-hide-tiles-fill',
-        paint: expect.objectContaining({ 'fill-opacity': 0.2 })
-      })
+    expect(mapInstance.setPaintProperty).not.toHaveBeenCalledWith(
+      'edp_boundaries-tiles-fill',
+      'fill-opacity',
+      expect.anything()
     )
   })
 })

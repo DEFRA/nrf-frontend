@@ -29,6 +29,42 @@ function createIndicatorElement(parent, className) {
   return el
 }
 
+/**
+ * @param {import('maplibre-gl').Map} mapInstance
+ * @returns {Array<[number, number]>}
+ */
+function getViewportCornerPoints(mapInstance) {
+  const canvas = mapInstance.getCanvas?.()
+  if (!canvas) {
+    return []
+  }
+  const w = canvas.offsetWidth
+  const h = canvas.offsetHeight
+  return [
+    [0, 0],
+    [w, 0],
+    [w, h],
+    [0, h]
+  ]
+}
+
+/**
+ * @param {import('maplibre-gl').Map} mapInstance
+ * @param {string} layerId
+ * @returns {boolean}
+ */
+function areAllCornersInsideLayer(mapInstance, layerId) {
+  const points = getViewportCornerPoints(mapInstance)
+  if (!points.length) {
+    return false
+  }
+  return points.every(
+    (point) =>
+      mapInstance.queryRenderedFeatures?.(point, { layers: [layerId] })
+        ?.length > 0
+  )
+}
+
 export function wireHideLayerOnZoom({
   mapInstance,
   mapElement,
@@ -42,17 +78,37 @@ export function wireHideLayerOnZoom({
   const border = createIndicatorElement(mapElement, 'app-area-indicator-border')
   const label = createIndicatorElement(mapElement, 'app-area-indicator-label')
 
+  let suppressedFillLayerId = null
+
   const update = () => {
     const zoom = mapInstance.getZoom?.() ?? 0
     const active = findActiveLayer(layerDefinitions, mapElementId, zoom)
+    const fillLayerId = active ? `${active.sourceId}-fill` : null
+    const shouldBeActive =
+      !!active && areAllCornersInsideLayer(mapInstance, fillLayerId)
 
-    if (!active) {
+    if (!shouldBeActive) {
+      if (suppressedFillLayerId) {
+        const previousLayer = layerDefinitions.find(
+          (layer) => `${layer.sourceId}-fill` === suppressedFillLayerId
+        )
+        mapInstance.setPaintProperty?.(
+          suppressedFillLayerId,
+          'fill-opacity',
+          previousLayer?.fillOpacity ?? 0
+        )
+        suppressedFillLayerId = null
+      }
       mapElement.classList.remove(ACTIVE_CLASS)
       border.hidden = true
       label.hidden = true
       return
     }
 
+    if (suppressedFillLayerId !== fillLayerId) {
+      mapInstance.setPaintProperty?.(fillLayerId, 'fill-opacity', 0)
+      suppressedFillLayerId = fillLayerId
+    }
     border.style.borderColor = active.lineColor
     label.style.backgroundColor = active.lineColor
     label.textContent = `Area: ${active.areaLabel || active.label || active.sourceLayer || active.sourceId}`
@@ -63,6 +119,9 @@ export function wireHideLayerOnZoom({
 
   mapInstance.on?.('zoomend', update)
   mapInstance.on?.('moveend', update)
+  // Run an initial check once the map has rendered and tiles have loaded —
+  // covers pre-zoomed loads where no user interaction triggers zoom/moveend.
+  mapInstance.once?.('idle', update)
   document.addEventListener('change', (event) => {
     const toggle = event.target.closest(
       `.app-layers-panel[data-map-element-id="${mapElementId}"] [data-layer-action="${LAYER_ACTION_TOGGLE}"]`

@@ -1,20 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createMockMapInstance as createMapInstance } from '../../../test-utils/create-mock-map-instance.js'
 import { wireHideLayerOnZoom } from './hide-layer-on-zoom.js'
 
 const MAP_ELEMENT_ID = 'test-map'
-
-function createMapInstance({ zoom = 10 } = {}) {
-  const handlers = {}
-  return {
-    on: vi.fn((eventName, callback) => {
-      handlers[eventName] = callback
-    }),
-    getZoom: vi.fn(() => zoom),
-    _handlers: handlers
-  }
-}
 
 function createMapElement() {
   const el = document.createElement('div')
@@ -47,6 +37,7 @@ const edpLayer = {
   label: 'EDP boundaries',
   areaLabel: 'Nature Restoration Fund nutrients levy',
   lineColor: '#FD0',
+  fillOpacity: 0.15,
   hideAtZoom: 12
 }
 
@@ -117,7 +108,10 @@ describe('wireHideLayerOnZoom', () => {
 
   it('shows the indicator with the visible layer label and colour at or above threshold', () => {
     const mapElement = createMapElement()
-    const mapInstance = createMapInstance({ zoom: 13 })
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
     createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
 
     wireHideLayerOnZoom({
@@ -144,7 +138,10 @@ describe('wireHideLayerOnZoom', () => {
 
   it('hides the indicator when the layer is toggled off via the layer-controls panel', () => {
     const mapElement = createMapElement()
-    const mapInstance = createMapInstance({ zoom: 13 })
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
     const panel = createLayersPanel([
       { sourceId: edpLayer.sourceId, checked: true }
     ])
@@ -171,7 +168,10 @@ describe('wireHideLayerOnZoom', () => {
 
   it('updates the indicator on map zoomend', () => {
     const mapElement = createMapElement()
-    const mapInstance = createMapInstance({ zoom: 11.9 })
+    const mapInstance = createMapInstance({
+      zoom: 11.9,
+      allCornersInsideLayer: true
+    })
     createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
 
     wireHideLayerOnZoom({
@@ -195,7 +195,10 @@ describe('wireHideLayerOnZoom', () => {
 
   it('picks the first visible layer when multiple have hideAtZoom thresholds', () => {
     const mapElement = createMapElement()
-    const mapInstance = createMapInstance({ zoom: 13 })
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
     const lpaLayer = {
       sourceId: 'lpa_boundaries-tiles',
       sourceLayer: 'lpa_boundaries',
@@ -222,7 +225,10 @@ describe('wireHideLayerOnZoom', () => {
 
   it('treats a layer as visible when no panel toggle exists for it', () => {
     const mapElement = createMapElement()
-    const mapInstance = createMapInstance({ zoom: 13 })
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
     // No panel created.
 
     wireHideLayerOnZoom({
@@ -250,6 +256,109 @@ describe('wireHideLayerOnZoom', () => {
       layerDefinitions: [layerWithoutThreshold]
     })
 
+    expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
+      false
+    )
+  })
+
+  it('runs an initial check on the map idle event, covering pre-zoomed loads with no user interaction', () => {
+    const mapElement = createMapElement()
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: false
+    })
+    createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
+
+    wireHideLayerOnZoom({
+      mapInstance,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions: [edpLayer]
+    })
+
+    expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
+      false
+    )
+
+    // Tiles finish loading after the initial sync update — corners now inside.
+    mapInstance.queryRenderedFeatures.mockReturnValue([{ type: 'Feature' }])
+    mapInstance._handlers.idle?.()
+
+    expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
+      true
+    )
+  })
+
+  it('hides the indicator when above the zoom threshold but the viewport corners are not all inside the layer', () => {
+    const mapElement = createMapElement()
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: false
+    })
+    createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
+
+    wireHideLayerOnZoom({
+      mapInstance,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions: [edpLayer]
+    })
+
+    expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
+      false
+    )
+    expect(mapInstance.setPaintProperty).not.toHaveBeenCalled()
+  })
+
+  it('suppresses the layer fill once when the indicator becomes active and does not re-suppress on subsequent updates', () => {
+    const mapElement = createMapElement()
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
+    createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
+
+    wireHideLayerOnZoom({
+      mapInstance,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions: [edpLayer]
+    })
+
+    expect(mapInstance.setPaintProperty).toHaveBeenCalledExactlyOnceWith(
+      'edp_boundaries-tiles-fill',
+      'fill-opacity',
+      0
+    )
+
+    mapInstance._handlers.moveend?.()
+
+    expect(mapInstance.setPaintProperty).toHaveBeenCalledTimes(1)
+  })
+
+  it('restores the layer fill when the viewport moves outside the layer', () => {
+    const mapElement = createMapElement()
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
+    createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
+
+    wireHideLayerOnZoom({
+      mapInstance,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions: [edpLayer]
+    })
+
+    mapInstance.queryRenderedFeatures.mockReturnValue([])
+    mapInstance._handlers.moveend?.()
+
+    expect(mapInstance.setPaintProperty).toHaveBeenLastCalledWith(
+      'edp_boundaries-tiles-fill',
+      'fill-opacity',
+      0.15
+    )
     expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
       false
     )
