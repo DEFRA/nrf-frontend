@@ -154,26 +154,15 @@ function inferStyleVariant(mapInstance) {
   return 'default'
 }
 
-function buildFillOpacityExpression(fillOpacity, hideAtZoom) {
-  if (typeof hideAtZoom !== 'number') {
-    return fillOpacity
-  }
-  return ['step', ['zoom'], fillOpacity, hideAtZoom, 0]
-}
-
 function applyVectorTileOverlayPaint(
   mapInstance,
   layerControlOptions,
   styleVariant
 ) {
-  const { sourceId, sourceLayer, hideAtZoom } = layerControlOptions
+  const { sourceId, sourceLayer } = layerControlOptions
   const { fillColor, fillOpacity, lineColor, lineWidth } = resolveLayerPaint(
     layerControlOptions,
     styleVariant
-  )
-  const fillOpacityExpression = buildFillOpacityExpression(
-    fillOpacity,
-    hideAtZoom
   )
 
   if (!mapInstance || !sourceId || !sourceLayer) {
@@ -181,12 +170,9 @@ function applyVectorTileOverlayPaint(
   }
 
   if (mapInstance.getLayer(`${sourceId}-fill`)) {
+    // Don't reset fill-opacity once the layer exists —
+    // wireHideLayerOnZoom owns it dynamically.
     mapInstance.setPaintProperty?.(`${sourceId}-fill`, 'fill-color', fillColor)
-    mapInstance.setPaintProperty?.(
-      `${sourceId}-fill`,
-      'fill-opacity',
-      fillOpacityExpression
-    )
   } else {
     mapInstance.addLayer({
       id: `${sourceId}-fill`,
@@ -195,7 +181,7 @@ function applyVectorTileOverlayPaint(
       'source-layer': sourceLayer,
       paint: {
         'fill-color': fillColor,
-        'fill-opacity': fillOpacityExpression
+        'fill-opacity': fillOpacity
       }
     })
   }
