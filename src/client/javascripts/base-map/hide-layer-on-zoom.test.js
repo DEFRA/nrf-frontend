@@ -261,6 +261,29 @@ describe('wireHideLayerOnZoom', () => {
     )
   })
 
+  it('keeps the indicator hidden when the map canvas is unavailable', () => {
+    const mapElement = createMapElement()
+    const mapInstance = createMapInstance({
+      zoom: 13,
+      allCornersInsideLayer: true
+    })
+    mapInstance.getCanvas = vi.fn(() => null)
+    createLayersPanel([{ sourceId: edpLayer.sourceId, checked: true }])
+
+    wireHideLayerOnZoom({
+      mapInstance,
+      mapElement,
+      mapElementId: MAP_ELEMENT_ID,
+      layerDefinitions: [edpLayer]
+    })
+
+    expect(mapElement.classList.contains('app-area-indicator--active')).toBe(
+      false
+    )
+    expect(mapInstance.queryRenderedFeatures).not.toHaveBeenCalled()
+    expect(mapInstance.setPaintProperty).not.toHaveBeenCalled()
+  })
+
   it('runs an initial check on the map idle event, covering pre-zoomed loads with no user interaction', () => {
     const mapElement = createMapElement()
     const mapInstance = createMapInstance({

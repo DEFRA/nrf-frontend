@@ -80,41 +80,58 @@ export function wireHideLayerOnZoom({
 
   let suppressedFillLayerId = null
 
-  const update = () => {
-    const zoom = mapInstance.getZoom?.() ?? 0
-    const active = findActiveLayer(layerDefinitions, mapElementId, zoom)
-    const fillLayerId = active ? `${active.sourceId}-fill` : null
-    const shouldBeActive =
-      !!active && areAllCornersInsideLayer(mapInstance, fillLayerId)
-
-    if (!shouldBeActive) {
-      if (suppressedFillLayerId) {
-        const previousLayer = layerDefinitions.find(
-          (layer) => `${layer.sourceId}-fill` === suppressedFillLayerId
-        )
-        mapInstance.setPaintProperty?.(
-          suppressedFillLayerId,
-          'fill-opacity',
-          previousLayer?.fillOpacity ?? 0
-        )
-        suppressedFillLayerId = null
-      }
-      mapElement.classList.remove(ACTIVE_CLASS)
-      border.hidden = true
-      label.hidden = true
+  const restoreFillOpacity = () => {
+    if (!suppressedFillLayerId) {
       return
     }
+    const previousLayer = layerDefinitions.find(
+      (layer) => `${layer.sourceId}-fill` === suppressedFillLayerId
+    )
+    mapInstance.setPaintProperty?.(
+      suppressedFillLayerId,
+      'fill-opacity',
+      previousLayer?.fillOpacity ?? 0
+    )
+    suppressedFillLayerId = null
+  }
 
-    if (suppressedFillLayerId !== fillLayerId) {
-      mapInstance.setPaintProperty?.(fillLayerId, 'fill-opacity', 0)
-      suppressedFillLayerId = fillLayerId
+  const suppressFillOpacity = (fillLayerId) => {
+    if (suppressedFillLayerId === fillLayerId) {
+      return
     }
+    mapInstance.setPaintProperty?.(fillLayerId, 'fill-opacity', 0)
+    suppressedFillLayerId = fillLayerId
+  }
+
+  const hideIndicator = () => {
+    restoreFillOpacity()
+    mapElement.classList.remove(ACTIVE_CLASS)
+    border.hidden = true
+    label.hidden = true
+  }
+
+  const showIndicator = (active) => {
+    suppressFillOpacity(`${active.sourceId}-fill`)
     border.style.borderColor = active.lineColor
     label.style.backgroundColor = active.lineColor
     label.textContent = `Area: ${active.areaLabel || active.label || active.sourceLayer || active.sourceId}`
     border.hidden = false
     label.hidden = false
     mapElement.classList.add(ACTIVE_CLASS)
+  }
+
+  const update = () => {
+    const zoom = mapInstance.getZoom?.() ?? 0
+    const active = findActiveLayer(layerDefinitions, mapElementId, zoom)
+    const isInsideActiveLayer =
+      !!active &&
+      areAllCornersInsideLayer(mapInstance, `${active.sourceId}-fill`)
+
+    if (isInsideActiveLayer) {
+      showIndicator(active)
+    } else {
+      hideIndicator()
+    }
   }
 
   mapInstance.on?.('zoomend', update)
