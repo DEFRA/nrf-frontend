@@ -41,7 +41,8 @@ export function saveBoundaryHandler(request, h) {
     boundaryGeojson: {
       boundaryGeometryWgs84,
       boundaryMetadata,
-      boundaryGeometryOriginal
+      boundaryGeometryOriginal,
+      intersectingEdps
     }
   })
 

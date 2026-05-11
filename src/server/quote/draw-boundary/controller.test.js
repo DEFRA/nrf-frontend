@@ -254,16 +254,6 @@ describe('POST /quote/draw-boundary/save', () => {
     boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] }
   }
 
-  const persistedFields = ({
-    boundaryGeometryWgs84,
-    boundaryMetadata,
-    boundaryGeometryOriginal
-  }) => ({
-    boundaryGeometryWgs84,
-    boundaryMetadata,
-    boundaryGeometryOriginal
-  })
-
   it('saves and redirects to development types when there are intersections', async () => {
     const response = await getServer().inject({
       method: 'POST',
@@ -272,7 +262,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: persistedFields(boundaryGeojsonWithEdp)
+      boundaryGeojson: boundaryGeojsonWithEdp
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/development-types')
@@ -286,7 +276,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: persistedFields(validBoundaryGeojson)
+      boundaryGeojson: validBoundaryGeojson
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe(noEdpPath)
