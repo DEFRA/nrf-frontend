@@ -1,6 +1,7 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
+import { addTracingHeader } from './helpers/tracing-header.js'
 
 const logger = createLogger()
 
@@ -33,9 +34,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
   const backendUrl = config.get('backend.apiUrl')
   const url = `${backendUrl}/upload/initiate`
 
-  logger.info(
-    `Initiating upload - url: ${url}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}`
-  )
+  logger.info({ url, s3Bucket, s3Path }, 'Initiating upload')
 
   try {
     const { payload } = await Wreck.post(url, {
@@ -45,9 +44,9 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
         s3Path,
         metadata
       }),
-      headers: {
+      headers: addTracingHeader({
         'Content-Type': 'application/json'
-      },
+      }),
       json: true
     })
 
@@ -77,7 +76,7 @@ export async function getUploadStatus(uploadId) {
   const backendUrl = config.get('backend.apiUrl')
   const url = `${backendUrl}/upload/${uploadId}/status`
 
-  logger.info(`Fetching upload status - url: ${url}, uploadId: ${uploadId}`)
+  logger.info({ url, uploadId }, 'Fetching upload status')
 
   try {
     const { payload } = await Wreck.get(url, { json: true })
