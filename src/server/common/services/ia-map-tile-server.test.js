@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getTraceId } from '@defra/hapi-tracing'
+import { withTraceId } from '@defra/hapi-tracing'
 
 vi.mock('@defra/hapi-tracing', () => ({
-  getTraceId: vi.fn()
+  withTraceId: vi.fn()
 }))
 
 vi.mock('../../../config/config.js', () => ({
@@ -39,7 +39,7 @@ describe('getMapTile', () => {
 
   beforeEach(() => {
     fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
-    vi.mocked(getTraceId).mockReturnValue(null)
+    vi.mocked(withTraceId).mockReturnValue({})
   })
 
   it('fetches the upstream URL constructed from path and query', async () => {
@@ -60,8 +60,16 @@ describe('getMapTile', () => {
     )
   })
 
-  it('includes the tracing header when a trace ID is present', async () => {
-    vi.mocked(getTraceId).mockReturnValue('trace-abc-123')
+  it('passes the tracing header name to withTraceId', async () => {
+    await getMapTile('tiles/7/1/2.mvt', createMockRequest())
+
+    expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
+  })
+
+  it('includes headers returned by withTraceId in the fetch call', async () => {
+    vi.mocked(withTraceId).mockReturnValue({
+      'x-cdp-request-id': 'trace-abc-123'
+    })
 
     await getMapTile('tiles/7/1/2.mvt', createMockRequest())
 
@@ -70,15 +78,6 @@ describe('getMapTile', () => {
       expect.objectContaining({
         headers: { 'x-cdp-request-id': 'trace-abc-123' }
       })
-    )
-  })
-
-  it('omits the tracing header when no trace ID is present', async () => {
-    await getMapTile('tiles/7/1/2.mvt', createMockRequest())
-
-    expect(fetchSpy).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ headers: {} })
     )
   })
 

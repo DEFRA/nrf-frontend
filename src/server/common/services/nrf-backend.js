@@ -1,7 +1,7 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
-import { addTracingHeader } from './helpers/tracing-header.js'
+import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
@@ -10,7 +10,7 @@ export const getRequestFromBackend = async ({ endpointPath }) => {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
     const response = await Wreck.get(url, {
       json: true,
-      headers: addTracingHeader()
+      headers: withTraceId(config.get('tracing.header'))
     })
     return response
   } catch (error) {
@@ -25,7 +25,7 @@ export const postRequestToBackend = async ({ endpointPath, payload }) => {
     const response = await Wreck.post(url, {
       payload,
       json: true,
-      headers: addTracingHeader()
+      headers: withTraceId(config.get('tracing.header'))
     })
     return response
   } catch (error) {
