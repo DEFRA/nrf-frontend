@@ -17,11 +17,11 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('./helpers/tracing-header.js', () => ({
-  addTracingHeader: vi.fn((headers = {}) => headers)
+vi.mock('@defra/hapi-tracing', () => ({
+  withTraceId: vi.fn((_, headers = {}) => headers)
 }))
 
-import { addTracingHeader } from './helpers/tracing-header.js'
+import { withTraceId } from '@defra/hapi-tracing'
 
 describe('uploader service', () => {
   describe('initiateUpload', () => {
@@ -56,7 +56,7 @@ describe('uploader service', () => {
       })
     })
 
-    it('should pass existing headers to addTracingHeader', async () => {
+    it('should call withTraceId with the tracing header name and existing headers', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
       })
@@ -66,13 +66,13 @@ describe('uploader service', () => {
         s3Bucket: 'test-bucket'
       })
 
-      expect(addTracingHeader).toHaveBeenCalledWith({
+      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id', {
         'Content-Type': 'application/json'
       })
     })
 
-    it('should include tracing header returned by addTracingHeader', async () => {
-      vi.mocked(addTracingHeader).mockReturnValue({
+    it('should include tracing header returned by withTraceId', async () => {
+      vi.mocked(withTraceId).mockReturnValue({
         'Content-Type': 'application/json',
         'x-cdp-request-id': 'trace-abc-123'
       })

@@ -1,5 +1,5 @@
 import { config } from '../../../config/config.js'
-import { addTracingHeader } from './helpers/tracing-header.js'
+import { withTraceId } from '@defra/hapi-tracing'
 import { createLogger } from '../helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -17,6 +17,6 @@ export const getMapTile = async (path, request) => {
   logger.debug(`Impact assessor proxy request: ${path || '/'}`)
   return fetch(upstreamUrl, {
     redirect: 'follow',
-    headers: addTracingHeader()
+    headers: withTraceId(config.get('tracing.header'))
   })
 }

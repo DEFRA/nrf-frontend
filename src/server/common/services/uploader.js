@@ -1,7 +1,7 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
-import { addTracingHeader } from './helpers/tracing-header.js'
+import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
@@ -44,7 +44,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
         s3Path,
         metadata
       }),
-      headers: addTracingHeader({
+      headers: withTraceId(config.get('tracing.header'), {
         'Content-Type': 'application/json'
       }),
       json: true
