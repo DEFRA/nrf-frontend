@@ -49,6 +49,12 @@ describe('draw-controls', () => {
     const panelConfig = map.addPanel.mock.calls[0][1]
     document.body.insertAdjacentHTML('beforeend', panelConfig.html)
 
+    const viewport = document.createElement('div')
+    viewport.id = 'draw-map-viewport'
+    viewport.tabIndex = 0
+    const viewportFocus = vi.spyOn(viewport, 'focus')
+    document.body.appendChild(viewport)
+
     const drawButton = document.querySelector(
       '.app-draw-panel[data-map-element-id="draw-map"] [data-draw-action="draw"]'
     )
@@ -68,6 +74,7 @@ describe('draw-controls', () => {
     drawButton.click()
     expect(drawPlugin.newPolygon).toHaveBeenCalledWith('feature-uuid')
     expect(map.hidePanel).toHaveBeenCalledWith('draw')
+    expect(viewportFocus).toHaveBeenCalledTimes(1)
 
     handlers['draw:created']?.({ id: 'feature-a' })
     expect(editButton.disabled).toBe(false)
@@ -75,11 +82,13 @@ describe('draw-controls', () => {
 
     editButton.click()
     expect(drawPlugin.editFeature).toHaveBeenCalledWith('feature-a')
+    expect(viewportFocus).toHaveBeenCalledTimes(2)
 
     handlers['draw:updated']?.({ id: 'feature-a' })
 
     deleteButton.click()
     expect(drawPlugin.deleteFeature).toHaveBeenCalledWith(['feature-a'])
+    expect(viewportFocus).toHaveBeenCalledTimes(3)
 
     handlers['draw:delete']?.({ featureIds: ['feature-a'] })
     expect(editButton.disabled).toBe(true)
