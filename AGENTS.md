@@ -7,6 +7,12 @@ This file provides guidance to AI coding agents when working with code in this r
 - Before making any code changes, read `.ai/rules/index.md` for coding standards and patterns.
 - Always run `nvm use` before running any commands to ensure the correct Node version (v24) is active. The project requires Node >=24 and has a `.nvmrc` file.
 
+## Symlinks
+
+**Always create symlinks with relative paths** — never absolute. Absolute symlinks break for every other developer and in CI. Use `ln -s ../relative/path target` and verify with `ls -la`.
+
+**Skill symlinks** (`.ai/skills/`) must point to `node_modules/@defra/nrf-library/.ai/skills/<name>` — never to a sibling repo (e.g. `../nrf-library/`). The installed package is what ships and is available in every environment.
+
 ## NPM tasks
 
 See `package.json`
