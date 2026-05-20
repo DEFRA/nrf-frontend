@@ -1,5 +1,4 @@
 import { within } from '@testing-library/dom'
-import { JSDOM } from 'jsdom'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { submitForm } from '../../test-utils/submit-form.js'
 import { loadPage } from '../../test-utils/load-page.js'
@@ -184,16 +183,13 @@ describe('GTM script rendering', () => {
       formData: { analytics: 'yes', source: 'page' }
     })
 
-    const response = await getServer().inject({
-      method: 'GET',
-      url: COOKIE_ROUTE,
-      headers: {
-        cookie,
-        'x-nrf-profile': 'prod'
-      }
+    const document = await loadPage({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      cookie,
+      headers: { 'x-nrf-profile': 'prod' }
     })
-    const { window } = new JSDOM(response.result)
-    const { queryByTestId } = within(window.document.documentElement)
+    const { queryByTestId } = within(document.documentElement)
 
     expect(queryByTestId('gtm-head')).toBeNull()
     expect(queryByTestId('gtm-body')).toBeNull()
@@ -208,16 +204,13 @@ describe('GTM script rendering', () => {
       formData: { analytics: 'yes', source: 'page' }
     })
 
-    const response = await getServer().inject({
-      method: 'GET',
-      url: COOKIE_ROUTE,
-      headers: {
-        cookie,
-        'x-nrf-profile': 'prod'
-      }
+    const document = await loadPage({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      cookie,
+      headers: { 'x-nrf-profile': 'prod' }
     })
-    const { window } = new JSDOM(response.result)
-    const { getByTestId } = within(window.document.documentElement)
+    const { getByTestId } = within(document.documentElement)
 
     expect(getByTestId('gtm-head')).toBeTruthy()
     expect(getByTestId('gtm-body')).toBeTruthy()
