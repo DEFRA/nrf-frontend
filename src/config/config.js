@@ -332,6 +332,13 @@ export const config = convict({
       default: 'http://localhost:4001',
       env: 'NRF_BACKEND_API_URL'
     },
+    apiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the backend',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'BACKEND_API_KEY'
+    },
     optional: {
       doc: 'When true, log backend connectivity failures as warnings instead of blocking startup',
       format: Boolean,
@@ -357,6 +364,13 @@ export const config = convict({
       format: String,
       default: 'http://localhost:8085',
       env: 'IMPACT_ASSESSOR_BASE_URL'
+    },
+    impactAssessorApiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor (e.g. map tile proxy).',
+      format: String,
+      default: '',
+      sensitive: true,
+      env: 'IMPACT_ASSESSOR_API_KEY'
     },
     impactAssessorLayers: {
       doc: 'Comma-separated list of impact assessor tile layer params shown in the Layers panel.',

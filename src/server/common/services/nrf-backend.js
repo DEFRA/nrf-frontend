@@ -5,12 +5,21 @@ import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
+const backendHeaders = () => {
+  const headers = withTraceId(config.get('tracing.header'))
+  const apiKey = config.get('backend.apiKey')
+  if (apiKey) {
+    headers['x-api-key'] = apiKey
+  }
+  return headers
+}
+
 export const getRequestFromBackend = async ({ endpointPath }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
     const response = await Wreck.get(url, {
       json: true,
-      headers: withTraceId(config.get('tracing.header'))
+      headers: backendHeaders()
     })
     return response
   } catch (error) {
@@ -25,7 +34,7 @@ export const postRequestToBackend = async ({ endpointPath, payload }) => {
     const response = await Wreck.post(url, {
       payload,
       json: true,
-      headers: withTraceId(config.get('tracing.header'))
+      headers: backendHeaders()
     })
     return response
   } catch (error) {
