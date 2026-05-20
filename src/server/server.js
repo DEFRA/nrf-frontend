@@ -116,6 +116,17 @@ export async function createServer() {
     await server.register(swagger)
   }
 
+  server.ext('onPreHandler', (request, h) => {
+    if (
+      request.yar &&
+      config.get('cdpEnvironment') === 'prod' &&
+      request.headers['x-nrf-profile'] === 'prod'
+    ) {
+      request.yar.set('isE2eProd', true)
+    }
+    return h.continue
+  })
+
   server.ext('onPreResponse', (request, h) => {
     const { response } = request
     if (response.isBoom) {
