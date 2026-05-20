@@ -1,4 +1,5 @@
 import { within } from '@testing-library/dom'
+import { JSDOM } from 'jsdom'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { submitForm } from '../../test-utils/submit-form.js'
 import { loadPage } from '../../test-utils/load-page.js'
@@ -172,6 +173,54 @@ describe('GTM script rendering', () => {
 
     expect(queryByTestId('gtm-head')).toBeNull()
     expect(queryByTestId('gtm-body')).toBeNull()
+  })
+
+  it('does not render GTM scripts when x-nrf-profile header is prod on prod environment', async () => {
+    config.set('cdpEnvironment', 'prod')
+
+    const { cookie } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: { analytics: 'yes', source: 'page' }
+    })
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: COOKIE_ROUTE,
+      headers: {
+        cookie,
+        'x-nrf-profile': 'prod'
+      }
+    })
+    const { window } = new JSDOM(response.result)
+    const { queryByTestId } = within(window.document.documentElement)
+
+    expect(queryByTestId('gtm-head')).toBeNull()
+    expect(queryByTestId('gtm-body')).toBeNull()
+
+    config.set('cdpEnvironment', 'local')
+  })
+
+  it('renders GTM scripts when x-nrf-profile header is prod but environment is not prod', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: { analytics: 'yes', source: 'page' }
+    })
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: COOKIE_ROUTE,
+      headers: {
+        cookie,
+        'x-nrf-profile': 'prod'
+      }
+    })
+    const { window } = new JSDOM(response.result)
+    const { getByTestId } = within(window.document.documentElement)
+
+    expect(getByTestId('gtm-head')).toBeTruthy()
+    expect(getByTestId('gtm-body')).toBeTruthy()
   })
 
   it('does not render GTM scripts when gtmId is not set', async () => {
