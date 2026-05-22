@@ -5,8 +5,14 @@ import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
-const backendHeaders = () => {
-  const headers = withTraceId(config.get('tracing.header'))
+/**
+ * Build headers for backend calls: trace header, any extra headers, and the
+ * service-to-service x-api-key when configured.
+ * @param {object} [extraHeaders]
+ * @returns {object}
+ */
+export const backendHeaders = (extraHeaders) => {
+  const headers = withTraceId(config.get('tracing.header'), extraHeaders)
   const apiKey = config.get('backend.apiKey')
   if (apiKey) {
     headers['x-api-key'] = apiKey
