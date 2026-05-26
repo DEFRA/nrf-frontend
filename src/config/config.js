@@ -393,6 +393,21 @@ export const config = convict({
     default: null,
     env: 'GTM_ID'
   },
+  cdpEnvironment: {
+    doc: 'The CDP environment the app is running in',
+    format: [
+      'local',
+      'infra-dev',
+      'management',
+      'dev',
+      'test',
+      'perf-test',
+      'ext-test',
+      'prod'
+    ],
+    default: 'local',
+    env: 'ENVIRONMENT'
+  },
   cdpUploader: {
     url: {
       doc: 'Browser-facing base URL for the CDP uploader form action. Required locally where the frontend and uploader are on different origins. Not needed in CDP cloud where the platform proxy routes /upload-and-scan/* requests.',
