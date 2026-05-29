@@ -3,6 +3,7 @@ import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
+import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
 
 const exemptPaths = new Set([
   boundaryTypePath,
@@ -10,11 +11,18 @@ const exemptPaths = new Set([
   deleteConfirmationPath
 ])
 
+const quoteDetailsPattern = new RegExp(
+  `^\\/quote\\/${referencePattern.source}\\/` + `${tokenPattern.source}$`
+)
+
+const isExempt = (path) =>
+  exemptPaths.has(path) || quoteDetailsPattern.test(path)
+
 export const checkForValidQuoteSession = (request, h) => {
   if (
     request.method !== 'get' ||
     !request.path.startsWith('/quote/') ||
-    exemptPaths.has(request.path)
+    isExempt(request.path)
   ) {
     return h.continue
   }
