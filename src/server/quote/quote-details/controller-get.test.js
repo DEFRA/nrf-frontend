@@ -14,18 +14,21 @@ describe('quoteDetailsGetController', () => {
     view: (template, model) => ({ template, model })
   })
 
-  it('should render the correct view with the quote data', async () => {
+  const mockBackend = (reference, body, status = 200) => {
+    server.use(
+      http.get(`${backendUrl}/quotes/${reference}`, () =>
+        HttpResponse.json(body, { status })
+      )
+    )
+  }
+
+  it('should render the quote details view when the status is valid', async () => {
     const quote = {
       reference: 'NRF-123456',
       email: { address: 'test@example.com' },
       boundary: { userInputType: 'upload', filename: null }
     }
-
-    server.use(
-      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
-        HttpResponse.json(quote)
-      )
-    )
+    mockBackend('NRF-123456', { status: 'valid', quote })
 
     const request = {
       params: { reference: 'NRF-123456', token: 'abctoken123' }
@@ -38,12 +41,31 @@ describe('quoteDetailsGetController', () => {
     expect(result.model.quote).toEqual(quote)
   })
 
+  it.each([
+    ['invalid', 'The link is invalid'],
+    [
+      'not_found',
+      'The NRF reference you have supplied does not match an existing quote'
+    ],
+    ['expired', 'This link has expired']
+  ])(
+    'should render the error view with the right message for status %s',
+    async (status, message) => {
+      mockBackend('NRF-123456', { status, quote: null })
+
+      const request = {
+        params: { reference: 'NRF-123456', token: 'abctoken123' }
+      }
+
+      const result = await quoteDetailsGetController.handler(request, buildH())
+
+      expect(result.template).toBe('quote/quote-details/error')
+      expect(result.model.pageHeading).toBe(message)
+    }
+  )
+
   it('should propagate errors thrown by the backend', async () => {
-    server.use(
-      http.get(`${backendUrl}/quotes/NRF-FAIL`, () =>
-        HttpResponse.json({ message: 'Not Found' }, { status: 404 })
-      )
-    )
+    mockBackend('NRF-FAIL', { message: 'Server error' }, 500)
 
     const request = {
       params: { reference: 'NRF-FAIL', token: 'bad-token' }

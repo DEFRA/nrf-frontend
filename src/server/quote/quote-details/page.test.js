@@ -3,7 +3,10 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
-import { mockGetQuote } from '../../../test-utils/mock-get-quote.js'
+import {
+  mockGetQuote,
+  mockGetQuoteStatus
+} from '../../../test-utils/mock-get-quote.js'
 
 const mswServer = setupMswServer()
 
@@ -165,5 +168,43 @@ describe('Quote details page', () => {
     expect(edpsHeading).not.toBeInTheDocument()
     const cards = main.querySelectorAll('.govuk-summary-card')
     expect(cards).toHaveLength(0)
+  })
+
+  describe('error states', () => {
+    it.each([
+      ['invalid', 'The link is invalid'],
+      [
+        'not_found',
+        'The NRF reference you have supplied does not match an existing quote'
+      ],
+      ['expired', 'This link has expired']
+    ])(
+      'should show the %s error message and no quote summary',
+      async (status, message) => {
+        mockGetQuoteStatus(mswServer, reference, status)
+        const document = await loadPage({
+          requestUrl,
+          server: getServer()
+        })
+
+        expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+          message
+        )
+        expect(
+          document.querySelector('.govuk-summary-list')
+        ).not.toBeInTheDocument()
+      }
+    )
+
+    it('should show the invalid link message for a malformed token', async () => {
+      const document = await loadPage({
+        requestUrl: `/quote/${reference}/not a valid token!`,
+        server: getServer()
+      })
+
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'The link is invalid'
+      )
+    })
   })
 })
