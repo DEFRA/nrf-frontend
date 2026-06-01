@@ -5,18 +5,38 @@ import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
-export const getRequestFromBackend = async ({ endpointPath }) => {
+export const getRequestFromBackend = async ({
+  endpointPath,
+  headers: extraHeaders
+}) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
+    const headers = {
+      ...withTraceId(config.get('tracing.header')),
+      ...extraHeaders
+    }
     const response = await Wreck.get(url, {
       json: true,
-      headers: withTraceId(config.get('tracing.header'))
+      headers
     })
     return response
   } catch (error) {
-    logger.error(error)
+    logger.error(error, 'GET request to backend failed')
     throw error
   }
+}
+
+/**
+ * @param {{ reference: string, bearerToken?: string }} options
+ */
+export const getQuoteFromBackend = async ({ reference, bearerToken }) => {
+  const headers = bearerToken
+    ? { Authorization: `Bearer ${bearerToken}` }
+    : undefined
+  return getRequestFromBackend({
+    endpointPath: `/quotes/${reference}`,
+    headers
+  })
 }
 
 export const postRequestToBackend = async ({ endpointPath, payload }) => {
@@ -29,7 +49,7 @@ export const postRequestToBackend = async ({ endpointPath, payload }) => {
     })
     return response
   } catch (error) {
-    logger.error(error)
+    logger.error(error, 'POST request to backend failed')
     throw error
   }
 }

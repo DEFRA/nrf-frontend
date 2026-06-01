@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
-import { getRequestFromBackend, postRequestToBackend } from './nrf-backend.js'
+import {
+  getRequestFromBackend,
+  getQuoteFromBackend,
+  postRequestToBackend
+} from './nrf-backend.js'
 
 const backendUrl = config.get('backend').apiUrl
 
@@ -65,6 +69,31 @@ describe('nrf-backend service', () => {
       expect(callArgs.headers).toEqual({})
     })
 
+    it('should merge extra headers when provided', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await getRequestFromBackend({
+        endpointPath: '/quotes/123',
+        headers: { Authorization: 'Bearer my-secret-token' }
+      })
+
+      expect(Wreck.get).toHaveBeenCalledWith(`${backendUrl}/quotes/123`, {
+        json: true,
+        headers: { Authorization: 'Bearer my-secret-token' }
+      })
+    })
+
+    it('should not include extra headers when none are provided', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await getRequestFromBackend({ endpointPath: '/quotes/123' })
+
+      const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
+      expect(callArgs.headers).not.toHaveProperty('Authorization')
+    })
+
     it('should log and rethrow errors when the request fails', async () => {
       const error = new Error('Network error')
       vi.mocked(Wreck.get).mockRejectedValue(error)
@@ -74,7 +103,55 @@ describe('nrf-backend service', () => {
         getRequestFromBackend({ endpointPath: '/quotes/123' })
       ).rejects.toThrow('Network error')
 
-      expect(mockLogger.error).toHaveBeenCalledWith(error)
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        error,
+        'GET request to backend failed'
+      )
+    })
+  })
+
+  describe('getQuoteFromBackend', () => {
+    it('should call getRequestFromBackend with the quote endpoint', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({
+        payload: { reference: 'NRF-123' }
+      })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await getQuoteFromBackend({ reference: 'NRF-123' })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        `${backendUrl}/quotes/NRF-123`,
+        expect.objectContaining({ json: true })
+      )
+    })
+
+    it('should include Authorization header when bearerToken is provided', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await getQuoteFromBackend({
+        reference: 'NRF-123',
+        bearerToken: 'my-secret-token'
+      })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        `${backendUrl}/quotes/NRF-123`,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer my-secret-token'
+          })
+        })
+      )
+    })
+
+    it('should not include Authorization header when bearerToken is not provided', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await getQuoteFromBackend({ reference: 'NRF-123' })
+
+      const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
+      expect(callArgs.headers).not.toHaveProperty('Authorization')
     })
   })
 
@@ -137,7 +214,10 @@ describe('nrf-backend service', () => {
         postRequestToBackend({ endpointPath: '/quotes', payload: {} })
       ).rejects.toThrow('Network error')
 
-      expect(mockLogger.error).toHaveBeenCalledWith(error)
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        error,
+        'POST request to backend failed'
+      )
     })
   })
 })
