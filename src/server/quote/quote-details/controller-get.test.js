@@ -11,7 +11,19 @@ const server = setupMswServer()
 
 describe('quoteDetailsGetController', () => {
   const buildH = () => ({
-    view: (template, model) => ({ template, model })
+    view: (template, model) => ({ template, model }),
+    state: vi.fn()
+  })
+
+  // A real human click sends Sec-Fetch-User: ?1; without it the request is
+  // treated as a prefetch/bot (§4.3).
+  const buildRequest = ({ reference, token, state } = {}) => ({
+    params: {
+      reference: reference ?? 'NRF-123456',
+      token: token ?? 'abctoken123'
+    },
+    headers: { 'sec-fetch-user': '?1' },
+    state: state ?? {}
   })
 
   const mockBackend = (reference, body, status = 200) => {
@@ -30,11 +42,10 @@ describe('quoteDetailsGetController', () => {
     }
     mockBackend('NRF-123456', { status: 'valid', quote })
 
-    const request = {
-      params: { reference: 'NRF-123456', token: 'abctoken123' }
-    }
-
-    const result = await quoteDetailsGetController.handler(request, buildH())
+    const result = await quoteDetailsGetController.handler(
+      buildRequest(),
+      buildH()
+    )
 
     expect(result.template).toBe('quote/quote-details/index')
     expect(result.model.pageHeading).toBe(heading)
@@ -53,11 +64,10 @@ describe('quoteDetailsGetController', () => {
     async (status, message) => {
       mockBackend('NRF-123456', { status, quote: null })
 
-      const request = {
-        params: { reference: 'NRF-123456', token: 'abctoken123' }
-      }
-
-      const result = await quoteDetailsGetController.handler(request, buildH())
+      const result = await quoteDetailsGetController.handler(
+        buildRequest(),
+        buildH()
+      )
 
       expect(result.template).toBe('quote/quote-details/error')
       expect(result.model.pageHeading).toBe(message)
@@ -67,12 +77,58 @@ describe('quoteDetailsGetController', () => {
   it('should propagate errors thrown by the backend', async () => {
     mockBackend('NRF-FAIL', { message: 'Server error' }, 500)
 
-    const request = {
-      params: { reference: 'NRF-FAIL', token: 'bad-token' }
-    }
+    const request = buildRequest({ reference: 'NRF-FAIL', token: 'bad-token' })
 
     await expect(
       quoteDetailsGetController.handler(request, buildH())
     ).rejects.toThrow()
+  })
+
+  it('should render the no-data stub for a prefetch request', async () => {
+    let backendCalled = false
+    server.use(
+      http.get(`${backendUrl}/quotes/NRF-123456`, () => {
+        backendCalled = true
+        return HttpResponse.json({ status: 'valid', quote: {} })
+      })
+    )
+
+    const request = buildRequest()
+    request.headers = {} // no Sec-Fetch-User → prefetch
+
+    const result = await quoteDetailsGetController.handler(request, buildH())
+
+    expect(result.template).toBe('quote/quote-details/stub')
+    expect(backendCalled).toBe(false)
+  })
+
+  it('should set the session cookie on a fresh valid arrival', async () => {
+    mockBackend('NRF-123456', {
+      status: 'valid',
+      quote: { reference: 'NRF-123456' }
+    })
+    const h = buildH()
+
+    await quoteDetailsGetController.handler(buildRequest(), h)
+
+    expect(h.state).toHaveBeenCalledWith(
+      'quote_session',
+      expect.objectContaining({ reference: 'NRF-123456' })
+    )
+  })
+
+  it('should not set the cookie again when one is already present', async () => {
+    mockBackend('NRF-123456', {
+      status: 'valid',
+      quote: { reference: 'NRF-123456' }
+    })
+    const h = buildH()
+    const request = buildRequest({
+      state: { quote_session: { reference: 'NRF-123456' } }
+    })
+
+    await quoteDetailsGetController.handler(request, h)
+
+    expect(h.state).not.toHaveBeenCalled()
   })
 })

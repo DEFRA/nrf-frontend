@@ -1,4 +1,6 @@
 import { getByRole } from '@testing-library/dom'
+import { http, HttpResponse } from 'msw'
+import { config } from '../../../config/config.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -7,21 +9,30 @@ import {
   mockGetQuote,
   mockGetQuoteStatus
 } from '../../../test-utils/mock-get-quote.js'
+import { resetQuoteAccessRateLimiter } from './rate-limiter.js'
 
+const backendUrl = config.get('backend').apiUrl
 const mswServer = setupMswServer()
 
 const { reference } = fullQuote
 const token = 'abcdeftoken123'
 const requestUrl = `/quote/${reference}/${token}`
 
+// A real human clicking the email link sends Sec-Fetch-User: ?1 (§4.3);
+// without it the controller treats the request as a prefetch/bot.
+const humanClick = { 'sec-fetch-user': '?1' }
+
 describe('Quote details page', () => {
   const getServer = setupTestServer()
+
+  beforeEach(() => resetQuoteAccessRateLimiter())
 
   it('should render the page heading and title with the NRF reference', async () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     expect(document.title).toBe(
       `Your Nature Restoration Fund levy quote (${reference}) - Nature Restoration Fund - Gov.uk`
@@ -35,7 +46,8 @@ describe('Quote details page', () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toBeInTheDocument()
@@ -68,7 +80,8 @@ describe('Quote details page', () => {
     })
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('Drawn')
@@ -84,7 +97,8 @@ describe('Quote details page', () => {
     })
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('Uploaded')
@@ -94,7 +108,8 @@ describe('Quote details page', () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const changeLinks = document.querySelectorAll(
       '.govuk-summary-list__actions a'
@@ -106,7 +121,8 @@ describe('Quote details page', () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const main = document.querySelector('main')
     const form = main.querySelector('form')
@@ -117,7 +133,8 @@ describe('Quote details page', () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Your Nature Restoration Fund levy quote'
@@ -128,7 +145,8 @@ describe('Quote details page', () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const main = document.querySelector('main')
     expect(
@@ -161,7 +179,8 @@ describe('Quote details page', () => {
     })
     const document = await loadPage({
       requestUrl,
-      server: getServer()
+      server: getServer(),
+      headers: humanClick
     })
     const main = document.querySelector('main')
     const edpsHeading = main.querySelector('h2')
@@ -184,7 +203,8 @@ describe('Quote details page', () => {
         mockGetQuoteStatus(mswServer, reference, status)
         const document = await loadPage({
           requestUrl,
-          server: getServer()
+          server: getServer(),
+          headers: humanClick
         })
 
         expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
@@ -211,11 +231,100 @@ describe('Quote details page', () => {
       mockGetQuote(mswServer)
       const document = await loadPage({
         requestUrl: `/quote/${reference}/abc_def-ABC_123`,
-        server: getServer()
+        server: getServer(),
+        headers: humanClick
       })
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
         'Your Nature Restoration Fund levy quote'
       )
+    })
+  })
+
+  describe('bot / prefetch handling', () => {
+    it('should show a no-data stub without Sec-Fetch-User and not call the backend', async () => {
+      let backendCalled = false
+      mswServer.use(
+        http.get(`${backendUrl}/quotes/${reference}`, () => {
+          backendCalled = true
+          return HttpResponse.json({ status: 'valid', quote: fullQuote })
+        })
+      )
+
+      const document = await loadPage({
+        requestUrl,
+        server: getServer()
+      })
+
+      expect(backendCalled).toBe(false)
+      expect(document.querySelector('meta[name="robots"]')?.content).toBe(
+        'noindex'
+      )
+      expect(
+        document.querySelector('.govuk-summary-list')
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('session cookie', () => {
+    it('should not consume a session on a refresh that carries the session cookie', async () => {
+      const calls = []
+      mswServer.use(
+        http.get(`${backendUrl}/quotes/${reference}`, ({ request }) => {
+          calls.push(new URL(request.url).searchParams.get('redeem'))
+          return HttpResponse.json({ status: 'valid', quote: fullQuote })
+        })
+      )
+
+      const first = await getServer().inject({
+        method: 'GET',
+        url: requestUrl,
+        headers: humanClick
+      })
+      const setCookie = first.headers['set-cookie']?.find((c) =>
+        c.startsWith('quote_session=')
+      )
+      expect(setCookie).toBeDefined()
+
+      const cookieValue = setCookie.split(';')[0]
+      await getServer().inject({
+        method: 'GET',
+        url: requestUrl,
+        headers: { ...humanClick, cookie: cookieValue }
+      })
+
+      // First visit redeems (no flag / redeem omitted); second reads with redeem=false
+      expect(calls[0]).toBeNull()
+      expect(calls[1]).toBe('false')
+    })
+  })
+
+  describe('security headers and rate limiting', () => {
+    it('should set Referrer-Policy: no-referrer so the token is not leaked', async () => {
+      mockGetQuote(mswServer)
+
+      const response = await getServer().inject({
+        method: 'GET',
+        url: requestUrl,
+        headers: humanClick
+      })
+
+      expect(response.headers['referrer-policy']).toBe('no-referrer')
+    })
+
+    it('should return 429 once the per-IP request limit is exceeded', async () => {
+      mockGetQuote(mswServer)
+      const points = config.get('quoteSession.rateLimit.points')
+
+      let last
+      for (let i = 0; i <= points; i++) {
+        last = await getServer().inject({
+          method: 'GET',
+          url: requestUrl,
+          headers: humanClick
+        })
+      }
+
+      expect(last.statusCode).toBe(429)
     })
   })
 })

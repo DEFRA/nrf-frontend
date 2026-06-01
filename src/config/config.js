@@ -6,6 +6,7 @@ import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 
@@ -189,6 +190,43 @@ export const config = convict({
         format: Boolean,
         default: isProduction,
         env: 'SESSION_COOKIE_SECURE'
+      }
+    }
+  },
+  quoteSession: {
+    cookie: {
+      ttl: {
+        doc: 'Quote access (magic link) session cookie ttl',
+        format: Number,
+        default: thirtyMinutesMs,
+        env: 'QUOTE_SESSION_COOKIE_TTL'
+      },
+      password: {
+        doc: 'Quote access session cookie password (32+ characters)',
+        format: String,
+        default: 'the-quote-session-password-must-be-at-least-32-chars',
+        env: 'QUOTE_SESSION_COOKIE_PASSWORD',
+        sensitive: true
+      },
+      secure: {
+        doc: 'set secure flag on the quote access session cookie',
+        format: Boolean,
+        default: isProduction,
+        env: 'QUOTE_SESSION_COOKIE_SECURE'
+      }
+    },
+    rateLimit: {
+      points: {
+        doc: 'Maximum quote access link requests per IP within the duration window',
+        format: Number,
+        default: 60,
+        env: 'QUOTE_ACCESS_RATE_LIMIT_POINTS'
+      },
+      durationSeconds: {
+        doc: 'Quote access rate limit window duration in seconds',
+        format: Number,
+        default: 60,
+        env: 'QUOTE_ACCESS_RATE_LIMIT_DURATION_SECONDS'
       }
     }
   },

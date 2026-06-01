@@ -2,6 +2,8 @@ import joi from 'joi'
 import { quoteDetailsGetController } from './controller-get.js'
 import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './quote-access-status.js'
+import { getQuoteAccessRateLimiter } from './rate-limiter.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 
 export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
@@ -15,11 +17,34 @@ const invalidLinkFailAction = (_request, h) =>
     )
     .takeover()
 
+// DoS protection (§8.3): cap requests per IP for the quote access link.
+const rateLimit = async (request, h) => {
+  try {
+    await getQuoteAccessRateLimiter().consume(request.info.remoteAddress)
+    return h.continue
+  } catch {
+    return h.response().code(statusCodes.tooManyRequests).takeover()
+  }
+}
+
+// Prevent the token leaking via the Referer header to outbound links (§8.1).
+const setReferrerPolicy = (request, h) => {
+  const { response } = request
+  if (!response.isBoom) {
+    response.header('Referrer-Policy', 'no-referrer')
+  }
+  return h.continue
+}
+
 export default [
   {
     method: 'GET',
     path: routePath,
     options: {
+      pre: [{ method: rateLimit }],
+      ext: {
+        onPreResponse: { method: setReferrerPolicy }
+      },
       validate: {
         params: joi.object({
           reference: joi

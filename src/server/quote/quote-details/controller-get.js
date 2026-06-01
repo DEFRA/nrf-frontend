@@ -1,21 +1,42 @@
 import { getQuoteFromBackend } from '../../common/services/nrf-backend.js'
-import getViewModel from './get-view-model.js'
+import getViewModel, { heading } from './get-view-model.js'
 import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './quote-access-status.js'
+import { isPrefetchRequest } from './is-prefetch-request.js'
+import {
+  hasQuoteSessionCookie,
+  setQuoteSessionCookie
+} from './quote-session-cookie.js'
+import { getPageTitle } from '../../common/helpers/page-title.js'
 
 const routeId = 'quote-details'
 
 export const quoteDetailsGetController = {
   async handler(request, h) {
     const { reference, token } = request.params
+
+    if (isPrefetchRequest(request)) {
+      return h.view(`quote/${routeId}/stub`, {
+        pageTitle: getPageTitle(heading),
+        pageHeading: heading
+      })
+    }
+
+    const hasSession = hasQuoteSessionCookie({ request, reference })
+
     const { payload } = await getQuoteFromBackend({
       reference,
-      bearerToken: token
+      bearerToken: token,
+      redeem: !hasSession
     })
     const { status, quote } = payload
 
     if (status !== quoteAccessStatus.valid) {
       return h.view(`quote/${routeId}/error`, getErrorViewModel(status))
+    }
+
+    if (!hasSession) {
+      setQuoteSessionCookie({ h, reference })
     }
 
     const viewModel = { ...getViewModel(reference), quote, reference }
