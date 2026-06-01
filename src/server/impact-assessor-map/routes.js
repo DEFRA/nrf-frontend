@@ -1,20 +1,12 @@
-import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
+import { getMapTile } from '../common/services/ia-map-tile-server.js'
 
 const logger = createLogger()
 const defaultCacheControl = 'no-cache'
 const cacheControlHeader = 'cache-control'
 
 export const routePath = '/impact-assessor-map'
-
-function getImpactAssessorUrl(path, query) {
-  const baseUrl = config.get('map.impactAssessorBaseUrl')
-  const params = new URLSearchParams(query)
-  const base = path ? `${baseUrl}/${path}` : baseUrl
-  const queryString = params.toString()
-  return queryString ? `${base}?${queryString}` : base
-}
 
 function getResponseHeaders(res) {
   return {
@@ -33,9 +25,7 @@ const proxyHandler = {
     const path = request.params.path || ''
 
     try {
-      const upstreamUrl = getImpactAssessorUrl(path, request.query)
-      logger.debug(`Impact assessor proxy request: ${path || '/'}`)
-      const response = await fetch(upstreamUrl, { redirect: 'follow' })
+      const response = await getMapTile(path, request)
 
       if (!response.ok) {
         const body = Buffer.from(await response.arrayBuffer())
@@ -49,9 +39,7 @@ const proxyHandler = {
         .type(contentType)
         .header(cacheControlHeader, cacheControl)
     } catch (err) {
-      logger.error(
-        `Impact assessor proxy error for ${path || '/'}: ${err.message} (${err.code || 'no error code'})`
-      )
+      logger.error(err, `Impact assessor proxy error for ${path || '/'}`)
       return h
         .response('Impact assessor tile request failed')
         .code(statusCodes.badGateway)

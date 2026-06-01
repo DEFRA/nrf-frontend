@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
 import { getUploadStatus, initiateUpload } from './uploader.js'
 import { config } from '../../../config/config.js'
@@ -17,11 +17,13 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-describe('uploader service', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
+vi.mock('@defra/hapi-tracing', () => ({
+  withTraceId: vi.fn((_, headers = {}) => headers)
+}))
 
+import { withTraceId } from '@defra/hapi-tracing'
+
+describe('uploader service', () => {
   describe('initiateUpload', () => {
     it('should return uploadId and uploadUrl on successful response', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({
@@ -51,6 +53,42 @@ describe('uploader service', () => {
       expect(result).toEqual({
         uploadId: 'test-upload-id',
         uploadUrl: '/upload-and-scan/test-upload-id'
+      })
+    })
+
+    it('should call withTraceId with the tracing header name and existing headers', async () => {
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
+      })
+
+      await initiateUpload({
+        redirect: '/quote/upload-received',
+        s3Bucket: 'test-bucket'
+      })
+
+      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id', {
+        'Content-Type': 'application/json'
+      })
+    })
+
+    it('should include tracing header returned by withTraceId', async () => {
+      vi.mocked(withTraceId).mockReturnValue({
+        'Content-Type': 'application/json',
+        'x-cdp-request-id': 'trace-abc-123'
+      })
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
+      })
+
+      await initiateUpload({
+        redirect: '/quote/upload-received',
+        s3Bucket: 'test-bucket'
+      })
+
+      const callArgs = vi.mocked(Wreck.post).mock.calls[0][1]
+      expect(callArgs.headers).toEqual({
+        'Content-Type': 'application/json',
+        'x-cdp-request-id': 'trace-abc-123'
       })
     })
 

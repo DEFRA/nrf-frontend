@@ -84,6 +84,7 @@ describe('boundary-map init', () => {
     document.body.innerHTML = ''
     delete globalThis.defra
     vi.resetModules()
+    globalThis.fetch = vi.fn().mockResolvedValue({})
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     vi.spyOn(document, 'addEventListener').mockImplementation(
@@ -112,15 +113,24 @@ describe('boundary-map init', () => {
   it('does nothing when no map element exists', async () => {
     await loadModule()
     expect(document.getElementById('boundary-map')).toBeNull()
-    expect(warnSpy).toHaveBeenCalledWith('Boundary map element not found', '')
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('Boundary map element not found')
+      })
+    )
   })
 
   it('does nothing when geojson is invalid JSON', async () => {
     createMapElement('not-valid-json')
     await loadModule()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to parse boundary GeoJSON',
-      expect.any(SyntaxError)
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('Failed to parse boundary GeoJSON')
+      })
     )
   })
 
@@ -144,9 +154,14 @@ describe('boundary-map init', () => {
   it('does nothing when defra global is undefined', async () => {
     createMapElement(validGeojson)
     await loadModule()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'DEFRA interactive map dependencies not available',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'DEFRA interactive map dependencies not available'
+        )
+      })
     )
   })
 
@@ -155,9 +170,14 @@ describe('boundary-map init', () => {
     globalThis.defra = { maplibreProvider: vi.fn() }
     await loadModule()
     expect(globalThis.defra.maplibreProvider).not.toHaveBeenCalled()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'DEFRA interactive map dependencies not available',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'DEFRA interactive map dependencies not available'
+        )
+      })
     )
   })
 
@@ -169,9 +189,14 @@ describe('boundary-map init', () => {
     }
     await loadModule()
     expect(constructorSpy).not.toHaveBeenCalled()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'DEFRA interactive map dependencies not available',
-      ''
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      '/api/browser-logs',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining(
+          'DEFRA interactive map dependencies not available'
+        )
+      })
     )
   })
 
@@ -340,7 +365,7 @@ describe('boundary-map init', () => {
     expect(mapInstance.fitBounds).not.toHaveBeenCalled()
   })
 
-  it('registers an error handler on the map instance', async () => {
+  it('suppresses map tile errors without sending browser logs', async () => {
     createMapElement(validGeojson)
     const mapInstance = createMockMapInstance(true)
     const mockDefra = createMockDefra(mapInstance)
@@ -352,27 +377,9 @@ describe('boundary-map init', () => {
     const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
     expect(errorCall).toBeTruthy()
 
-    // Trigger the error handler with an error object
+    const callsBefore = globalThis.fetch.mock.calls.length
     errorCall[1]({ error: new Error('tile load failed') })
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Boundary map error',
-      expect.any(Error)
-    )
-  })
-
-  it('error handler falls back to the event itself when err.error is missing', async () => {
-    createMapElement(validGeojson)
-    const mapInstance = createMockMapInstance(true)
-    const mockDefra = createMockDefra(mapInstance)
-    globalThis.defra = mockDefra
-
-    await loadModule()
-    mockDefra._triggerReady()
-
-    const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
-    const errEvent = { message: 'something went wrong' }
-    errorCall[1](errEvent)
-    expect(warnSpy).toHaveBeenCalledWith('Boundary map error', errEvent)
+    expect(globalThis.fetch.mock.calls.length).toBe(callsBefore)
   })
 
   it('adds fill and line layers with correct paint properties', async () => {

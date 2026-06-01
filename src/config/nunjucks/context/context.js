@@ -18,6 +18,14 @@ const isProduction = config.get('isProduction')
 let webpackManifest
 let webpackManifestMtimeMs
 
+function isE2eProd(request) {
+  try {
+    return request?.yar?.get('isE2eProd') === true
+  } catch {
+    return false
+  }
+}
+
 export function context(request) {
   const shouldReload =
     !webpackManifest ||
@@ -48,7 +56,8 @@ export function context(request) {
     navigation: buildNavigation(request),
     isAuthenticated,
     user,
-    analyticsEnabled: areAnalyticsCookiesAccepted(request),
+    analyticsEnabled:
+      !isE2eProd(request) && areAnalyticsCookiesAccepted(request),
     gtmId: config.get('gtmId'),
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]

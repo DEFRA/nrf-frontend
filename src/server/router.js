@@ -11,6 +11,7 @@ import { osBaseMap } from './os-base-map/index.js'
 import { osNamesSearch } from './os-names-search/index.js'
 import { impactAssessorMap } from './impact-assessor-map/index.js'
 import { cookies } from './cookies/index.js'
+import { browserLogs } from './browser-logs/index.js'
 
 export const router = {
   plugin: {
@@ -30,7 +31,8 @@ export const router = {
         quote,
         osBaseMap,
         osNamesSearch,
-        impactAssessorMap
+        impactAssessorMap,
+        browserLogs
       ])
 
       // Static assets

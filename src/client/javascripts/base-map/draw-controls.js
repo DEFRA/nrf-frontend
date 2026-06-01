@@ -1,4 +1,4 @@
-import { logWarning } from './helpers.js'
+import { logger } from '../logger/index.js'
 import {
   DRAW_ACTION_DELETE,
   DRAW_ACTION_DRAW,
@@ -55,10 +55,14 @@ function runDrawPanelAction({
   drawPlugin,
   drawState,
   hideDrawPanel,
-  refreshButtonState
+  refreshButtonState,
+  focusViewport
 }) {
   if (!drawPlugin) {
-    logWarning('Draw plugin not available, action ignored')
+    logger.info(
+      { action: 'plugin-unavailable' },
+      'Draw plugin not available, action ignored'
+    )
     return
   }
 
@@ -68,6 +72,7 @@ function runDrawPanelAction({
     drawPlugin.newPolygon?.(featureId)
     drawState.pendingFeatureId = featureId
     refreshButtonState()
+    focusViewport()
     return
   }
 
@@ -78,6 +83,7 @@ function runDrawPanelAction({
   if (action === DRAW_ACTION_EDIT) {
     hideDrawPanel()
     drawPlugin.editFeature?.(drawState.featureId)
+    focusViewport()
     return
   }
 
@@ -85,6 +91,7 @@ function runDrawPanelAction({
     drawPlugin.deleteFeature?.([drawState.featureId])
     drawState.featureId = null
     refreshButtonState()
+    focusViewport()
   }
 }
 
@@ -185,6 +192,8 @@ function wireDrawPanelButtons({
   let hasHydratedInitialFeature = false
   const hideDrawPanel = () => map.hidePanel?.(DRAW_PANEL_ID)
   const showDrawPanel = () => map.showPanel?.(DRAW_PANEL_ID)
+  const focusViewport = () =>
+    document.getElementById(`${mapElementId}-viewport`)?.focus()
 
   const refreshButtonState = () =>
     refreshDrawPanelButtons(mapElementId, drawState)
@@ -195,7 +204,8 @@ function wireDrawPanelButtons({
       drawPlugin,
       drawState,
       hideDrawPanel,
-      refreshButtonState
+      refreshButtonState,
+      focusViewport
     })
 
   registerDrawPanelClickHandler({ mapElementId, runAction })

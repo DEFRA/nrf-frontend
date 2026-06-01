@@ -1,4 +1,4 @@
-import { logWarning } from './helpers.js'
+import { logger } from '../logger/index.js'
 
 const FEATURE_SOURCE_ID = 'feature'
 const BOUNDARY_SOURCE_ID = 'boundary'
@@ -199,7 +199,7 @@ export async function getLayers({
 
     return []
   } catch (err) {
-    logWarning('Failed to load map layers', err)
+    logger.error(err, 'Failed to load map layers')
     return []
   }
 }

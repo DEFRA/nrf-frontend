@@ -106,6 +106,28 @@ export const config = convict({
       default: isProduction
         ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
         : []
+    },
+    browserLogging: {
+      enabled: {
+        doc: 'Is browser logging enabled',
+        format: Boolean,
+        default: process.env.NODE_ENV !== 'test',
+        env: 'BROWSER_LOGGING_ENABLED'
+      },
+      rateLimit: {
+        points: {
+          doc: 'Maximum browser log requests per IP/session within the duration window',
+          format: Number,
+          default: 10,
+          env: 'BROWSER_LOGS_RATE_LIMIT_POINTS'
+        },
+        durationSeconds: {
+          doc: 'Rate limit window duration in seconds',
+          format: Number,
+          default: 60,
+          env: 'BROWSER_LOGS_RATE_LIMIT_DURATION_SECONDS'
+        }
+      }
     }
   },
   httpProxy: {
@@ -356,6 +378,21 @@ export const config = convict({
     nullable: true,
     default: null,
     env: 'GTM_ID'
+  },
+  cdpEnvironment: {
+    doc: 'The CDP environment the app is running in',
+    format: [
+      'local',
+      'infra-dev',
+      'management',
+      'dev',
+      'test',
+      'perf-test',
+      'ext-test',
+      'prod'
+    ],
+    default: 'local',
+    env: 'ENVIRONMENT'
   },
   cdpUploader: {
     url: {

@@ -243,7 +243,7 @@ describe('base-map features', () => {
     })
 
     it('returns [] and logs warning when fetch fails', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      globalThis.fetch = vi.fn().mockResolvedValue({})
       const fetchImpl = vi.fn().mockRejectedValue(new Error('network'))
 
       const result = await getLayers({
@@ -252,11 +252,13 @@ describe('base-map features', () => {
       })
 
       expect(result).toEqual([])
-      expect(warnSpy).toHaveBeenCalledWith(
-        'Failed to load map layers',
-        expect.any(Error)
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        '/api/browser-logs',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('Failed to load map layers')
+        })
       )
-      warnSpy.mockRestore()
     })
 
     it('returns [] when layersUrl is missing', async () => {
@@ -306,7 +308,7 @@ describe('base-map features', () => {
     })
 
     it('logs warning and returns [] when response is not ok', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      globalThis.fetch = vi.fn().mockResolvedValue({})
       const fetchImpl = vi.fn().mockResolvedValue({
         ok: false,
         status: 500,
@@ -319,11 +321,13 @@ describe('base-map features', () => {
       })
 
       expect(result).toEqual([])
-      expect(warnSpy).toHaveBeenCalledWith(
-        'Failed to load map layers',
-        expect.any(Error)
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        '/api/browser-logs',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('Failed to load map layers')
+        })
       )
-      warnSpy.mockRestore()
     })
 
     it('does not include empty filters in query string', async () => {

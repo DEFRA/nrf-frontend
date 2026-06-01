@@ -1,3 +1,4 @@
+import { logger } from '../logger/index.js'
 import { BOUNDARY_ACTION_SAVE, NOT_AVAILABLE_TEXT } from './constants.js'
 import {
   formatArea,
@@ -54,7 +55,7 @@ async function submitSaveAndContinue(
       body: JSON.stringify({ boundaryGeojson })
     })
   } catch (err) {
-    console.error(`submitSaveAndContinue error: ${err.message}`)
+    logger.error(err, 'submitSaveAndContinue error')
   }
 
   if (response?.redirected) {
