@@ -3,7 +3,7 @@ import { quoteDetailsGetController } from './controller-get.js'
 
 export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
-export const tokenPattern = /[a-zA-Z0-9-]+/
+export const tokenPattern = /[a-zA-Z0-9_-]+/
 
 export default [
   {
