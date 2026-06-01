@@ -206,5 +206,16 @@ describe('Quote details page', () => {
         'The link is invalid'
       )
     })
+
+    it('should accept a base64url token containing underscores and hyphens', async () => {
+      mockGetQuote(mswServer)
+      const document = await loadPage({
+        requestUrl: `/quote/${reference}/abc_def-ABC_123`,
+        server: getServer()
+      })
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'Your Nature Restoration Fund levy quote'
+      )
+    })
   })
 })

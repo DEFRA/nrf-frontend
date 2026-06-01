@@ -5,7 +5,7 @@ import { quoteAccessStatus } from './quote-access-status.js'
 
 export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
-export const tokenPattern = /[a-zA-Z0-9-]+/
+export const tokenPattern = /[a-zA-Z0-9_-]+/
 
 const invalidLinkFailAction = (_request, h) =>
   h
