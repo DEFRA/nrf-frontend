@@ -1,26 +1,22 @@
 import { getByRole } from '@testing-library/dom'
-import { http, HttpResponse } from 'msw'
-import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-
-const backendUrl = config.get('backend').apiUrl
+import { mockGetQuote } from '../../../test-utils/mock-get-quote.js'
 
 const mswServer = setupMswServer()
+
+const reference = 'NRF-123456'
+const requestUrl = `${routePath}?reference=${reference}`
 
 describe('Confirmation page', () => {
   const getServer = setupTestServer()
 
   it('should render the page heading and title', async () => {
-    mswServer.use(
-      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
-        HttpResponse.json({ reference: 'NRF-123456' })
-      )
-    )
+    mockGetQuote(mswServer, { reference })
     const document = await loadPage({
-      requestUrl: `${routePath}?reference=NRF-123456`,
+      requestUrl,
       server: getServer()
     })
     expect(document.title).toBe(
@@ -32,13 +28,9 @@ describe('Confirmation page', () => {
   })
 
   it('should show the reference number', async () => {
-    mswServer.use(
-      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
-        HttpResponse.json({ reference: 'NRF-123456' })
-      )
-    )
+    mockGetQuote(mswServer, { reference })
     const document = await loadPage({
-      requestUrl: `${routePath}?reference=NRF-123456`,
+      requestUrl,
       server: getServer()
     })
     expect(getByRole(document, 'main')).toHaveTextContent(

@@ -83,6 +83,16 @@ describe('checkForValidQuoteSession', () => {
     expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 
+  it('continues without session check for quote details page', () => {
+    const request = makeRequest({ path: '/quote/NRF-123456/abc123token' })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+  })
+
   it('continues without session check for non-GET requests', () => {
     const request = makeRequest({ path: '/quote/residential', method: 'post' })
     const h = makeH()

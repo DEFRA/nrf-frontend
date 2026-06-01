@@ -1,0 +1,84 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {{ govukSummaryList({
+          classes: "govuk-!-margin-bottom-9",
+          rows: [
+            {
+              key: { text: "NRF reference" },
+              value: { text: reference }
+            },
+            {
+              key: { text: "Red line boundary" },
+              value: {
+                text:
+                  quote.boundary.filename
+                    if quote.boundary.userInputType === 'upload' and quote.boundary.filename
+                    else ('Uploaded' if quote.boundary.userInputType === 'upload' else 'Drawn')
+              }
+            } if quote.boundary.userInputType,
+            {
+              key: { text: "Development types" },
+              value: {
+                html: "<ul class=\"govuk-list\">" +
+                  ("<li>Housing</li>" if quote.development.types and "housing" in quote.development.types else "") +
+                  ("<li>Other residential</li>" if quote.development.types and "other-residential" in quote.development.types else "") +
+                  "</ul>"
+              }
+            } if quote.development.types,
+            {
+              key: { text: "Number of residential units" },
+              value: { text: quote.development.residentialBuildingCount }
+            } if quote.development.residentialBuildingCount,
+            {
+              key: { text: "Maximum number of people" },
+              value: { text: quote.development.peopleCount }
+            } if quote.development.peopleCount,
+            {
+              key: { text: "Waste water treatment works" },
+              value: { text: quote.wasteWaterTreatmentWorksName or "I don't know yet" }
+            } if quote.wasteWaterTreatmentWorksId is defined,
+            {
+              key: { text: "Email address" },
+              value: { text: quote.email.address }
+            } if quote.email.address,
+            {
+              key: { text: "Quote amount" },
+              value: { text: quote.levyGbp }
+            } if quote.levyGbp
+          ]
+        }) }}
+
+        {% if quote.edps and quote.edps.length %}
+          <h2 class="govuk-heading-m">EDPs</h2>
+
+          {% for edp in quote.edps %}
+            {{ govukSummaryList({
+              card: {
+                title: {
+                  text: edp.edpName,
+                  headingLevel: 3
+                }
+              },
+              rows: [
+                {
+                  key: { text: "Nitrogen" },
+                  value: { text: edp.impact.nitrogenTotal.amount + " " + edp.impact.nitrogenTotal.unit }
+                } if edp.impact and edp.impact.nitrogenTotal,
+                {
+                  key: { text: "Phosphorus" },
+                  value: { text: edp.impact.phosphorusTotal.amount + " " + edp.impact.phosphorusTotal.unit }
+                } if edp.impact and edp.impact.phosphorusTotal
+              ]
+            }) }}
+          {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

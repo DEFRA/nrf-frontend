@@ -14,6 +14,7 @@ import routesPeopleCount from './people-count/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
 import routesWasteWater from './waste-water/routes.js'
+import routesQuoteDetails from './quote-details/routes.js'
 import { checkForValidQuoteSession } from './helpers/is-quote-session-in-progress/index.js'
 
 /**
@@ -55,7 +56,8 @@ export const quote = {
         ...routesConfirmation,
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
-        ...routesWasteWater
+        ...routesWasteWater,
+        ...routesQuoteDetails
       ])
     }
   }
