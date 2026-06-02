@@ -14,8 +14,12 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 
 // Lower the quote details rate limit under test so the limit test trips after
-// a handful of requests instead of 60+, keeping the suite fast.
-const quoteDetailsRateLimitPoints = isTest ? 5 : 60
+// a handful of requests instead of the production limit, keeping the suite fast.
+const quoteDetailsRateLimitTest = 5
+const quoteDetailsRateLimitDefault = 60
+const quoteDetailsRateLimitPoints = isTest
+  ? quoteDetailsRateLimitTest
+  : quoteDetailsRateLimitDefault
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
