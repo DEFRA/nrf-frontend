@@ -29,10 +29,10 @@ export const quoteDetailsGetController = {
       bearerToken: token,
       redeem: !hasSession
     })
-    const { status, quote } = payload
+    const { accessStatus, quote } = payload
 
-    if (status !== quoteAccessStatus.valid) {
-      return h.view(`quote/${routeId}/error`, getErrorViewModel(status))
+    if (accessStatus !== quoteAccessStatus.valid) {
+      return h.view(`quote/${routeId}/error`, getErrorViewModel(accessStatus))
     }
 
     if (!hasSession) {

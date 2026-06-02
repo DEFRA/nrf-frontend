@@ -5,20 +5,20 @@ import { fullQuote } from './fixtures/quote.js'
 export const mockGetQuote = (
   mswServer,
   quoteData = fullQuote,
-  status = 'valid'
+  accessStatus = 'valid'
 ) => {
   mswServer.use(
     http.get(
       `${config.get('backend').apiUrl}/quotes/${quoteData.reference}`,
-      () => HttpResponse.json({ status, quote: quoteData })
+      () => HttpResponse.json({ accessStatus, quote: quoteData })
     )
   )
 }
 
-export const mockGetQuoteStatus = (mswServer, reference, status) => {
+export const mockGetQuoteStatus = (mswServer, reference, accessStatus) => {
   mswServer.use(
     http.get(`${config.get('backend').apiUrl}/quotes/${reference}`, () =>
-      HttpResponse.json({ status, quote: null })
+      HttpResponse.json({ accessStatus, quote: null })
     )
   )
 }

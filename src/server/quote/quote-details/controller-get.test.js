@@ -43,7 +43,7 @@ describe('quoteDetailsGetController', () => {
       email: { address: 'test@example.com' },
       boundary: { userInputType: 'upload', filename: null }
     }
-    mockBackend('NRF-123456', { status: 'valid', quote })
+    mockBackend('NRF-123456', { accessStatus: 'valid', quote })
 
     const result = await quoteDetailsGetController.handler(
       buildRequest(),
@@ -65,7 +65,7 @@ describe('quoteDetailsGetController', () => {
   ])(
     'should render the error view with the right message for status %s',
     async (status, message) => {
-      mockBackend('NRF-123456', { status, quote: null })
+      mockBackend('NRF-123456', { accessStatus: status, quote: null })
 
       const result = await quoteDetailsGetController.handler(
         buildRequest(),
@@ -92,7 +92,7 @@ describe('quoteDetailsGetController', () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRF-123456`, () => {
         backendCalled = true
-        return HttpResponse.json({ status: 'valid', quote: {} })
+        return HttpResponse.json({ accessStatus: 'valid', quote: {} })
       })
     )
 
@@ -106,7 +106,7 @@ describe('quoteDetailsGetController', () => {
 
   it('should set the session cookie on a fresh valid arrival', async () => {
     mockBackend('NRF-123456', {
-      status: 'valid',
+      accessStatus: 'valid',
       quote: { reference: 'NRF-123456' }
     })
     const h = buildH()
@@ -122,7 +122,7 @@ describe('quoteDetailsGetController', () => {
 
   it('should not set the cookie again when one is already present', async () => {
     mockBackend('NRF-123456', {
-      status: 'valid',
+      accessStatus: 'valid',
       quote: { reference: 'NRF-123456' }
     })
     const h = buildH()

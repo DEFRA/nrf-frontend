@@ -250,7 +250,7 @@ describe('Quote details page', () => {
       mswServer.use(
         http.get(`${backendUrl}/quotes/${reference}`, () => {
           backendCalled = true
-          return HttpResponse.json({ status: 'valid', quote: fullQuote })
+          return HttpResponse.json({ accessStatus: 'valid', quote: fullQuote })
         })
       )
 
@@ -291,7 +291,7 @@ describe('Quote details page', () => {
       mswServer.use(
         http.get(`${backendUrl}/quotes/${reference}`, ({ request }) => {
           calls.push(new URL(request.url).searchParams.get('redeem'))
-          return HttpResponse.json({ status: 'valid', quote: fullQuote })
+          return HttpResponse.json({ accessStatus: 'valid', quote: fullQuote })
         })
       )
 
