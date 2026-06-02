@@ -56,7 +56,7 @@ describe('uploader service', () => {
       })
     })
 
-    it('should call withTraceId with the tracing header name and existing headers', async () => {
+    it('should call withTraceId with the tracing header name', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
       })
@@ -66,9 +66,7 @@ describe('uploader service', () => {
         s3Bucket: 'test-bucket'
       })
 
-      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id', {
-        'Content-Type': 'application/json'
-      })
+      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
     })
 
     it('should include tracing header returned by withTraceId', async () => {
@@ -90,6 +88,25 @@ describe('uploader service', () => {
         'Content-Type': 'application/json',
         'x-cdp-request-id': 'trace-abc-123'
       })
+    })
+
+    it('should include the x-api-key header when backend.apiKey is set', async () => {
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
+      })
+      config.set('backend.apiKey', 'secret-key')
+
+      try {
+        await initiateUpload({
+          redirect: '/quote/upload-received',
+          s3Bucket: 'test-bucket'
+        })
+      } finally {
+        config.set('backend.apiKey', '')
+      }
+
+      const callArgs = vi.mocked(Wreck.post).mock.calls[0][1]
+      expect(callArgs.headers['x-api-key']).toBe('secret-key')
     })
 
     it('should prepend cdpUploader.url when set (local dev)', async () => {
@@ -201,9 +218,25 @@ describe('uploader service', () => {
 
       expect(Wreck.get).toHaveBeenCalledWith(
         `${backendUrl}/upload/test-upload-id/status`,
-        { json: true }
+        { headers: {}, json: true }
       )
       expect(result).toEqual({ uploadStatus: 'pending' })
+    })
+
+    it('should include the x-api-key header when backend.apiKey is set', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({
+        payload: { uploadStatus: 'pending' }
+      })
+      config.set('backend.apiKey', 'secret-key')
+
+      try {
+        await getUploadStatus('test-upload-id')
+      } finally {
+        config.set('backend.apiKey', '')
+      }
+
+      const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
+      expect(callArgs.headers['x-api-key']).toBe('secret-key')
     })
 
     it('should return error status when request fails', async () => {
