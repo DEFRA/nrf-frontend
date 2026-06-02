@@ -5,6 +5,8 @@ vi.mock('@defra/hapi-tracing', () => ({
   withTraceId: vi.fn()
 }))
 
+const mockApiKeyRef = vi.hoisted(() => ({ current: '' }))
+
 vi.mock('../../../config/config.js', () => ({
   config: {
     get: vi.fn((key) => {
@@ -13,6 +15,9 @@ vi.mock('../../../config/config.js', () => ({
       }
       if (key === 'tracing.header') {
         return 'x-cdp-request-id'
+      }
+      if (key === 'map.impactAssessorApiKey') {
+        return mockApiKeyRef.current
       }
       return null
     })
@@ -40,6 +45,7 @@ describe('getMapTile', () => {
   beforeEach(() => {
     fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
     vi.mocked(withTraceId).mockReturnValue({})
+    mockApiKeyRef.current = ''
   })
 
   it('fetches the upstream URL constructed from path and query', async () => {
@@ -104,5 +110,18 @@ describe('getMapTile', () => {
     const result = await getMapTile('tiles/7/1/2.mvt', createMockRequest())
 
     expect(result).toBe(mockResponse)
+  })
+
+  it('includes the x-api-key header when map.impactAssessorApiKey is set', async () => {
+    mockApiKeyRef.current = 'secret-key'
+
+    await getMapTile('tiles/7/1/2.mvt', createMockRequest())
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: { 'x-api-key': 'secret-key' }
+      })
+    )
   })
 })

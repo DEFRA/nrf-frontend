@@ -1,7 +1,7 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
-import { withTraceId } from '@defra/hapi-tracing'
+import { backendHeaders } from './nrf-backend.js'
 
 const logger = createLogger()
 
@@ -44,9 +44,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
         s3Path,
         metadata
       }),
-      headers: withTraceId(config.get('tracing.header'), {
-        'Content-Type': 'application/json'
-      }),
+      headers: backendHeaders({ 'Content-Type': 'application/json' }),
       json: true
     })
 
@@ -79,7 +77,10 @@ export async function getUploadStatus(uploadId) {
   logger.info({ url, uploadId }, 'Fetching upload status')
 
   try {
-    const { payload } = await Wreck.get(url, { json: true })
+    const { payload } = await Wreck.get(url, {
+      headers: backendHeaders(),
+      json: true
+    })
 
     return {
       uploadStatus: payload.uploadStatus ?? 'unknown'
