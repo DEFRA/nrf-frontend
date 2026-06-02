@@ -304,6 +304,8 @@ describe('Quote details page', () => {
         c.startsWith('quote_details_session=')
       )
       expect(setCookie).toBeDefined()
+      // Scoped to this quote's own route, not the whole /quote namespace
+      expect(setCookie).toContain(`Path=/quote/${reference}`)
 
       const cookieValue = setCookie.split(';')[0]
       await getServer().inject({

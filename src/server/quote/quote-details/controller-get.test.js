@@ -115,7 +115,8 @@ describe('quoteDetailsGetController', () => {
 
     expect(h.state).toHaveBeenCalledWith(
       'quote_details_session',
-      expect.objectContaining({ reference: 'NRF-123456' })
+      expect.objectContaining({ reference: 'NRF-123456' }),
+      expect.objectContaining({ path: '/quote/NRF-123456' })
     )
   })
 
