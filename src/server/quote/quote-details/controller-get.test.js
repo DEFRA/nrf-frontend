@@ -16,7 +16,7 @@ describe('quoteDetailsGetController', () => {
   })
 
   // A normal browser User-Agent is treated as a human visit; a known bot/
-  // previewer UA triggers the prefetch stub (§4.3).
+  // previewer UA triggers the prefetch stub.
   const browserUserAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
 

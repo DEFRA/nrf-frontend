@@ -19,7 +19,7 @@ const token = 'abcdeftoken123'
 const requestUrl = `/quote/${reference}/${token}`
 
 // A normal browser User-Agent is treated as a human visit; a known bot/
-// previewer UA triggers the prefetch stub (§4.3). Safari sends no Sec-Fetch
+// previewer UA triggers the prefetch stub. Safari sends no Sec-Fetch
 // headers, so detection is by UA, not by Sec-Fetch-User.
 const humanClick = {
   'user-agent':

@@ -17,7 +17,7 @@ const invalidLinkFailAction = (_request, h) =>
     )
     .takeover()
 
-// DoS protection (§8.3): cap requests per IP for the quote access link.
+// DoS protection: cap requests per IP for the quote access link.
 const rateLimit = async (request, h) => {
   try {
     await getQuoteAccessRateLimiter().consume(request.info.remoteAddress)
@@ -27,7 +27,7 @@ const rateLimit = async (request, h) => {
   }
 }
 
-// Prevent the token leaking via the Referer header to outbound links (§8.1).
+// Prevent the token leaking via the Referer header to outbound links.
 const setReferrerPolicy = (request, h) => {
   const { response } = request
   if (!response.isBoom) {

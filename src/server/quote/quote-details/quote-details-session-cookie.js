@@ -5,7 +5,7 @@ export const QUOTE_DETAILS_SESSION_COOKIE = 'quote_details_session'
 const cookiePath = (reference) => `/quote/${reference}`
 
 /**
- * Registers the quote details access session cookie (tech spec §4.2).
+ * Registers the quote details access session cookie.
  *
  * Distinct from the in-journey quote session (Yar, see quote-session-cache):
  * this cookie governs viewing a quote via a magic link. Iron-encoded (signed +
