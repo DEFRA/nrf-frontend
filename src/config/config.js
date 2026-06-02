@@ -12,6 +12,10 @@ const oneWeekMs = 604800000
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
+
+// Lower the quote access rate limit under test so the limit test trips after
+// a handful of requests instead of 60+, keeping the suite fast.
+const quoteAccessRateLimitPoints = isTest ? 5 : 60
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
@@ -219,7 +223,7 @@ export const config = convict({
       points: {
         doc: 'Maximum quote access link requests per IP within the duration window',
         format: Number,
-        default: isTest ? 5 : 60,
+        default: quoteAccessRateLimitPoints,
         env: 'QUOTE_ACCESS_RATE_LIMIT_POINTS'
       },
       durationSeconds: {
