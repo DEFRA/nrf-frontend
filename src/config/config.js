@@ -15,6 +15,17 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
 
+/**
+ * Convict `format` validator that fails closed at startup when a secret
+ * is unset in production. Allows empty values in dev/test so local stacks
+ * without auth wired (e.g. paired with stale upstream images) still boot.
+ */
+const requireInProduction = (envName) => (val) => {
+  if (isProduction && !val) {
+    throw new Error(`${envName} is required in production`)
+  }
+}
+
 export const config = convict({
   serviceVersion: {
     doc: 'The service version, this variable is injected into your docker container in CDP environments',
@@ -334,7 +345,7 @@ export const config = convict({
     },
     apiKey: {
       doc: 'Service-to-service x-api-key value sent on every outbound call to the backend',
-      format: String,
+      format: requireInProduction('BACKEND_API_KEY'),
       default: '',
       sensitive: true,
       env: 'BACKEND_API_KEY'
@@ -367,7 +378,7 @@ export const config = convict({
     },
     impactAssessorApiKey: {
       doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor (e.g. map tile proxy).',
-      format: String,
+      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
       default: '',
       sensitive: true,
       env: 'IMPACT_ASSESSOR_API_KEY'

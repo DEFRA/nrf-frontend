@@ -12,7 +12,10 @@ const logger = createLogger()
  * @returns {object}
  */
 export const backendHeaders = (extraHeaders) => {
-  const headers = withTraceId(config.get('tracing.header'), extraHeaders)
+  const headers = {
+    ...withTraceId(config.get('tracing.header')),
+    ...extraHeaders
+  }
   const apiKey = config.get('backend.apiKey')
   if (apiKey) {
     headers['x-api-key'] = apiKey
@@ -26,13 +29,9 @@ export const getRequestFromBackend = async ({
 }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
-    const headers = {
-      ...withTraceId(config.get('tracing.header')),
-      ...extraHeaders
-    }
     const response = await Wreck.get(url, {
       json: true,
-      headers
+      headers: backendHeaders(extraHeaders)
     })
     return response
   } catch (error) {

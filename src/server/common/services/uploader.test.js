@@ -56,7 +56,7 @@ describe('uploader service', () => {
       })
     })
 
-    it('should call withTraceId with the tracing header name and existing headers', async () => {
+    it('should call withTraceId with the tracing header name', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
       })
@@ -66,9 +66,7 @@ describe('uploader service', () => {
         s3Bucket: 'test-bucket'
       })
 
-      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id', {
-        'Content-Type': 'application/json'
-      })
+      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
     })
 
     it('should include tracing header returned by withTraceId', async () => {
