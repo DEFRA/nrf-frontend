@@ -13,9 +13,9 @@ const oneWeekMs = 604800000
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 
-// Lower the quote access rate limit under test so the limit test trips after
+// Lower the quote details rate limit under test so the limit test trips after
 // a handful of requests instead of 60+, keeping the suite fast.
-const quoteAccessRateLimitPoints = isTest ? 5 : 60
+const quoteDetailsRateLimitPoints = isTest ? 5 : 60
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
@@ -197,40 +197,40 @@ export const config = convict({
       }
     }
   },
-  quoteSession: {
+  quoteDetailsSession: {
     cookie: {
       ttl: {
-        doc: 'Quote access (magic link) session cookie ttl',
+        doc: 'Quote details (magic link) session cookie ttl',
         format: Number,
         default: thirtyMinutesMs,
-        env: 'QUOTE_SESSION_COOKIE_TTL'
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_TTL'
       },
       password: {
-        doc: 'Quote access session cookie password (32+ characters)',
+        doc: 'Quote details session cookie password (32+ characters)',
         format: String,
-        default: 'the-quote-session-password-must-be-at-least-32-chars',
-        env: 'QUOTE_SESSION_COOKIE_PASSWORD',
+        default: 'the-quote-details-session-password-at-least-32-chars',
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_PASSWORD',
         sensitive: true
       },
       secure: {
-        doc: 'set secure flag on the quote access session cookie',
+        doc: 'set secure flag on the quote details session cookie',
         format: Boolean,
         default: isProduction,
-        env: 'QUOTE_SESSION_COOKIE_SECURE'
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_SECURE'
       }
     },
     rateLimit: {
       points: {
-        doc: 'Maximum quote access link requests per IP within the duration window',
+        doc: 'Maximum quote details link requests per IP within the duration window',
         format: Number,
-        default: quoteAccessRateLimitPoints,
-        env: 'QUOTE_ACCESS_RATE_LIMIT_POINTS'
+        default: quoteDetailsRateLimitPoints,
+        env: 'QUOTE_DETAILS_RATE_LIMIT_POINTS'
       },
       durationSeconds: {
-        doc: 'Quote access rate limit window duration in seconds',
+        doc: 'Quote details rate limit window duration in seconds',
         format: Number,
         default: 60,
-        env: 'QUOTE_ACCESS_RATE_LIMIT_DURATION_SECONDS'
+        env: 'QUOTE_DETAILS_RATE_LIMIT_DURATION_SECONDS'
       }
     }
   },

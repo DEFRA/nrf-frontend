@@ -301,7 +301,7 @@ describe('Quote details page', () => {
         headers: humanClick
       })
       const setCookie = first.headers['set-cookie']?.find((c) =>
-        c.startsWith('quote_session=')
+        c.startsWith('quote_details_session=')
       )
       expect(setCookie).toBeDefined()
 
@@ -333,7 +333,7 @@ describe('Quote details page', () => {
 
     it('should return 429 once the per-IP request limit is exceeded', async () => {
       mockGetQuote(mswServer)
-      const points = config.get('quoteSession.rateLimit.points')
+      const points = config.get('quoteDetailsSession.rateLimit.points')
 
       let last
       for (let i = 0; i <= points; i++) {

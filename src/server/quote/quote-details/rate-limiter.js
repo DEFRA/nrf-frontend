@@ -9,8 +9,8 @@ let rateLimiter = null
 export const getQuoteAccessRateLimiter = () => {
   if (!rateLimiter) {
     rateLimiter = new RateLimiterMemory({
-      points: config.get('quoteSession.rateLimit.points'),
-      duration: config.get('quoteSession.rateLimit.durationSeconds')
+      points: config.get('quoteDetailsSession.rateLimit.points'),
+      duration: config.get('quoteDetailsSession.rateLimit.durationSeconds')
     })
   }
 

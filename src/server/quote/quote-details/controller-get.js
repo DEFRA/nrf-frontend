@@ -4,9 +4,9 @@ import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './quote-access-status.js'
 import { isPrefetchRequest } from './is-prefetch-request.js'
 import {
-  hasQuoteSessionCookie,
-  setQuoteSessionCookie
-} from './quote-session-cookie.js'
+  hasQuoteDetailsSessionCookie,
+  setQuoteDetailsSessionCookie
+} from './quote-details-session-cookie.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 
 const routeId = 'quote-details'
@@ -22,7 +22,7 @@ export const quoteDetailsGetController = {
       })
     }
 
-    const hasSession = hasQuoteSessionCookie({ request, reference })
+    const hasSession = hasQuoteDetailsSessionCookie({ request, reference })
 
     const { payload } = await getQuoteFromBackend({
       reference,
@@ -36,7 +36,7 @@ export const quoteDetailsGetController = {
     }
 
     if (!hasSession) {
-      setQuoteSessionCookie({ h, reference })
+      setQuoteDetailsSessionCookie({ h, reference })
     }
 
     const viewModel = { ...getViewModel(reference), quote, reference }

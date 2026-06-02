@@ -114,7 +114,7 @@ describe('quoteDetailsGetController', () => {
     await quoteDetailsGetController.handler(buildRequest(), h)
 
     expect(h.state).toHaveBeenCalledWith(
-      'quote_session',
+      'quote_details_session',
       expect.objectContaining({ reference: 'NRF-123456' })
     )
   })
@@ -126,7 +126,7 @@ describe('quoteDetailsGetController', () => {
     })
     const h = buildH()
     const request = buildRequest({
-      state: { quote_session: { reference: 'NRF-123456' } }
+      state: { quote_details_session: { reference: 'NRF-123456' } }
     })
 
     await quoteDetailsGetController.handler(request, h)
