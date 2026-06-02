@@ -18,9 +18,13 @@ const { reference } = fullQuote
 const token = 'abcdeftoken123'
 const requestUrl = `/quote/${reference}/${token}`
 
-// A real human clicking the email link sends Sec-Fetch-User: ?1 (§4.3);
-// without it the controller treats the request as a prefetch/bot.
-const humanClick = { 'sec-fetch-user': '?1' }
+// A normal browser User-Agent is treated as a human visit; a known bot/
+// previewer UA triggers the prefetch stub (§4.3). Safari sends no Sec-Fetch
+// headers, so detection is by UA, not by Sec-Fetch-User.
+const humanClick = {
+  'user-agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
+}
 
 describe('Quote details page', () => {
   const getServer = setupTestServer()
@@ -241,7 +245,7 @@ describe('Quote details page', () => {
   })
 
   describe('bot / prefetch handling', () => {
-    it('should show a no-data stub without Sec-Fetch-User and not call the backend', async () => {
+    it('should show a no-data stub for a known previewer and not call the backend', async () => {
       let backendCalled = false
       mswServer.use(
         http.get(`${backendUrl}/quotes/${reference}`, () => {
@@ -252,7 +256,8 @@ describe('Quote details page', () => {
 
       const document = await loadPage({
         requestUrl,
-        server: getServer()
+        server: getServer(),
+        headers: { 'user-agent': 'Slackbot-LinkExpanding 1.0' }
       })
 
       expect(backendCalled).toBe(false)
@@ -262,6 +267,21 @@ describe('Quote details page', () => {
       expect(
         document.querySelector('.govuk-summary-list')
       ).not.toBeInTheDocument()
+    })
+
+    it('should show the quote for a Safari browser (no Sec-Fetch headers)', async () => {
+      mockGetQuote(mswServer)
+
+      const document = await loadPage({
+        requestUrl,
+        server: getServer(),
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+        }
+      })
+
+      expect(document.querySelector('.govuk-summary-list')).toBeInTheDocument()
     })
   })
 

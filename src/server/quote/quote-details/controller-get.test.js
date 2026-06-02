@@ -15,14 +15,17 @@ describe('quoteDetailsGetController', () => {
     state: vi.fn()
   })
 
-  // A real human click sends Sec-Fetch-User: ?1; without it the request is
-  // treated as a prefetch/bot (§4.3).
-  const buildRequest = ({ reference, token, state } = {}) => ({
+  // A normal browser User-Agent is treated as a human visit; a known bot/
+  // previewer UA triggers the prefetch stub (§4.3).
+  const browserUserAgent =
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
+
+  const buildRequest = ({ reference, token, state, userAgent } = {}) => ({
     params: {
       reference: reference ?? 'NRF-123456',
       token: token ?? 'abctoken123'
     },
-    headers: { 'sec-fetch-user': '?1' },
+    headers: { 'user-agent': userAgent ?? browserUserAgent },
     state: state ?? {}
   })
 
@@ -93,8 +96,7 @@ describe('quoteDetailsGetController', () => {
       })
     )
 
-    const request = buildRequest()
-    request.headers = {} // no Sec-Fetch-User → prefetch
+    const request = buildRequest({ userAgent: 'Slackbot-LinkExpanding 1.0' })
 
     const result = await quoteDetailsGetController.handler(request, buildH())
 

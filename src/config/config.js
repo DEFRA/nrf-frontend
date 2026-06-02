@@ -219,7 +219,7 @@ export const config = convict({
       points: {
         doc: 'Maximum quote access link requests per IP within the duration window',
         format: Number,
-        default: 60,
+        default: isTest ? 5 : 60,
         env: 'QUOTE_ACCESS_RATE_LIMIT_POINTS'
       },
       durationSeconds: {
