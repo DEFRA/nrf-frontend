@@ -1,13 +1,11 @@
-import { getRequestFromBackend } from '../../common/services/nrf-backend.js'
+import { getQuoteFromBackend } from '../../common/services/nrf-backend.js'
 
 export const confirmationGetController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {
     const baseViewModel = getViewModel()
     const { reference } = request.query
 
-    const { payload: quote } = await getRequestFromBackend({
-      endpointPath: `/quotes/${reference}`
-    })
+    const { payload: quote } = await getQuoteFromBackend({ reference })
 
     const viewModel = { ...baseViewModel, reference, quote }
     return h.view(`quote/${routeId}/index`, viewModel)
