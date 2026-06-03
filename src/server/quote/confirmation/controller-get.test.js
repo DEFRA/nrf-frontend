@@ -16,12 +16,10 @@ describe('confirmationGetController', () => {
     view: (template, model) => ({ template, model })
   })
 
-  it('should render the correct view with the view model and quote details', async () => {
-    const quote = { reference: 'NRF-123456', email: 'test@example.com' }
-
+  it('should render the confirmation view when the quote exists', async () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRF-123456`, () =>
-        HttpResponse.json(quote)
+        HttpResponse.json({ accessStatus: 'invalid', quote: null })
       )
     )
 
@@ -33,13 +31,28 @@ describe('confirmationGetController', () => {
     expect(result.template).toBe('quote/confirmation/index')
     expect(result.model).toMatchObject(baseViewModel)
     expect(result.model.reference).toBe('NRF-123456')
-    expect(result.model.quote).toEqual(quote)
+  })
+
+  it('should return not found when the quote does not exist', async () => {
+    server.use(
+      http.get(`${backendUrl}/quotes/NRF-999999`, () =>
+        HttpResponse.json({ accessStatus: 'not_found', quote: null })
+      )
+    )
+
+    const controller = confirmationGetController({ routeId, getViewModel })
+    const request = { query: { reference: 'NRF-999999' } }
+
+    const result = await controller.handler(request, buildH())
+
+    expect(result.isBoom).toBe(true)
+    expect(result.output.statusCode).toBe(404)
   })
 
   it('should propagate errors thrown by the backend', async () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRF-FAIL`, () =>
-        HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        HttpResponse.json({ message: 'Server error' }, { status: 500 })
       )
     )
 

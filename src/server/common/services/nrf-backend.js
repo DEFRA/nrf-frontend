@@ -41,14 +41,19 @@ export const getRequestFromBackend = async ({
 }
 
 /**
- * @param {{ reference: string, bearerToken?: string }} options
+ * @param {{ reference: string, bearerToken?: string, redeem?: boolean }} options
  */
-export const getQuoteFromBackend = async ({ reference, bearerToken }) => {
+export const getQuoteFromBackend = async ({
+  reference,
+  bearerToken,
+  redeem = true
+}) => {
   const headers = bearerToken
     ? { Authorization: `Bearer ${bearerToken}` }
     : undefined
+  const query = redeem ? '' : '?redeem=false'
   return getRequestFromBackend({
-    endpointPath: `/quotes/${reference}`,
+    endpointPath: `/quotes/${reference}${query}`,
     headers
   })
 }
