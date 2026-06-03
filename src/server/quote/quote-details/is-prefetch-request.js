@@ -17,14 +17,21 @@ const botUserAgents = [
   'bingpreview',
   'redditbot',
   'embedly',
-  'outlook',
-  'office',
+  // Outlook/Office link-preview UA: "Microsoft Office/16.0 (Microsoft Outlook 16.0)"
+  // Real users opening a link in Outlook's in-app browser have a different UA
+  // that does not contain this exact substring.
+  'microsoft office/',
   'microsoftpreview',
-  'bot',
+  // Generic crawler/bot signals — anchored to avoid matching real browser UAs
+  'googlebot',
+  'bingbot',
+  'yandexbot',
+  'duckduckbot',
   'crawler',
   'spider',
-  'preview',
-  'scanner'
+  'linkpreview',
+  'prerender',
+  'headlesschrome'
 ]
 
 /**

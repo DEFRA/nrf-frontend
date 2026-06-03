@@ -4,6 +4,7 @@ import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './quote-access-status.js'
 import { getQuoteAccessRateLimiter } from './rate-limiter.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { getClientIp } from '../../common/helpers/get-client-ip.js'
 
 export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
@@ -20,7 +21,7 @@ const invalidLinkFailAction = (_request, h) =>
 // DoS protection: cap requests per IP for the quote access link.
 const rateLimit = async (request, h) => {
   try {
-    await getQuoteAccessRateLimiter().consume(request.info.remoteAddress)
+    await getQuoteAccessRateLimiter().consume(getClientIp(request))
     return h.continue
   } catch {
     return h.response().code(statusCodes.tooManyRequests).takeover()
