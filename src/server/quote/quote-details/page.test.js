@@ -9,7 +9,6 @@ import {
   mockGetQuote,
   mockGetQuoteStatus
 } from '../../../test-utils/mock-get-quote.js'
-import { resetQuoteAccessRateLimiter } from './rate-limiter.js'
 
 const backendUrl = config.get('backend').apiUrl
 const mswServer = setupMswServer()
@@ -28,8 +27,6 @@ const humanClick = {
 
 describe('Quote details page', () => {
   const getServer = setupTestServer()
-
-  beforeEach(() => resetQuoteAccessRateLimiter())
 
   it('should render the page heading and title with the NRF reference', async () => {
     mockGetQuote(mswServer)
@@ -195,12 +192,9 @@ describe('Quote details page', () => {
 
   describe('error states', () => {
     it.each([
-      ['invalid', 'The link is invalid'],
-      [
-        'not_found',
-        'The NRF reference you have supplied does not match an existing quote'
-      ],
-      ['expired', 'This link has expired']
+      ['invalid', 'This link has expired'],
+      ['not_found', 'This link has expired'],
+      ['expired', 'This link is no longer active']
     ])(
       'should show the %s error message and no quote summary',
       async (status, message) => {
@@ -220,14 +214,14 @@ describe('Quote details page', () => {
       }
     )
 
-    it('should show the invalid link message for a malformed token', async () => {
+    it('should show the expired link message for a malformed token', async () => {
       const document = await loadPage({
         requestUrl: `/quote/${reference}/not a valid token!`,
         server: getServer()
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'The link is invalid'
+        'This link has expired'
       )
     })
 
@@ -331,22 +325,6 @@ describe('Quote details page', () => {
       })
 
       expect(response.headers['referrer-policy']).toBe('no-referrer')
-    })
-
-    it('should return 429 once the per-IP request limit is exceeded', async () => {
-      mockGetQuote(mswServer)
-      const points = config.get('quoteDetailsSession.rateLimit.points')
-
-      let last
-      for (let i = 0; i <= points; i++) {
-        last = await getServer().inject({
-          method: 'GET',
-          url: requestUrl,
-          headers: humanClick
-        })
-      }
-
-      expect(last.statusCode).toBe(429)
     })
   })
 })

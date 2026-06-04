@@ -13,13 +13,6 @@ const oneWeekMs = 604800000
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 
-// Lower the quote details rate limit under test so the limit test trips after
-// a handful of requests instead of the production limit, keeping the suite fast.
-const quoteDetailsRateLimitTest = 5
-const quoteDetailsRateLimitDefault = 60
-const quoteDetailsRateLimitPoints = isTest
-  ? quoteDetailsRateLimitTest
-  : quoteDetailsRateLimitDefault
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
@@ -232,20 +225,6 @@ export const config = convict({
         format: Boolean,
         default: isProduction,
         env: 'QUOTE_DETAILS_SESSION_COOKIE_SECURE'
-      }
-    },
-    rateLimit: {
-      points: {
-        doc: 'Maximum quote details link requests per IP within the duration window',
-        format: Number,
-        default: quoteDetailsRateLimitPoints,
-        env: 'QUOTE_DETAILS_RATE_LIMIT_POINTS'
-      },
-      durationSeconds: {
-        doc: 'Quote details rate limit window duration in seconds',
-        format: Number,
-        default: 60,
-        env: 'QUOTE_DETAILS_RATE_LIMIT_DURATION_SECONDS'
       }
     }
   },

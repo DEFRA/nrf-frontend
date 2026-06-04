@@ -1,4 +1,4 @@
-import { config } from '../../../config/config.js'
+import { config } from '../../../../config/config.js'
 
 export const QUOTE_DETAILS_SESSION_COOKIE = 'quote_details_session'
 
