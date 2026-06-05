@@ -107,6 +107,23 @@ describe('Quote resend flows', () => {
       )
     })
 
+    it('renders the expired link error page for a malformed token instead of a raw 400', async () => {
+      const { response, document } = await submitForm({
+        requestUrl: `/quote/${reference}/resend-known`,
+        server: getServer(),
+        formData: { token: 'not a valid token!' }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'This link has expired'
+      )
+      const form = document.querySelector(
+        `form[action="/quote/${reference}/resend-unknown"]`
+      )
+      expect(form).toBeInTheDocument()
+    })
+
     it('redirects to the start of the service if the confirmation is visited without a fresh resend', async () => {
       const confirmation = await getServer().inject({
         method: 'GET',

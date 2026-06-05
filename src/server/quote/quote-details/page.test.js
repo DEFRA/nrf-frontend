@@ -225,6 +225,18 @@ describe('Quote details page', () => {
       )
     })
 
+    it('should render a usable resend form action with the reference for a malformed token', async () => {
+      const document = await loadPage({
+        requestUrl: `/quote/${reference}/not a valid token!`,
+        server: getServer()
+      })
+
+      const form = document.querySelector(
+        `form[action="/quote/${reference}/resend-unknown"]`
+      )
+      expect(form).toBeInTheDocument()
+    })
+
     it('should accept a base64url token containing underscores and hyphens', async () => {
       mockGetQuote(mswServer)
       const document = await loadPage({

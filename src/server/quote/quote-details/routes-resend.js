@@ -7,6 +7,8 @@ import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validat
 import { saveValidationFlashToCache } from '../helpers/form-validation-session/index.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { emailField } from '../../common/validation/email.js'
+import getErrorViewModel from './get-error-view-model.js'
+import { quoteAccessStatus } from './helpers/quote-access-status.js'
 
 export const resendKnownPath = '/quote/{reference}/resend-known'
 export const resendUnknownPath = '/quote/{reference}/resend-unknown'
@@ -38,6 +40,19 @@ const invalidEmailFailAction = (request, h, err) => {
     .takeover()
 }
 
+// A corrupted token on the one-click resend can't be used, so fall back to the
+// generic expired-link error page (which offers the email-based resend) rather
+// than leaking a raw Hapi 400.
+const invalidKnownResendFailAction = (request, h) => {
+  const { reference } = request.params
+  return h
+    .view(
+      'quote/quote-details/error',
+      getErrorViewModel(quoteAccessStatus.invalid, { reference })
+    )
+    .takeover()
+}
+
 export default [
   {
     method: 'POST',
@@ -45,7 +60,8 @@ export default [
     options: {
       validate: {
         params: joi.object({ reference: referenceSchema }),
-        payload: joi.object({ token: tokenSchema })
+        payload: joi.object({ token: tokenSchema }),
+        failAction: invalidKnownResendFailAction
       }
     },
     ...quoteDetailsResendKnownController

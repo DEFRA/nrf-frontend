@@ -7,13 +7,15 @@ export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
 export const tokenPattern = /[a-zA-Z0-9_-]+/
 
-const invalidLinkFailAction = (_request, h) =>
-  h
+const invalidLinkFailAction = (request, h) => {
+  const { reference, token } = request.params
+  return h
     .view(
       'quote/quote-details/error',
-      getErrorViewModel(quoteAccessStatus.invalid)
+      getErrorViewModel(quoteAccessStatus.invalid, { reference, token })
     )
     .takeover()
+}
 
 // Prevent the token leaking via the Referer header to outbound links.
 const setReferrerPolicy = (request, h) => {
