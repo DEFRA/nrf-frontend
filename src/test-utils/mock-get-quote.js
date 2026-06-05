@@ -26,12 +26,13 @@ export const mockGetQuoteStatus = (mswServer, reference, accessStatus) => {
 export const mockResendKnown = (
   mswServer,
   reference,
-  body = { ok: true, message: "We've sent a new link to dev**@example.com" }
+  body = { ok: true, message: "We've sent a new link to dev**@example.com" },
+  status = 200
 ) => {
   mswServer.use(
     http.post(
       `${config.get('backend').apiUrl}/quotes/${reference}/resend-known`,
-      () => HttpResponse.json(body)
+      () => HttpResponse.json(body, { status })
     )
   )
 }
