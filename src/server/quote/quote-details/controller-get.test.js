@@ -20,13 +20,23 @@ describe('quoteDetailsGetController', () => {
   const browserUserAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
 
-  const buildRequest = ({ reference, token, state, userAgent } = {}) => ({
+  const buildRequest = ({
+    reference,
+    token,
+    state,
+    userAgent,
+    flash
+  } = {}) => ({
     params: {
       reference: reference ?? 'NRF-123456',
       token: token ?? 'abctoken123'
     },
     headers: { 'user-agent': userAgent ?? browserUserAgent },
-    state: state ?? {}
+    state: state ?? {},
+    yar: {
+      get: vi.fn(() => flash ?? null),
+      clear: vi.fn()
+    }
   })
 
   const mockBackend = (reference, body, status = 200) => {
@@ -56,12 +66,9 @@ describe('quoteDetailsGetController', () => {
   })
 
   it.each([
-    ['invalid', 'The link is invalid'],
-    [
-      'not_found',
-      'The NRF reference you have supplied does not match an existing quote'
-    ],
-    ['expired', 'This link has expired']
+    ['invalid', 'This link has expired'],
+    ['not_found', 'This link has expired'],
+    ['expired', 'This link is no longer active']
   ])(
     'should render the error view with the right message for status %s',
     async (status, message) => {
@@ -76,6 +83,23 @@ describe('quoteDetailsGetController', () => {
       expect(result.model.pageHeading).toBe(message)
     }
   )
+
+  it('threads a validation flash into the error view after a failed resend redirect', async () => {
+    mockBackend('NRF-123456', { accessStatus: 'invalid', quote: null })
+    const flash = {
+      validationErrors: { summary: [{ text: 'Enter an email address' }] },
+      formSubmitData: { email: 'bad' }
+    }
+
+    const result = await quoteDetailsGetController.handler(
+      buildRequest({ flash }),
+      buildH()
+    )
+
+    expect(result.template).toBe('quote/quote-details/error')
+    expect(result.model.validationErrors).toEqual(flash.validationErrors)
+    expect(result.model.formSubmitData).toEqual(flash.formSubmitData)
+  })
 
   it('should propagate errors thrown by the backend', async () => {
     mockBackend('NRF-FAIL', { message: 'Server error' }, 500)

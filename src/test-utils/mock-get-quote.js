@@ -22,3 +22,32 @@ export const mockGetQuoteStatus = (mswServer, reference, accessStatus) => {
     )
   )
 }
+
+export const mockResendKnown = (
+  mswServer,
+  reference,
+  body = { ok: true, message: "We've sent a new link to dev**@example.com" }
+) => {
+  mswServer.use(
+    http.post(
+      `${config.get('backend').apiUrl}/quotes/${reference}/resend-known`,
+      () => HttpResponse.json(body)
+    )
+  )
+}
+
+export const mockResendUnknown = (
+  mswServer,
+  reference,
+  body = {
+    ok: true,
+    message: "If a matching quote is found, we've sent a new link."
+  }
+) => {
+  mswServer.use(
+    http.post(
+      `${config.get('backend').apiUrl}/quotes/${reference}/resend-unknown`,
+      () => HttpResponse.json(body)
+    )
+  )
+}

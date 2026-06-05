@@ -1,18 +1,46 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { quoteAccessStatus } from './quote-access-status.js'
+import { quoteAccessStatus } from './helpers/quote-access-status.js'
 
-const messages = {
-  [quoteAccessStatus.invalid]: 'The link is invalid',
-  [quoteAccessStatus.notFound]:
-    'The NRF reference you have supplied does not match an existing quote',
-  [quoteAccessStatus.expired]: 'This link has expired'
+// View-model variants mapping onto the backend access statuses.
+export const errorVariant = {
+  knownExpired: 'knownExpired',
+  unknownExpired: 'unknownExpired'
 }
 
-export default function getErrorViewModel(status) {
-  const message = messages[status] ?? messages[quoteAccessStatus.invalid]
+const variantByStatus = {
+  [quoteAccessStatus.expired]: {
+    variant: errorVariant.knownExpired,
+    heading: 'This link is no longer active'
+  },
+  [quoteAccessStatus.invalid]: {
+    variant: errorVariant.unknownExpired,
+    heading: 'This link has expired'
+  },
+  [quoteAccessStatus.notFound]: {
+    variant: errorVariant.unknownExpired,
+    heading: 'This link has expired'
+  }
+}
+
+/**
+ * Builds the view model for the quote-details error page, selecting the resend
+ * affordance to render from the backend access status.
+ *
+ * @param {string} status - the backend access status (valid/invalid/expired/not_found)
+ * @param {object} [options]
+ * @param {string} [options.reference] - the quote reference, used to build form actions
+ * @param {string} [options.token] - the raw access token, threaded into the State 2 one-click form
+ * @returns {object} the view model
+ */
+export default function getErrorViewModel(status, { reference, token } = {}) {
+  const { variant, heading } =
+    variantByStatus[status] ?? variantByStatus[quoteAccessStatus.invalid]
 
   return {
-    pageTitle: getPageTitle(message),
-    pageHeading: message
+    pageTitle: getPageTitle(heading),
+    pageHeading: heading,
+    variant,
+    reference,
+    token
   }
 }

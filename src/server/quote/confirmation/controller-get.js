@@ -1,6 +1,6 @@
 import Boom from '@hapi/boom'
 import { getQuoteFromBackend } from '../../common/services/nrf-backend.js'
-import { quoteAccessStatus } from '../quote-details/quote-access-status.js'
+import { quoteAccessStatus } from '../quote-details/helpers/quote-access-status.js'
 
 export const confirmationGetController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {
