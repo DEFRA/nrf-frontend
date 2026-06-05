@@ -33,7 +33,7 @@ export const quoteDetailsResendKnownController = {
     if (!payload.message) {
       return h.view(
         'quote/quote-details/error',
-        getErrorViewModel(quoteAccessStatus.invalid, { reference })
+        getErrorViewModel(quoteAccessStatus.invalid, { reference, token })
       )
     }
 
