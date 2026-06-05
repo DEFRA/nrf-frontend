@@ -66,8 +66,11 @@ describe('quoteDetailsGetController', () => {
   })
 
   it.each([
-    ['invalid', 'This link has expired'],
-    ['not_found', 'This link has expired'],
+    ['invalid', 'The link is invalid'],
+    [
+      'not_found',
+      'The NRF reference you have supplied does not match an existing quote'
+    ],
     ['expired', 'This link is no longer active']
   ])(
     'should render the error view with the right message for status %s',

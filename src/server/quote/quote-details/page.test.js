@@ -192,8 +192,11 @@ describe('Quote details page', () => {
 
   describe('error states', () => {
     it.each([
-      ['invalid', 'This link has expired'],
-      ['not_found', 'This link has expired'],
+      ['invalid', 'The link is invalid'],
+      [
+        'not_found',
+        'The NRF reference you have supplied does not match an existing quote'
+      ],
       ['expired', 'This link is no longer active']
     ])(
       'should show the %s error message and no quote summary',
@@ -214,14 +217,14 @@ describe('Quote details page', () => {
       }
     )
 
-    it('should show the expired link message for a malformed token', async () => {
+    it('should show the invalid link message for a malformed token', async () => {
       const document = await loadPage({
         requestUrl: `/quote/${reference}/not a valid token!`,
         server: getServer()
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'This link has expired'
+        'The link is invalid'
       )
     })
 

@@ -14,11 +14,12 @@ const variantByStatus = {
   },
   [quoteAccessStatus.invalid]: {
     variant: errorVariant.unknownExpired,
-    heading: 'This link has expired'
+    heading: 'The link is invalid'
   },
   [quoteAccessStatus.notFound]: {
     variant: errorVariant.unknownExpired,
-    heading: 'This link has expired'
+    heading:
+      'The NRF reference you have supplied does not match an existing quote'
   }
 }
 

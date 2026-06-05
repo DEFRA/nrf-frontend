@@ -51,9 +51,15 @@ describe('Quote resend flows', () => {
   })
 
   describe('State 3 — unknown expired link page', () => {
-    it.each([['invalid'], ['not_found']])(
-      'shows an email field and send button for %s status',
-      async (status) => {
+    it.each([
+      ['invalid', 'The link is invalid'],
+      [
+        'not_found',
+        'The NRF reference you have supplied does not match an existing quote'
+      ]
+    ])(
+      'shows the %s heading with an email field and send button',
+      async (status, heading) => {
         mockGetQuoteStatus(mswServer, reference, status)
 
         const document = await loadPage({
@@ -63,7 +69,7 @@ describe('Quote resend flows', () => {
         })
 
         expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-          'This link has expired'
+          heading
         )
         expect(
           queryByLabelText(
@@ -107,7 +113,7 @@ describe('Quote resend flows', () => {
       )
     })
 
-    it('renders the expired link error page for a malformed token instead of a raw 400', async () => {
+    it('renders the invalid link error page for a malformed token instead of a raw 400', async () => {
       const { response, document } = await submitForm({
         requestUrl: `/quote/${reference}/resend-known`,
         server: getServer(),
@@ -116,7 +122,7 @@ describe('Quote resend flows', () => {
 
       expect(response.statusCode).toBe(200)
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'This link has expired'
+        'The link is invalid'
       )
       const form = document.querySelector(
         `form[action="/quote/${reference}/resend-unknown"]`
@@ -124,7 +130,7 @@ describe('Quote resend flows', () => {
       expect(form).toBeInTheDocument()
     })
 
-    it('shows the expired link email form, carrying the token, when the backend will not honour it', async () => {
+    it('shows the invalid link email form, carrying the token, when the backend will not honour it', async () => {
       mockResendKnown(mswServer, reference, { ok: true })
 
       const { response, document } = await submitForm({
@@ -135,7 +141,7 @@ describe('Quote resend flows', () => {
 
       expect(response.statusCode).toBe(200)
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'This link has expired'
+        'The link is invalid'
       )
       const form = document.querySelector(
         `form[action="/quote/${reference}/resend-unknown"]`
@@ -242,7 +248,7 @@ describe('Quote resend flows', () => {
       expect(document.body.textContent).toContain(genericMessage)
     })
 
-    it('redirects back to the expired page with an inline error for a malformed email', async () => {
+    it('redirects back to the invalid link page with an inline error for a malformed email', async () => {
       mockGetQuoteStatus(mswServer, reference, 'invalid')
 
       const { response, cookie } = await submitForm({
@@ -262,7 +268,7 @@ describe('Quote resend flows', () => {
       const { document } = new JSDOM(page.result).window
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'This link has expired'
+        'The link is invalid'
       )
       const errorSummary = document.querySelector('.govuk-error-summary')
       expect(errorSummary).toBeInTheDocument()
