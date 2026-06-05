@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { saveResendConfirmationToCache } from './helpers/resend-confirmation-session.js'
@@ -21,6 +22,12 @@ export const quoteDetailsResendKnownController = {
       endpointPath: `/quotes/${reference}/resend-known`,
       payload: { token }
     })
+
+    // The backend omits the message when the email wasn't actually sent (e.g.
+    // Notify rejected it); show the error page rather than a blank "link sent".
+    if (!payload.message) {
+      throw Boom.badGateway('Resend email was not sent')
+    }
 
     saveResendConfirmationToCache(request, { message: payload.message })
 
