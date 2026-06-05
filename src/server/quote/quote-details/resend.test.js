@@ -124,7 +124,7 @@ describe('Quote resend flows', () => {
       expect(form).toBeInTheDocument()
     })
 
-    it('shows the expired link email form when the backend will not honour the token', async () => {
+    it('shows the expired link email form, carrying the token, when the backend will not honour it', async () => {
       mockResendKnown(mswServer, reference, { ok: true })
 
       const { response, document } = await submitForm({
@@ -141,6 +141,34 @@ describe('Quote resend flows', () => {
         `form[action="/quote/${reference}/resend-unknown"]`
       )
       expect(form).toBeInTheDocument()
+      // The hidden token must be carried through so the form can be submitted —
+      // an empty token fails payload validation and redirects to a dead URL.
+      expect(form.querySelector('input[name="token"]').value).toBe(token)
+    })
+
+    it('lets the email form rendered from a rejected token be submitted successfully', async () => {
+      mockResendKnown(mswServer, reference, { ok: true })
+      mockResendUnknown(mswServer, reference)
+
+      const { document } = await submitForm({
+        requestUrl: `/quote/${reference}/resend-known`,
+        server: getServer(),
+        formData: { token }
+      })
+      const carriedToken = document.querySelector(
+        'form[action$="/resend-unknown"] input[name="token"]'
+      ).value
+
+      const { response } = await submitForm({
+        requestUrl: `/quote/${reference}/resend-unknown`,
+        server: getServer(),
+        formData: { token: carriedToken, email: 'developer@housebuilder.com' }
+      })
+
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.location).toBe(
+        `/quote/${reference}/resend-unknown`
+      )
     })
 
     it('shows the error page when the backend fails to send the email', async () => {
