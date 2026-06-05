@@ -124,8 +124,27 @@ describe('Quote resend flows', () => {
       expect(form).toBeInTheDocument()
     })
 
-    it('shows the error page when the backend reports the email was not sent', async () => {
+    it('shows the expired link email form when the backend will not honour the token', async () => {
       mockResendKnown(mswServer, reference, { ok: true })
+
+      const { response, document } = await submitForm({
+        requestUrl: `/quote/${reference}/resend-known`,
+        server: getServer(),
+        formData: { token }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'This link has expired'
+      )
+      const form = document.querySelector(
+        `form[action="/quote/${reference}/resend-unknown"]`
+      )
+      expect(form).toBeInTheDocument()
+    })
+
+    it('shows the error page when the backend fails to send the email', async () => {
+      mockResendKnown(mswServer, reference, { ok: false }, 502)
 
       const { response } = await submitForm({
         requestUrl: `/quote/${reference}/resend-known`,

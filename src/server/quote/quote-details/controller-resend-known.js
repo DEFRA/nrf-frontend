@@ -1,7 +1,8 @@
-import Boom from '@hapi/boom'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { saveResendConfirmationToCache } from './helpers/resend-confirmation-session.js'
+import getErrorViewModel from './get-error-view-model.js'
+import { quoteAccessStatus } from './helpers/quote-access-status.js'
 
 /**
  * Handles the one-click resend from the "link no longer active" page (State 2).
@@ -12,6 +13,12 @@ import { saveResendConfirmationToCache } from './helpers/resend-confirmation-ses
  * Follows POST-Redirect-GET: the confirmation message is stashed in the session
  * and the user is redirected to the GET confirmation route, so a refresh doesn't
  * re-trigger the resend.
+ *
+ * The backend returns a generic 200 with no message when it won't honour the
+ * token (e.g. session-exhausted, replaced, or never issued). Rather than claim
+ * a link was sent, we fall back to the "link has expired" page so the user can
+ * request one via their email. A genuine send failure is a backend 5xx, which
+ * propagates to the standard error page.
  */
 export const quoteDetailsResendKnownController = {
   async handler(request, h) {
@@ -23,10 +30,11 @@ export const quoteDetailsResendKnownController = {
       payload: { token }
     })
 
-    // The backend omits the message when the email wasn't actually sent (e.g.
-    // Notify rejected it); show the error page rather than a blank "link sent".
     if (!payload.message) {
-      throw Boom.badGateway('Resend email was not sent')
+      return h.view(
+        'quote/quote-details/error',
+        getErrorViewModel(quoteAccessStatus.invalid, { reference })
+      )
     }
 
     saveResendConfirmationToCache(request, { message: payload.message })
