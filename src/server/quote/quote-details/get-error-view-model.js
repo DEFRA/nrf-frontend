@@ -4,7 +4,8 @@ import { quoteAccessStatus } from './helpers/quote-access-status.js'
 // View-model variants mapping onto the backend access statuses.
 export const errorVariant = {
   knownExpired: 'knownExpired',
-  unknownExpired: 'unknownExpired'
+  unknownExpired: 'unknownExpired',
+  noQuote: 'noQuote'
 }
 
 const variantByStatus = {
@@ -14,11 +15,12 @@ const variantByStatus = {
   },
   [quoteAccessStatus.invalid]: {
     variant: errorVariant.unknownExpired,
-    heading: 'This link has expired'
+    heading: 'The link is invalid'
   },
   [quoteAccessStatus.notFound]: {
-    variant: errorVariant.unknownExpired,
-    heading: 'This link has expired'
+    variant: errorVariant.noQuote,
+    heading:
+      'The NRF reference you have supplied does not match an existing quote'
   }
 }
 
