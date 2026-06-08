@@ -2,6 +2,7 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { toEcs } from './ecs-transformer.js'
 import { config } from '../../config/config.js'
 import { getBrowserLogsRateLimiter } from './rate-limiter.js'
+import { getClientIp } from '../common/helpers/get-client-ip.js'
 
 export const browserLogsController = {
   options: {
@@ -13,7 +14,7 @@ export const browserLogsController = {
         assign: 'rateLimit',
         method: async function (request, h) {
           try {
-            const key = request.yar?.id ?? request.info.remoteAddress
+            const key = request.yar?.id ?? getClientIp(request)
             await getBrowserLogsRateLimiter().consume(key)
           } catch {
             return h.response().code(statusCodes.tooManyRequests).takeover()

@@ -15,8 +15,16 @@ const quoteDetailsPattern = new RegExp(
   `^\\/quote\\/${referencePattern.source}\\/` + `${tokenPattern.source}$`
 )
 
+// The quote-details GET link and the two resend POSTs are token/email-gated,
+// not session-gated, so they bypass the in-progress-session check.
+const resendPattern = new RegExp(
+  `^\\/quote\\/${referencePattern.source}\\/resend-(known|unknown)$`
+)
+
 const isExempt = (path) =>
-  exemptPaths.has(path) || quoteDetailsPattern.test(path)
+  exemptPaths.has(path) ||
+  quoteDetailsPattern.test(path) ||
+  resendPattern.test(path)
 
 export const checkForValidQuoteSession = (request, h) => {
   if (

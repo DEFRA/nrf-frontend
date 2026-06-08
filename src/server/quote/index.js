@@ -15,7 +15,9 @@ import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
 import routesWasteWater from './waste-water/routes.js'
 import routesQuoteDetails from './quote-details/routes.js'
+import routesQuoteDetailsResend from './quote-details/routes-resend.js'
 import { checkForValidQuoteSession } from './helpers/is-quote-session-in-progress/index.js'
+import { registerQuoteDetailsSessionCookie } from './quote-details/helpers/quote-details-session-cookie.js'
 
 /**
  * @openapi
@@ -38,6 +40,8 @@ export const quote = {
   plugin: {
     name: 'quote',
     register(server) {
+      registerQuoteDetailsSessionCookie(server)
+
       server.ext('onPreHandler', checkForValidQuoteSession)
 
       server.route([
@@ -57,7 +61,8 @@ export const quote = {
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
         ...routesWasteWater,
-        ...routesQuoteDetails
+        ...routesQuoteDetails,
+        ...routesQuoteDetailsResend
       ])
     }
   }

@@ -6,14 +6,27 @@ import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
+
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
+
+/**
+ * Convict `format` validator that fails closed at startup when a secret
+ * is unset in production. Allows empty values in dev/test so local stacks
+ * without auth wired (e.g. paired with stale upstream images) still boot.
+ */
+const requireInProduction = (envName) => (val) => {
+  if (isProduction && !val) {
+    throw new Error(`${envName} is required in production`)
+  }
+}
 
 export const config = convict({
   serviceVersion: {
@@ -192,6 +205,29 @@ export const config = convict({
       }
     }
   },
+  quoteDetailsSession: {
+    cookie: {
+      ttl: {
+        doc: 'Quote details (magic link) session cookie ttl',
+        format: Number,
+        default: thirtyMinutesMs,
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_TTL'
+      },
+      password: {
+        doc: 'Quote details session cookie password (32+ characters)',
+        format: String,
+        default: 'the-quote-details-session-password-at-least-32-chars',
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_PASSWORD',
+        sensitive: true
+      },
+      secure: {
+        doc: 'set secure flag on the quote details session cookie',
+        format: Boolean,
+        default: isProduction,
+        env: 'QUOTE_DETAILS_SESSION_COOKIE_SECURE'
+      }
+    }
+  },
   redis: {
     host: {
       doc: 'Redis cache host',
@@ -332,6 +368,13 @@ export const config = convict({
       default: 'http://localhost:4001',
       env: 'NRF_BACKEND_API_URL'
     },
+    apiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the backend',
+      format: requireInProduction('BACKEND_API_KEY'),
+      default: '',
+      sensitive: true,
+      env: 'BACKEND_API_KEY'
+    },
     optional: {
       doc: 'When true, log backend connectivity failures as warnings instead of blocking startup',
       format: Boolean,
@@ -357,6 +400,13 @@ export const config = convict({
       format: String,
       default: 'http://localhost:8085',
       env: 'IMPACT_ASSESSOR_BASE_URL'
+    },
+    impactAssessorApiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor (e.g. map tile proxy).',
+      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
+      default: '',
+      sensitive: true,
+      env: 'IMPACT_ASSESSOR_API_KEY'
     },
     impactAssessorLayers: {
       doc: 'Comma-separated list of impact assessor tile layer params shown in the Layers panel.',

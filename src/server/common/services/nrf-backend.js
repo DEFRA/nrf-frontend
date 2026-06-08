@@ -5,19 +5,33 @@ import { withTraceId } from '@defra/hapi-tracing'
 
 const logger = createLogger()
 
+/**
+ * Build headers for backend calls: trace header, any extra headers, and the
+ * service-to-service x-api-key when configured.
+ * @param {object} [extraHeaders]
+ * @returns {object}
+ */
+export const backendHeaders = (extraHeaders) => {
+  const headers = {
+    ...withTraceId(config.get('tracing.header')),
+    ...extraHeaders
+  }
+  const apiKey = config.get('backend.apiKey')
+  if (apiKey) {
+    headers['x-api-key'] = apiKey
+  }
+  return headers
+}
+
 export const getRequestFromBackend = async ({
   endpointPath,
   headers: extraHeaders
 }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
-    const headers = {
-      ...withTraceId(config.get('tracing.header')),
-      ...extraHeaders
-    }
     const response = await Wreck.get(url, {
       json: true,
-      headers
+      headers: backendHeaders(extraHeaders)
     })
     return response
   } catch (error) {
@@ -27,14 +41,19 @@ export const getRequestFromBackend = async ({
 }
 
 /**
- * @param {{ reference: string, bearerToken?: string }} options
+ * @param {{ reference: string, bearerToken?: string, redeem?: boolean }} options
  */
-export const getQuoteFromBackend = async ({ reference, bearerToken }) => {
+export const getQuoteFromBackend = async ({
+  reference,
+  bearerToken,
+  redeem = true
+}) => {
   const headers = bearerToken
     ? { Authorization: `Bearer ${bearerToken}` }
     : undefined
+  const query = redeem ? '' : '?redeem=false'
   return getRequestFromBackend({
-    endpointPath: `/quotes/${reference}`,
+    endpointPath: `/quotes/${reference}${query}`,
     headers
   })
 }
@@ -45,7 +64,7 @@ export const postRequestToBackend = async ({ endpointPath, payload }) => {
     const response = await Wreck.post(url, {
       payload,
       json: true,
-      headers: withTraceId(config.get('tracing.header'))
+      headers: backendHeaders()
     })
     return response
   } catch (error) {

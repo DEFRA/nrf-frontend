@@ -153,6 +153,24 @@ describe('nrf-backend service', () => {
       const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
       expect(callArgs.headers).not.toHaveProperty('Authorization')
     })
+
+    it('should include the x-api-key header when backend.apiKey is set', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      const original = config.get('backend.apiKey')
+      config.set('backend.apiKey', 'secret-key')
+      try {
+        await getRequestFromBackend({ endpointPath: '/quotes/123' })
+      } finally {
+        config.set('backend.apiKey', original)
+      }
+
+      expect(Wreck.get).toHaveBeenCalledWith(`${backendUrl}/quotes/123`, {
+        json: true,
+        headers: { 'x-api-key': 'secret-key' }
+      })
+    })
   })
 
   describe('postRequestToBackend', () => {

@@ -15,8 +15,13 @@ function getImpactAssessorUrl(path, query) {
 export const getMapTile = async (path, request) => {
   const upstreamUrl = getImpactAssessorUrl(path, request.query)
   logger.debug(`Impact assessor proxy request: ${path || '/'}`)
+  const headers = withTraceId(config.get('tracing.header'))
+  const apiKey = config.get('map.impactAssessorApiKey')
+  if (apiKey) {
+    headers['x-api-key'] = apiKey
+  }
   return fetch(upstreamUrl, {
     redirect: 'follow',
-    headers: withTraceId(config.get('tracing.header'))
+    headers
   })
 }

@@ -5,11 +5,13 @@ describe('#config', () => {
     let prodConfig
 
     beforeAll(async () => {
-      const original = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
+      vi.stubEnv('NODE_ENV', 'production')
+      // Required by the production-only convict validators on these keys.
+      vi.stubEnv('BACKEND_API_KEY', 'test-backend-key')
+      vi.stubEnv('IMPACT_ASSESSOR_API_KEY', 'test-ia-key')
       vi.resetModules()
       ;({ config: prodConfig } = await import('./config.js'))
-      process.env.NODE_ENV = original
+      vi.unstubAllEnvs()
     })
 
     test('log.format is ecs', () => {
