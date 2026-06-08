@@ -41,6 +41,9 @@
 
         {{ govukButton({ text: "Send new link" }) }}
       </form>
+
+    {% elif variant === "noQuote" %}
+      <p class="govuk-body">Check the link in your email and try again. If the problem continues, you may need to request a new quote.</p>
     {% endif %}
   </div>
 </div>

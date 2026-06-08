@@ -50,38 +50,54 @@ describe('Quote resend flows', () => {
     })
   })
 
-  describe('State 3 — unknown expired link page', () => {
-    it.each([
-      ['invalid', 'The link is invalid'],
-      [
-        'not_found',
-        'The NRF reference you have supplied does not match an existing quote'
-      ]
-    ])(
-      'shows the %s heading with an email field and send button',
-      async (status, heading) => {
-        mockGetQuoteStatus(mswServer, reference, status)
+  describe('State 3 — invalid token page (quote exists)', () => {
+    it('shows the invalid link heading with an email field and send button', async () => {
+      mockGetQuoteStatus(mswServer, reference, 'invalid')
 
-        const document = await loadPage({
-          requestUrl: linkUrl,
-          server: getServer(),
-          headers: humanClick
-        })
+      const document = await loadPage({
+        requestUrl: linkUrl,
+        server: getServer(),
+        headers: humanClick
+      })
 
-        expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-          heading
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'The link is invalid'
+      )
+      expect(
+        queryByLabelText(
+          document,
+          'Enter the email address you used for the quote'
         )
-        expect(
-          queryByLabelText(
-            document,
-            'Enter the email address you used for the quote'
-          )
-        ).toBeInTheDocument()
-        expect(
-          getByRole(document, 'button', { name: 'Send new link' })
-        ).toBeInTheDocument()
-      }
-    )
+      ).toBeInTheDocument()
+      expect(
+        getByRole(document, 'button', { name: 'Send new link' })
+      ).toBeInTheDocument()
+    })
+  })
+
+  describe('State 4 — reference matches no quote (dead-end)', () => {
+    it('shows the no-quote heading with no email field or resend button', async () => {
+      mockGetQuoteStatus(mswServer, reference, 'not_found')
+
+      const document = await loadPage({
+        requestUrl: linkUrl,
+        server: getServer(),
+        headers: humanClick
+      })
+
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'The NRF reference you have supplied does not match an existing quote'
+      )
+      expect(
+        queryByLabelText(
+          document,
+          'Enter the email address you used for the quote'
+        )
+      ).not.toBeInTheDocument()
+      expect(
+        document.querySelector('form[action$="/resend-unknown"]')
+      ).toBeNull()
+    })
   })
 
   describe('known resend submission', () => {
