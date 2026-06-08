@@ -25,7 +25,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: |
-          npm ci
+          npm ci --ignore-scripts
+          npm run security-audit
           npm run build:frontend
           npm run format:check
           npm run lint
