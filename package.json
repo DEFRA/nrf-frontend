@@ -81,7 +81,7 @@
     "undici": "^7.24.4"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-env": "^7.29.7",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@vitest/coverage-v8": "^4.1.7",
@@ -91,8 +91,8 @@
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^14.0.0",
     "cross-env": "^10.1.0",
-    "cssnano": "^7.1.7",
-    "cssnano-preset-default": "^7.0.10",
+    "cssnano": "^8.0.1",
+    "cssnano-preset-default": "^8.0.1",
     "eslint": "^9.39.4",
     "husky": "^9.1.7",
     "jsdom": "^29.0.0",
@@ -103,17 +103,17 @@
     "postcss-load-config": "^6.0.1",
     "postcss-loader": "^8.2.1",
     "prettier": "^3.8.1",
-    "sass": "^1.98.0",
-    "sass-embedded": "^1.98.0",
-    "sass-loader": "^16.0.7",
+    "sass": "^1.100.0",
+    "sass-embedded": "^1.100.0",
+    "sass-loader": "^17.0.0",
     "source-map-loader": "^5.0.0",
     "stylelint": "^16.26.1",
     "stylelint-config-gds": "^2.0.0",
-    "terser-webpack-plugin": "^5.4.0",
+    "terser-webpack-plugin": "^5.6.1",
     "vitest": "^4.0.18",
     "vitest-axe": "^0.1.0",
-    "webpack": "^5.105.4",
-    "webpack-assets-manifest": "^6.5.1",
-    "webpack-cli": "^7.0.2"
+    "webpack": "^5.107.2",
+    "webpack-assets-manifest": "^6.5.2",
+    "webpack-cli": "^7.0.3"
   }
 }
