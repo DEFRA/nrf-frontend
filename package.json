@@ -20,7 +20,7 @@
     "frontend:watch": "cross-env NODE_ENV=development webpack --watch",
     "git:pre-commit-hook": "npm run security-audit && npm run format:check && npm run lint && npm test",
     "postinstall": "npm run setup:husky",
-    "security-audit": "npm audit --audit-level=high",
+    "security-audit": "npm audit --audit-level=moderate",
     "lint": "run-s lint:js lint:scss",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
