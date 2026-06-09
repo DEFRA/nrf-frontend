@@ -42,7 +42,7 @@
     }
   },
   "dependencies": {
-    "@defra/cdp-auditing": "^0.6.0",
+    "@defra/cdp-auditing": "^0.6.1",
     "@defra/hapi-secure-context": "^0.4.0",
     "@defra/hapi-tracing": "^1.30.0",
     "@defra/interactive-map": "^0.0.25-alpha",
