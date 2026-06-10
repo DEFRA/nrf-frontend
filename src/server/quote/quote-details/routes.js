@@ -7,12 +7,21 @@ export const routePath = '/quote/{reference}/{token}'
 export const referencePattern = /NRF-\d{6}/
 export const tokenPattern = /[a-zA-Z0-9_-]+/
 
-const invalidLinkFailAction = (request, h) => {
+// A malformed reference can't correspond to a real quote, so there is nothing
+// to recover — show the dead-end "no quote" page rather than the email-entry
+// form (which would loop, since the resend route rejects the same reference).
+// A malformed token against a well-formed reference is still treated as an
+// invalid-but-recoverable link.
+const invalidLinkFailAction = (request, h, err) => {
   const { reference, token } = request.params
+  const referenceInvalid = err.details?.some((d) => d.path?.[0] === 'reference')
+  const status = referenceInvalid
+    ? quoteAccessStatus.notFound
+    : quoteAccessStatus.invalid
   return h
     .view(
       'quote/quote-details/error',
-      getErrorViewModel(quoteAccessStatus.invalid, { reference, token })
+      getErrorViewModel(status, { reference, token })
     )
     .takeover()
 }
