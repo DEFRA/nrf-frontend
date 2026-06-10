@@ -240,6 +240,20 @@ describe('Quote details page', () => {
       expect(form).toBeInTheDocument()
     })
 
+    it('should show the dead-end no-quote page with no resend form for a malformed reference', async () => {
+      const document = await loadPage({
+        requestUrl: `/quote/NRF-12345/${token}`,
+        server: getServer()
+      })
+
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'The NRF reference you have supplied does not match an existing quote'
+      )
+      expect(
+        document.querySelector('form[action$="/resend-unknown"]')
+      ).toBeNull()
+    })
+
     it('should accept a base64url token containing underscores and hyphens', async () => {
       mockGetQuote(mswServer)
       const document = await loadPage({
