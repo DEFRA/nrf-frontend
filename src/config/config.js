@@ -393,6 +393,7 @@ export const config = convict({
       doc: 'Ordnance Survey Vector Tile API key for the OS Vector Tile API base map.',
       format: String,
       default: '',
+      sensitive: true,
       env: 'OS_API_KEY'
     },
     impactAssessorBaseUrl: {
