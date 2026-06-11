@@ -1,4 +1,5 @@
 import neostandard from 'neostandard'
+import noSecrets from 'eslint-plugin-no-secrets'
 
 export default [
   ...neostandard({
@@ -7,6 +8,10 @@ export default [
     noJsx: true,
     noStyle: true
   }),
+  {
+    plugins: { 'no-secrets': noSecrets },
+    rules: { 'no-secrets/no-secrets': ['error', { tolerance: 4.5 }] }
+  },
   {
     files: ['src/server/plugins/swagger-initializer.js'],
     languageOptions: {

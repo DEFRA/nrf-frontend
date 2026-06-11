@@ -94,6 +94,7 @@
     "cssnano": "^7.1.9",
     "cssnano-preset-default": "^7.0.17",
     "eslint": "^9.39.4",
+    "eslint-plugin-no-secrets": "^2.3.3",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "msw": "^2.14.6",
