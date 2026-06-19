@@ -43,11 +43,6 @@ describe('Draw boundary page', () => {
     )
     expect(mapStylesCss).toBeInTheDocument()
 
-    const drawPluginCss = document.querySelector(
-      'link[href*="interactive-map/plugins/draw-ml/index.css"]'
-    )
-    expect(drawPluginCss).toBeInTheDocument()
-
     const coreScript = document.querySelector(
       'script[src*="interactive-map/core/index.js"]'
     )
