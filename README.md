@@ -62,7 +62,7 @@ The OpenAPI spec is generated from `@openapi` JSDoc annotations in the route and
 
 An AI (Claude Code) skill is provided to audit and fix the `@openapi` annotations so they match the actual endpoint implementations.
 
-Run it from the project root with:
+Run it from nrf-solution with:
 
 ```shell
 /sync-swagger
