@@ -228,13 +228,6 @@ export default {
         {
           from: path.join(
             interactiveMapPath,
-            'plugins/beta/draw-ml/dist/css/index.css'
-          ),
-          to: 'interactive-map/plugins/draw-ml/index.css'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
             'plugins/search/dist/umd/index.js'
           ),
           to: 'interactive-map/plugins/search/index.js'
