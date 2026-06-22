@@ -14,8 +14,13 @@ describe('email getViewModel', () => {
     expect(viewModel.pageHeading).toBe(title)
   })
 
-  it('should link back to waste-water', () => {
-    const viewModel = getViewModel()
-    expect(viewModel.backLinkPath).toBe('/quote/waste-water')
+  it('should link back to residential by default', () => {
+    const viewModel = getViewModel({})
+    expect(viewModel.backLinkPath).toBe('/quote/residential')
+  })
+
+  it('should link back to people-count when developmentTypes includes other-residential', () => {
+    const viewModel = getViewModel({ developmentTypes: ['other-residential'] })
+    expect(viewModel.backLinkPath).toBe('/quote/people-count')
   })
 })

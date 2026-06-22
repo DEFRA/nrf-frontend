@@ -9,8 +9,6 @@ export const fullQuote = {
     residentialBuildingCount: '42',
     peopleCount: '100'
   },
-  wasteWaterTreatmentWorksId: 'unknown',
-  wasteWaterTreatmentWorksName: null,
   email: {
     address: 'test@example.com'
   },

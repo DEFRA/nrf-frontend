@@ -13,9 +13,7 @@ describe('getNextPage', () => {
     ).toBe('/quote/people-count')
   })
 
-  it('returns the waste-water route if other-residential is not selected', () => {
-    expect(getNextPage({ developmentTypes: ['housing'] })).toBe(
-      '/quote/waste-water'
-    )
+  it('returns the email route if other-residential is not selected', () => {
+    expect(getNextPage({ developmentTypes: ['housing'] })).toBe('/quote/email')
   })
 })

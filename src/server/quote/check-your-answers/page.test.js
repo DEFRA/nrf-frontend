@@ -6,7 +6,6 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as developmentTypesPath } from '../development-types/routes.js'
 import { routePath as residentialPath } from '../residential/routes.js'
 import { routePath as peopleCountPath } from '../people-count/routes.js'
-import { routePath as wasteWaterPath } from '../waste-water/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -83,12 +82,6 @@ describe('Check your answers page', () => {
       cookie
     }))
     ;({ cookie } = await submitForm({
-      requestUrl: wasteWaterPath,
-      server: getServer(),
-      formData: { wasteWaterTreatmentWorks: 'i-dont-know' },
-      cookie
-    }))
-    ;({ cookie } = await submitForm({
       requestUrl: emailRoutePath,
       server: getServer(),
       formData: { email: 'test@example.com' },
@@ -109,8 +102,6 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('42')
     expect(summaryList).toHaveTextContent('Maximum number of people')
     expect(summaryList).toHaveTextContent('100')
-    expect(summaryList).toHaveTextContent('Waste water treatment works')
-    expect(summaryList).toHaveTextContent("I don't know yet")
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
 
@@ -128,9 +119,6 @@ describe('Check your answers page', () => {
     expect(
       getByRole(document, 'link', { name: 'Changemaximum number of people' })
     ).toHaveAttribute('href', '/quote/people-count')
-    expect(
-      getByRole(document, 'link', { name: 'Changewaste water treatment works' })
-    ).toHaveAttribute('href', '/quote/waste-water')
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email')

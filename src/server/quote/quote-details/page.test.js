@@ -63,8 +63,6 @@ describe('Quote details page', () => {
     expect(summaryList).toHaveTextContent('42')
     expect(summaryList).toHaveTextContent('Maximum number of people')
     expect(summaryList).toHaveTextContent('100')
-    expect(summaryList).toHaveTextContent('Waste water treatment works')
-    expect(summaryList).toHaveTextContent("I don't know yet")
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
     expect(summaryList).toHaveTextContent('Quote amount')
