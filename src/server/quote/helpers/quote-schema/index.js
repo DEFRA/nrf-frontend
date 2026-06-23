@@ -53,8 +53,6 @@ const peopleCountOptional = whenDevelopmentTypeOptional(
   'other-residential',
   peopleCountSchema.optional()
 )
-const wasteWaterTreatmentWorksId = joi.string().allow(null).required()
-const wasteWaterTreatmentWorksName = joi.string().allow(null).required()
 const email = emailValidation().extract('email')
 
 export const inProgressQuoteDataSchema = joi.object({
@@ -64,8 +62,6 @@ export const inProgressQuoteDataSchema = joi.object({
   developmentTypes: developmentTypes.optional().allow(null),
   residentialBuildingCount: residentialBuildingCountOptional,
   peopleCount: peopleCountOptional,
-  wasteWaterTreatmentWorksId: joi.string().optional().allow(null),
-  wasteWaterTreatmentWorksName: joi.string().optional().allow(null),
   email: email.optional().allow(null)
 })
 
@@ -77,7 +73,5 @@ export const completeQuoteDataSchema = joi.object({
   developmentTypes,
   residentialBuildingCount,
   peopleCount,
-  wasteWaterTreatmentWorksId,
-  wasteWaterTreatmentWorksName,
   email
 })

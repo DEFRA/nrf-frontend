@@ -68,8 +68,6 @@ describe('Save and retrieve quote data from session cache', () => {
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
             residentialBuildingCount: 10,
-            wasteWaterTreatmentWorksId: '101',
-            wasteWaterTreatmentWorksName: 'Great Billing WRC',
             email: 'test@example.com'
           }),
           set: vi.fn(),
@@ -82,12 +80,9 @@ describe('Save and retrieve quote data from session cache', () => {
         'quote',
         expect.objectContaining({
           boundaryGeojson: { type: 'NewPolygon' },
-          developmentTypes: null,
-          wasteWaterTreatmentWorksId: null,
-          wasteWaterTreatmentWorksName: null
+          developmentTypes: null
         })
       )
-      expect(request.yar.clear).toHaveBeenCalledWith('nearbyWasteWaterOptions')
     })
 
     it('does not clear dependent answers when saving a non-boundary property', () => {
@@ -98,8 +93,6 @@ describe('Save and retrieve quote data from session cache', () => {
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
             residentialBuildingCount: 10,
-            wasteWaterTreatmentWorksId: '101',
-            wasteWaterTreatmentWorksName: 'Great Billing WRC',
             email: 'test@example.com'
           }),
           set: vi.fn(),
@@ -112,9 +105,7 @@ describe('Save and retrieve quote data from session cache', () => {
         'quote',
         expect.objectContaining({
           email: 'new@example.com',
-          developmentTypes: ['housing'],
-          wasteWaterTreatmentWorksId: '101',
-          wasteWaterTreatmentWorksName: 'Great Billing WRC'
+          developmentTypes: ['housing']
         })
       )
       expect(request.yar.clear).not.toHaveBeenCalled()
@@ -173,8 +164,6 @@ describe('Save and retrieve quote data from session cache', () => {
       boundaryGeojson: { type: 'Polygon' },
       developmentTypes: ['housing'],
       residentialBuildingCount: 10,
-      wasteWaterTreatmentWorksId: '101',
-      wasteWaterTreatmentWorksName: 'Great Billing WRC',
       email: 'test@example.com'
     }
 
@@ -211,8 +200,6 @@ describe('Save and retrieve quote data from session cache', () => {
             developmentTypes: ['housing', 'other-residential'],
             residentialBuildingCount: 10,
             peopleCount: 5,
-            wasteWaterTreatmentWorksId: '101',
-            wasteWaterTreatmentWorksName: 'Great Billing WRC',
             email: 'test@example.com'
           })
         },
@@ -231,8 +218,6 @@ describe('Save and retrieve quote data from session cache', () => {
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing', 'other-residential'],
-            wasteWaterTreatmentWorksId: '101',
-            wasteWaterTreatmentWorksName: 'Great Billing WRC',
             email: 'test@example.com'
           })
         },

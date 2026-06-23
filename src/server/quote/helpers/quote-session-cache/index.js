@@ -2,7 +2,6 @@ import {
   inProgressQuoteDataSchema,
   completeQuoteDataSchema
 } from '../quote-schema/index.js'
-import { nearbyOptionsCacheKey } from '../../waste-water/constants.js'
 
 const cacheKey = 'quote'
 
@@ -27,11 +26,8 @@ export const saveQuoteDataToCache = (request, quoteData) => {
       boundaryGeojson: quoteData.boundaryEntryType
         ? null
         : quoteData.boundaryGeojson,
-      developmentTypes: null,
-      wasteWaterTreatmentWorksId: null,
-      wasteWaterTreatmentWorksName: null
+      developmentTypes: null
     }
-    request.yar.clear(nearbyOptionsCacheKey)
   }
 
   const updatedQuoteCache = { ...existingQuoteCache, ...quoteData }

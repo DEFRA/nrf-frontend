@@ -89,6 +89,6 @@ describe('People count page', () => {
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/waste-water')
+    expect(response.headers.location).toBe('/quote/email')
   })
 })

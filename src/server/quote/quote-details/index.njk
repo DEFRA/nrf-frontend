@@ -41,10 +41,6 @@
               value: { text: quote.development.peopleCount }
             } if quote.development.peopleCount,
             {
-              key: { text: "Waste water treatment works" },
-              value: { text: quote.wasteWaterTreatmentWorksName or "I don't know yet" }
-            } if quote.wasteWaterTreatmentWorksId is defined,
-            {
               key: { text: "Email address" },
               value: { text: quote.email.address }
             } if quote.email.address,
