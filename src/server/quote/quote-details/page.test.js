@@ -340,18 +340,4 @@ describe('Quote details page', () => {
       expect(calls[1]).toBe('false')
     })
   })
-
-  describe('security headers and rate limiting', () => {
-    it('should set Referrer-Policy: no-referrer so the token is not leaked', async () => {
-      mockGetQuote(mswServer)
-
-      const response = await getServer().inject({
-        method: 'GET',
-        url: requestUrl,
-        headers: humanClick
-      })
-
-      expect(response.headers['referrer-policy']).toBe('no-referrer')
-    })
-  })
 })

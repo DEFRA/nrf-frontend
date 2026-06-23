@@ -26,23 +26,11 @@ const invalidLinkFailAction = (request, h, err) => {
     .takeover()
 }
 
-// Prevent the token leaking via the Referer header to outbound links.
-const setReferrerPolicy = (request, h) => {
-  const { response } = request
-  if (!response.isBoom) {
-    response.header('Referrer-Policy', 'no-referrer')
-  }
-  return h.continue
-}
-
 export default [
   {
     method: 'GET',
     path: routePath,
     options: {
-      ext: {
-        onPreResponse: { method: setReferrerPolicy }
-      },
       validate: {
         params: joi.object({
           reference: joi

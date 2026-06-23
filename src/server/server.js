@@ -14,6 +14,7 @@ import { sessionCache } from './common/helpers/session-cache/session-cache.js'
 import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
 import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
+import { applySecurityHeaders } from './common/helpers/security-headers.js'
 import { defraIdentity } from './plugins/defra-identity.js'
 import { cookies } from './plugins/cookies.js'
 import { createLogger } from './common/helpers/logging/logger.js'
@@ -138,6 +139,7 @@ export async function createServer() {
   })
 
   server.ext('onPreResponse', catchAll)
+  server.ext('onPreResponse', applySecurityHeaders)
 
   return server
 }
