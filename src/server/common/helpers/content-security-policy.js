@@ -20,6 +20,7 @@ const contentSecurityPolicy = {
   plugin: Blankie,
   options: {
     defaultSrc: ['self'],
+    baseUri: ['self'],
     fontSrc: ['self'],
     connectSrc: [
       'self',
