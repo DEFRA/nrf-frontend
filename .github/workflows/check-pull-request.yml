@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Test code and Create Test Coverage Reports
         uses: actions/setup-node@v6
@@ -69,7 +69,7 @@ jobs:
       MAILINATOR_API_KEY: ${{ secrets.MAILINATOR_API_KEY }}
       NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
       - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
         with:
