@@ -1,6 +1,7 @@
 import { quoteController } from '../controller-get.js'
 import { quoteSubmitController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
+import { quoteSubmitRateLimitPre } from '../helpers/session-rate-limit/index.js'
 
 const routeId = 'check-your-answers'
 export const routePath = `/quote/${routeId}`
@@ -38,6 +39,9 @@ export default [
   {
     method: 'POST',
     path: routePath,
+    options: {
+      pre: [quoteSubmitRateLimitPre]
+    },
     ...quoteSubmitController
   }
 ]

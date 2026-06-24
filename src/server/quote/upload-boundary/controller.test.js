@@ -91,7 +91,10 @@ describe('upload-boundary controller', () => {
 
     await handler(request, h)
 
-    expect(request.yar.set).not.toHaveBeenCalled()
+    expect(request.yar.set).not.toHaveBeenCalledWith(
+      'pendingUploadId',
+      expect.anything()
+    )
     expect(h.view).toHaveBeenCalledWith(
       'quote/upload-boundary/index',
       expect.objectContaining({

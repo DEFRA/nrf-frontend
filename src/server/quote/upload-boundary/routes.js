@@ -1,4 +1,5 @@
 import { handler } from './controller.js'
+import { fileUploadRateLimitPre } from '../helpers/session-rate-limit/index.js'
 
 export const routePath = '/quote/upload-boundary'
 
@@ -22,6 +23,9 @@ export default [
   {
     method: 'GET',
     path: routePath,
+    options: {
+      pre: [fileUploadRateLimitPre]
+    },
     handler
   }
 ]
