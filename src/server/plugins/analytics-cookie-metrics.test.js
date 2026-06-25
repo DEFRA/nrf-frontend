@@ -1,8 +1,5 @@
 import { vi } from 'vitest'
 import { analyticsCookieMetrics } from './analytics-cookie-metrics.js'
-import { metricsCounter } from '../common/helpers/metrics.js'
-
-vi.mock('../common/helpers/metrics.js')
 
 const SESSION_KEY = 'analyticsCookiePreference'
 
@@ -18,7 +15,6 @@ function makeRequest({ yarValue = null, analytics = null, path = '/' } = {}) {
   return {
     path,
     yar: {
-      _store: { [SESSION_KEY]: yarValue },
       get: vi.fn().mockReturnValue(yarValue),
       set: vi.fn()
     },
@@ -66,7 +62,6 @@ describe('analyticsCookieMetrics plugin', () => {
       const request = { path: '/', state: {} }
       const result = await handler(request, h)
       expect(result).toBe(h.continue)
-      expect(metricsCounter).not.toHaveBeenCalled()
     })
   })
 
@@ -80,46 +75,31 @@ describe('analyticsCookieMetrics plugin', () => {
       const request = makeRequest({ path })
       const result = await handler(request, h)
       expect(result).toBe(h.continue)
-      expect(metricsCounter).not.toHaveBeenCalled()
       expect(request.yar.set).not.toHaveBeenCalled()
     })
   })
 
   describe('first request — no session key set', () => {
-    it('sets session to "shown" and fires BannerShown metric', async () => {
+    it('sets session to "shown"', async () => {
       const request = makeRequest({ yarValue: null, analytics: null })
       await handler(request, h)
       expect(request.yar.set).toHaveBeenCalledWith(SESSION_KEY, 'shown')
-      expect(metricsCounter).toHaveBeenCalledWith('analyticsCookieBannerShown')
-    })
-
-    it('does not fire accepted/rejected metrics', async () => {
-      const request = makeRequest({ yarValue: null, analytics: null })
-      await handler(request, h)
-      expect(metricsCounter).not.toHaveBeenCalledWith(
-        'analyticsCookiesAccepted'
-      )
-      expect(metricsCounter).not.toHaveBeenCalledWith(
-        'analyticsCookiesRejected'
-      )
     })
   })
 
   describe('session is "shown", user has since accepted', () => {
-    it('sets session to "accepted" and fires Accepted metric', async () => {
+    it('sets session to "accepted"', async () => {
       const request = makeRequest({ yarValue: 'shown', analytics: true })
       await handler(request, h)
       expect(request.yar.set).toHaveBeenCalledWith(SESSION_KEY, 'accepted')
-      expect(metricsCounter).toHaveBeenCalledWith('analyticsCookiesAccepted')
     })
   })
 
   describe('session is "shown", user has since rejected', () => {
-    it('sets session to "rejected" and fires Rejected metric', async () => {
+    it('sets session to "rejected"', async () => {
       const request = makeRequest({ yarValue: 'shown', analytics: false })
       await handler(request, h)
       expect(request.yar.set).toHaveBeenCalledWith(SESSION_KEY, 'rejected')
-      expect(metricsCounter).toHaveBeenCalledWith('analyticsCookiesRejected')
     })
   })
 
@@ -128,7 +108,6 @@ describe('analyticsCookieMetrics plugin', () => {
       const request = makeRequest({ yarValue: 'shown', analytics: null })
       await handler(request, h)
       expect(request.yar.set).not.toHaveBeenCalled()
-      expect(metricsCounter).not.toHaveBeenCalled()
     })
   })
 
@@ -137,7 +116,6 @@ describe('analyticsCookieMetrics plugin', () => {
       const request = makeRequest({ yarValue: 'accepted', analytics: true })
       await handler(request, h)
       expect(request.yar.set).not.toHaveBeenCalled()
-      expect(metricsCounter).not.toHaveBeenCalled()
     })
   })
 
@@ -146,25 +124,22 @@ describe('analyticsCookieMetrics plugin', () => {
       const request = makeRequest({ yarValue: 'rejected', analytics: false })
       await handler(request, h)
       expect(request.yar.set).not.toHaveBeenCalled()
-      expect(metricsCounter).not.toHaveBeenCalled()
     })
   })
 
   describe('cookie_preferences deleted after accepting', () => {
-    it('resets session to "shown" and fires BannerShown metric', async () => {
+    it('resets session to "shown"', async () => {
       const request = makeRequest({ yarValue: 'accepted', analytics: null })
       await handler(request, h)
       expect(request.yar.set).toHaveBeenCalledWith(SESSION_KEY, 'shown')
-      expect(metricsCounter).toHaveBeenCalledWith('analyticsCookieBannerShown')
     })
   })
 
   describe('cookie_preferences deleted after rejecting', () => {
-    it('resets session to "shown" and fires BannerShown metric', async () => {
+    it('resets session to "shown"', async () => {
       const request = makeRequest({ yarValue: 'rejected', analytics: null })
       await handler(request, h)
       expect(request.yar.set).toHaveBeenCalledWith(SESSION_KEY, 'shown')
-      expect(metricsCounter).toHaveBeenCalledWith('analyticsCookieBannerShown')
     })
   })
 

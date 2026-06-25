@@ -74,9 +74,12 @@ export async function createServer() {
     nunjucksConfig,
     Scooter,
     contentSecurityPolicy,
-    cookies,
-    analyticsCookieMetrics
+    cookies
   ])
+
+  if (config.get('isMetricsEnabled')) {
+    await server.register(analyticsCookieMetrics)
+  }
 
   // Store session cache on server app for auth plugin access
   server.app.sessionCache = server.cache({
