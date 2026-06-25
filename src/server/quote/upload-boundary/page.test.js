@@ -3,11 +3,14 @@ import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { initiateUpload } from '../../common/services/uploader.js'
+import { config } from '../../../config/config.js'
 
 import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 
 vi.mock('../helpers/quote-session-cache/index.js')
 vi.mock('../../common/services/uploader.js')
+
+const MAX = config.get('sessionRateLimit.maxRequestsPerSession')
 
 describe('Upload boundary page', () => {
   const getServer = setupTestServer()
@@ -97,5 +100,28 @@ describe('Upload boundary page', () => {
       )
     ).toBeInTheDocument()
     expect(document.querySelector('main form')).not.toBeInTheDocument()
+  })
+
+  it('returns 429 once the session has hit the request limit', async () => {
+    const first = await getServer().inject({ method: 'GET', url: routePath })
+    const cookie = []
+      .concat(first.headers['set-cookie'])
+      .map((c) => c.split(';')[0])
+      .join('; ')
+
+    for (let i = 1; i < MAX; i++) {
+      await getServer().inject({
+        method: 'GET',
+        url: routePath,
+        headers: { cookie }
+      })
+    }
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: routePath,
+      headers: { cookie }
+    })
+    expect(response.statusCode).toBe(429)
   })
 })

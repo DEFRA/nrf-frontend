@@ -11,6 +11,15 @@ describe('#contentSecurityPolicy config variations', () => {
     vi.resetModules()
   })
 
+  test('should always include base-uri self', async () => {
+    mockConfigGet.mockImplementation(() => null)
+
+    const { contentSecurityPolicy } =
+      await import('./content-security-policy.js')
+
+    expect(contentSecurityPolicy.options.baseUri).toEqual(['self'])
+  })
+
   test('should include cdpUploader url in formAction when configured', async () => {
     mockConfigGet.mockImplementation((key) => {
       if (key === 'cdpUploader.url') {

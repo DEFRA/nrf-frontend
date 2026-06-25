@@ -20,4 +20,9 @@ describe('#contentSecurityPolicy', () => {
 
     expect(resp.headers['content-security-policy']).toBeDefined()
   })
+
+  test('Should include base-uri self', async () => {
+    const resp = await server.inject({ method: 'GET', url: '/' })
+    expect(resp.headers['content-security-policy']).toContain("base-uri 'self'")
+  })
 })

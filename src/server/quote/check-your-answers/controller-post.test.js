@@ -1,71 +1,61 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
-import { quoteSubmitController } from './controller-post.js'
+import { routePath } from './routes.js'
+import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
-import {
-  clearQuoteDataFromCache,
-  getCompleteQuoteDataFromCache
-} from '../helpers/quote-session-cache/index.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
 const backendUrl = config.get('backend').apiUrl
+const MAX = config.get('sessionRateLimit.maxRequestsPerSession')
 
-vi.mock('../helpers/quote-session-cache/index.js', () => ({
-  getCompleteQuoteDataFromCache: vi.fn(),
-  clearQuoteDataFromCache: vi.fn()
-}))
-
-const server = setupMswServer()
+const mswServer = setupMswServer()
 
 describe('quoteSubmitController', () => {
-  it('should post the complete quote data to the backend and redirect with the reference', async () => {
-    const quoteData = {
-      boundaryEntryType: 'draw',
-      developmentTypes: ['housing'],
-      residentialBuildingCount: 10,
-      email: 'test@example.com'
-    }
-    getCompleteQuoteDataFromCache.mockReturnValue(quoteData)
+  const getServer = setupTestServer()
+  let sessionCookie
 
-    let capturedBody
-    server.use(
-      http.post(`${backendUrl}/quotes`, async ({ request: req }) => {
-        capturedBody = await req.json()
-        return HttpResponse.json({ reference: 'REF-001002' })
-      })
-    )
-
-    const codeResponse = Symbol('codeResponse')
-    const h = {
-      redirect: vi
-        .fn()
-        .mockReturnValue({ code: vi.fn().mockReturnValue(codeResponse) })
-    }
-    const request = {}
-
-    const result = await quoteSubmitController.handler(request, h)
-
-    expect(getCompleteQuoteDataFromCache).toHaveBeenCalledWith(request)
-    expect(capturedBody).toEqual(quoteData)
-    expect(clearQuoteDataFromCache).toHaveBeenCalledWith(request)
-    expect(h.redirect).toHaveBeenCalledWith(
-      '/quote/confirmation?reference=REF-001002'
-    )
-    expect(h.redirect().code).toHaveBeenCalledWith(303)
-    expect(result).toBe(codeResponse)
-  })
-
-  it('should propagate errors thrown by the backend', async () => {
-    getCompleteQuoteDataFromCache.mockReturnValue({ email: 'test@example.com' })
-
-    server.use(
+  beforeEach(async () => {
+    sessionCookie = await withValidQuoteSession(getServer())
+    mswServer.use(
       http.post(`${backendUrl}/quotes`, () =>
-        HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+        HttpResponse.json({ reference: 'NRF-123456' })
       )
     )
+  })
 
-    const h = { redirect: vi.fn() }
+  it('redirects to the confirmation page on successful submit', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: {},
+      cookie: sessionCookie
+    })
 
-    await expect(quoteSubmitController.handler({}, h)).rejects.toThrow()
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/quote/confirmation?reference=NRF-123456'
+    )
+  })
+
+  it('returns 429 once the session has hit the request limit', async () => {
+    for (let i = 0; i < MAX; i++) {
+      await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: {},
+        cookie: sessionCookie
+      })
+    }
+
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: {},
+      cookie: sessionCookie
+    })
+
+    expect(response.statusCode).toBe(429)
   })
 })

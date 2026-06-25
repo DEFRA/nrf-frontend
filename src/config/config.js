@@ -10,6 +10,9 @@ const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 
+const SESSION_RATE_LIMIT_MAX = 60
+const SESSION_RATE_LIMIT_MAX_TEST = 35
+
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 
@@ -203,6 +206,14 @@ export const config = convict({
         default: isProduction,
         env: 'SESSION_COOKIE_SECURE'
       }
+    }
+  },
+  sessionRateLimit: {
+    maxRequestsPerSession: {
+      doc: 'Maximum requests per session per hour for rate-limited endpoints (file upload, quote submit)',
+      format: Number,
+      default: isTest ? SESSION_RATE_LIMIT_MAX_TEST : SESSION_RATE_LIMIT_MAX,
+      env: 'SESSION_RATE_LIMIT_MAX_REQUESTS'
     }
   },
   quoteDetailsSession: {
