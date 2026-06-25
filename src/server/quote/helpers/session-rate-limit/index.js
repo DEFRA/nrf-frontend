@@ -23,6 +23,9 @@ async function checkSessionRateLimit(request, { sessionKey, metricName }) {
     return true
   }
 
+  // Emits once per contiguous burst crossing the threshold, but may re-emit if
+  // old timestamps age out of the window and the count drops back below 29 then
+  // rises again. Acceptable for a soft early-warning signal.
   if (withinWindow.length === METRIC_THRESHOLD_REQUESTS - 1) {
     await metricsCounter(metricName)
   }
@@ -47,7 +50,7 @@ function rateLimitPre({ sessionKey, metricName, logMessage }) {
         metricName
       })
       if (limited) {
-        createLogger().error({ sessionId: request.yar.id }, logMessage)
+        createLogger().warn({ sessionId: request.yar.id }, logMessage)
         return h
           .response({ message: 'Too many requests' })
           .code(statusCodes.tooManyRequests)

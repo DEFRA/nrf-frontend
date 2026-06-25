@@ -24,6 +24,9 @@ export default [
     method: 'GET',
     path: routePath,
     options: {
+      // Rate limit on the GET because the controller calls initiateUpload() on
+      // every page load — each visit starts a new CDP upload session, so this
+      // accurately limits upload initiations rather than passive page views.
       pre: [fileUploadRateLimitPre]
     },
     handler
