@@ -6,12 +6,12 @@ const SESSION_KEY = 'analyticsCookiePreference'
 export const analyticsCookieMetrics = {
   name: 'analytics-cookie-metrics',
   register(server) {
-    const EXCLUDED_PATHS = ['/health', '/version', '/favicon.ico']
+    const EXCLUDED_PATHS = new Set(['/health', '/version', '/favicon.ico'])
 
     server.ext('onPreHandler', async (request, h) => {
       if (
         !request.yar ||
-        EXCLUDED_PATHS.includes(request.path) ||
+        EXCLUDED_PATHS.has(request.path) ||
         request.path.startsWith('/public/')
       ) {
         return h.continue
@@ -20,14 +20,17 @@ export const analyticsCookieMetrics = {
       const analyticsPref = request.yar.get(SESSION_KEY)
       const cookiePolicy = getCookiePreferences(request)
 
-      if (
-        analyticsPref === null ||
-        (['accepted', 'rejected'].includes(analyticsPref) &&
-          cookiePolicy.analytics === null)
-      ) {
+      const cookieDeleted =
+        ['accepted', 'rejected'].includes(analyticsPref) &&
+        cookiePolicy.analytics === null
+
+      if (analyticsPref === null || cookieDeleted) {
         request.yar.set(SESSION_KEY, 'shown')
         await metricsCounter('analyticsCookieBannerShown')
-      } else if (analyticsPref === 'shown' && cookiePolicy.analytics !== null) {
+        return h.continue
+      }
+
+      if (analyticsPref === 'shown' && cookiePolicy.analytics !== null) {
         if (cookiePolicy.analytics === true) {
           request.yar.set(SESSION_KEY, 'accepted')
           await metricsCounter('analyticsCookiesAccepted')
