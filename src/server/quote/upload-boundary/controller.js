@@ -5,7 +5,6 @@ import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../helpers/form-validation-session/index.js'
-
 const routeId = 'upload-boundary'
 
 export async function handler(request, h) {
