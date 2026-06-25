@@ -17,6 +17,7 @@ import { contentSecurityPolicy } from './common/helpers/content-security-policy.
 import { applySecurityHeaders } from './common/helpers/security-headers.js'
 import { defraIdentity } from './plugins/defra-identity.js'
 import { cookies } from './plugins/cookies.js'
+import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import Bell from '@hapi/bell'
 import { csrf } from './common/helpers/csrf.js'
@@ -73,7 +74,8 @@ export async function createServer() {
     nunjucksConfig,
     Scooter,
     contentSecurityPolicy,
-    cookies
+    cookies,
+    analyticsCookieMetrics
   ])
 
   // Store session cache on server app for auth plugin access
