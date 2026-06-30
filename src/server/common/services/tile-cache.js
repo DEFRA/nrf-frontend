@@ -6,7 +6,7 @@ const logger = createLogger()
 const keyPrefix = 'tile:'
 const tilePathPattern = /^tiles\/[^/]+\/\d+\/\d+\/\d+\.mvt$/
 
-let client
+let client = null
 
 function getClient() {
   if (!client) {
@@ -16,7 +16,7 @@ function getClient() {
 }
 
 export function resetTileCacheClient() {
-  client = undefined
+  client = null
 }
 
 export function isCacheableTilePath(path) {
