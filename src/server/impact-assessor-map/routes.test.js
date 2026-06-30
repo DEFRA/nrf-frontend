@@ -13,10 +13,34 @@ vi.mock('../common/services/ia-map-tile-server.js', () => ({
   getMapTile: vi.fn()
 }))
 
+const tileCacheConfig = vi.hoisted(() => ({ enabled: true }))
+
+vi.mock('../../config/config.js', () => ({
+  config: {
+    get: vi.fn((key) => {
+      if (key === 'map.tileCacheEnabled') {
+        return tileCacheConfig.enabled
+      }
+      if (key === 'map.tileCacheControlMaxAge') {
+        return 86400
+      }
+      return null
+    })
+  }
+}))
+
+vi.mock('../common/services/tile-cache.js', () => ({
+  getCachedTile: vi.fn(),
+  setCachedTile: vi.fn(),
+  isCacheableTilePath: vi.fn((path) => /\.mvt$/.test(path))
+}))
+
 const { default: routes, routePath } = await import('./routes.js')
 import { getMapTile } from '../common/services/ia-map-tile-server.js'
+import { getCachedTile, setCachedTile } from '../common/services/tile-cache.js'
 
 const handler = routes[0].handler
+const tileCacheControl = 'public, max-age=86400, immutable'
 
 function createMockRequest({ path = '', query = {} } = {}) {
   return {
@@ -69,6 +93,7 @@ function createFetchResponse({
 describe('impact-assessor-map routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    tileCacheConfig.enabled = true
   })
 
   it('exports expected route configuration', () => {
@@ -78,7 +103,7 @@ describe('impact-assessor-map routes', () => {
     expect(routes[0].options.auth).toBe(false)
   })
 
-  it('proxies successful upstream response with headers', async () => {
+  it('proxies non-tile responses with upstream headers', async () => {
     vi.mocked(getMapTile).mockResolvedValue(
       createFetchResponse({
         body: 'tile-binary',
@@ -88,20 +113,110 @@ describe('impact-assessor-map routes', () => {
     )
 
     const request = createMockRequest({
-      path: 'tiles/edp/7/1/2.mvt',
+      path: 'boundary-validation',
       query: { token: 'abc', v: '1' }
     })
     const h = createMockH()
 
     await handler(request, h)
 
-    expect(getMapTile).toHaveBeenCalledWith('tiles/edp/7/1/2.mvt', request)
+    expect(getMapTile).toHaveBeenCalledWith('boundary-validation', request)
+    expect(getCachedTile).not.toHaveBeenCalled()
     expect(h.response).toHaveBeenCalledWith(expect.any(Buffer))
     expect(h._response.type).toHaveBeenCalledWith('application/x-protobuf')
     expect(h._response.header).toHaveBeenCalledWith(
       'cache-control',
       'max-age=600'
     )
+  })
+
+  it('serves a cached tile without calling upstream', async () => {
+    const cached = Buffer.from('cached-tile')
+    vi.mocked(getCachedTile).mockResolvedValue(cached)
+
+    const h = createMockH()
+    await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
+
+    expect(getMapTile).not.toHaveBeenCalled()
+    expect(h.response).toHaveBeenCalledWith(cached)
+    expect(h._response.type).toHaveBeenCalledWith(
+      'application/vnd.mapbox-vector-tile'
+    )
+    expect(h._response.header).toHaveBeenCalledWith(
+      'cache-control',
+      tileCacheControl
+    )
+  })
+
+  it('fetches, caches and labels a tile on cache miss', async () => {
+    vi.mocked(getCachedTile).mockResolvedValue(null)
+    vi.mocked(getMapTile).mockResolvedValue(
+      createFetchResponse({ body: 'fresh-tile' })
+    )
+
+    const h = createMockH()
+    await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
+
+    expect(getMapTile).toHaveBeenCalled()
+    expect(setCachedTile).toHaveBeenCalledWith(
+      'tiles/edp/7/1/2.mvt',
+      expect.any(Buffer)
+    )
+    expect(h._response.type).toHaveBeenCalledWith(
+      'application/vnd.mapbox-vector-tile'
+    )
+    expect(h._response.header).toHaveBeenCalledWith(
+      'cache-control',
+      tileCacheControl
+    )
+  })
+
+  it('keys the cache on the tile path only, ignoring query params', async () => {
+    vi.mocked(getCachedTile).mockResolvedValue(null)
+    vi.mocked(getMapTile).mockResolvedValue(
+      createFetchResponse({ body: 'fresh-tile' })
+    )
+
+    const h = createMockH()
+    const request = createMockRequest({
+      path: 'tiles/edp/7/1/2.mvt',
+      query: { token: 'abc', variant: 'full' }
+    })
+    await handler(request, h)
+
+    expect(getMapTile).toHaveBeenCalledWith('tiles/edp/7/1/2.mvt', request)
+    expect(getCachedTile).toHaveBeenCalledWith('tiles/edp/7/1/2.mvt')
+    expect(setCachedTile).toHaveBeenCalledWith(
+      'tiles/edp/7/1/2.mvt',
+      expect.any(Buffer)
+    )
+  })
+
+  it('does not cache non-OK tile responses', async () => {
+    vi.mocked(getCachedTile).mockResolvedValue(null)
+    vi.mocked(getMapTile).mockResolvedValue(
+      createFetchResponse({ ok: false, status: 404, body: 'missing' })
+    )
+
+    const h = createMockH()
+    await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
+
+    expect(setCachedTile).not.toHaveBeenCalled()
+    expect(h._response.code).toHaveBeenCalledWith(404)
+  })
+
+  it('bypasses the cache when tile caching is disabled', async () => {
+    tileCacheConfig.enabled = false
+    vi.mocked(getMapTile).mockResolvedValue(
+      createFetchResponse({ contentType: 'application/x-protobuf' })
+    )
+
+    const h = createMockH()
+    await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
+
+    expect(getCachedTile).not.toHaveBeenCalled()
+    expect(setCachedTile).not.toHaveBeenCalled()
+    expect(h._response.type).toHaveBeenCalledWith('application/x-protobuf')
   })
 
   it('uses defaults when upstream headers are absent', async () => {
