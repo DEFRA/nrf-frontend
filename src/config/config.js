@@ -432,6 +432,18 @@ export const config = convict({
       format: String,
       default: '/public/data/vts/OS_VTS_3857_Outdoor.json',
       env: 'MAP_DEFAULT_STYLE_URL'
+    },
+    tileRedisCacheTtlSeconds: {
+      doc: 'Time-to-live, in seconds, for cached vector tiles stored in Redis.',
+      format: Number,
+      default: 86400,
+      env: 'MAP_TILE_REDIS_CACHE_TTL_SECONDS'
+    },
+    tileCacheControlMaxAge: {
+      doc: 'max-age, in seconds, sent on the Cache-Control header for vector tile responses.',
+      format: Number,
+      default: 86400,
+      env: 'MAP_TILE_CACHE_CONTROL_MAX_AGE'
     }
   },
   gtmId: {
