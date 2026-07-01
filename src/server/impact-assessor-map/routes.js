@@ -26,10 +26,6 @@ function tileCacheControl() {
   return `public, max-age=${config.get('map.tileCacheControlMaxAge')}, immutable`
 }
 
-function isTileCachingEnabled(path) {
-  return config.get('map.tileCacheEnabled') && isCacheableTilePath(path)
-}
-
 const proxyHandler = {
   method: 'GET',
   path: `${routePath}/{path*}`,
@@ -38,7 +34,7 @@ const proxyHandler = {
   },
   async handler(request, h) {
     const path = request.params.path || ''
-    const cacheable = isTileCachingEnabled(path)
+    const cacheable = isCacheableTilePath(path)
 
     try {
       if (cacheable) {

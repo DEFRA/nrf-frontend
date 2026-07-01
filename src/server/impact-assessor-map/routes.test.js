@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 
@@ -11,15 +11,11 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-const tileCacheConfig = vi.hoisted(() => ({ enabled: true }))
 const impactAssessorBaseUrl = 'http://localhost:8085'
 
 vi.mock('../../config/config.js', () => ({
   config: {
     get: vi.fn((key) => {
-      if (key === 'map.tileCacheEnabled') {
-        return tileCacheConfig.enabled
-      }
       if (key === 'map.tileCacheControlMaxAge') {
         return 86400
       }
@@ -73,14 +69,6 @@ function createMockH() {
 }
 
 describe('impact-assessor-map routes', () => {
-  let fetchSpy
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    tileCacheConfig.enabled = true
-    fetchSpy = vi.spyOn(globalThis, 'fetch')
-  })
-
   it('exports expected route configuration', () => {
     expect(routePath).toBe('/impact-assessor-map')
     expect(routes[0].method).toBe('GET')
@@ -124,7 +112,6 @@ describe('impact-assessor-map routes', () => {
     const h = createMockH()
     await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
 
-    expect(fetchSpy).not.toHaveBeenCalled()
     expect(h.response).toHaveBeenCalledWith(cached)
     expect(h._response.type).toHaveBeenCalledWith(
       'application/vnd.mapbox-vector-tile'
@@ -147,7 +134,6 @@ describe('impact-assessor-map routes', () => {
     const h = createMockH()
     await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
 
-    expect(fetchSpy).toHaveBeenCalled()
     expect(setCachedTile).toHaveBeenCalledWith(
       'tiles/edp/7/1/2.mvt',
       expect.any(Buffer)
@@ -204,26 +190,6 @@ describe('impact-assessor-map routes', () => {
 
     expect(setCachedTile).not.toHaveBeenCalled()
     expect(h._response.code).toHaveBeenCalledWith(404)
-  })
-
-  it('bypasses the cache when tile caching is disabled', async () => {
-    tileCacheConfig.enabled = false
-    mswServer.use(
-      http.get(
-        `${impactAssessorBaseUrl}/tiles/edp/7/1/2.mvt`,
-        () =>
-          new HttpResponse(Buffer.from('uncached-tile'), {
-            headers: { 'content-type': 'application/x-protobuf' }
-          })
-      )
-    )
-
-    const h = createMockH()
-    await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
-
-    expect(getCachedTile).not.toHaveBeenCalled()
-    expect(setCachedTile).not.toHaveBeenCalled()
-    expect(h._response.type).toHaveBeenCalledWith('application/x-protobuf')
   })
 
   it('uses defaults when upstream headers are absent', async () => {

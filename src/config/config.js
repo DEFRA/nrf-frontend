@@ -433,12 +433,6 @@ export const config = convict({
       default: '/public/data/vts/OS_VTS_3857_Outdoor.json',
       env: 'MAP_DEFAULT_STYLE_URL'
     },
-    tileCacheEnabled: {
-      doc: 'Cache impact assessor vector tiles (.mvt) in Redis to avoid repeated upstream fetches.',
-      format: Boolean,
-      default: true,
-      env: 'MAP_TILE_CACHE_ENABLED'
-    },
     tileRedisCacheTtlSeconds: {
       doc: 'Time-to-live, in seconds, for cached vector tiles stored in Redis.',
       format: Number,
