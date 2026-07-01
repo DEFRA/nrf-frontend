@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const mockClient = vi.hoisted(() => ({
   getBuffer: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock('../../../config/config.js', () => ({
       if (key === 'redis') {
         return { host: 'localhost' }
       }
-      if (key === 'map.tileCacheTtlSeconds') {
+      if (key === 'map.tileRedisCacheTtlSeconds') {
         return 86400
       }
       return null
@@ -36,27 +36,24 @@ const {
 } = await import('./tile-cache.js')
 
 describe('tile-cache', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   afterEach(() => {
     resetTileCacheClient()
   })
 
   describe('isCacheableTilePath', () => {
-    it.each([
-      'tiles/edp_boundaries/8/130/85.mvt',
-      'tiles/lpa_boundaries/12/2048/1361.mvt'
-    ])('accepts tile path %s', (path) => {
-      expect(isCacheableTilePath(path)).toBe(true)
-    })
+    it.each(['tiles/edp_boundaries/8/130/85.mvt'])(
+      'accepts tile path %s',
+      (path) => {
+        expect(isCacheableTilePath(path)).toBe(true)
+      }
+    )
 
     it.each([
       '',
       'boundary-validation',
       'tiles/edp_boundaries/8/130/85.json',
-      'tiles/edp_boundaries/8/130.mvt'
+      'tiles/edp_boundaries/8/130.mvt',
+      'tiles/lpa_boundaries/12/2048/1361.mvt'
     ])('rejects non-tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(false)
     })

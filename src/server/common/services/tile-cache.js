@@ -4,7 +4,7 @@ import { buildRedisClient } from '../helpers/redis-client.js'
 
 const logger = createLogger()
 const keyPrefix = 'tile:'
-const tilePathPattern = /^tiles\/[^/]+\/\d+\/\d+\/\d+\.mvt$/
+const tilePathPattern = /^tiles\/edp_boundaries\/\d+\/\d+\/\d+\.mvt$/
 
 let client = null
 
@@ -38,7 +38,7 @@ export async function setCachedTile(path, buffer) {
       `${keyPrefix}${path}`,
       buffer,
       'EX',
-      config.get('map.tileCacheTtlSeconds')
+      config.get('map.tileRedisCacheTtlSeconds')
     )
   } catch (err) {
     logger.error(err, `Tile cache write failed for ${path}`)

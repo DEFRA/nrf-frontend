@@ -137,7 +137,7 @@ export async function createServer() {
     const { response } = request
     if (response.isBoom) {
       response.output.headers['cache-control'] = 'no-store, must-revalidate'
-    } else if (response.headers?.['cache-control']?.startsWith('public')) {
+    } else if (response.headers?.['cache-control']?.includes('public')) {
       // Route opted into public caching (e.g. cached map tiles); leave it as-is.
     } else {
       response.header('Cache-Control', 'no-store, must-revalidate')

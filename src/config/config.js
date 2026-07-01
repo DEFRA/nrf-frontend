@@ -439,11 +439,11 @@ export const config = convict({
       default: true,
       env: 'MAP_TILE_CACHE_ENABLED'
     },
-    tileCacheTtlSeconds: {
+    tileRedisCacheTtlSeconds: {
       doc: 'Time-to-live, in seconds, for cached vector tiles stored in Redis.',
       format: Number,
       default: 86400,
-      env: 'MAP_TILE_CACHE_TTL_SECONDS'
+      env: 'MAP_TILE_REDIS_CACHE_TTL_SECONDS'
     },
     tileCacheControlMaxAge: {
       doc: 'max-age, in seconds, sent on the Cache-Control header for vector tile responses.',

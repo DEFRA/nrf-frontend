@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 
 const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
@@ -9,11 +11,8 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('../common/services/ia-map-tile-server.js', () => ({
-  getMapTile: vi.fn()
-}))
-
 const tileCacheConfig = vi.hoisted(() => ({ enabled: true }))
+const impactAssessorBaseUrl = 'http://localhost:8085'
 
 vi.mock('../../config/config.js', () => ({
   config: {
@@ -23,6 +22,15 @@ vi.mock('../../config/config.js', () => ({
       }
       if (key === 'map.tileCacheControlMaxAge') {
         return 86400
+      }
+      if (key === 'map.impactAssessorBaseUrl') {
+        return impactAssessorBaseUrl
+      }
+      if (key === 'tracing.header') {
+        return 'x-cdp-request-id'
+      }
+      if (key === 'map.impactAssessorApiKey') {
+        return ''
       }
       return null
     })
@@ -35,9 +43,11 @@ vi.mock('../common/services/tile-cache.js', () => ({
   isCacheableTilePath: vi.fn((path) => /\.mvt$/.test(path))
 }))
 
+const mswServer = setupMswServer()
+
 const { default: routes, routePath } = await import('./routes.js')
-import { getMapTile } from '../common/services/ia-map-tile-server.js'
-import { getCachedTile, setCachedTile } from '../common/services/tile-cache.js'
+const { getCachedTile, setCachedTile } =
+  await import('../common/services/tile-cache.js')
 
 const handler = routes[0].handler
 const tileCacheControl = 'public, max-age=86400, immutable'
@@ -62,38 +72,13 @@ function createMockH() {
   }
 }
 
-function createFetchResponse({
-  ok = true,
-  status = 200,
-  body = 'payload',
-  contentType = 'application/json',
-  cacheControl = 'max-age=120'
-} = {}) {
-  return {
-    ok,
-    status,
-    headers: {
-      get: vi.fn((name) => {
-        if (name === 'content-type') {
-          return contentType
-        }
-
-        if (name === 'cache-control') {
-          return cacheControl
-        }
-
-        return null
-      })
-    },
-    arrayBuffer: vi.fn(async () => Buffer.from(body)),
-    json: vi.fn(async () => ({ ok: true }))
-  }
-}
-
 describe('impact-assessor-map routes', () => {
+  let fetchSpy
+
   beforeEach(() => {
     vi.clearAllMocks()
     tileCacheConfig.enabled = true
+    fetchSpy = vi.spyOn(globalThis, 'fetch')
   })
 
   it('exports expected route configuration', () => {
@@ -104,11 +89,14 @@ describe('impact-assessor-map routes', () => {
   })
 
   it('proxies non-tile responses with upstream headers', async () => {
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({
-        body: 'tile-binary',
-        contentType: 'application/x-protobuf',
-        cacheControl: 'max-age=600'
+    mswServer.use(
+      http.get(`${impactAssessorBaseUrl}/boundary-validation`, () => {
+        return new HttpResponse(Buffer.from('tile-binary'), {
+          headers: {
+            'content-type': 'application/x-protobuf',
+            'cache-control': 'max-age=600'
+          }
+        })
       })
     )
 
@@ -120,7 +108,6 @@ describe('impact-assessor-map routes', () => {
 
     await handler(request, h)
 
-    expect(getMapTile).toHaveBeenCalledWith('boundary-validation', request)
     expect(getCachedTile).not.toHaveBeenCalled()
     expect(h.response).toHaveBeenCalledWith(expect.any(Buffer))
     expect(h._response.type).toHaveBeenCalledWith('application/x-protobuf')
@@ -137,7 +124,7 @@ describe('impact-assessor-map routes', () => {
     const h = createMockH()
     await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
 
-    expect(getMapTile).not.toHaveBeenCalled()
+    expect(fetchSpy).not.toHaveBeenCalled()
     expect(h.response).toHaveBeenCalledWith(cached)
     expect(h._response.type).toHaveBeenCalledWith(
       'application/vnd.mapbox-vector-tile'
@@ -150,14 +137,17 @@ describe('impact-assessor-map routes', () => {
 
   it('fetches, caches and labels a tile on cache miss', async () => {
     vi.mocked(getCachedTile).mockResolvedValue(null)
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({ body: 'fresh-tile' })
+    mswServer.use(
+      http.get(
+        `${impactAssessorBaseUrl}/tiles/edp/7/1/2.mvt`,
+        () => new HttpResponse(Buffer.from('fresh-tile'))
+      )
     )
 
     const h = createMockH()
     await handler(createMockRequest({ path: 'tiles/edp/7/1/2.mvt' }), h)
 
-    expect(getMapTile).toHaveBeenCalled()
+    expect(fetchSpy).toHaveBeenCalled()
     expect(setCachedTile).toHaveBeenCalledWith(
       'tiles/edp/7/1/2.mvt',
       expect.any(Buffer)
@@ -173,8 +163,15 @@ describe('impact-assessor-map routes', () => {
 
   it('keys the cache on the tile path only, ignoring query params', async () => {
     vi.mocked(getCachedTile).mockResolvedValue(null)
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({ body: 'fresh-tile' })
+    let capturedUrl
+    mswServer.use(
+      http.get(
+        `${impactAssessorBaseUrl}/tiles/edp/7/1/2.mvt`,
+        ({ request: req }) => {
+          capturedUrl = new URL(req.url)
+          return new HttpResponse(Buffer.from('fresh-tile'))
+        }
+      )
     )
 
     const h = createMockH()
@@ -184,7 +181,8 @@ describe('impact-assessor-map routes', () => {
     })
     await handler(request, h)
 
-    expect(getMapTile).toHaveBeenCalledWith('tiles/edp/7/1/2.mvt', request)
+    expect(capturedUrl.searchParams.get('token')).toBe('abc')
+    expect(capturedUrl.searchParams.get('variant')).toBe('full')
     expect(getCachedTile).toHaveBeenCalledWith('tiles/edp/7/1/2.mvt')
     expect(setCachedTile).toHaveBeenCalledWith(
       'tiles/edp/7/1/2.mvt',
@@ -194,8 +192,11 @@ describe('impact-assessor-map routes', () => {
 
   it('does not cache non-OK tile responses', async () => {
     vi.mocked(getCachedTile).mockResolvedValue(null)
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({ ok: false, status: 404, body: 'missing' })
+    mswServer.use(
+      http.get(
+        `${impactAssessorBaseUrl}/tiles/edp/7/1/2.mvt`,
+        () => new HttpResponse('missing', { status: 404 })
+      )
     )
 
     const h = createMockH()
@@ -207,8 +208,14 @@ describe('impact-assessor-map routes', () => {
 
   it('bypasses the cache when tile caching is disabled', async () => {
     tileCacheConfig.enabled = false
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({ contentType: 'application/x-protobuf' })
+    mswServer.use(
+      http.get(
+        `${impactAssessorBaseUrl}/tiles/edp/7/1/2.mvt`,
+        () =>
+          new HttpResponse(Buffer.from('uncached-tile'), {
+            headers: { 'content-type': 'application/x-protobuf' }
+          })
+      )
     )
 
     const h = createMockH()
@@ -220,29 +227,26 @@ describe('impact-assessor-map routes', () => {
   })
 
   it('uses defaults when upstream headers are absent', async () => {
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({
-        body: 'default-headers',
-        contentType: null,
-        cacheControl: null
-      })
+    mswServer.use(
+      http.get(
+        impactAssessorBaseUrl,
+        () => new HttpResponse(Buffer.from('default-headers'))
+      )
     )
 
     const h = createMockH()
     await handler(createMockRequest(), h)
 
-    expect(getMapTile).toHaveBeenCalledWith('', expect.any(Object))
     expect(h._response.type).toHaveBeenCalledWith('')
     expect(h._response.header).toHaveBeenCalledWith('cache-control', 'no-cache')
   })
 
   it('passes through non-OK upstream status and body', async () => {
-    vi.mocked(getMapTile).mockResolvedValue(
-      createFetchResponse({
-        ok: false,
-        status: 404,
-        body: 'missing'
-      })
+    mswServer.use(
+      http.get(
+        `${impactAssessorBaseUrl}/missing/path`,
+        () => new HttpResponse('missing', { status: 404 })
+      )
     )
 
     const h = createMockH()
@@ -253,8 +257,11 @@ describe('impact-assessor-map routes', () => {
   })
 
   it('returns bad gateway and logs network errors', async () => {
-    const networkError = Object.assign(new Error('boom'), { code: 'ENOTFOUND' })
-    vi.mocked(getMapTile).mockRejectedValue(networkError)
+    mswServer.use(
+      http.get(`${impactAssessorBaseUrl}/tiles/fail.mvt`, () =>
+        HttpResponse.error()
+      )
+    )
 
     const h = createMockH()
     await handler(createMockRequest({ path: 'tiles/fail.mvt' }), h)
@@ -264,7 +271,7 @@ describe('impact-assessor-map routes', () => {
     )
     expect(h._response.code).toHaveBeenCalledWith(502)
     expect(mockLogger.error).toHaveBeenCalledWith(
-      networkError,
+      expect.any(Error),
       'Impact assessor proxy error for tiles/fail.mvt'
     )
   })
