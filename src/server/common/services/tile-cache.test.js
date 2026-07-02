@@ -72,7 +72,10 @@ describe('tile-cache', () => {
 
       const result = await getCachedTile('tiles/edp_boundaries/8/130/85.mvt')
 
-      expect(buildRedisClient).toHaveBeenCalledWith({ host: 'localhost' })
+      expect(buildRedisClient).toHaveBeenCalledWith({
+        host: 'localhost',
+        useSingleInstanceCache: true
+      })
       expect(mockClient.getBuffer).toHaveBeenCalledWith(
         'tile:tiles/edp_boundaries/8/130/85.mvt'
       )

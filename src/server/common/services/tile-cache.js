@@ -10,7 +10,15 @@ let client = null
 
 function getClient() {
   if (!client) {
-    client = buildRedisClient(config.get('redis'))
+    // Force a single-instance connection regardless of environment. Tile cache
+    // operations include KEYS + multi-key DEL in clearTileCache(), which are
+    // not cluster-safe: KEYS only fans to one shard and DEL across multiple
+    // keys triggers CROSSSLOT errors on ioredis Cluster. A single-node client
+    // hits the Elasticache primary endpoint and avoids both issues.
+    client = buildRedisClient({
+      ...config.get('redis'),
+      useSingleInstanceCache: true
+    })
   }
   return client
 }
