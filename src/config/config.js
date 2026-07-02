@@ -393,6 +393,13 @@ export const config = convict({
       env: 'NRF_BACKEND_OPTIONAL'
     }
   },
+  adminApiKey: {
+    doc: 'Inbound x-api-key required on /admin/* endpoints (sent by the admin-frontend)',
+    format: requireInProduction('FRONTEND_API_KEY'),
+    default: '',
+    sensitive: true,
+    env: 'FRONTEND_API_KEY'
+  },
   useSwagger: {
     doc: 'Enable Swagger API documentation at /docs',
     format: Boolean,
