@@ -9,6 +9,7 @@ describe('#config', () => {
       // Required by the production-only convict validators on these keys.
       vi.stubEnv('BACKEND_API_KEY', 'test-backend-key')
       vi.stubEnv('IMPACT_ASSESSOR_API_KEY', 'test-ia-key')
+      vi.stubEnv('FRONTEND_API_KEY', 'test-frontend-key')
       vi.resetModules()
       ;({ config: prodConfig } = await import('./config.js'))
       vi.unstubAllEnvs()
