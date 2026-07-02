@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const mockClient = vi.hoisted(() => ({
   getBuffer: vi.fn(),
-  set: vi.fn()
+  set: vi.fn(),
+  keys: vi.fn(),
+  del: vi.fn()
 }))
 
 const buildRedisClient = vi.hoisted(() => vi.fn(() => mockClient))
@@ -18,17 +20,21 @@ vi.mock('../../../config/config.js', () => ({
       if (key === 'map.tileRedisCacheTtlSeconds') {
         return 86400
       }
+      if (key === 'redis.keyPrefix') {
+        return 'nrf-frontend:'
+      }
       return null
     })
   }
 }))
 
-const mockLogger = vi.hoisted(() => ({ error: vi.fn() }))
+const mockLogger = vi.hoisted(() => ({ error: vi.fn(), info: vi.fn() }))
 vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
 const {
+  clearTileCache,
   getCachedTile,
   isCacheableTilePath,
   resetTileCacheClient,
@@ -113,6 +119,63 @@ describe('tile-cache', () => {
         setCachedTile('tiles/edp_boundaries/8/130/85.mvt', Buffer.from('x'))
       ).resolves.toBeUndefined()
       expect(mockLogger.error).toHaveBeenCalledWith(err, expect.any(String))
+    })
+  })
+
+  describe('clearTileCache', () => {
+    it('returns 0 when no tile keys exist', async () => {
+      mockClient.keys.mockResolvedValue([])
+
+      const result = await clearTileCache()
+
+      expect(mockClient.keys).toHaveBeenCalledWith('nrf-frontend:tile:*')
+      expect(mockClient.del).not.toHaveBeenCalled()
+      expect(result).toBe(0)
+    })
+
+    it('deletes all tile keys and returns the count', async () => {
+      const rawKeys = [
+        'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt',
+        'nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt'
+      ]
+      mockClient.keys.mockResolvedValue(rawKeys)
+      mockClient.del.mockResolvedValue(2)
+
+      const result = await clearTileCache()
+
+      expect(mockClient.keys).toHaveBeenCalledWith('nrf-frontend:tile:*')
+      expect(mockClient.del).toHaveBeenCalledWith([
+        'tile:tiles/edp_boundaries/8/128/84.mvt',
+        'tile:tiles/edp_boundaries/8/129/84.mvt'
+      ])
+      expect(result).toBe(2)
+    })
+
+    it('strips the redis key prefix before calling del', async () => {
+      mockClient.keys.mockResolvedValue([
+        'nrf-frontend:tile:tiles/edp_boundaries/10/512/341.mvt'
+      ])
+      mockClient.del.mockResolvedValue(1)
+
+      await clearTileCache()
+
+      expect(mockClient.del).toHaveBeenCalledWith([
+        'tile:tiles/edp_boundaries/10/512/341.mvt'
+      ])
+    })
+
+    it('logs the count of deleted keys', async () => {
+      mockClient.keys.mockResolvedValue([
+        'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt'
+      ])
+      mockClient.del.mockResolvedValue(1)
+
+      await clearTileCache()
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { keyCount: 1 },
+        'Tile cache cleared'
+      )
     })
   })
 })

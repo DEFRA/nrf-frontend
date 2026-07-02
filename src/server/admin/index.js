@@ -36,8 +36,16 @@ function validateApiKey(request) {
  *     security:
  *       - apiKey: []
  *     responses:
- *       204:
+ *       200:
  *         description: Cache cleared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   description: Number of tile keys deleted
  *       401:
  *         description: Missing or invalid API key
  */
@@ -54,11 +62,7 @@ export const admin = {
         async handler(request, h) {
           validateApiKey(request)
           const count = await clearTileCache()
-          logger.info(
-            { count },
-            'Admin tile cache clear: %d keys deleted',
-            count
-          )
+          logger.info({ count }, 'Admin tile cache cleared')
           return h.response({ count }).code(200)
         }
       })

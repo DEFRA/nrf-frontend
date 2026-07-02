@@ -58,6 +58,6 @@ export async function clearTileCache() {
   }
   const unprefixedKeys = rawKeys.map((k) => k.slice(redisPrefix.length))
   await client.del(unprefixedKeys)
-  logger.info(`Tile cache cleared: ${rawKeys.length} keys deleted`)
+  logger.info({ keyCount: rawKeys.length }, 'Tile cache cleared')
   return rawKeys.length
 }
