@@ -46,18 +46,18 @@ export async function setCachedTile(path, buffer) {
 }
 
 export async function clearTileCache() {
-  const client = getClient()
+  const redisClient = getClient()
   // ioredis does not apply keyPrefix to KEYS pattern arguments — supply the
   // full prefixed pattern explicitly, then strip the prefix from returned keys
   // before passing to DEL (which would otherwise double-prefix them).
   const redisPrefix = config.get('redis.keyPrefix')
   const fullPattern = `${redisPrefix}${keyPrefix}*`
-  const rawKeys = await client.keys(fullPattern)
+  const rawKeys = await redisClient.keys(fullPattern)
   if (rawKeys.length === 0) {
     return 0
   }
   const unprefixedKeys = rawKeys.map((k) => k.slice(redisPrefix.length))
-  await client.del(unprefixedKeys)
+  await redisClient.del(unprefixedKeys)
   logger.info({ keyCount: rawKeys.length }, 'Tile cache cleared')
   return rawKeys.length
 }

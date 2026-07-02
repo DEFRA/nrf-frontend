@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'node:crypto'
 import Boom from '@hapi/boom'
 
 import { config } from '../../config/config.js'
+import { statusCodes } from '../common/constants/status-codes.js'
 import { clearTileCache } from '../common/services/tile-cache.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 
@@ -63,7 +64,7 @@ export const admin = {
           validateApiKey(request)
           const count = await clearTileCache()
           logger.info({ count }, 'Admin tile cache cleared')
-          return h.response({ count }).code(200)
+          return h.response({ count }).code(statusCodes.ok)
         }
       })
     }
