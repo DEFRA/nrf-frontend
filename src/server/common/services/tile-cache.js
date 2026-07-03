@@ -55,12 +55,14 @@ export async function setCachedTile(path, buffer) {
 
 export async function clearTileCache() {
   const redisClient = getClient()
-  // ioredis does not apply keyPrefix to KEYS pattern arguments — supply the
+  // KEYS is blocked in managed Redis environments (e.g. ElastiCache) due to
+  // missing permissions. Use SCAN instead — it is non-blocking and permitted.
+  // ioredis does not apply keyPrefix to SCAN pattern arguments, so supply the
   // full prefixed pattern explicitly, then strip the prefix from returned keys
   // before passing to DEL (which would otherwise double-prefix them).
   const redisPrefix = config.get('redis.keyPrefix')
   const fullPattern = `${redisPrefix}${keyPrefix}*`
-  const rawKeys = await redisClient.keys(fullPattern)
+  const rawKeys = await scanAll(redisClient, fullPattern)
   if (rawKeys.length === 0) {
     return 0
   }
@@ -68,4 +70,14 @@ export async function clearTileCache() {
   await redisClient.del(unprefixedKeys)
   logger.info({ keyCount: rawKeys.length }, 'Tile cache cleared')
   return rawKeys.length
+}
+
+function scanAll(redisClient, pattern) {
+  return new Promise((resolve, reject) => {
+    const keys = []
+    const stream = redisClient.scanStream({ match: pattern, count: 100 })
+    stream.on('data', (batch) => keys.push(...batch))
+    stream.on('end', () => resolve(keys))
+    stream.on('error', reject)
+  })
 }

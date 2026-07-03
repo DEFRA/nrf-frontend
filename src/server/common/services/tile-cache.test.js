@@ -1,9 +1,25 @@
+import { EventEmitter } from 'node:events'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+function makeScanStream(batches, error) {
+  const emitter = new EventEmitter()
+  process.nextTick(() => {
+    if (error) {
+      emitter.emit('error', error)
+      return
+    }
+    for (const batch of batches) {
+      emitter.emit('data', batch)
+    }
+    emitter.emit('end')
+  })
+  return emitter
+}
 
 const mockClient = vi.hoisted(() => ({
   getBuffer: vi.fn(),
   set: vi.fn(),
-  keys: vi.fn(),
+  scanStream: vi.fn(),
   del: vi.fn()
 }))
 
@@ -127,11 +143,14 @@ describe('tile-cache', () => {
 
   describe('clearTileCache', () => {
     it('returns 0 when no tile keys exist', async () => {
-      mockClient.keys.mockResolvedValue([])
+      mockClient.scanStream.mockReturnValue(makeScanStream([]))
 
       const result = await clearTileCache()
 
-      expect(mockClient.keys).toHaveBeenCalledWith('nrf-frontend:tile:*')
+      expect(mockClient.scanStream).toHaveBeenCalledWith({
+        match: 'nrf-frontend:tile:*',
+        count: 100
+      })
       expect(mockClient.del).not.toHaveBeenCalled()
       expect(result).toBe(0)
     })
@@ -141,12 +160,11 @@ describe('tile-cache', () => {
         'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt',
         'nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt'
       ]
-      mockClient.keys.mockResolvedValue(rawKeys)
+      mockClient.scanStream.mockReturnValue(makeScanStream([rawKeys]))
       mockClient.del.mockResolvedValue(2)
 
       const result = await clearTileCache()
 
-      expect(mockClient.keys).toHaveBeenCalledWith('nrf-frontend:tile:*')
       expect(mockClient.del).toHaveBeenCalledWith([
         'tile:tiles/edp_boundaries/8/128/84.mvt',
         'tile:tiles/edp_boundaries/8/129/84.mvt'
@@ -155,9 +173,11 @@ describe('tile-cache', () => {
     })
 
     it('strips the redis key prefix before calling del', async () => {
-      mockClient.keys.mockResolvedValue([
-        'nrf-frontend:tile:tiles/edp_boundaries/10/512/341.mvt'
-      ])
+      mockClient.scanStream.mockReturnValue(
+        makeScanStream([
+          ['nrf-frontend:tile:tiles/edp_boundaries/10/512/341.mvt']
+        ])
+      )
       mockClient.del.mockResolvedValue(1)
 
       await clearTileCache()
@@ -167,10 +187,30 @@ describe('tile-cache', () => {
       ])
     })
 
-    it('logs the count of deleted keys', async () => {
-      mockClient.keys.mockResolvedValue([
-        'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt'
+    it('accumulates keys across multiple scan batches', async () => {
+      mockClient.scanStream.mockReturnValue(
+        makeScanStream([
+          ['nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt'],
+          ['nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt']
+        ])
+      )
+      mockClient.del.mockResolvedValue(2)
+
+      const result = await clearTileCache()
+
+      expect(mockClient.del).toHaveBeenCalledWith([
+        'tile:tiles/edp_boundaries/8/128/84.mvt',
+        'tile:tiles/edp_boundaries/8/129/84.mvt'
       ])
+      expect(result).toBe(2)
+    })
+
+    it('logs the count of deleted keys', async () => {
+      mockClient.scanStream.mockReturnValue(
+        makeScanStream([
+          ['nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt']
+        ])
+      )
       mockClient.del.mockResolvedValue(1)
 
       await clearTileCache()
