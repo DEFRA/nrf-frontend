@@ -219,5 +219,33 @@ describe('tile-cache', () => {
         'Tile cache cleared'
       )
     })
+
+    it('fans scanStream across all master nodes on a cluster client', async () => {
+      const node1 = { scanStream: vi.fn() }
+      const node2 = { scanStream: vi.fn() }
+      node1.scanStream.mockReturnValue(
+        makeScanStream([
+          ['nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt']
+        ])
+      )
+      node2.scanStream.mockReturnValue(
+        makeScanStream([
+          ['nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt']
+        ])
+      )
+      mockClient.nodes = vi.fn().mockReturnValue([node1, node2])
+      mockClient.del.mockResolvedValue(2)
+
+      const result = await clearTileCache()
+
+      expect(mockClient.nodes).toHaveBeenCalledWith('master')
+      expect(mockClient.del).toHaveBeenCalledWith([
+        'tile:tiles/edp_boundaries/8/128/84.mvt',
+        'tile:tiles/edp_boundaries/8/129/84.mvt'
+      ])
+      expect(result).toBe(2)
+
+      delete mockClient.nodes
+    })
   })
 })

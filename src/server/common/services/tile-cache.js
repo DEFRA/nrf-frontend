@@ -65,9 +65,17 @@ export async function clearTileCache() {
 }
 
 function scanAll(redisClient, pattern) {
+  // Cluster clients don't have scanStream — fan out across each master node.
+  const nodes = redisClient.nodes ? redisClient.nodes('master') : [redisClient]
+  return Promise.all(nodes.map((node) => scanNode(node, pattern))).then(
+    (results) => results.flat()
+  )
+}
+
+function scanNode(node, pattern) {
   return new Promise((resolve, reject) => {
     const keys = []
-    const stream = redisClient.scanStream({ match: pattern, count: 100 })
+    const stream = node.scanStream({ match: pattern, count: 100 })
     stream.on('data', (batch) => keys.push(...batch))
     stream.on('end', () => resolve(keys))
     stream.on('error', reject)
