@@ -52,23 +52,31 @@ export async function clearTileCache() {
   // ioredis does not apply keyPrefix to SCAN pattern arguments, so supply the
   // full prefixed pattern explicitly, then strip the prefix from returned keys
   // before passing to DEL (which would otherwise double-prefix them).
+  // On a Cluster client, each node's keys are deleted via that same node to
+  // avoid CROSSSLOT errors (keys on different nodes hash to different slots).
   const redisPrefix = config.get('redis.keyPrefix')
   const fullPattern = `${redisPrefix}${keyPrefix}*`
-  const rawKeys = await scanAll(redisClient, fullPattern)
-  if (rawKeys.length === 0) {
-    return 0
+  const counts = await scanAndDelete(redisClient, fullPattern, redisPrefix)
+  const total = counts.reduce((sum, n) => sum + n, 0)
+  if (total > 0) {
+    logger.info({ keyCount: total }, 'Tile cache cleared')
   }
-  const unprefixedKeys = rawKeys.map((k) => k.slice(redisPrefix.length))
-  await redisClient.del(unprefixedKeys)
-  logger.info({ keyCount: rawKeys.length }, 'Tile cache cleared')
-  return rawKeys.length
+  return total
 }
 
-function scanAll(redisClient, pattern) {
+async function scanAndDelete(redisClient, pattern, redisPrefix) {
   // Cluster clients don't have scanStream — fan out across each master node.
   const nodes = redisClient.nodes ? redisClient.nodes('master') : [redisClient]
-  return Promise.all(nodes.map((node) => scanNode(node, pattern))).then(
-    (results) => results.flat()
+  return Promise.all(
+    nodes.map(async (node) => {
+      const rawKeys = await scanNode(node, pattern)
+      if (rawKeys.length === 0) {
+        return 0
+      }
+      const unprefixedKeys = rawKeys.map((k) => k.slice(redisPrefix.length))
+      await node.del(unprefixedKeys)
+      return rawKeys.length
+    })
   )
 }
 
