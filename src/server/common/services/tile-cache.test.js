@@ -239,10 +239,10 @@ describe('tile-cache', () => {
 
       expect(mockClient.nodes).toHaveBeenCalledWith('master')
       expect(node1.del).toHaveBeenCalledWith([
-        'tile:tiles/edp_boundaries/8/128/84.mvt'
+        'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt'
       ])
       expect(node2.del).toHaveBeenCalledWith([
-        'tile:tiles/edp_boundaries/8/129/84.mvt'
+        'nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt'
       ])
       expect(result).toBe(2)
 
