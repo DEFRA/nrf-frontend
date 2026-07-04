@@ -160,14 +160,16 @@ describe('tile-cache', () => {
         'nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt'
       ]
       mockClient.scanStream.mockReturnValue(makeScanStream([rawKeys]))
-      mockClient.del.mockResolvedValue(2)
+      mockClient.del.mockResolvedValue(1)
 
       const result = await clearTileCache()
 
-      expect(mockClient.del).toHaveBeenCalledWith([
-        'tile:tiles/edp_boundaries/8/128/84.mvt',
+      expect(mockClient.del).toHaveBeenCalledWith(
+        'tile:tiles/edp_boundaries/8/128/84.mvt'
+      )
+      expect(mockClient.del).toHaveBeenCalledWith(
         'tile:tiles/edp_boundaries/8/129/84.mvt'
-      ])
+      )
       expect(result).toBe(2)
     })
 
@@ -181,9 +183,9 @@ describe('tile-cache', () => {
 
       await clearTileCache()
 
-      expect(mockClient.del).toHaveBeenCalledWith([
+      expect(mockClient.del).toHaveBeenCalledWith(
         'tile:tiles/edp_boundaries/10/512/341.mvt'
-      ])
+      )
     })
 
     it('accumulates keys across multiple scan batches', async () => {
@@ -193,14 +195,16 @@ describe('tile-cache', () => {
           ['nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt']
         ])
       )
-      mockClient.del.mockResolvedValue(2)
+      mockClient.del.mockResolvedValue(1)
 
       const result = await clearTileCache()
 
-      expect(mockClient.del).toHaveBeenCalledWith([
-        'tile:tiles/edp_boundaries/8/128/84.mvt',
+      expect(mockClient.del).toHaveBeenCalledWith(
+        'tile:tiles/edp_boundaries/8/128/84.mvt'
+      )
+      expect(mockClient.del).toHaveBeenCalledWith(
         'tile:tiles/edp_boundaries/8/129/84.mvt'
-      ])
+      )
       expect(result).toBe(2)
     })
 
@@ -238,12 +242,12 @@ describe('tile-cache', () => {
       const result = await clearTileCache()
 
       expect(mockClient.nodes).toHaveBeenCalledWith('master')
-      expect(node1.del).toHaveBeenCalledWith([
+      expect(node1.del).toHaveBeenCalledWith(
         'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt'
-      ])
-      expect(node2.del).toHaveBeenCalledWith([
+      )
+      expect(node2.del).toHaveBeenCalledWith(
         'nrf-frontend:tile:tiles/edp_boundaries/8/129/84.mvt'
-      ])
+      )
       expect(result).toBe(2)
 
       delete mockClient.nodes

@@ -82,10 +82,12 @@ async function scanAndDelete(redisClient, pattern, redisPrefix, isCluster) {
       }
       // Cluster node clients have no keyPrefix — pass raw keys directly.
       // Single-node client has keyPrefix set — strip it so ioredis re-applies it.
+      // Delete one key at a time: multi-key DEL causes CROSSSLOT even within a
+      // single node when keys hash to different slots.
       const keysForDel = isCluster
         ? rawKeys
         : rawKeys.map((k) => k.slice(redisPrefix.length))
-      await node.del(keysForDel)
+      await Promise.all(keysForDel.map((k) => node.del(k)))
       return rawKeys.length
     })
   )
