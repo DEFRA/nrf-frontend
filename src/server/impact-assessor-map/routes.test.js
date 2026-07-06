@@ -4,6 +4,7 @@ import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 
 const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
+  info: vi.fn(),
   error: vi.fn()
 }))
 
