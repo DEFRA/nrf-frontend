@@ -1,6 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 
-export const heading = 'Your Nature restoration levy levy quote'
+export const heading = 'Your Nature restoration levy quote'
 
 export default function getViewModel(reference) {
   return {
