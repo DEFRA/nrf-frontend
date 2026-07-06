@@ -223,6 +223,7 @@ describe('boundary-info-view', () => {
     const loggerFetch = vi.fn().mockResolvedValue({})
     globalThis.fetch = vi
       .fn()
+      .mockImplementationOnce(loggerFetch) // logger.info before fetch
       .mockRejectedValueOnce(new Error('Network failure'))
       .mockImplementation(loggerFetch)
 

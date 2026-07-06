@@ -46,6 +46,8 @@ export function saveBoundaryHandler(request, h) {
     }
   })
 
+  logger.info('draw-boundary boundary saved to quote cache')
+
   if (intersectsEdp) {
     return h.redirect(developmentTypesPath)
   }

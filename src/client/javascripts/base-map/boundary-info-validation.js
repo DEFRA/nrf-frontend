@@ -129,6 +129,11 @@ export function createBoundaryValidationRunner({
         normalized: responseParser(payload)
       }
 
+      logger.info(
+        { status: response.status, payloadType: typeof payload, payload },
+        'draw-boundary check-boundary response'
+      )
+
       state.latestResponse = validationResult.normalized
 
       renderBoundaryValidationResult({

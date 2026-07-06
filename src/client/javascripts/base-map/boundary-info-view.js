@@ -49,6 +49,18 @@ async function submitSaveAndContinue(
       headers['x-csrf-token'] = csrfToken
     }
 
+    if (typeof boundaryGeojson !== 'object' || boundaryGeojson === null) {
+      logger.error(
+        { boundaryGeojsonType: typeof boundaryGeojson, boundaryGeojson },
+        'draw-boundary save: boundaryGeojson is not an object'
+      )
+    } else {
+      logger.info(
+        { boundaryGeojson },
+        'draw-boundary save: submitting boundaryGeojson'
+      )
+    }
+
     response = await fetch(saveAndContinueUrl, {
       method: 'POST',
       headers,
