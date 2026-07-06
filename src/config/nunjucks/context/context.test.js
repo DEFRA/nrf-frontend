@@ -71,7 +71,7 @@ describe('context and cache', () => {
               href: '/login'
             }
           ],
-          serviceName: 'Nature Restoration Fund',
+          serviceName: 'Nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: '/',
           phaseBanner: {
@@ -184,7 +184,7 @@ describe('context and cache', () => {
               href: '/login'
             }
           ],
-          serviceName: 'Nature Restoration Fund',
+          serviceName: 'Nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: '/',
           phaseBanner: {

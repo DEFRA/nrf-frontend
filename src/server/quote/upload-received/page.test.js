@@ -72,7 +72,7 @@ describe('Upload received page', () => {
       'Boundary file upload status'
     )
     expect(document.title).toBe(
-      'Boundary file upload status - Nature Restoration Fund - Gov.uk'
+      'Boundary file upload status - Nature restoration levy - GOV.UK'
     )
   })
 

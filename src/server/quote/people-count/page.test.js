@@ -28,7 +28,7 @@ describe('People count page', () => {
       pageHeading
     )
     expect(document.title).toBe(
-      'What is the maximum number of people the development will serve? - Nature Restoration Fund - Gov.uk'
+      'What is the maximum number of people the development will serve? - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

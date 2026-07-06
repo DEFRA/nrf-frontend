@@ -17,7 +17,7 @@ describe('Boundary type page', () => {
       'Choose how you would like to show us the boundary of your development'
     )
     expect(document.title).toBe(
-      'Choose how you would like to show us the boundary of your development - Nature Restoration Fund - Gov.uk'
+      'Choose how you would like to show us the boundary of your development - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

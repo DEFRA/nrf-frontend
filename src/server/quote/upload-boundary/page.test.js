@@ -34,7 +34,7 @@ describe('Upload boundary page', () => {
       'Upload a red line boundary file'
     )
     expect(document.title).toBe(
-      'Upload a red line boundary file - Nature Restoration Fund - Gov.uk'
+      'Upload a red line boundary file - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
@@ -77,7 +77,7 @@ describe('Upload boundary page', () => {
     })
 
     expect(document.title).toBe(
-      'Error: Upload a red line boundary file - Nature Restoration Fund - Gov.uk'
+      'Error: Upload a red line boundary file - Nature restoration levy - GOV.UK'
     )
     expect(
       getByRole(document, 'heading', { name: 'There is a problem' })

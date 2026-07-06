@@ -21,10 +21,10 @@ describe('No EDP page', () => {
       cookie: sessionCookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Nature Restoration Fund levy is not available in this area'
+      'Nature restoration levy is not available in this area'
     )
     expect(document.title).toBe(
-      'Nature Restoration Fund levy is not available in this area - Nature Restoration Fund - Gov.uk'
+      'Nature restoration levy is not available in this area - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

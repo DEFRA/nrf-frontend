@@ -21,7 +21,7 @@ describe('people-count getViewModel', () => {
   it('should return the correct pageTitle and pageHeading', () => {
     const viewModel = getViewModel({})
     expect(viewModel.pageTitle).toBe(
-      'What is the maximum number of people the development will serve? - Nature Restoration Fund - Gov.uk'
+      'What is the maximum number of people the development will serve? - Nature restoration levy - GOV.UK'
     )
     expect(viewModel.pageHeading).toBe(title)
   })
