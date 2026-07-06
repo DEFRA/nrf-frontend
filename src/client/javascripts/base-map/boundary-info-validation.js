@@ -100,10 +100,26 @@ export function createBoundaryValidationRunner({
     state.inFlightRequest = controller
 
     try {
+      const requestBody = requestBuilder(feature)
+      const geometry = requestBody?.geometry
+
+      if (
+        !geometry ||
+        typeof geometry !== 'object' ||
+        geometry.type !== 'Polygon' ||
+        !Array.isArray(geometry.coordinates) ||
+        geometry.coordinates.length === 0
+      ) {
+        logger.error(
+          { geometryType: typeof geometry, geometry },
+          'draw-boundary check: invalid geometry before sending to check-boundary endpoint'
+        )
+      }
+
       const response = await fetch(endpoint, {
         method,
         headers: buildBoundaryRequestHeaders(csrfToken),
-        body: JSON.stringify(requestBuilder(feature)),
+        body: JSON.stringify(requestBody),
         signal: controller.signal
       })
 
