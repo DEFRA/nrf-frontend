@@ -36,10 +36,10 @@ describe('Quote details page', () => {
       headers: humanClick
     })
     expect(document.title).toBe(
-      `Your Nature Restoration Fund levy quote (${reference}) - Nature Restoration Fund - Gov.uk`
+      `Your Nature restoration levy levy quote (${reference}) - Nature restoration levy - Gov.uk`
     )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Your Nature Restoration Fund levy quote'
+      'Your Nature restoration levy levy quote'
     )
   })
 
@@ -136,7 +136,7 @@ describe('Quote details page', () => {
       headers: humanClick
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Your Nature Restoration Fund levy quote'
+      'Your Nature restoration levy levy quote'
     )
   })
 
@@ -260,7 +260,7 @@ describe('Quote details page', () => {
         headers: humanClick
       })
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'Your Nature Restoration Fund levy quote'
+        'Your Nature restoration levy levy quote'
       )
     })
   })

@@ -11,7 +11,7 @@ describe('upload-boundary getViewModel', () => {
 
     expect(viewModel).toEqual({
       pageTitle:
-        'Upload a red line boundary file - Nature Restoration Fund - Gov.uk',
+        'Upload a red line boundary file - Nature restoration levy - Gov.uk',
       pageHeading: 'Upload a red line boundary file',
       backLinkPath: '/quote/boundary-type'
     })

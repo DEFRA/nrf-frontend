@@ -37,7 +37,7 @@ describe('Boundary map page', () => {
         'Boundary Map'
       )
       expect(document.title).toBe(
-        'Boundary Map - Nature Restoration Fund - Gov.uk'
+        'Boundary Map - Nature restoration levy - Gov.uk'
       )
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',

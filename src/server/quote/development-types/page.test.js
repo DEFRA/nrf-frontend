@@ -25,7 +25,7 @@ describe('Development type page', () => {
       'What type of development is it?'
     )
     expect(document.title).toBe(
-      'What type of development is it? - Nature Restoration Fund - Gov.uk'
+      'What type of development is it? - Nature restoration levy - Gov.uk'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

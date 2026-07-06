@@ -35,7 +35,7 @@ const edpLayer = {
   sourceId: 'edp_boundaries-tiles',
   sourceLayer: 'edp_boundaries',
   label: 'EDP boundaries',
-  areaLabel: 'Nature Restoration Fund nutrients levy',
+  areaLabel: 'Nature restoration levy nutrients levy',
   lineColor: '#FD0',
   fillOpacity: 0.15,
   hideAtZoom: 12
@@ -130,7 +130,7 @@ describe('wireHideLayerOnZoom', () => {
     expect(border.hidden).toBe(false)
     expect(label.hidden).toBe(false)
     expect(label.textContent).toBe(
-      'Area: Nature Restoration Fund nutrients levy'
+      'Area: Nature restoration levy nutrients levy'
     )
     expect(border.style.borderColor).toBe('rgb(255, 221, 0)')
     expect(label.style.backgroundColor).toBe('rgb(255, 221, 0)')

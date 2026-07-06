@@ -59,7 +59,7 @@ describe('cookiesController (GET)', () => {
     cookiesController.handler(mockRequest, mockH)
 
     expect(mockH.view).toHaveBeenCalledWith('cookies/index', {
-      pageTitle: 'Cookies on Nature Restoration Fund',
+      pageTitle: 'Cookies on Nature restoration levy',
       payload: { analytics: undefined },
       showSuccessBanner: false,
       backUrl: '/',

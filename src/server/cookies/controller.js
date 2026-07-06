@@ -16,7 +16,7 @@ import { statusCodes } from '../common/constants/status-codes.js'
 const COOKIES_VIEW_ROUTE = 'cookies/index'
 
 const cookiesPageSettings = {
-  pageTitle: 'Cookies on Nature Restoration Fund'
+  pageTitle: 'Cookies on Nature restoration levy'
 }
 
 const isSafeRelativePath = (value) =>

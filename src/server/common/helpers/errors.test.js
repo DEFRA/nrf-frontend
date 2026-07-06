@@ -23,7 +23,7 @@ describe('#errors', () => {
     })
 
     expect(result).toEqual(
-      expect.stringContaining('Page not found | Nature Restoration Fund')
+      expect.stringContaining('Page not found | Nature restoration levy')
     )
     expect(statusCode).toBe(statusCodes.notFound)
   })
