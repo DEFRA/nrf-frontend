@@ -111,7 +111,9 @@ export function createBoundaryValidationRunner({
         geometry.coordinates.length === 0
       ) {
         logger.error(
-          { geometryType: typeof geometry, geometry },
+          new Error(
+            `draw-boundary check: invalid geometry - type: ${geometry?.type}, coordinates length: ${geometry?.coordinates?.length}`
+          ),
           'draw-boundary check: invalid geometry before sending to check-boundary endpoint'
         )
       }
@@ -144,11 +146,6 @@ export function createBoundaryValidationRunner({
         status: response.status,
         normalized: responseParser(payload)
       }
-
-      logger.info(
-        { status: response.status, payloadType: typeof payload, payload },
-        'draw-boundary check-boundary response'
-      )
 
       state.latestResponse = validationResult.normalized
 

@@ -51,13 +51,10 @@ async function submitSaveAndContinue(
 
     if (typeof boundaryGeojson !== 'object' || boundaryGeojson === null) {
       logger.error(
-        { boundaryGeojsonType: typeof boundaryGeojson, boundaryGeojson },
+        new Error(
+          `draw-boundary save: boundaryGeojson is not an object - type: ${typeof boundaryGeojson}, value: ${JSON.stringify(boundaryGeojson)}`
+        ),
         'draw-boundary save: boundaryGeojson is not an object'
-      )
-    } else {
-      logger.info(
-        { boundaryGeojson },
-        'draw-boundary save: submitting boundaryGeojson'
       )
     }
 

@@ -1039,9 +1039,7 @@ describe('base-map config', () => {
           ok: true,
           json: vi.fn().mockResolvedValue(checkGeojson)
         })
-        .mockResolvedValueOnce({}) // logger.info after check-boundary
         .mockResolvedValueOnce({ redirected: false })
-        .mockResolvedValueOnce({}) // logger.info before save
 
       globalThis.defra = {
         InteractiveMap: new Proxy(function () {}, {
@@ -1087,7 +1085,7 @@ describe('base-map config', () => {
 
       await Promise.resolve()
 
-      expect(globalThis.fetch).toHaveBeenCalledTimes(5)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(3)
       expect(globalThis.fetch).toHaveBeenLastCalledWith(
         '/quote/draw-boundary/save',
         {
@@ -1680,9 +1678,7 @@ describe('base-map config', () => {
           ok: true,
           json: vi.fn().mockResolvedValue(checkGeojson)
         })
-        .mockResolvedValueOnce({}) // logger.info after check-boundary
         .mockResolvedValueOnce({ redirected: false })
-        .mockResolvedValueOnce({}) // logger.info before save
 
       globalThis.defra = {
         InteractiveMap: new Proxy(function () {}, {
@@ -1727,7 +1723,7 @@ describe('base-map config', () => {
 
       await Promise.resolve()
 
-      expect(globalThis.fetch).toHaveBeenCalledTimes(5)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(3)
       expect(globalThis.fetch).toHaveBeenLastCalledWith(
         '/quote/draw-boundary/save',
         {
@@ -2136,7 +2132,6 @@ describe('base-map config', () => {
           ok: true,
           json: vi.fn().mockResolvedValue(successPayload)
         })
-        .mockResolvedValueOnce({}) // logger.info after check-boundary (draw 1)
         .mockResolvedValueOnce({}) // logger.error: invalid geometry (draw 2)
         .mockResolvedValueOnce({
           ok: false,
@@ -2250,7 +2245,6 @@ describe('base-map config', () => {
             }
           })
         })
-        .mockResolvedValueOnce({}) // logger.info after check-boundary (draw 1)
         .mockResolvedValueOnce({}) // logger.error: invalid geometry (draw 2)
         .mockRejectedValueOnce(new Error('Network offline'))
         .mockResolvedValue({})
@@ -2449,7 +2443,6 @@ describe('base-map config', () => {
             intersectingEdps: []
           })
         })
-        .mockResolvedValueOnce({}) // logger.info after successful check-boundary
       globalThis.fetch = fetchSpy
 
       globalThis.defra = {
@@ -2492,7 +2485,7 @@ describe('base-map config', () => {
       await Promise.resolve()
       await Promise.resolve()
 
-      expect(fetchSpy).toHaveBeenCalledTimes(5)
+      expect(fetchSpy).toHaveBeenCalledTimes(4)
 
       const panelRoot = document.querySelector(
         '.app-boundary-info-panel[data-map-element-id="test-map-abort"]'
