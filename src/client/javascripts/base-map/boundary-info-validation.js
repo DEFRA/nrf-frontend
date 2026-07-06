@@ -76,86 +76,115 @@ function renderBoundaryValidationResult({
   })
 }
 
-export function createBoundaryValidationRunner({
-  map,
-  mapElementId,
-  state,
-  endpoint,
-  method,
-  requestBuilder,
-  responseParser,
-  csrfToken,
-  saveAndContinueUrl,
-  onSaveAndContinue
-}) {
-  return async function runValidation(feature) {
-    if (
-      !beginBoundaryValidation({ map, mapElementId, state, feature, endpoint })
-    ) {
+function buildValidationResult(response, payload, responseParser) {
+  if (!response.ok) {
+    logger.error(
+      new Error(
+        `Boundary validation request failed with status ${response.status}`
+      ),
+      'Boundary validation request failed'
+    )
+  }
+  return {
+    ok: response.ok,
+    status: response.status,
+    normalized: responseParser(payload)
+  }
+}
+
+function logInvalidGeometry(geometry) {
+  if (
+    !geometry ||
+    typeof geometry !== 'object' ||
+    geometry.type !== 'Polygon' ||
+    !Array.isArray(geometry.coordinates) ||
+    geometry.coordinates.length === 0
+  ) {
+    logger.error(
+      new Error(
+        `draw-boundary check: invalid geometry - type: ${geometry?.type}, coordinates length: ${geometry?.coordinates?.length}`
+      ),
+      'draw-boundary check: invalid geometry before sending to check-boundary endpoint'
+    )
+  }
+}
+
+async function runBoundaryValidation(feature, options) {
+  const {
+    map,
+    mapElementId,
+    state,
+    endpoint,
+    method,
+    requestBuilder,
+    responseParser,
+    csrfToken,
+    saveAndContinueUrl,
+    onSaveAndContinue
+  } = options
+
+  if (
+    !beginBoundaryValidation({ map, mapElementId, state, feature, endpoint })
+  ) {
+    return
+  }
+
+  abortBoundaryRequest(state)
+  const controller = new AbortController()
+  state.inFlightRequest = controller
+
+  try {
+    const requestBody = requestBuilder(feature)
+    logInvalidGeometry(requestBody?.geometry)
+
+    const response = await fetch(endpoint, {
+      method,
+      headers: buildBoundaryRequestHeaders(csrfToken),
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    })
+
+    let payload = null
+    try {
+      payload = await response.json()
+    } catch {
+      payload = null
+    }
+
+    const validationResult = buildValidationResult(
+      response,
+      payload,
+      responseParser
+    )
+
+    state.latestResponse = validationResult.normalized
+    renderBoundaryValidationResult({
+      mapElementId,
+      validationResult,
+      saveAndContinueUrl,
+      onSaveAndContinue
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError') {
       return
     }
 
-    abortBoundaryRequest(state)
-    const controller = new AbortController()
-    state.inFlightRequest = controller
-
-    try {
-      const response = await fetch(endpoint, {
-        method,
-        headers: buildBoundaryRequestHeaders(csrfToken),
-        body: JSON.stringify(requestBuilder(feature)),
-        signal: controller.signal
-      })
-
-      let payload = null
-      try {
-        payload = await response.json()
-      } catch {
-        payload = null
-      }
-
-      if (!response.ok) {
-        logger.error(
-          new Error(
-            `Boundary validation request failed with status ${response.status}`
-          ),
-          'Boundary validation request failed'
-        )
-      }
-
-      const validationResult = {
-        ok: response.ok,
-        status: response.status,
-        normalized: responseParser(payload)
-      }
-
-      state.latestResponse = validationResult.normalized
-
-      renderBoundaryValidationResult({
-        mapElementId,
-        validationResult,
-        saveAndContinueUrl,
-        onSaveAndContinue
-      })
-    } catch (error) {
-      if (error?.name === 'AbortError') {
-        return
-      }
-
-      logger.error(error, 'Boundary validation request failed')
-
-      renderBoundaryPanel(mapElementId, {
-        summary: 'Boundary validation could not be completed.',
-        announce: 'Boundary validation could not be completed',
-        focusHeading: true,
-        error: 'An error occurred checking the boundary'
-      })
-    } finally {
-      if (state.inFlightRequest === controller) {
-        state.inFlightRequest = null
-      }
+    logger.error(error, 'Boundary validation request failed')
+    renderBoundaryPanel(mapElementId, {
+      summary: 'Boundary validation could not be completed.',
+      announce: 'Boundary validation could not be completed',
+      focusHeading: true,
+      error: 'An error occurred checking the boundary'
+    })
+  } finally {
+    if (state.inFlightRequest === controller) {
+      state.inFlightRequest = null
     }
   }
+}
+
+export function createBoundaryValidationRunner(options) {
+  return (feature) => runBoundaryValidation(feature, options)
 }
 
 export function registerBoundaryInfoMapEvents({
