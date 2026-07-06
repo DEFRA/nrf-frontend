@@ -24,7 +24,7 @@ describe('No EDP page', () => {
       'Nature restoration levy levy is not available in this area'
     )
     expect(document.title).toBe(
-      'Nature restoration levy levy is not available in this area - Nature restoration levy - Gov.uk'
+      'Nature restoration levy levy is not available in this area - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

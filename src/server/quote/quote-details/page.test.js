@@ -36,7 +36,7 @@ describe('Quote details page', () => {
       headers: humanClick
     })
     expect(document.title).toBe(
-      `Your Nature restoration levy levy quote (${reference}) - Nature restoration levy - Gov.uk`
+      `Your Nature restoration levy levy quote (${reference}) - Nature restoration levy - GOV.UK`
     )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Your Nature restoration levy levy quote'

@@ -12,7 +12,7 @@ describe('Delete quote confirmation page', () => {
       requestUrl: routePath,
       server: getServer()
     })
-    expect(document.title).toBe(`${title} - Nature restoration levy - Gov.uk`)
+    expect(document.title).toBe(`${title} - Nature restoration levy - GOV.UK`)
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       title
     )

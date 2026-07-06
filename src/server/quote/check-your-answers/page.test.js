@@ -31,7 +31,7 @@ describe('Check your answers page', () => {
       cookie: sessionCookie
     })
     expect(document.title).toBe(
-      'Check your answers - Nature restoration levy - Gov.uk'
+      'Check your answers - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Check your answers'

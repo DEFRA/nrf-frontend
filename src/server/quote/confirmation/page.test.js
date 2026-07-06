@@ -20,7 +20,7 @@ describe('Confirmation page', () => {
       server: getServer()
     })
     expect(document.title).toBe(
-      'Your details have been submitted - Nature restoration levy - Gov.uk'
+      'Your details have been submitted - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Your details have been submitted'

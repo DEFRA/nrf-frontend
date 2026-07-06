@@ -24,7 +24,7 @@ describe('Email page', () => {
       'Enter your email address'
     )
     expect(document.title).toBe(
-      'Enter your email address - Nature restoration levy - Gov.uk'
+      'Enter your email address - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

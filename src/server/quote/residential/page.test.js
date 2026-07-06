@@ -26,7 +26,7 @@ describe('Residential page', () => {
       inputLabel
     )
     expect(document.title).toBe(
-      'How many residential units in this development? - Nature restoration levy - Gov.uk'
+      'How many residential units in this development? - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

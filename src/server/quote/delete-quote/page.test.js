@@ -23,7 +23,7 @@ describe('Delete quote page', () => {
       'Are you sure you want to delete this quote?'
     )
     expect(document.title).toBe(
-      'Are you sure you want to delete this quote? - Nature restoration levy - Gov.uk'
+      'Are you sure you want to delete this quote? - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

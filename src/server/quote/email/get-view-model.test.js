@@ -9,7 +9,7 @@ describe('email getViewModel', () => {
   it('should return the correct pageTitle and pageHeading', () => {
     const viewModel = getViewModel()
     expect(viewModel.pageTitle).toBe(
-      'Enter your email address - Nature restoration levy - Gov.uk'
+      'Enter your email address - Nature restoration levy - GOV.UK'
     )
     expect(viewModel.pageHeading).toBe(title)
   })
