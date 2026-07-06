@@ -40,6 +40,7 @@ const proxyHandler = {
       if (cacheable) {
         const cached = await getCachedTile(path)
         if (cached) {
+          logger.debug({ path }, 'Impact assessor tile cache read')
           return h
             .response(cached)
             .type(mvtContentType)
@@ -58,6 +59,7 @@ const proxyHandler = {
 
       if (cacheable) {
         await setCachedTile(path, payload)
+        logger.debug({ path }, 'Impact assessor tile cache write')
         return h
           .response(payload)
           .type(mvtContentType)
