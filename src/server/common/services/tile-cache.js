@@ -49,25 +49,54 @@ export async function clearTileCache() {
   const redisClient = getClient()
   // KEYS is blocked in managed Redis environments (e.g. ElastiCache) due to
   // missing permissions. Use SCAN instead — it is non-blocking and permitted.
-  // ioredis does not apply keyPrefix to SCAN pattern arguments, so supply the
-  // full prefixed pattern explicitly, then strip the prefix from returned keys
-  // before passing to DEL (which would otherwise double-prefix them).
+  // On a Cluster client, fan out across master nodes and delete via the same
+  // node that returned the keys — avoids CROSSSLOT errors.
+  // Node clients from cluster.nodes() are raw connections with no keyPrefix
+  // option, so SCAN returns and DEL must use the full key names as-is.
+  // On a single-node client the keyPrefix option is active, so DEL must
+  // receive un-prefixed keys and lets ioredis re-apply the prefix.
   const redisPrefix = config.get('redis.keyPrefix')
   const fullPattern = `${redisPrefix}${keyPrefix}*`
-  const rawKeys = await scanAll(redisClient, fullPattern)
-  if (rawKeys.length === 0) {
-    return 0
+  const isCluster = Boolean(redisClient.nodes)
+  const counts = await scanAndDelete(
+    redisClient,
+    fullPattern,
+    redisPrefix,
+    isCluster
+  )
+  const total = counts.reduce((sum, n) => sum + n, 0)
+  if (total > 0) {
+    logger.info({ keyCount: total }, 'Tile cache cleared')
   }
-  const unprefixedKeys = rawKeys.map((k) => k.slice(redisPrefix.length))
-  await redisClient.del(unprefixedKeys)
-  logger.info({ keyCount: rawKeys.length }, 'Tile cache cleared')
-  return rawKeys.length
+  return total
 }
 
-function scanAll(redisClient, pattern) {
+async function scanAndDelete(redisClient, pattern, redisPrefix, isCluster) {
+  // Cluster clients don't have scanStream — fan out across each master node.
+  const nodes = isCluster ? redisClient.nodes('master') : [redisClient]
+  return Promise.all(
+    nodes.map(async (node) => {
+      const rawKeys = await scanNode(node, pattern)
+      if (rawKeys.length === 0) {
+        return 0
+      }
+      // Cluster node clients have no keyPrefix — pass raw keys directly.
+      // Single-node client has keyPrefix set — strip it so ioredis re-applies it.
+      // Delete one key at a time: multi-key DEL causes CROSSSLOT even within a
+      // single node when keys hash to different slots.
+      const keysForDel = isCluster
+        ? rawKeys
+        : rawKeys.map((k) => k.slice(redisPrefix.length))
+      await Promise.all(keysForDel.map((k) => node.del(k)))
+      return rawKeys.length
+    })
+  )
+}
+
+function scanNode(node, pattern) {
   return new Promise((resolve, reject) => {
     const keys = []
-    const stream = redisClient.scanStream({ match: pattern, count: 100 })
+    const stream = node.scanStream({ match: pattern, count: 100 })
     stream.on('data', (batch) => keys.push(...batch))
     stream.on('end', () => resolve(keys))
     stream.on('error', reject)
