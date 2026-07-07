@@ -19,7 +19,7 @@
           rows: [
             {
               key: { text: "Planning application type" },
-              value: { text: (planningTypeOptions | selectattr("value", "equalto", formSubmitData.planningType) | first).text },
+              value: { text: planningTypeLabel },
               actions: { items: [{ href: "/quote/planning-type", text: "Change", visuallyHiddenText: "planning application type" }] }
             } if formSubmitData.planningType,
             {
