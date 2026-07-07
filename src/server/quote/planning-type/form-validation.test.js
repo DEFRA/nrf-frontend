@@ -5,29 +5,13 @@ const errorMessage = 'Select a planning application type'
 
 describe('planning-type form validation', () => {
   describe('planningType', () => {
-    it('passes for "full-planning-permission"', () => {
-      const { error } = getSchema().validate({
-        planningType: 'full-planning-permission'
-      })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for "outline-planning-permission"', () => {
-      const { error } = getSchema().validate({
-        planningType: 'outline-planning-permission'
-      })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for "hybrid-planning-permission"', () => {
-      const { error } = getSchema().validate({
-        planningType: 'hybrid-planning-permission'
-      })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for "other"', () => {
-      const { error } = getSchema().validate({ planningType: 'other' })
+    it.each([
+      'full-planning-permission',
+      'outline-planning-permission',
+      'hybrid-planning-permission',
+      'other'
+    ])('passes for "%s"', (value) => {
+      const { error } = getSchema().validate({ planningType: value })
       expect(error).toBeUndefined()
     })
 

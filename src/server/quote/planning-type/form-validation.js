@@ -2,7 +2,7 @@ import joi from 'joi'
 
 const errorMessage = 'Select a planning application type'
 
-export default function () {
+export default function planningTypeValidation() {
   return joi.object({
     planningType: joi
       .string()
