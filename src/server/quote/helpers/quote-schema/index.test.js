@@ -1,6 +1,7 @@
 import { completeQuoteDataSchema, inProgressQuoteDataSchema } from './index.js'
 
 const validBase = {
+  planningType: 'full-planning-permission',
   boundaryEntryType: 'draw',
   boundaryGeojson: {
     crs: {

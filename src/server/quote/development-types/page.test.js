@@ -90,7 +90,8 @@ describe('Development type page', () => {
     const { cookie } = await submitForm({
       requestUrl: boundaryTypePath,
       server: getServer(),
-      formData: { boundaryEntryType: 'draw' }
+      formData: { boundaryEntryType: 'draw' },
+      cookie: sessionCookie
     })
 
     const document = await loadPage({

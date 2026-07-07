@@ -11,12 +11,24 @@
     <div class="govuk-grid-column-two-thirds-from-desktop">
       <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
+        {% set planningTypeLabels = {
+          "full-planning-permission": "Full planning permission",
+          "outline-planning-permission": "Outline planning permission",
+          "hybrid-planning-permission": "Hybrid planning permission",
+          "other": "Other"
+        } %}
+
         {# boundaryFilename (below) is user-controlled. Safe here because
            govukSummaryList escapes value.text (but NOT value.html), and the
            backend validates it against a strict allowlist. Do NOT switch to html:. #}
         {{ govukSummaryList({
           classes: "govuk-!-margin-bottom-9",
           rows: [
+            {
+              key: { text: "Planning application type" },
+              value: { text: planningTypeLabels[formSubmitData.planningType] },
+              actions: { items: [{ href: "/quote/planning-type", text: "Change", visuallyHiddenText: "planning application type" }] }
+            } if formSubmitData.planningType,
             {
               key: { text: "Red line boundary" },
               value: {

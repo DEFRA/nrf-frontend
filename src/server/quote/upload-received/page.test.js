@@ -59,6 +59,7 @@ describe('Upload received page', () => {
 
   beforeEach(() => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      planningType: 'full-planning-permission',
       boundaryEntryType: 'upload'
     })
     vi.mocked(getUploadStatus).mockResolvedValue({

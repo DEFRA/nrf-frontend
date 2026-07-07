@@ -1,4 +1,5 @@
 import joi from 'joi'
+import planningTypeValidation from '../../planning-type/form-validation.js'
 import boundaryTypeValidation from '../../boundary-type/form-validation.js'
 import developmentTypesValidation from '../../development-types/form-validation.js'
 import residentialValidation from '../../residential/form-validation.js'
@@ -9,6 +10,7 @@ import peopleCountValidation from '../../people-count/form-validation.js'
 // the backend database (see db.changelog-1.8.xml).
 const MAX_BOUNDARY_FILENAME_LENGTH = 255
 
+const planningType = planningTypeValidation().extract('planningType')
 const boundaryEntryType = boundaryTypeValidation().extract('boundaryEntryType')
 const boundaryGeojson = joi.object().required()
 // Filename of the uploaded red-line boundary file — for zip uploads this is
@@ -56,7 +58,8 @@ const peopleCountOptional = whenDevelopmentTypeOptional(
 const email = emailValidation().extract('email')
 
 export const inProgressQuoteDataSchema = joi.object({
-  boundaryEntryType,
+  planningType: planningType.required(),
+  boundaryEntryType: boundaryEntryType.optional().allow(null),
   boundaryGeojson: boundaryGeojson.optional().allow(null),
   boundaryFilename: boundaryFilename.optional().allow(null),
   developmentTypes: developmentTypes.optional().allow(null),
@@ -66,6 +69,7 @@ export const inProgressQuoteDataSchema = joi.object({
 })
 
 export const completeQuoteDataSchema = joi.object({
+  planningType,
   boundaryEntryType,
   boundaryGeojson,
   // Optional: drawn boundaries don't have a filename.

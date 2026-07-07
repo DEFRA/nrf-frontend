@@ -1,0 +1,63 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate>
+      {% include "partials/csrf-token.njk" %}
+
+      {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+      {% endif %}
+
+      {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+      {{ govukRadios({
+        name: "planningType",
+        fieldset: {
+          legend: {
+            html: legendHtml,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: {
+          text: "Options below include any variations to an existing permission."
+        },
+        errorMessage: validationErrors.messagesByFormField.planningType,
+        value: formSubmitData.planningType,
+        items: [
+          {
+            value: "full-planning-permission",
+            text: "Full planning permission"
+          },
+          {
+            value: "outline-planning-permission",
+            text: "Outline planning permission"
+          },
+          {
+            value: "hybrid-planning-permission",
+            text: "Hybrid planning permission"
+          },
+          {
+            value: "other",
+            text: "Other"
+          }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+
+    </form>
+  </div>
+</div>
+{% endblock %}

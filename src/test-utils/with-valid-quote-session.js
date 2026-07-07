@@ -1,11 +1,11 @@
 import { submitForm } from './submit-form.js'
-import { routePath as boundaryTypePath } from '../server/quote/boundary-type/routes.js'
+import { routePath as planningTypePath } from '../server/quote/planning-type/routes.js'
 
 export const withValidQuoteSession = async (server, requestUrl = null) => {
   const { cookie } = await submitForm({
-    requestUrl: boundaryTypePath,
+    requestUrl: planningTypePath,
     server,
-    formData: { boundaryEntryType: 'upload' }
+    formData: { planningType: 'full-planning-permission' }
   })
   if (!requestUrl) return cookie
   const { cookie: updatedCookie } = await submitForm({

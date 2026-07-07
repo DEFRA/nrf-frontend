@@ -1,0 +1,65 @@
+import { quoteController } from '../controller-get.js'
+import { quotePostController } from '../controller-post.js'
+import getViewModel from './get-view-model.js'
+import formValidation from './form-validation.js'
+import getNextPage from './get-next-page.js'
+
+const routeId = 'planning-type'
+export const routePath = '/quote/planning-type'
+
+/**
+ * @openapi
+ * /quote/planning-type:
+ *   get:
+ *     tags:
+ *       - Quote
+ *     summary: Planning application type selection page
+ *     description: Renders the planning application type selection form
+ *     responses:
+ *       200:
+ *         description: HTML form page
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *   post:
+ *     tags:
+ *       - Quote
+ *     summary: Submit planning application type selection
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - planningType
+ *             properties:
+ *               planningType:
+ *                 type: string
+ *                 enum:
+ *                   - full-planning-permission
+ *                   - outline-planning-permission
+ *                   - hybrid-planning-permission
+ *                   - other
+ *     responses:
+ *       303:
+ *         description: Redirect to next step on success or back to form on validation failure
+ */
+export default [
+  {
+    method: 'GET',
+    path: routePath,
+    ...quoteController({ routeId, getViewModel })
+  },
+  {
+    method: 'POST',
+    path: routePath,
+    ...quotePostController({
+      routeId,
+      formValidation,
+      getViewModel,
+      getNextPage
+    })
+  }
+]
