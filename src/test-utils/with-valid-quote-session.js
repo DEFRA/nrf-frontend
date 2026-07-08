@@ -1,11 +1,11 @@
 import { submitForm } from './submit-form.js'
-import { routePath as planningTypePath } from '../server/quote/planning-type/routes.js'
+import { routePath as startPath } from '../server/quote/start/routes.js'
 
 export const withValidQuoteSession = async (server, requestUrl = null) => {
   const { cookie } = await submitForm({
-    requestUrl: planningTypePath,
+    requestUrl: startPath,
     server,
-    formData: { planningType: 'full-planning-permission' }
+    formData: {}
   })
   if (!requestUrl) return cookie
   const { cookie: updatedCookie } = await submitForm({

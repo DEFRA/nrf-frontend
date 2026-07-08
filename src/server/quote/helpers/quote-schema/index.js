@@ -58,7 +58,7 @@ const peopleCountOptional = whenDevelopmentTypeOptional(
 const email = emailValidation().extract('email')
 
 export const inProgressQuoteDataSchema = joi.object({
-  planningType: planningType.required(),
+  planningType: planningType.optional().allow(null),
   boundaryEntryType: boundaryEntryType.optional().allow(null),
   boundaryGeojson: boundaryGeojson.optional().allow(null),
   boundaryFilename: boundaryFilename.optional().allow(null),
