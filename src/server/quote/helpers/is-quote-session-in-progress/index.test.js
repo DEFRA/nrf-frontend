@@ -64,14 +64,15 @@ describe('checkForValidQuoteSession', () => {
     expect(h.redirect).toHaveBeenCalledWith(applicationTypeNotAvailablePath)
   })
 
-  it('continues without session check for application-type-not-available page', () => {
+  it('continues on application-type-not-available when planningType is "other"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
     const request = makeRequest({ path: applicationTypeNotAvailablePath })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(h.redirect).not.toHaveBeenCalled()
   })
 
   it('continues without session check for planning-type page', () => {

@@ -8,7 +8,6 @@ import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
 
 const exemptPaths = new Set([
   planningTypePath,
-  applicationTypeNotAvailablePath,
   confirmationPath,
   deleteConfirmationPath
 ])
@@ -42,7 +41,10 @@ export const checkForValidQuoteSession = (request, h) => {
     return h.redirect(startPath).takeover()
   }
 
-  if (planningType === 'other') {
+  if (
+    planningType === 'other' &&
+    request.path !== applicationTypeNotAvailablePath
+  ) {
     return h.redirect(applicationTypeNotAvailablePath).takeover()
   }
 
