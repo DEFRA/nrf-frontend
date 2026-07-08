@@ -17,6 +17,7 @@ describe('Upload boundary page', () => {
 
   beforeEach(() => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      planningType: 'full-planning-permission',
       boundaryEntryType: 'upload'
     })
     vi.mocked(initiateUpload).mockResolvedValue({

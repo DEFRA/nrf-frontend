@@ -12,18 +12,20 @@ describe('Save and retrieve quote data from session cache', () => {
         yar: { get: vi.fn().mockReturnValue(), set: vi.fn(), clear: vi.fn() },
         logger: { error: vi.fn() }
       }
-      const quoteData = { boundaryEntryType: 'draw' }
+      const quoteData = { planningType: 'full-planning-permission' }
       saveQuoteDataToCache(request, quoteData)
       expect(request.yar.set).toHaveBeenCalledWith(
         'quote',
-        expect.objectContaining({ boundaryEntryType: 'draw' })
+        expect.objectContaining({ planningType: 'full-planning-permission' })
       )
     })
 
     it('merges new data with any existing cache data', () => {
       const request = {
         yar: {
-          get: vi.fn().mockReturnValue({ boundaryEntryType: 'draw' }),
+          get: vi
+            .fn()
+            .mockReturnValue({ planningType: 'full-planning-permission' }),
           set: vi.fn()
         },
         logger: { error: vi.fn() }
@@ -32,7 +34,7 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.yar.set).toHaveBeenCalledWith(
         'quote',
         expect.objectContaining({
-          boundaryEntryType: 'draw',
+          planningType: 'full-planning-permission',
           email: 'test@example.com'
         })
       )
@@ -42,6 +44,7 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
@@ -64,6 +67,7 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
@@ -89,6 +93,7 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing'],
@@ -111,10 +116,12 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.yar.clear).not.toHaveBeenCalled()
     })
 
-    it('does not log an error when quoteData is {boundaryEntryType: "upload"}', () => {
+    it('does not log an error when saving a valid boundaryEntryType', () => {
       const request = {
         yar: {
-          get: vi.fn().mockReturnValue({}),
+          get: vi
+            .fn()
+            .mockReturnValue({ planningType: 'full-planning-permission' }),
           set: vi.fn(),
           clear: vi.fn()
         },
@@ -144,10 +151,14 @@ describe('Save and retrieve quote data from session cache', () => {
   describe('Retrieve quote data from session cache', () => {
     it('returns the existing cache data', () => {
       const request = {
-        yar: { get: vi.fn().mockReturnValue({ boundaryEntryType: 'draw' }) }
+        yar: {
+          get: vi
+            .fn()
+            .mockReturnValue({ planningType: 'full-planning-permission' })
+        }
       }
       const quoteData = getQuoteDataFromCache(request)
-      expect(quoteData).toEqual({ boundaryEntryType: 'draw' })
+      expect(quoteData).toEqual({ planningType: 'full-planning-permission' })
     })
 
     it('returns an empty object when the cache is empty', () => {
@@ -160,6 +171,7 @@ describe('Save and retrieve quote data from session cache', () => {
 
   describe('getCompleteQuoteDataFromCache', () => {
     const validQuoteData = {
+      planningType: 'full-planning-permission',
       boundaryEntryType: 'draw',
       boundaryGeojson: { type: 'Polygon' },
       developmentTypes: ['housing'],
@@ -195,6 +207,7 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing', 'other-residential'],
@@ -215,6 +228,7 @@ describe('Save and retrieve quote data from session cache', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
             developmentTypes: ['housing', 'other-residential'],

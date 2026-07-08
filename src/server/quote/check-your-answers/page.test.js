@@ -2,6 +2,7 @@ import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
+import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as developmentTypesPath } from '../development-types/routes.js'
 import { routePath as residentialPath } from '../residential/routes.js'
@@ -94,6 +95,8 @@ describe('Check your answers page', () => {
       cookie
     })
     const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toHaveTextContent('Planning application type')
+    expect(summaryList).toHaveTextContent('Full planning permission')
     expect(summaryList).toHaveTextContent('Red line boundary')
     expect(summaryList).toHaveTextContent('Uploaded')
     expect(summaryList).toHaveTextContent('Development types')
@@ -105,6 +108,11 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
 
+    expect(
+      getByRole(document, 'link', {
+        name: 'Changeplanning application type'
+      })
+    ).toHaveAttribute('href', planningTypePath)
     expect(
       getByRole(document, 'link', {
         name: 'Changered line boundary'

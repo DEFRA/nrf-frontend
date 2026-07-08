@@ -1,4 +1,5 @@
-import { routePath as boundaryTypePath } from '../../boundary-type/routes.js'
+import { routePath as planningTypePath } from '../../planning-type/routes.js'
+import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
@@ -6,7 +7,8 @@ import { routePath as deleteConfirmationPath } from '../../delete-quote-confirma
 import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
 
 const exemptPaths = new Set([
-  boundaryTypePath,
+  planningTypePath,
+  applicationTypeNotAvailablePath,
   confirmationPath,
   deleteConfirmationPath
 ])
@@ -35,9 +37,13 @@ export const checkForValidQuoteSession = (request, h) => {
     return h.continue
   }
 
-  const { boundaryEntryType } = getQuoteDataFromCache(request)
-  if (!boundaryEntryType) {
+  const { planningType } = getQuoteDataFromCache(request)
+  if (!planningType) {
     return h.redirect(startPath).takeover()
+  }
+
+  if (planningType === 'other') {
+    return h.redirect(applicationTypeNotAvailablePath).takeover()
   }
 
   return h.continue

@@ -18,6 +18,11 @@
           classes: "govuk-!-margin-bottom-9",
           rows: [
             {
+              key: { text: "Planning application type" },
+              value: { text: planningTypeLabel },
+              actions: { items: [{ href: "/quote/planning-type", text: "Change", visuallyHiddenText: "planning application type" }] }
+            } if formSubmitData.planningType,
+            {
               key: { text: "Red line boundary" },
               value: {
                 text:

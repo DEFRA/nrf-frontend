@@ -4,14 +4,21 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
 describe('Boundary type page', () => {
   const getServer = setupTestServer()
+  let sessionCookie
+
+  beforeEach(
+    async () => (sessionCookie = await withValidQuoteSession(getServer()))
+  )
 
   it('should render all page elements', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Choose how you would like to show us the boundary of your development'
@@ -21,7 +28,7 @@ describe('Boundary type page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/'
+      '/quote/planning-type'
     )
     expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
     expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()
@@ -33,7 +40,8 @@ describe('Boundary type page', () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { boundaryEntryType: 'draw' }
+      formData: { boundaryEntryType: 'draw' },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
@@ -48,7 +56,8 @@ describe('Boundary type page', () => {
     const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: {}
+      formData: {},
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(routePath)
@@ -67,7 +76,8 @@ describe('Boundary type page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { boundaryEntryType: 'draw' }
+      formData: { boundaryEntryType: 'draw' },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/draw-boundary')
@@ -77,7 +87,8 @@ describe('Boundary type page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { boundaryEntryType: 'upload' }
+      formData: { boundaryEntryType: 'upload' },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/upload-boundary')
