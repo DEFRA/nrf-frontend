@@ -59,6 +59,12 @@ describe('Check your answers page', () => {
   it('should show all summary rows when a full session is built up', async () => {
     let cookie = sessionCookie
     ;({ cookie } = await submitForm({
+      requestUrl: '/quote/planning-type',
+      server: getServer(),
+      formData: { planningType: 'full-planning-permission' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
       requestUrl: boundaryTypePath,
       server: getServer(),
       formData: { boundaryEntryType: 'upload' },

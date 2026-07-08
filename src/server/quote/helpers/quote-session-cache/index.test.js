@@ -161,11 +161,11 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(quoteData).toEqual({ planningType: 'full-planning-permission' })
     })
 
-    it('returns an empty object when the cache is empty', () => {
+    it('returns null when the cache is empty', () => {
       const request = {
         yar: { get: vi.fn().mockReturnValue(null) }
       }
-      expect(getQuoteDataFromCache(request)).toEqual({})
+      expect(getQuoteDataFromCache(request)).toBeNull()
     })
   })
 

@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import { checkForValidQuoteSession } from './index.js'
-import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
@@ -21,7 +20,7 @@ const makeH = () => {
 }
 
 describe('checkForValidQuoteSession', () => {
-  it('continues when planningType is present', () => {
+  it('continues when a quote session exists', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       planningType: 'full-planning-permission'
     })
@@ -34,9 +33,20 @@ describe('checkForValidQuoteSession', () => {
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
-  it('redirects to start when planningType is absent', () => {
+  it('continues when session is initialised but empty', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({})
-    const request = makeRequest({ path: '/quote/residential' })
+    const request = makeRequest({ path: '/quote/planning-type' })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it('redirects to start when no quote session exists', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue(null)
+    const request = makeRequest({ path: '/quote/planning-type' })
     const h = makeH()
 
     checkForValidQuoteSession(request, h)
@@ -64,24 +74,15 @@ describe('checkForValidQuoteSession', () => {
     expect(h.redirect).toHaveBeenCalledWith(applicationTypeNotAvailablePath)
   })
 
-  it('continues without session check for application-type-not-available page', () => {
+  it('continues on application-type-not-available when planningType is "other"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
     const request = makeRequest({ path: applicationTypeNotAvailablePath })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
 
     expect(result).toBe(h.continue)
-    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
-  })
-
-  it('continues without session check for planning-type page', () => {
-    const request = makeRequest({ path: planningTypePath })
-    const h = makeH()
-
-    const result = checkForValidQuoteSession(request, h)
-
-    expect(result).toBe(h.continue)
-    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+    expect(h.redirect).not.toHaveBeenCalled()
   })
 
   it('continues without session check for confirmation page', () => {

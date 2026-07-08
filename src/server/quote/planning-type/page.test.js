@@ -18,7 +18,8 @@ describe('Planning type page', () => {
   it('should render all page elements', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     const { pageTitle, pageHeading, backLinkPath } = getViewModel()
     expect(document.title).toBe(pageTitle)

@@ -1,17 +1,11 @@
-import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
-import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
+import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 
-const exemptPaths = new Set([
-  planningTypePath,
-  applicationTypeNotAvailablePath,
-  confirmationPath,
-  deleteConfirmationPath
-])
+const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
 
 const quoteDetailsPattern = new RegExp(
   `^\\/quote\\/${referencePattern.source}\\/` + `${tokenPattern.source}$`
@@ -37,12 +31,16 @@ export const checkForValidQuoteSession = (request, h) => {
     return h.continue
   }
 
-  const { planningType } = getQuoteDataFromCache(request)
-  if (!planningType) {
+  const quoteData = getQuoteDataFromCache(request)
+  if (quoteData === null) {
     return h.redirect(startPath).takeover()
   }
 
-  if (planningType === 'other') {
+  const { planningType } = quoteData
+  if (
+    planningType === 'other' &&
+    request.path !== applicationTypeNotAvailablePath
+  ) {
     return h.redirect(applicationTypeNotAvailablePath).takeover()
   }
 

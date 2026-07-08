@@ -13,7 +13,7 @@ const logInvalidQuoteData = (request) => {
 }
 
 export const saveQuoteDataToCache = (request, quoteData) => {
-  const existingQuoteCache = getQuoteDataFromCache(request)
+  const existingQuoteCache = getQuoteDataFromCache(request) ?? {}
 
   const boundaryChanged = ['boundaryGeojson', 'boundaryEntryType'].some(
     (key) => key in quoteData
@@ -40,8 +40,7 @@ export const saveQuoteDataToCache = (request, quoteData) => {
   return getQuoteDataFromCache(request)
 }
 
-export const getQuoteDataFromCache = (request) =>
-  request.yar.get(cacheKey) || {}
+export const getQuoteDataFromCache = (request) => request.yar.get(cacheKey)
 
 export const getCompleteQuoteDataFromCache = (request) => {
   const quoteData = request.yar.get(cacheKey)
@@ -51,5 +50,7 @@ export const getCompleteQuoteDataFromCache = (request) => {
   }
   return value
 }
+
+export const initQuoteSession = (request) => request.yar.set(cacheKey, {})
 
 export const clearQuoteDataFromCache = (request) => request.yar.clear(cacheKey)
