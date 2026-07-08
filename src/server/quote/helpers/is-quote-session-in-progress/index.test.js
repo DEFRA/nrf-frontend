@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { checkForValidQuoteSession } from './index.js'
 import { routePath as planningTypePath } from '../../planning-type/routes.js'
+import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
@@ -45,6 +46,26 @@ describe('checkForValidQuoteSession', () => {
 
   it('continues without session check for non-quote paths', () => {
     const request = makeRequest({ path: '/about' })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+  })
+
+  it('redirects to application-type-not-available when planningType is "other"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
+    const request = makeRequest({ path: '/quote/boundary-type' })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(applicationTypeNotAvailablePath)
+  })
+
+  it('continues without session check for application-type-not-available page', () => {
+    const request = makeRequest({ path: applicationTypeNotAvailablePath })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
