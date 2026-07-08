@@ -22,6 +22,13 @@ export async function checkBoundaryHandler(request, h) {
     return h.response(response).code(statusCode)
   }
 
+  if (!result.geojson || typeof result.geojson !== 'object') {
+    logger.error(
+      { geojson: result.geojson, sentGeometry: geometry },
+      'draw-boundary: check boundary response is not an object and will fail POST /quotes validation'
+    )
+  }
+
   return h.response(result.geojson)
 }
 
@@ -37,14 +44,14 @@ export function saveBoundaryHandler(request, h) {
 
   const intersectsEdp = intersectingEdps.length > 0
 
-  saveQuoteDataToCache(request, {
-    boundaryGeojson: {
-      boundaryGeometryWgs84,
-      boundaryMetadata,
-      boundaryGeometryOriginal,
-      intersectingEdps
-    }
-  })
+  const boundaryGeojsonToCache = {
+    boundaryGeometryWgs84,
+    boundaryMetadata,
+    boundaryGeometryOriginal,
+    intersectingEdps
+  }
+
+  saveQuoteDataToCache(request, { boundaryGeojson: boundaryGeojsonToCache })
 
   logger.info('draw-boundary boundary saved to quote cache')
 
