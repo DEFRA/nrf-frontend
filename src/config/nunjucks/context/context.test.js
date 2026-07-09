@@ -48,7 +48,8 @@ describe('context and cache', () => {
 
       test('Should provide expected context', () => {
         expect(contextResult).toEqual({
-          analyticsEnabled: false,
+          analyticsEnabled: null,
+          areAnalyticsCookiesAccepted: false,
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
@@ -161,7 +162,8 @@ describe('context and cache', () => {
 
       test('Should provide expected context', () => {
         expect(contextResult).toEqual({
-          analyticsEnabled: false,
+          analyticsEnabled: null,
+          areAnalyticsCookiesAccepted: false,
           assetPath: '/public/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
