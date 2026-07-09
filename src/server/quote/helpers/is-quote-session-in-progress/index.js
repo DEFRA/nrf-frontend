@@ -25,6 +25,26 @@ const isExempt = (path) =>
   quoteDetailsPattern.test(path) ||
   resendPattern.test(path)
 
+const redirectIfPlanningTypeOther = (planningType, path, h) => {
+  if (
+    planningType === 'other' &&
+    path !== applicationTypeNotAvailablePath &&
+    path !== planningTypePath
+  ) {
+    return h.redirect(applicationTypeNotAvailablePath).takeover()
+  }
+}
+
+const redirectIfNotHousing = (isHousing, path, h) => {
+  if (
+    isHousing === 'no' &&
+    path !== notHousingPath &&
+    path !== confirmHousingPath
+  ) {
+    return h.redirect(notHousingPath).takeover()
+  }
+}
+
 export const checkForValidQuoteSession = (request, h) => {
   if (
     request.method !== 'get' ||
@@ -40,21 +60,9 @@ export const checkForValidQuoteSession = (request, h) => {
   }
 
   const { planningType, isHousing } = quoteData
-  if (
-    planningType === 'other' &&
-    request.path !== applicationTypeNotAvailablePath &&
-    request.path !== planningTypePath
-  ) {
-    return h.redirect(applicationTypeNotAvailablePath).takeover()
-  }
-
-  if (
-    isHousing === 'no' &&
-    request.path !== notHousingPath &&
-    request.path !== confirmHousingPath
-  ) {
-    return h.redirect(notHousingPath).takeover()
-  }
-
-  return h.continue
+  return (
+    redirectIfPlanningTypeOther(planningType, request.path, h) ??
+    redirectIfNotHousing(isHousing, request.path, h) ??
+    h.continue
+  )
 }
