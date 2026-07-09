@@ -75,25 +75,28 @@ describe('Analytics cookie table', () => {
 describe('GA cookie clearing script', () => {
   const getServer = setupTestServer()
 
-  it('renders GA cookie clearing script when analytics rejected', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      formData: { analytics: 'no', source: 'page' }
-    })
+  it.each([
+    {
+      label: 'analytics rejected',
+      setup: async () => {
+        const { cookie } = await submitForm({
+          requestUrl: COOKIE_ROUTE,
+          server: getServer(),
+          formData: { analytics: 'no', source: 'page' }
+        })
+        return { cookie }
+      }
+    },
+    {
+      label: 'no cookie preference set',
+      setup: async () => ({})
+    }
+  ])('renders GA cookie clearing script when $label', async ({ setup }) => {
+    const { cookie } = await setup()
     const document = await loadPage({
       requestUrl: COOKIE_ROUTE,
       server: getServer(),
       cookie
-    })
-    const { getByTestId } = within(document.documentElement)
-    expect(getByTestId('ga-cookie-clear')).toBeTruthy()
-  })
-
-  it('renders GA cookie clearing script when no cookie preference is set', async () => {
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer()
     })
     const { getByTestId } = within(document.documentElement)
     expect(getByTestId('ga-cookie-clear')).toBeTruthy()
