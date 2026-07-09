@@ -214,10 +214,10 @@ describe('GTM script rendering', () => {
       server: getServer(),
       cookie
     })
-    const { getByTestId } = within(document.documentElement)
+    const { getByTestId, queryByTestId } = within(document.documentElement)
 
     expect(getByTestId('gtm-head')).toBeTruthy()
-    expect(getByTestId('gtm-body')).toBeTruthy()
+    expect(queryByTestId('gtm-body')).toBeNull()
     expect(document.documentElement.innerHTML).not.toContain(
       "'analytics_storage': 'granted'"
     )
@@ -228,10 +228,10 @@ describe('GTM script rendering', () => {
       requestUrl: COOKIE_ROUTE,
       server: getServer()
     })
-    const { getByTestId } = within(document.documentElement)
+    const { getByTestId, queryByTestId } = within(document.documentElement)
 
     expect(getByTestId('gtm-head')).toBeTruthy()
-    expect(getByTestId('gtm-body')).toBeTruthy()
+    expect(queryByTestId('gtm-body')).toBeNull()
     expect(document.documentElement.innerHTML).not.toContain(
       "'analytics_storage': 'granted'"
     )

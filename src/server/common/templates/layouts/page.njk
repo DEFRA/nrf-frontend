@@ -36,7 +36,7 @@
 {% endblock %}
 
 {% block bodyStart %}
-  {% if analyticsEnabled %}
+  {% if analyticsEnabled and areAnalyticsCookiesAccepted %}
     {% include "partials/google-tag-manager.body.njk" %}
   {% endif %}
 {% endblock %}
