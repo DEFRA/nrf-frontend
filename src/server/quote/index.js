@@ -1,4 +1,5 @@
 import routesStart from './start/routes.js'
+import routesConfirmHousing from './confirm-housing/routes.js'
 import routesApplicationTypeNotAvailable from './application-type-not-available/routes.js'
 import routesPlanningType from './planning-type/routes.js'
 import routesBoundaryType from './boundary-type/routes.js'
@@ -47,6 +48,7 @@ export const quote = {
 
       server.route([
         ...routesStart,
+        ...routesConfirmHousing,
         ...routesApplicationTypeNotAvailable,
         ...routesPlanningType,
         ...routesBoundaryType,

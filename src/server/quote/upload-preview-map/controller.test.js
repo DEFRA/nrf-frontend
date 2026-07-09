@@ -192,7 +192,7 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
-    it('should save and redirect to development-types when boundary intersects EDP', () => {
+    it('should save and redirect to email when boundary intersects EDP', () => {
       const h = createMockH()
       const request = createMockRequest(mockEdpGeojson)
       getQuoteDataFromCache.mockReturnValue({})
@@ -205,7 +205,7 @@ describe('map controller', () => {
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
-      expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
+      expect(h.redirect).toHaveBeenCalledWith('/quote/email')
     })
 
     it('should lift boundaryFilename from boundaryGeojson when saving to cache', () => {
@@ -233,7 +233,7 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
-    it('should redirect to development-types based on cached boundary intersecting EDP when session geojson is absent', () => {
+    it('should redirect to email based on cached boundary intersecting EDP when session geojson is absent', () => {
       const h = createMockH()
       const request = createMockRequest(null)
       getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockEdpGeojson })
@@ -241,7 +241,7 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).not.toHaveBeenCalled()
-      expect(h.redirect).toHaveBeenCalledWith('/quote/development-types')
+      expect(h.redirect).toHaveBeenCalledWith('/quote/email')
     })
   })
 })

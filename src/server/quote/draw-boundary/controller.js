@@ -2,7 +2,7 @@ import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
-import { routePath as developmentTypesPath } from '../development-types/routes.js'
+import { routePath as emailPath } from '../email/routes.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
 
 const logger = createLogger()
@@ -56,7 +56,7 @@ export function saveBoundaryHandler(request, h) {
   logger.info('draw-boundary boundary saved to quote cache')
 
   if (intersectsEdp) {
-    return h.redirect(developmentTypesPath)
+    return h.redirect(emailPath)
   }
 
   return h.redirect(noEdpPath)

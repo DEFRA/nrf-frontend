@@ -57,7 +57,7 @@ export function postHandler(request, h) {
   }
 
   if (intersectsEdp) {
-    return h.redirect('/quote/development-types')
+    return h.redirect('/quote/email')
   }
 
   logger.info('map - boundary does not intersect EDP, saved to quote data')
