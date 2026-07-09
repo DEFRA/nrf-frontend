@@ -227,7 +227,7 @@ describe('Boundary map page', () => {
       ).toHaveValue('draw')
     })
 
-    it('should redirect to development-types on save and continue', async () => {
+    it('should redirect to email on save and continue', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const { response } = await submitForm({
         requestUrl: routePath,
@@ -236,7 +236,7 @@ describe('Boundary map page', () => {
         cookie
       })
       expect(response.statusCode).toBe(302)
-      expect(response.headers.location).toBe('/quote/development-types')
+      expect(response.headers.location).toBe('/quote/email')
     })
   })
 

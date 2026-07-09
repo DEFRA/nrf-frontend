@@ -39,19 +39,19 @@ describe('quotePostController', () => {
   })
 
   it('should save the payload to cache and redirect to the next page on successful submission', () => {
-    const mergedQuoteData = { developmentTypes: ['housing'] }
+    const mergedQuoteData = { residentialBuildingCount: 10 }
     vi.mocked(saveQuoteDataToCache).mockReturnValue(mergedQuoteData)
     const controller = quotePostController({
       formValidation: () => () => {},
       getNextPage
     })
-    const request = buildRequest({ developmentTypes: ['housing'] })
+    const request = buildRequest({ residentialBuildingCount: 10 })
     const h = buildH()
 
     controller.handler(request, h)
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, request.payload)
-    expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/boundary-type')
   })
 
   it('should save validation errors to flash and redirect on validation failure', () => {

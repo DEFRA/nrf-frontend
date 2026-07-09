@@ -33,25 +33,10 @@
               actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/draw-boundary", text: "Change", visuallyHiddenText: "red line boundary" }] }
             } if formSubmitData.boundaryEntryType,
             {
-              key: { text: "Development types" },
-              value: {
-                html: "<ul class=\"govuk-list\">" +
-                  ("<li>Housing</li>" if formSubmitData.developmentTypes and "housing" in formSubmitData.developmentTypes else "") +
-                  ("<li>Other residential</li>" if formSubmitData.developmentTypes and "other-residential" in formSubmitData.developmentTypes else "") +
-                  "</ul>"
-              },
-              actions: { items: [{ href: "/quote/development-types", text: "Change", visuallyHiddenText: "development types" }] }
-            } if formSubmitData.developmentTypes,
-            {
               key: { text: "Number of residential units" },
               value: { text: formSubmitData.residentialBuildingCount },
               actions: { items: [{ href: "/quote/residential", text: "Change", visuallyHiddenText: "number of residential units" }] }
             } if formSubmitData.residentialBuildingCount,
-            {
-              key: { text: "Maximum number of people" },
-              value: { text: formSubmitData.peopleCount },
-              actions: { items: [{ href: "/quote/people-count", text: "Change", visuallyHiddenText: "maximum number of people" }] }
-            } if formSubmitData.peopleCount,
             {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },

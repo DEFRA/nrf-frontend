@@ -8,7 +8,8 @@ import {
 
 export const quoteSubmitController = {
   async handler(request, h) {
-    const quoteData = getCompleteQuoteDataFromCache(request)
+    const { isHousing: _, ...quoteData } =
+      getCompleteQuoteDataFromCache(request)
     const response = await postRequestToBackend({
       endpointPath: '/quotes',
       payload: quoteData
