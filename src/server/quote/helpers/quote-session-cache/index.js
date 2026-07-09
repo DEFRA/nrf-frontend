@@ -25,8 +25,7 @@ export const saveQuoteDataToCache = (request, quoteData) => {
       ...quoteData,
       boundaryGeojson: quoteData.boundaryEntryType
         ? null
-        : quoteData.boundaryGeojson,
-      developmentTypes: null
+        : quoteData.boundaryGeojson
     }
   }
 

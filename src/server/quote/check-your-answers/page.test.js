@@ -4,9 +4,7 @@ import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as developmentTypesPath } from '../development-types/routes.js'
 import { routePath as residentialPath } from '../residential/routes.js'
-import { routePath as peopleCountPath } from '../people-count/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -71,21 +69,9 @@ describe('Check your answers page', () => {
       cookie
     }))
     ;({ cookie } = await submitForm({
-      requestUrl: developmentTypesPath,
-      server: getServer(),
-      formData: { developmentTypes: ['housing', 'other-residential'] },
-      cookie
-    }))
-    ;({ cookie } = await submitForm({
       requestUrl: residentialPath,
       server: getServer(),
       formData: { residentialBuildingCount: '42' },
-      cookie
-    }))
-    ;({ cookie } = await submitForm({
-      requestUrl: peopleCountPath,
-      server: getServer(),
-      formData: { peopleCount: '100' },
       cookie
     }))
     ;({ cookie } = await submitForm({
@@ -105,12 +91,8 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('Full planning permission')
     expect(summaryList).toHaveTextContent('Red line boundary')
     expect(summaryList).toHaveTextContent('Uploaded')
-    expect(summaryList).toHaveTextContent('Development types')
-    expect(summaryList).toHaveTextContent('Housing')
     expect(summaryList).toHaveTextContent('Number of residential units')
     expect(summaryList).toHaveTextContent('42')
-    expect(summaryList).toHaveTextContent('Maximum number of people')
-    expect(summaryList).toHaveTextContent('100')
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
 
@@ -125,14 +107,8 @@ describe('Check your answers page', () => {
       })
     ).toHaveAttribute('href', '/quote/upload-boundary')
     expect(
-      getByRole(document, 'link', { name: 'Changedevelopment types' })
-    ).toHaveAttribute('href', '/quote/development-types')
-    expect(
       getByRole(document, 'link', { name: 'Changenumber of residential units' })
     ).toHaveAttribute('href', '/quote/residential')
-    expect(
-      getByRole(document, 'link', { name: 'Changemaximum number of people' })
-    ).toHaveAttribute('href', '/quote/people-count')
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email')

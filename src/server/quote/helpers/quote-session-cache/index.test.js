@@ -40,37 +40,14 @@ describe('Save and retrieve quote data from session cache', () => {
       )
     })
 
-    it('strips fields made redundant by updated answers', () => {
+    it('clears boundaryGeojson when boundaryEntryType changes', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
             planningType: 'full-planning-permission',
+            isHousing: 'yes',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
-            developmentTypes: ['housing'],
-            residentialBuildingCount: 10,
-            email: 'test@example.com'
-          }),
-          set: vi.fn()
-        },
-        logger: { error: vi.fn() }
-      }
-      // changing to other-residential means residentialBuildingCount is no longer needed
-      saveQuoteDataToCache(request, { developmentTypes: ['other-residential'] })
-      expect(request.yar.set).toHaveBeenCalledWith(
-        'quote',
-        expect.not.objectContaining({ residentialBuildingCount: 10 })
-      )
-    })
-
-    it('clears dependent answers when boundaryChanged flag is set', () => {
-      const request = {
-        yar: {
-          get: vi.fn().mockReturnValue({
-            planningType: 'full-planning-permission',
-            boundaryEntryType: 'draw',
-            boundaryGeojson: { type: 'Polygon' },
-            developmentTypes: ['housing'],
             residentialBuildingCount: 10,
             email: 'test@example.com'
           }),
@@ -79,12 +56,12 @@ describe('Save and retrieve quote data from session cache', () => {
         },
         logger: { error: vi.fn() }
       }
-      saveQuoteDataToCache(request, { boundaryGeojson: { type: 'NewPolygon' } })
+      saveQuoteDataToCache(request, { boundaryEntryType: 'upload' })
       expect(request.yar.set).toHaveBeenCalledWith(
         'quote',
         expect.objectContaining({
-          boundaryGeojson: { type: 'NewPolygon' },
-          developmentTypes: null
+          boundaryEntryType: 'upload',
+          boundaryGeojson: null
         })
       )
     })
@@ -94,9 +71,9 @@ describe('Save and retrieve quote data from session cache', () => {
         yar: {
           get: vi.fn().mockReturnValue({
             planningType: 'full-planning-permission',
+            isHousing: 'yes',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
-            developmentTypes: ['housing'],
             residentialBuildingCount: 10,
             email: 'test@example.com'
           }),
@@ -110,7 +87,7 @@ describe('Save and retrieve quote data from session cache', () => {
         'quote',
         expect.objectContaining({
           email: 'new@example.com',
-          developmentTypes: ['housing']
+          residentialBuildingCount: 10
         })
       )
       expect(request.yar.clear).not.toHaveBeenCalled()
@@ -172,9 +149,9 @@ describe('Save and retrieve quote data from session cache', () => {
   describe('getCompleteQuoteDataFromCache', () => {
     const validQuoteData = {
       planningType: 'full-planning-permission',
+      isHousing: 'yes',
       boundaryEntryType: 'draw',
       boundaryGeojson: { type: 'Polygon' },
-      developmentTypes: ['housing'],
       residentialBuildingCount: 10,
       email: 'test@example.com'
     }
@@ -189,49 +166,14 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.logger.error).not.toHaveBeenCalled()
     })
 
-    it('strips fields not required by the schema', () => {
-      const request = {
-        yar: {
-          get: vi.fn().mockReturnValue({
-            ...validQuoteData,
-            peopleCount: 5
-          })
-        },
-        logger: { error: vi.fn() }
-      }
-      const result = getCompleteQuoteDataFromCache(request)
-      expect(result.peopleCount).toBeUndefined()
-    })
-
-    it('returns both residentialBuildingCount and peopleCount when both development types are present', () => {
+    it('logs an error if residentialBuildingCount is missing', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({
             planningType: 'full-planning-permission',
+            isHousing: 'yes',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
-            developmentTypes: ['housing', 'other-residential'],
-            residentialBuildingCount: 10,
-            peopleCount: 5,
-            email: 'test@example.com'
-          })
-        },
-        logger: { error: vi.fn() }
-      }
-      const result = getCompleteQuoteDataFromCache(request)
-      expect(result.residentialBuildingCount).toBe(10)
-      expect(result.peopleCount).toBe(5)
-      expect(request.logger.error).not.toHaveBeenCalled()
-    })
-
-    it('logs an error if developmentTypes set but not residentialBuildingCount or peopleCount', () => {
-      const request = {
-        yar: {
-          get: vi.fn().mockReturnValue({
-            planningType: 'full-planning-permission',
-            boundaryEntryType: 'draw',
-            boundaryGeojson: { type: 'Polygon' },
-            developmentTypes: ['housing', 'other-residential'],
             email: 'test@example.com'
           })
         },

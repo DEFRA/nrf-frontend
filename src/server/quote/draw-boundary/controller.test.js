@@ -254,7 +254,7 @@ describe('POST /quote/draw-boundary/save', () => {
     boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] }
   }
 
-  it('saves and redirects to development types when there are intersections', async () => {
+  it('saves and redirects to email when there are intersections', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: savePath,
@@ -265,7 +265,7 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryGeojson: boundaryGeojsonWithEdp
     })
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/development-types')
+    expect(response.headers.location).toBe('/quote/email')
   })
 
   it('saves and redirects to no-edp when there are no intersections', async () => {
