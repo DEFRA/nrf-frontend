@@ -43,6 +43,7 @@ export function context(request) {
 
   const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
   const user = isAuthenticated ? request?.auth?.credentials : null
+  const gtmId = config.get('gtmId')
 
   return {
     assetPath: `${assetPath}/assets`,
@@ -56,9 +57,9 @@ export function context(request) {
     navigation: buildNavigation(request),
     isAuthenticated,
     user,
-    analyticsEnabled:
-      !isE2eProd(request) && areAnalyticsCookiesAccepted(request),
-    gtmId: config.get('gtmId'),
+    analyticsEnabled: !isE2eProd(request) && gtmId,
+    areAnalyticsCookiesAccepted: areAnalyticsCookiesAccepted(request),
+    gtmId,
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`

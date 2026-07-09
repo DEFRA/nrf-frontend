@@ -7,9 +7,9 @@ import { config } from '../../../config/config.js'
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
 const gtmId = config.get('gtmId')
-const gtmOrigin = 'https://www.googletagmanager.com'
-const gaOrigin = 'https://www.google-analytics.com'
-const gaRegion1Origin = 'https://region1.google-analytics.com'
+const gtmOrigin = 'https://*.googletagmanager.com'
+const gaOrigin = 'https://*.google-analytics.com'
+const gaRegion1Origin = 'https://*.google-analytics.com'
 
 const mapExternalOrigins = [
   'https://raw.githubusercontent.com',
@@ -31,7 +31,12 @@ const contentSecurityPolicy = {
     mediaSrc: ['self'],
     styleSrc: ['self', 'unsafe-inline'],
     scriptSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
-    imgSrc: ['self', 'data:', ...mapExternalOrigins],
+    imgSrc: [
+      'self',
+      'data:',
+      ...mapExternalOrigins,
+      ...(gtmId ? [gtmOrigin, gaOrigin, gaRegion1Origin] : [])
+    ],
     frameSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     objectSrc: ['none'],
     frameAncestors: ['none'],

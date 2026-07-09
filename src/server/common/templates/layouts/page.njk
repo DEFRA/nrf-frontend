@@ -26,17 +26,17 @@
 {% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}
-  {% if not analyticsEnabled %}
+  {% if not areAnalyticsCookiesAccepted %}
     {% include "partials/google-analytics-cookie-clear.njk" %}
   {% endif %}
-  {% if analyticsEnabled and gtmId %}
+  {% if analyticsEnabled %}
     {% include "partials/google-tag-manager-head.njk" %}
   {% endif %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
 {% endblock %}
 
 {% block bodyStart %}
-  {% if analyticsEnabled and gtmId %}
+  {% if analyticsEnabled %}
     {% include "partials/google-tag-manager.body.njk" %}
   {% endif %}
 {% endblock %}

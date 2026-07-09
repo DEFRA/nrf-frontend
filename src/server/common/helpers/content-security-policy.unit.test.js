@@ -79,19 +79,16 @@ describe('#contentSecurityPolicy config variations', () => {
       await import('./content-security-policy.js')
 
     expect(contentSecurityPolicy.options.scriptSrc).toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.frameSrc).toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.connectSrc).toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.connectSrc).toContain(
-      'https://www.google-analytics.com'
-    )
-    expect(contentSecurityPolicy.options.connectSrc).toContain(
-      'https://region1.google-analytics.com'
+      'https://*.google-analytics.com'
     )
   })
 
@@ -102,19 +99,16 @@ describe('#contentSecurityPolicy config variations', () => {
       await import('./content-security-policy.js')
 
     expect(contentSecurityPolicy.options.scriptSrc).not.toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.frameSrc).not.toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.connectSrc).not.toContain(
-      'https://www.googletagmanager.com'
+      'https://*.googletagmanager.com'
     )
     expect(contentSecurityPolicy.options.connectSrc).not.toContain(
-      'https://www.google-analytics.com'
-    )
-    expect(contentSecurityPolicy.options.connectSrc).not.toContain(
-      'https://region1.google-analytics.com'
+      'https://*.google-analytics.com'
     )
   })
 })
