@@ -5,6 +5,7 @@ import routesPlanningType from './planning-type/routes.js'
 import routesBoundaryType from './boundary-type/routes.js'
 import routesResidential from './residential/routes.js'
 import routesNoEdp from './no-edp/routes.js'
+import routesNotHousing from './not-housing/routes.js'
 import routesDevelopmentType from './development-types/routes.js'
 import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
@@ -54,6 +55,7 @@ export const quote = {
         ...routesBoundaryType,
         ...routesResidential,
         ...routesNoEdp,
+        ...routesNotHousing,
         ...routesDevelopmentType,
         ...routesEmail,
         ...routesUploadBoundary,

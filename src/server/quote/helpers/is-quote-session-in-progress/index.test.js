@@ -6,6 +6,8 @@ import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
+import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
+import { routePath as notHousingPath } from '../../not-housing/routes.js'
 
 vi.mock('../quote-session-cache/index.js')
 
@@ -125,6 +127,38 @@ describe('checkForValidQuoteSession', () => {
 
     expect(result).toBe(h.continue)
     expect(getQuoteDataFromCache).not.toHaveBeenCalled()
+  })
+
+  it('redirects to not-housing when isHousing is "no"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
+    const request = makeRequest({ path: '/quote/boundary-type' })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(notHousingPath)
+  })
+
+  it('continues on not-housing when isHousing is "no"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
+    const request = makeRequest({ path: notHousingPath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it('continues on confirm-housing when isHousing is "no"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
+    const request = makeRequest({ path: confirmHousingPath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
   })
 
   it('continues without session check for non-GET requests', () => {
