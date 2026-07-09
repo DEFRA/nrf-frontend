@@ -1,4 +1,5 @@
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
+import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
@@ -39,7 +40,8 @@ export const checkForValidQuoteSession = (request, h) => {
   const { planningType } = quoteData
   if (
     planningType === 'other' &&
-    request.path !== applicationTypeNotAvailablePath
+    request.path !== applicationTypeNotAvailablePath &&
+    request.path !== planningTypePath
   ) {
     return h.redirect(applicationTypeNotAvailablePath).takeover()
   }

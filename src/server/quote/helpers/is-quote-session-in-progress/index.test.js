@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { checkForValidQuoteSession } from './index.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
+import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
@@ -72,6 +73,17 @@ describe('checkForValidQuoteSession', () => {
     checkForValidQuoteSession(request, h)
 
     expect(h.redirect).toHaveBeenCalledWith(applicationTypeNotAvailablePath)
+  })
+
+  it('continues on planning-type when planningType is "other"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
+    const request = makeRequest({ path: planningTypePath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
   })
 
   it('continues on application-type-not-available when planningType is "other"', () => {
