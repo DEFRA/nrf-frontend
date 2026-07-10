@@ -3,6 +3,8 @@ import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../start/routes.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
+import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
+import { routePath as notHousingPath } from '../../not-housing/routes.js'
 import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 
@@ -23,6 +25,28 @@ const isExempt = (path) =>
   quoteDetailsPattern.test(path) ||
   resendPattern.test(path)
 
+const redirectIfPlanningTypeOther = (planningType, path, h) => {
+  if (
+    planningType === 'other' &&
+    path !== applicationTypeNotAvailablePath &&
+    path !== planningTypePath
+  ) {
+    return h.redirect(applicationTypeNotAvailablePath).takeover()
+  }
+  return undefined
+}
+
+const redirectIfNotHousing = (isHousing, path, h) => {
+  if (
+    isHousing === 'no' &&
+    path !== notHousingPath &&
+    path !== confirmHousingPath
+  ) {
+    return h.redirect(notHousingPath).takeover()
+  }
+  return undefined
+}
+
 export const checkForValidQuoteSession = (request, h) => {
   if (
     request.method !== 'get' ||
@@ -37,14 +61,10 @@ export const checkForValidQuoteSession = (request, h) => {
     return h.redirect(startPath).takeover()
   }
 
-  const { planningType } = quoteData
-  if (
-    planningType === 'other' &&
-    request.path !== applicationTypeNotAvailablePath &&
-    request.path !== planningTypePath
-  ) {
-    return h.redirect(applicationTypeNotAvailablePath).takeover()
-  }
-
-  return h.continue
+  const { planningType, isHousing } = quoteData
+  return (
+    redirectIfPlanningTypeOther(planningType, request.path, h) ??
+    redirectIfNotHousing(isHousing, request.path, h) ??
+    h.continue
+  )
 }
