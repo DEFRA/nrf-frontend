@@ -54,8 +54,8 @@ export function context(request) {
     isAuthenticated,
     user,
     analyticsEnabled:
-      !isAnalyticsDisabled(request) &&
-      request?.path !== ANALYTICS_INTERNAL_ROUTE,
+      request?.path !== ANALYTICS_INTERNAL_ROUTE &&
+      !isAnalyticsDisabled(request),
     areAnalyticsCookiesAccepted: areAnalyticsCookiesAccepted(request),
     gtmId,
     getAssetPath(asset) {
