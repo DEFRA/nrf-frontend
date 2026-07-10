@@ -31,7 +31,8 @@ export const inProgressQuoteDataSchema = joi.object({
   residentialBuildingCount: residentialBuildingCountSchema
     .optional()
     .allow(null),
-  email: email.optional().allow(null)
+  email: email.optional().allow(null),
+  disableAnalyticsAudit: joi.boolean().optional()
 })
 
 export const completeQuoteDataSchema = joi.object({
@@ -42,5 +43,6 @@ export const completeQuoteDataSchema = joi.object({
   // Optional: drawn boundaries don't have a filename.
   boundaryFilename: boundaryFilename.optional().allow(null),
   residentialBuildingCount: residentialBuildingCountSchema,
-  email
+  email,
+  disableAnalyticsAudit: joi.boolean().optional()
 })

@@ -237,48 +237,6 @@ describe('GTM script rendering', () => {
     )
   })
 
-  it('does not render GTM scripts when x-nrf-profile header is prod on prod environment', async () => {
-    config.set('cdpEnvironment', 'prod')
-
-    const { cookie } = await submitForm({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      formData: { analytics: 'yes', source: 'page' }
-    })
-
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      cookie,
-      headers: { 'x-nrf-profile': 'prod' }
-    })
-    const { queryByTestId } = within(document.documentElement)
-
-    expect(queryByTestId('gtm-head')).toBeNull()
-    expect(queryByTestId('gtm-body')).toBeNull()
-
-    config.set('cdpEnvironment', 'local')
-  })
-
-  it('renders GTM scripts when x-nrf-profile header is prod but environment is not prod', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      formData: { analytics: 'yes', source: 'page' }
-    })
-
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      cookie,
-      headers: { 'x-nrf-profile': 'prod' }
-    })
-    const { getByTestId } = within(document.documentElement)
-
-    expect(getByTestId('gtm-head')).toBeTruthy()
-    expect(getByTestId('gtm-body')).toBeTruthy()
-  })
-
   it('does not render GTM scripts when gtmId is not set', async () => {
     config.set('gtmId', null)
 

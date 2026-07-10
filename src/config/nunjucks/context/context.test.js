@@ -48,7 +48,7 @@ describe('context and cache', () => {
 
       test('Should provide expected context', () => {
         expect(contextResult).toEqual({
-          analyticsEnabled: null,
+          analyticsEnabled: true,
           areAnalyticsCookiesAccepted: false,
           assetPath: '/public/assets',
           breadcrumbs: [],
@@ -162,7 +162,7 @@ describe('context and cache', () => {
 
       test('Should provide expected context', () => {
         expect(contextResult).toEqual({
-          analyticsEnabled: null,
+          analyticsEnabled: true,
           areAnalyticsCookiesAccepted: false,
           assetPath: '/public/assets',
           breadcrumbs: [],

@@ -1,5 +1,6 @@
 import {
   COOKIE_NAME_PREFERENCES,
+  COOKIE_NAME_DISABLE_ANALYTICS,
   COOKIE_OPTIONS,
   COOKIE_ROUTE,
   CONFIRMATION_QUERY_PARAM
@@ -28,6 +29,14 @@ function buildCurrentUrl(request) {
 export const cookies = {
   name: 'cookie-policy',
   register(server) {
+    server.state(COOKIE_NAME_DISABLE_ANALYTICS, {
+      clearInvalid: true,
+      ttl: null,
+      path: COOKIE_OPTIONS.PATH,
+      isSecure: config.get('isProduction'),
+      isSameSite: COOKIE_OPTIONS.IS_SAME_SITE
+    })
+
     server.state(COOKIE_NAME_PREFERENCES, {
       clearInvalid: true,
       ttl: COOKIE_OPTIONS.TTL,
