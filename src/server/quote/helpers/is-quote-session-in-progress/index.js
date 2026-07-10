@@ -33,6 +33,7 @@ const redirectIfPlanningTypeOther = (planningType, path, h) => {
   ) {
     return h.redirect(applicationTypeNotAvailablePath).takeover()
   }
+  return undefined
 }
 
 const redirectIfNotHousing = (isHousing, path, h) => {
@@ -43,6 +44,7 @@ const redirectIfNotHousing = (isHousing, path, h) => {
   ) {
     return h.redirect(notHousingPath).takeover()
   }
+  return undefined
 }
 
 export const checkForValidQuoteSession = (request, h) => {
