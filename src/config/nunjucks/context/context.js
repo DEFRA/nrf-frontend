@@ -9,6 +9,7 @@ import {
   areAnalyticsCookiesAccepted,
   isAnalyticsDisabled
 } from '../../../server/cookies/helpers/cookie-service.js'
+import { ANALYTICS_INTERNAL_ROUTE } from '../../../server/cookies/helpers/constants.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -52,7 +53,9 @@ export function context(request) {
     navigation: buildNavigation(request),
     isAuthenticated,
     user,
-    analyticsEnabled: !isAnalyticsDisabled(request),
+    analyticsEnabled:
+      !isAnalyticsDisabled(request) &&
+      request?.path !== ANALYTICS_INTERNAL_ROUTE,
     areAnalyticsCookiesAccepted: areAnalyticsCookiesAccepted(request),
     gtmId,
     getAssetPath(asset) {
