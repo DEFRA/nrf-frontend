@@ -5,10 +5,14 @@ import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache
 } from '../helpers/quote-session-cache/index.js'
+import { isAnalyticsDisabled } from '../../cookies/helpers/cookie-service.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {
     const { isHousing, ...quoteData } = getCompleteQuoteDataFromCache(request)
+    if (isAnalyticsDisabled(request)) {
+      quoteData.disableAnalyticsAudit = true
+    }
     const response = await postRequestToBackend({
       endpointPath: '/quotes',
       payload: quoteData

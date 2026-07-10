@@ -13,6 +13,7 @@ import { impactAssessorMap } from './impact-assessor-map/index.js'
 import { cookies } from './cookies/index.js'
 import { browserLogs } from './browser-logs/index.js'
 import { admin } from './admin/index.js'
+import { analyticsInternal } from './analytics-internal/index.js'
 
 export const router = {
   plugin: {
@@ -34,7 +35,8 @@ export const router = {
         osNamesSearch,
         impactAssessorMap,
         browserLogs,
-        admin
+        admin,
+        analyticsInternal
       ])
 
       // Static assets

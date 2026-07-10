@@ -29,19 +29,24 @@
   {% if not areAnalyticsCookiesAccepted %}
     {% include "partials/google-analytics-cookie-clear.njk" %}
   {% endif %}
-  {% if analyticsEnabled %}
+  {% if analyticsEnabled and gtmId %}
     {% include "partials/google-tag-manager-head.njk" %}
   {% endif %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
 {% endblock %}
 
 {% block bodyStart %}
-  {% if analyticsEnabled and areAnalyticsCookiesAccepted %}
+  {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
     {% include "partials/google-tag-manager.body.njk" %}
   {% endif %}
 {% endblock %}
 
 {% block headerStart %}
+  {% if not analyticsEnabled %}
+    <div style="background:#d4351c;padding:8px 15px 8px 15px" data-testid="analytics-disabled-banner">
+      <p class="govuk-body" style="color:#fff;margin-bottom:0">Analytics &amp; audit events disabled (<a href="/analytics-internal" style="color:#fff">Change</a>)</p>
+    </div>
+  {% endif %}
   {% include "partials/cookie-banner.njk" %}
 {% endblock %}
 

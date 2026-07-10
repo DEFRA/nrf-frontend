@@ -12,3 +12,6 @@ export const COOKIE_OPTIONS = {
 }
 
 export const COOKIE_ROUTE = '/cookies'
+
+export const COOKIE_NAME_DISABLE_ANALYTICS = 'disable_analytics_audit'
+export const ANALYTICS_INTERNAL_ROUTE = '/analytics-internal'

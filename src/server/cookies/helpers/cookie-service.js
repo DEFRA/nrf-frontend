@@ -1,5 +1,9 @@
 import Joi from 'joi'
-import { COOKIE_NAME_PREFERENCES, COOKIE_OPTIONS } from './constants.js'
+import {
+  COOKIE_NAME_PREFERENCES,
+  COOKIE_NAME_DISABLE_ANALYTICS,
+  COOKIE_OPTIONS
+} from './constants.js'
 import { COOKIE_POLICY_VERSION } from './version.js'
 import { config } from '../../../config/config.js'
 
@@ -80,4 +84,23 @@ export function clearCookiePreferences(response) {
 export function areAnalyticsCookiesAccepted(request) {
   const preferences = getCookiePreferences(request)
   return preferences.analytics === true
+}
+
+export function isAnalyticsDisabled(request) {
+  return request.state?.[COOKIE_NAME_DISABLE_ANALYTICS] === '1'
+}
+
+export function setDisableAnalyticsCookie(response) {
+  response.state(COOKIE_NAME_DISABLE_ANALYTICS, '1', {
+    ttl: null,
+    path: COOKIE_OPTIONS.PATH,
+    isSecure: config.get('isProduction'),
+    isSameSite: COOKIE_OPTIONS.IS_SAME_SITE
+  })
+}
+
+export function clearDisableAnalyticsCookie(response) {
+  response.unstate(COOKIE_NAME_DISABLE_ANALYTICS, {
+    path: COOKIE_OPTIONS.PATH
+  })
 }

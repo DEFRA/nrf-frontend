@@ -5,7 +5,10 @@ import { config } from '../../config.js'
 import { buildNavigation } from './build-navigation.js'
 import { gitHash } from '../../../server/common/helpers/git-hash.js'
 import { createLogger } from '../../../server/common/helpers/logging/logger.js'
-import { areAnalyticsCookiesAccepted } from '../../../server/cookies/helpers/cookie-service.js'
+import {
+  areAnalyticsCookiesAccepted,
+  isAnalyticsDisabled
+} from '../../../server/cookies/helpers/cookie-service.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -17,14 +20,6 @@ const isProduction = config.get('isProduction')
 
 let webpackManifest
 let webpackManifestMtimeMs
-
-function isE2eProd(request) {
-  try {
-    return request?.yar?.get('isE2eProd') === true
-  } catch {
-    return false
-  }
-}
 
 export function context(request) {
   const shouldReload =
@@ -57,7 +52,7 @@ export function context(request) {
     navigation: buildNavigation(request),
     isAuthenticated,
     user,
-    analyticsEnabled: !isE2eProd(request) && gtmId,
+    analyticsEnabled: !isAnalyticsDisabled(request),
     areAnalyticsCookiesAccepted: areAnalyticsCookiesAccepted(request),
     gtmId,
     getAssetPath(asset) {

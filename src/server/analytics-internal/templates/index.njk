@@ -1,0 +1,37 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate>
+      <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+
+      {% set legendHtml %}
+        <h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>
+      {% endset %}
+
+      {{ govukRadios({
+        name: "analyticsEnabled",
+        fieldset: {
+          legend: {
+            html: legendHtml,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        value: "yes" if analyticsEnabled else "no",
+        items: [
+          { value: "yes", text: "Yes" },
+          { value: "no", text: "No" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Save" }) }}
+    </form>
+
+  </div>
+</div>
+{% endblock %}
