@@ -12,6 +12,9 @@ import { wireHideLayersOnDraw } from './hide-layers-on-draw.js'
 const MAP_ELEMENT_ID = 'draw-boundary-datasets-map'
 const MIN_CONTAINER_HEIGHT = 320
 const CONTAINER_BOTTOM_GAP = 16
+const DEFAULT_ZOOM = 8.5
+const NORFOLK_LNG = 1.1405503
+const NORFOLK_LAT = 52.7089441
 
 // MapLibre fetches tiles from a Web Worker, which has no implicit base URL,
 // so relative URLs (e.g. '/impact-assessor-map/...') fail to parse there.
@@ -58,8 +61,8 @@ document.addEventListener('DOMContentLoaded', function () {
     behaviour: 'inline',
     mapProvider: window.defra.maplibreProvider(),
     mapStyle: mapStyles[0],
-    center: [1.1405503, 52.7089441], // Norfolk
-    zoom: 8.5,
+    center: [NORFOLK_LNG, NORFOLK_LAT],
+    zoom: DEFAULT_ZOOM,
     containerHeight: getContainerHeight(mapElement),
     transformRequest,
     plugins: [

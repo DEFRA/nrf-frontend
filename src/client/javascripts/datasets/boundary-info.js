@@ -28,14 +28,14 @@ function buildPanelHtml() {
 }
 
 function formatArea(area) {
-  if (!area || area.hectares == null || area.acres == null) {
+  if (area?.hectares == null || area?.acres == null) {
     return NOT_AVAILABLE_TEXT
   }
   return `${area.hectares}ha (${area.acres} acres)`
 }
 
 function formatPerimeter(perimeter) {
-  if (!perimeter || perimeter.kilometres == null || perimeter.miles == null) {
+  if (perimeter?.kilometres == null || perimeter?.miles == null) {
     return NOT_AVAILABLE_TEXT
   }
   return `${perimeter.kilometres}km (${perimeter.miles} miles)`
