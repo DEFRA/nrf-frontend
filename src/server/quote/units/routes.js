@@ -4,17 +4,17 @@ import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
 
-const routeId = 'development-types'
-export const routePath = '/quote/development-types'
+const routeId = 'units'
+export const routePath = '/quote/units'
 
 /**
  * @openapi
- * /quote/development-types:
+ * /quote/units:
  *   get:
  *     tags:
  *       - Quote
- *     summary: Development types page
- *     description: Renders the development type selection form
+ *     summary: Residential units page
+ *     description: Renders the units building count form
  *     responses:
  *       200:
  *         description: HTML form page
@@ -25,7 +25,7 @@ export const routePath = '/quote/development-types'
  *   post:
  *     tags:
  *       - Quote
- *     summary: Submit development types
+ *     summary: Submit units unit count
  *     requestBody:
  *       required: true
  *       content:
@@ -33,15 +33,12 @@ export const routePath = '/quote/development-types'
  *           schema:
  *             type: object
  *             required:
- *               - developmentTypes
+ *               - housingUnits
  *             properties:
- *               developmentTypes:
- *                 type: array
- *                 items:
- *                   type: string
- *                   enum:
- *                     - housing
- *                     - other-residential
+ *               housingUnits:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 999999
  *     responses:
  *       303:
  *         description: Redirect to next step on success or back to form on validation failure

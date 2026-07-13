@@ -1,5 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { routePath as residentialPath } from '../residential/routes.js'
+import { routePath as residentialPath } from '../units/routes.js'
 
 export const title =
   'Choose how you would like to show us the boundary of your development'

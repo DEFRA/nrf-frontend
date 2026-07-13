@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { quotePostController } from './controller-post.js'
-import getNextPage from './residential/get-next-page.js'
+import getNextPage from './units/get-next-page.js'
 
 import { saveValidationFlashToCache } from './helpers/form-validation-session/index.js'
 import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
@@ -39,13 +39,13 @@ describe('quotePostController', () => {
   })
 
   it('should save the payload to cache and redirect to the next page on successful submission', () => {
-    const mergedQuoteData = { residentialBuildingCount: 10 }
+    const mergedQuoteData = { housingUnits: 10 }
     vi.mocked(saveQuoteDataToCache).mockReturnValue(mergedQuoteData)
     const controller = quotePostController({
       formValidation: () => () => {},
       getNextPage
     })
-    const request = buildRequest({ residentialBuildingCount: 10 })
+    const request = buildRequest({ housingUnits: 10 })
     const h = buildH()
 
     controller.handler(request, h)

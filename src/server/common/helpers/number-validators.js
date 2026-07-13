@@ -3,6 +3,10 @@
  * Rejects scientific notation (1e3), plus/minus signs, decimal numbers,
  * and non-numeric input. Server-side validation for progressive enhancement.
  *
+ * Decimal numbers (e.g. 2.4) raise a distinct `number.integer` error,
+ * separate from `number.min`, so callers can give an accurate message
+ * rather than implying the value is merely too small.
+ *
  * @param {Object} options - Configuration options
  * @param {number} options.min - Minimum allowed value (inclusive)
  * @param {number} options.max - Maximum allowed value (inclusive)
@@ -10,6 +14,7 @@
  */
 const ERROR_REQUIRED = 'any.required'
 const ERROR_FORMAT = 'number.format'
+const ERROR_INTEGER = 'number.integer'
 const ERROR_MIN = 'number.min'
 const ERROR_MAX = 'number.max'
 
@@ -29,7 +34,7 @@ export function createPlainIntegerValidator({ min, max }) {
 
     // Check for decimal numbers (e.g. 2.4, -3.5)
     if (/^-?\d+\.\d+$/.test(cleanedValue)) {
-      return helpers.error(ERROR_MIN)
+      return helpers.error(ERROR_INTEGER)
     }
 
     // Must be digits only (reject letters, scientific notation, plus signs)
