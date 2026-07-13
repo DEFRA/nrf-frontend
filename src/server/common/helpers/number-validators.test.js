@@ -7,6 +7,7 @@ describe('createPlainIntegerValidator', () => {
   const schema = joi.any().custom(validator).messages({
     'any.required': 'Field is required',
     'number.format': 'Enter a number using digits only',
+    'number.integer': 'Enter a whole number',
     'number.min': 'Number too small',
     'number.max': 'Number too large'
   })
@@ -83,12 +84,17 @@ describe('createPlainIntegerValidator', () => {
   describe('decimal numbers', () => {
     it('fails for decimal number', () => {
       const { error } = schema.validate(3.5)
-      expect(error.details[0].message).toBe('Number too small')
+      expect(error.details[0].message).toBe('Enter a whole number')
     })
 
     it('fails for string decimal', () => {
       const { error } = schema.validate('3.5')
-      expect(error.details[0].message).toBe('Number too small')
+      expect(error.details[0].message).toBe('Enter a whole number')
+    })
+
+    it('fails for negative decimal', () => {
+      const { error } = schema.validate('-3.5')
+      expect(error.details[0].message).toBe('Enter a whole number')
     })
   })
 

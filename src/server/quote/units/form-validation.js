@@ -2,12 +2,13 @@ import joi from 'joi'
 
 import { createPlainIntegerValidator } from '../../common/helpers/number-validators.js'
 
-const MAX_RESIDENTIAL_UNITS = 999999
+const MAX_RESIDENTIAL_UNITS = 50000
 
-const requiredErrorMessage = 'Enter the number of residential units'
-const formatErrorMessage = 'Enter a number using digits only, for example 12'
-const minErrorMessage = 'Enter a whole number greater than zero'
-const maxErrorMessage = 'Enter a smaller whole number within the allowed range'
+const requiredErrorMessage = 'Enter the number of housing units'
+const formatErrorMessage = 'Housing units must be a number'
+const integerErrorMessage = 'Housing units must be a whole number'
+const minErrorMessage = 'Housing units must be 1 or more'
+const maxErrorMessage = 'Housing units must be 50,000 or fewer'
 
 const plainIntegerValidator = createPlainIntegerValidator({
   min: 1,
@@ -23,6 +24,7 @@ export default function formValidation() {
       .messages({
         'any.required': requiredErrorMessage,
         'number.format': formatErrorMessage,
+        'number.integer': integerErrorMessage,
         'number.min': minErrorMessage,
         'number.max': maxErrorMessage
       })

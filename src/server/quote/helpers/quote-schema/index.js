@@ -2,7 +2,7 @@ import joi from 'joi'
 import planningTypeValidation from '../../planning-type/form-validation.js'
 import boundaryTypeValidation from '../../boundary-type/form-validation.js'
 import confirmHousingValidation from '../../confirm-housing/form-validation.js'
-import residentialValidation from '../../residential/form-validation.js'
+import residentialValidation from '../../units/form-validation.js'
 import emailValidation from '../../email/form-validation.js'
 
 // Matches the VARCHAR(255) width of the quotes.boundary_filename column in

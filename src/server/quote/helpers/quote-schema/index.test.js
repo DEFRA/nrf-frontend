@@ -58,9 +58,7 @@ describe('completeQuoteDataSchema', () => {
       const { residentialBuildingCount: _, ...without } = validBase
       const { error } = completeQuoteDataSchema.validate(without)
       expect(error).toBeDefined()
-      expect(error.details[0].message).toBe(
-        'Enter the number of residential units'
-      )
+      expect(error.details[0].message).toBe('Enter the number of housing units')
     })
   })
 

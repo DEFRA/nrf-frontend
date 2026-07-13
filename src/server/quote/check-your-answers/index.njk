@@ -33,9 +33,9 @@
               actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/draw-boundary", text: "Change", visuallyHiddenText: "red line boundary" }] }
             } if formSubmitData.boundaryEntryType,
             {
-              key: { text: "Number of residential units" },
+              key: { text: "Number of units" },
               value: { text: formSubmitData.residentialBuildingCount },
-              actions: { items: [{ href: "/quote/residential", text: "Change", visuallyHiddenText: "number of residential units" }] }
+              actions: { items: [{ href: "/quote/units", text: "Change", visuallyHiddenText: "number of units" }] }
             } if formSubmitData.residentialBuildingCount,
             {
               key: { text: "Email address" },

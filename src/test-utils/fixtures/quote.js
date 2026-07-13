@@ -5,7 +5,7 @@ export const fullQuote = {
     filename: 'site-plan.geojson'
   },
   development: {
-    types: ['housing', 'other-residential'],
+    types: ['housing', 'other-units'],
     residentialBuildingCount: '42',
     peopleCount: '100'
   },

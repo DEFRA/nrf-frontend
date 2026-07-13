@@ -80,6 +80,6 @@ describe('Confirm housing page', () => {
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/residential')
+    expect(response.headers.location).toBe('/quote/units')
   })
 })

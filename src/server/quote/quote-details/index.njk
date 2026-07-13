@@ -28,12 +28,12 @@
               value: {
                 html: "<ul class=\"govuk-list\">" +
                   ("<li>Housing</li>" if quote.development.types and "housing" in quote.development.types else "") +
-                  ("<li>Other residential</li>" if quote.development.types and "other-residential" in quote.development.types else "") +
+                  ("<li>Other units</li>" if quote.development.types and "other-units" in quote.development.types else "") +
                   "</ul>"
               }
             } if quote.development.types,
             {
-              key: { text: "Number of residential units" },
+              key: { text: "Number of units units" },
               value: { text: quote.development.residentialBuildingCount }
             } if quote.development.residentialBuildingCount,
             {

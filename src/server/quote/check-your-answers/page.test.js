@@ -4,7 +4,7 @@ import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as residentialPath } from '../residential/routes.js'
+import { routePath as residentialPath } from '../units/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -91,7 +91,7 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('Full planning permission')
     expect(summaryList).toHaveTextContent('Red line boundary')
     expect(summaryList).toHaveTextContent('Uploaded')
-    expect(summaryList).toHaveTextContent('Number of residential units')
+    expect(summaryList).toHaveTextContent('Number of units')
     expect(summaryList).toHaveTextContent('42')
     expect(summaryList).toHaveTextContent('Email address')
     expect(summaryList).toHaveTextContent('test@example.com')
@@ -107,8 +107,8 @@ describe('Check your answers page', () => {
       })
     ).toHaveAttribute('href', '/quote/upload-boundary')
     expect(
-      getByRole(document, 'link', { name: 'Changenumber of residential units' })
-    ).toHaveAttribute('href', '/quote/residential')
+      getByRole(document, 'link', { name: 'Changenumber of units' })
+    ).toHaveAttribute('href', '/quote/units')
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email')

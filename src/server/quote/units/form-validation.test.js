@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import getSchema from './form-validation.js'
 
-describe('residential form validation', () => {
+describe('units form validation', () => {
   describe('residentialBuildingCount', () => {
     describe('valid inputs', () => {
       it('passes for a valid integer (6)', () => {
@@ -31,9 +31,16 @@ describe('residential form validation', () => {
         expect(value.residentialBuildingCount).toBe(345)
       })
 
-      it('passes for maximum allowed value (999999)', () => {
+      it('passes for minimum allowed value (1)', () => {
         const { error } = getSchema().validate({
-          residentialBuildingCount: 999999
+          residentialBuildingCount: 1
+        })
+        expect(error).toBeUndefined()
+      })
+
+      it('passes for maximum allowed value (50000)', () => {
+        const { error } = getSchema().validate({
+          residentialBuildingCount: 50000
         })
         expect(error).toBeUndefined()
       })
@@ -43,14 +50,14 @@ describe('residential form validation', () => {
       it('fails when absent', () => {
         const { error } = getSchema().validate({})
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter the number of housing units'
         )
       })
 
       it('fails when empty string', () => {
         const { error } = getSchema().validate({ residentialBuildingCount: '' })
         expect(error.details[0].message).toBe(
-          'Enter the number of residential units'
+          'Enter the number of housing units'
         )
       })
     })
@@ -58,9 +65,7 @@ describe('residential form validation', () => {
     describe('zero', () => {
       it('fails when zero', () => {
         const { error } = getSchema().validate({ residentialBuildingCount: 0 })
-        expect(error.details[0].message).toBe(
-          'Enter a whole number greater than zero'
-        )
+        expect(error.details[0].message).toBe('Housing units must be 1 or more')
       })
     })
 
@@ -70,18 +75,27 @@ describe('residential form validation', () => {
           residentialBuildingCount: 3.5
         })
         expect(error.details[0].message).toBe(
-          'Enter a whole number greater than zero'
+          'Housing units must be a whole number'
+        )
+      })
+
+      it('fails when a decimal string ("3.5")', () => {
+        const { error } = getSchema().validate({
+          residentialBuildingCount: '3.5'
+        })
+        expect(error.details[0].message).toBe(
+          'Housing units must be a whole number'
         )
       })
     })
 
     describe('extremely large numbers', () => {
-      it('fails when exceeding maximum (1000000)', () => {
+      it('fails when exceeding maximum (50001)', () => {
         const { error } = getSchema().validate({
-          residentialBuildingCount: 1000000
+          residentialBuildingCount: 50001
         })
         expect(error.details[0].message).toBe(
-          'Enter a smaller whole number within the allowed range'
+          'Housing units must be 50,000 or fewer'
         )
       })
 
@@ -90,7 +104,7 @@ describe('residential form validation', () => {
           residentialBuildingCount: 999999999
         })
         expect(error.details[0].message).toBe(
-          'Enter a smaller whole number within the allowed range'
+          'Housing units must be 50,000 or fewer'
         )
       })
     })
@@ -100,54 +114,42 @@ describe('residential form validation', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: 'abc'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
-        )
+        expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
       it('fails when text with units (25 units)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '25 units'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
-        )
+        expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
       it('fails when number with comma separator (1,000)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '1,000'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
-        )
+        expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
       it('fails when scientific notation (1e3)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '1e3'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
-        )
+        expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
       it('fails when number with plus sign (+10)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '+10'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a number using digits only, for example 12'
-        )
+        expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
       it('fails when number with minus sign (-3)', () => {
         const { error } = getSchema().validate({
           residentialBuildingCount: '-3'
         })
-        expect(error.details[0].message).toBe(
-          'Enter a whole number greater than zero'
-        )
+        expect(error.details[0].message).toBe('Housing units must be 1 or more')
       })
     })
   })
