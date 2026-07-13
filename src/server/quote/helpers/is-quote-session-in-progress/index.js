@@ -6,9 +6,17 @@ import { routePath as deleteConfirmationPath } from '../../delete-quote-confirma
 import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
 import { routePath as notHousingPath } from '../../not-housing/routes.js'
 import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
+import { routePath as drawBoundaryDatasetsPath } from '../../draw-boundary-datasets/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 
-const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
+// draw-boundary-datasets is a standalone technical example of the interactive
+// map datasets plugin, not a step in the quote journey, so it is exempt from
+// the in-progress-session check.
+const exemptPaths = new Set([
+  confirmationPath,
+  deleteConfirmationPath,
+  drawBoundaryDatasetsPath
+])
 
 const quoteDetailsPattern = new RegExp(
   `^\\/quote\\/${referencePattern.source}\\/` + `${tokenPattern.source}$`

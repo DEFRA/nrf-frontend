@@ -10,6 +10,7 @@ import { quote } from './quote/index.js'
 import { osBaseMap } from './os-base-map/index.js'
 import { osNamesSearch } from './os-names-search/index.js'
 import { impactAssessorMap } from './impact-assessor-map/index.js'
+import { excludedAreasMap } from './excluded-areas-map/index.js'
 import { cookies } from './cookies/index.js'
 import { browserLogs } from './browser-logs/index.js'
 import { admin } from './admin/index.js'
@@ -34,6 +35,7 @@ export const router = {
         osBaseMap,
         osNamesSearch,
         impactAssessorMap,
+        excludedAreasMap,
         browserLogs,
         admin,
         analyticsInternal

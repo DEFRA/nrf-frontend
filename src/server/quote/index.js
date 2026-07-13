@@ -10,6 +10,7 @@ import routesDevelopmentType from './development-types/routes.js'
 import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
 import routesDrawBoundary from './draw-boundary/routes.js'
+import routesDrawBoundaryDatasets from './draw-boundary-datasets/routes.js'
 import routesUploadReceived from './upload-received/routes.js'
 import routesUploadPreviewMap from './upload-preview-map/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
@@ -60,6 +61,7 @@ export const quote = {
         ...routesEmail,
         ...routesUploadBoundary,
         ...routesDrawBoundary,
+        ...routesDrawBoundaryDatasets,
         ...routesUploadReceived,
         ...routesUploadPreviewMap,
         ...routesCheckYourAnswers,
