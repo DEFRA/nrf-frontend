@@ -1,4 +1,4 @@
-import { routePath as routePathResidential } from '../residential/routes.js'
+import { routePath as routePathResidential } from '../units/routes.js'
 
 export default function getNextPage({ isHousing }) {
   if (isHousing === 'yes') {

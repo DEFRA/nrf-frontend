@@ -4,11 +4,7 @@ export const fullQuote = {
     userInputType: 'upload',
     filename: 'site-plan.geojson'
   },
-  development: {
-    types: ['housing', 'other-residential'],
-    residentialBuildingCount: '42',
-    peopleCount: '100'
-  },
+  housingUnits: '42',
   email: {
     address: 'test@example.com'
   },

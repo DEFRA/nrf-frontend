@@ -1,14 +1,15 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
-import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { expectInputError } from '../../../test-utils/assertions.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
-describe('Development type page', () => {
+describe('Residential page', () => {
   const getServer = setupTestServer()
+  const inputLabel = 'Enter the maximum number of units you are developing'
   let sessionCookie
 
   beforeEach(
@@ -22,28 +23,25 @@ describe('Development type page', () => {
       cookie: sessionCookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'What type of development is it?'
+      inputLabel
     )
     expect(document.title).toBe(
-      'What type of development is it? - Nature restoration levy - GOV.UK'
+      'Enter the maximum number of units you are developing - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/upload-preview-map'
+      '/quote/confirm-housing'
     )
-    // unchecked, if user made no previous input
-    expect(getByLabelText(document, 'Housing')).not.toBeChecked()
-    expect(getByLabelText(document, 'Other residential')).not.toBeChecked()
-    // CSRF token
+    expect(getByLabelText(document, inputLabel)).toHaveValue('')
     const csrfToken = document.querySelector('form input[name="csrfToken"]')
     expect(csrfToken).toBeInTheDocument()
   })
 
-  it("should remember the user's previous selection", async () => {
+  it("should remember the user's previously entered value", async () => {
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { developmentTypes: ['housing'] },
+      formData: { housingUnits: '25' },
       cookie: sessionCookie
     })
     const document = await loadPage({
@@ -51,8 +49,7 @@ describe('Development type page', () => {
       server: getServer(),
       cookie: updatedCookie
     })
-    expect(getByLabelText(document, 'Housing')).toBeChecked()
-    expect(getByLabelText(document, 'Other residential')).not.toBeChecked()
+    expect(getByLabelText(document, inputLabel)).toHaveValue('25')
   })
 
   it('should show a validation error, after an invalid form submission', async () => {
@@ -69,9 +66,10 @@ describe('Development type page', () => {
       server: getServer(),
       cookie: updatedCookie
     })
-    expectFieldsetError({
+    expectInputError({
       document,
-      errorMessage: 'Select a development type to continue'
+      inputLabel,
+      errorMessage: 'Enter the number of housing units'
     })
   })
 
@@ -79,30 +77,10 @@ describe('Development type page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { developmentTypes: ['other-residential'] },
+      formData: { housingUnits: '6' },
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/people-count')
-  })
-
-  it('should link back to draw-boundary when boundary entry type is draw', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: boundaryTypePath,
-      server: getServer(),
-      formData: { boundaryEntryType: 'draw' },
-      cookie: sessionCookie
-    })
-
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer(),
-      cookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/quote/draw-boundary'
-    )
+    expect(response.headers.location).toBe('/quote/boundary-type')
   })
 })

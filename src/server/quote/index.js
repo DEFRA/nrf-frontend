@@ -3,10 +3,9 @@ import routesConfirmHousing from './confirm-housing/routes.js'
 import routesApplicationTypeNotAvailable from './application-type-not-available/routes.js'
 import routesPlanningType from './planning-type/routes.js'
 import routesBoundaryType from './boundary-type/routes.js'
-import routesResidential from './residential/routes.js'
+import routesUnits from './units/routes.js'
 import routesNoEdp from './no-edp/routes.js'
 import routesNotHousing from './not-housing/routes.js'
-import routesDevelopmentType from './development-types/routes.js'
 import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
 import routesDrawBoundary from './draw-boundary/routes.js'
@@ -14,7 +13,6 @@ import routesUploadReceived from './upload-received/routes.js'
 import routesUploadPreviewMap from './upload-preview-map/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
-import routesPeopleCount from './people-count/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
 import routesQuoteDetails from './quote-details/routes.js'
@@ -53,17 +51,15 @@ export const quote = {
         ...routesApplicationTypeNotAvailable,
         ...routesPlanningType,
         ...routesBoundaryType,
-        ...routesResidential,
+        ...routesUnits,
         ...routesNoEdp,
         ...routesNotHousing,
-        ...routesDevelopmentType,
         ...routesEmail,
         ...routesUploadBoundary,
         ...routesDrawBoundary,
         ...routesUploadReceived,
         ...routesUploadPreviewMap,
         ...routesCheckYourAnswers,
-        ...routesPeopleCount,
         ...routesConfirmation,
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,

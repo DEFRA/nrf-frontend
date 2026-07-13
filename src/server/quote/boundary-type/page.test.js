@@ -28,7 +28,7 @@ describe('Boundary type page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/residential'
+      '/quote/units'
     )
     expect(getByLabelText(document, 'Draw on a map')).not.toBeChecked()
     expect(getByLabelText(document, 'Upload a file')).not.toBeChecked()

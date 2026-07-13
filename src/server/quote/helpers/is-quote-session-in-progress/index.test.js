@@ -27,7 +27,7 @@ describe('checkForValidQuoteSession', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       planningType: 'full-planning-permission'
     })
-    const request = makeRequest({ path: '/quote/residential' })
+    const request = makeRequest({ path: '/quote/units' })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
@@ -162,7 +162,7 @@ describe('checkForValidQuoteSession', () => {
   })
 
   it('continues without session check for non-GET requests', () => {
-    const request = makeRequest({ path: '/quote/residential', method: 'post' })
+    const request = makeRequest({ path: '/quote/units', method: 'post' })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
