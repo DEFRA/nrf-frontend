@@ -4,8 +4,12 @@ import getSchema from './form-validation.js'
 describe('units form validation', () => {
   describe('housingUnits', () => {
     describe('valid inputs', () => {
-      it('passes for a valid integer (6)', () => {
-        const { error } = getSchema().validate({ housingUnits: 6 })
+      it.each([
+        ['a valid integer', 6],
+        ['the minimum allowed value', 1],
+        ['the maximum allowed value', 50000]
+      ])('passes for %s (%s)', (_description, input) => {
+        const { error } = getSchema().validate({ housingUnits: input })
         expect(error).toBeUndefined()
       })
 
@@ -29,20 +33,6 @@ describe('units form validation', () => {
         })
         expect(error).toBeUndefined()
         expect(value.housingUnits).toBe(345)
-      })
-
-      it('passes for minimum allowed value (1)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: 1
-        })
-        expect(error).toBeUndefined()
-      })
-
-      it('passes for maximum allowed value (50000)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: 50000
-        })
-        expect(error).toBeUndefined()
       })
     })
 
@@ -110,38 +100,14 @@ describe('units form validation', () => {
     })
 
     describe('non-numeric input', () => {
-      it('fails when non-numeric characters (abc)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: 'abc'
-        })
-        expect(error.details[0].message).toBe('Housing units must be a number')
-      })
-
-      it('fails when text with units (25 units)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: '25 units'
-        })
-        expect(error.details[0].message).toBe('Housing units must be a number')
-      })
-
-      it('fails when number with comma separator (1,000)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: '1,000'
-        })
-        expect(error.details[0].message).toBe('Housing units must be a number')
-      })
-
-      it('fails when scientific notation (1e3)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: '1e3'
-        })
-        expect(error.details[0].message).toBe('Housing units must be a number')
-      })
-
-      it('fails when number with plus sign (+10)', () => {
-        const { error } = getSchema().validate({
-          housingUnits: '+10'
-        })
+      it.each([
+        ['non-numeric characters', 'abc'],
+        ['text with units', '25 units'],
+        ['a comma separator', '1,000'],
+        ['scientific notation', '1e3'],
+        ['a plus sign', '+10']
+      ])('fails when %s (%s)', (_description, input) => {
+        const { error } = getSchema().validate({ housingUnits: input })
         expect(error.details[0].message).toBe('Housing units must be a number')
       })
 
