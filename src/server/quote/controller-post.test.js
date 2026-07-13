@@ -39,13 +39,13 @@ describe('quotePostController', () => {
   })
 
   it('should save the payload to cache and redirect to the next page on successful submission', () => {
-    const mergedQuoteData = { residentialBuildingCount: 10 }
+    const mergedQuoteData = { housingUnits: 10 }
     vi.mocked(saveQuoteDataToCache).mockReturnValue(mergedQuoteData)
     const controller = quotePostController({
       formValidation: () => () => {},
       getNextPage
     })
-    const request = buildRequest({ residentialBuildingCount: 10 })
+    const request = buildRequest({ housingUnits: 10 })
     const h = buildH()
 
     controller.handler(request, h)

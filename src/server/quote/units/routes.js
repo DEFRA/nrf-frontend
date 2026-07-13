@@ -33,9 +33,9 @@ export const routePath = '/quote/units'
  *           schema:
  *             type: object
  *             required:
- *               - residentialBuildingCount
+ *               - housingUnits
  *             properties:
- *               residentialBuildingCount:
+ *               housingUnits:
  *                 type: integer
  *                 minimum: 1
  *                 maximum: 999999

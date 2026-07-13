@@ -24,22 +24,9 @@
               }
             } if quote.boundary.userInputType,
             {
-              key: { text: "Development types" },
-              value: {
-                html: "<ul class=\"govuk-list\">" +
-                  ("<li>Housing</li>" if quote.development.types and "housing" in quote.development.types else "") +
-                  ("<li>Other units</li>" if quote.development.types and "other-units" in quote.development.types else "") +
-                  "</ul>"
-              }
-            } if quote.development.types,
-            {
-              key: { text: "Number of units units" },
-              value: { text: quote.development.residentialBuildingCount }
-            } if quote.development.residentialBuildingCount,
-            {
-              key: { text: "Maximum number of people" },
-              value: { text: quote.development.peopleCount }
-            } if quote.development.peopleCount,
+              key: { text: "Number of units" },
+              value: { text: quote.housingUnits }
+            } if quote.housingUnits,
             {
               key: { text: "Email address" },
               value: { text: quote.email.address }

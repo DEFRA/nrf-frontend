@@ -34,9 +34,9 @@
             } if formSubmitData.boundaryEntryType,
             {
               key: { text: "Number of units" },
-              value: { text: formSubmitData.residentialBuildingCount },
+              value: { text: formSubmitData.housingUnits },
               actions: { items: [{ href: "/quote/units", text: "Change", visuallyHiddenText: "number of units" }] }
-            } if formSubmitData.residentialBuildingCount,
+            } if formSubmitData.housingUnits,
             {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },

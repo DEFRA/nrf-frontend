@@ -22,7 +22,7 @@ const validBase = {
       ]
     ]
   },
-  residentialBuildingCount: '10',
+  housingUnits: '10',
   email: 'test@example.com'
 }
 
@@ -48,14 +48,14 @@ describe('completeQuoteDataSchema', () => {
     })
   })
 
-  describe('residentialBuildingCount', () => {
-    it('passes with residentialBuildingCount present', () => {
+  describe('housingUnits', () => {
+    it('passes with housingUnits present', () => {
       const { error } = completeQuoteDataSchema.validate(validBase)
       expect(error).toBeUndefined()
     })
 
-    it('fails when residentialBuildingCount is missing', () => {
-      const { residentialBuildingCount: _, ...without } = validBase
+    it('fails when housingUnits is missing', () => {
+      const { housingUnits: _, ...without } = validBase
       const { error } = completeQuoteDataSchema.validate(without)
       expect(error).toBeDefined()
       expect(error.details[0].message).toBe('Enter the number of housing units')
@@ -110,16 +110,16 @@ describe('inProgressQuoteDataSchema', () => {
     expect(error).toBeUndefined()
   })
 
-  it('allows null residentialBuildingCount', () => {
+  it('allows null housingUnits', () => {
     const { error } = inProgressQuoteDataSchema.validate({
       ...validBase,
-      residentialBuildingCount: null
+      housingUnits: null
     })
     expect(error).toBeUndefined()
   })
 
-  it('allows missing residentialBuildingCount', () => {
-    const { residentialBuildingCount: _, ...without } = validBase
+  it('allows missing housingUnits', () => {
+    const { housingUnits: _, ...without } = validBase
     const { error } = inProgressQuoteDataSchema.validate(without)
     expect(error).toBeUndefined()
   })

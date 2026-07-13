@@ -41,7 +41,7 @@ describe('Residential page', () => {
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { residentialBuildingCount: '25' },
+      formData: { housingUnits: '25' },
       cookie: sessionCookie
     })
     const document = await loadPage({
@@ -77,7 +77,7 @@ describe('Residential page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { residentialBuildingCount: '6' },
+      formData: { housingUnits: '6' },
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(303)

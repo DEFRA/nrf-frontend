@@ -17,16 +17,12 @@ const plainIntegerValidator = createPlainIntegerValidator({
 
 export default function formValidation() {
   return joi.object({
-    residentialBuildingCount: joi
-      .any()
-      .custom(plainIntegerValidator)
-      .required()
-      .messages({
-        'any.required': requiredErrorMessage,
-        'number.format': formatErrorMessage,
-        'number.integer': integerErrorMessage,
-        'number.min': minErrorMessage,
-        'number.max': maxErrorMessage
-      })
+    housingUnits: joi.any().custom(plainIntegerValidator).required().messages({
+      'any.required': requiredErrorMessage,
+      'number.format': formatErrorMessage,
+      'number.integer': integerErrorMessage,
+      'number.min': minErrorMessage,
+      'number.max': maxErrorMessage
+    })
   })
 }

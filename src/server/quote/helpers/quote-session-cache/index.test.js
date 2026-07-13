@@ -48,7 +48,7 @@ describe('Save and retrieve quote data from session cache', () => {
             isHousing: 'yes',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
-            residentialBuildingCount: 10,
+            housingUnits: 10,
             email: 'test@example.com'
           }),
           set: vi.fn(),
@@ -74,7 +74,7 @@ describe('Save and retrieve quote data from session cache', () => {
             isHousing: 'yes',
             boundaryEntryType: 'draw',
             boundaryGeojson: { type: 'Polygon' },
-            residentialBuildingCount: 10,
+            housingUnits: 10,
             email: 'test@example.com'
           }),
           set: vi.fn(),
@@ -87,7 +87,7 @@ describe('Save and retrieve quote data from session cache', () => {
         'quote',
         expect.objectContaining({
           email: 'new@example.com',
-          residentialBuildingCount: 10
+          housingUnits: 10
         })
       )
       expect(request.yar.clear).not.toHaveBeenCalled()
@@ -152,7 +152,7 @@ describe('Save and retrieve quote data from session cache', () => {
       isHousing: 'yes',
       boundaryEntryType: 'draw',
       boundaryGeojson: { type: 'Polygon' },
-      residentialBuildingCount: 10,
+      housingUnits: 10,
       email: 'test@example.com'
     }
 
@@ -166,7 +166,7 @@ describe('Save and retrieve quote data from session cache', () => {
       expect(request.logger.error).not.toHaveBeenCalled()
     })
 
-    it('logs an error if residentialBuildingCount is missing', () => {
+    it('logs an error if housingUnits is missing', () => {
       const request = {
         yar: {
           get: vi.fn().mockReturnValue({

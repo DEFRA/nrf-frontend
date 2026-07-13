@@ -71,7 +71,7 @@ describe('Check your answers page', () => {
     ;({ cookie } = await submitForm({
       requestUrl: residentialPath,
       server: getServer(),
-      formData: { residentialBuildingCount: '42' },
+      formData: { housingUnits: '42' },
       cookie
     }))
     ;({ cookie } = await submitForm({
