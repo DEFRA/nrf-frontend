@@ -16,7 +16,7 @@ describe('boundary-type form validation', () => {
     it('fails when absent', () => {
       const { error } = getSchema().validate({})
       expect(error.details[0].message).toBe(
-        'Select if you would like to draw a map or upload a file'
+        'Select how you would like to show your red line boundary'
       )
     })
 
@@ -25,7 +25,7 @@ describe('boundary-type form validation', () => {
         boundaryEntryType: 'something-else'
       })
       expect(error.details[0].message).toBe(
-        'Select if you would like to draw a map or upload a file'
+        'Select how you would like to show your red line boundary'
       )
     })
   })

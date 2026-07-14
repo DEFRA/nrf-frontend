@@ -23,15 +23,19 @@
               actions: { items: [{ href: "/quote/planning-type", text: "Change", visuallyHiddenText: "planning application type" }] }
             } if formSubmitData.planningType,
             {
-              key: { text: "Red line boundary" },
+              key: { text: "Draw on a map" },
               value: {
-                text:
-                  formSubmitData.boundaryFilename
-                    if formSubmitData.boundaryEntryType === 'upload' and formSubmitData.boundaryFilename
-                    else ('Uploaded' if formSubmitData.boundaryEntryType === 'upload' else 'Drawn')
+                text: "Yes"
               },
-              actions: { items: [{ href: "/quote/upload-boundary" if formSubmitData.boundaryEntryType === 'upload' else "/quote/draw-boundary", text: "Change", visuallyHiddenText: "red line boundary" }] }
-            } if formSubmitData.boundaryEntryType,
+              actions: { items: [{ href: "/quote/draw-boundary", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
+            } if formSubmitData.boundaryEntryType === 'draw',
+            {
+              key: { text: "Upload a file" },
+              value: {
+                text: formSubmitData.boundaryFilename if formSubmitData.boundaryFilename else 'Uploaded'
+              },
+              actions: { items: [{ href: "/quote/upload-boundary", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
+            } if formSubmitData.boundaryEntryType === 'upload',
             {
               key: { text: "Number of units" },
               value: { text: formSubmitData.housingUnits },

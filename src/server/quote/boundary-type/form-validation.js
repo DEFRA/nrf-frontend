@@ -1,6 +1,6 @@
 import joi from 'joi'
 
-const errorMessage = 'Select if you would like to draw a map or upload a file'
+const errorMessage = 'Select how you would like to show your red line boundary'
 
 export default function () {
   return joi.object({

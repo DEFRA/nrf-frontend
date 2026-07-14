@@ -68,7 +68,7 @@ describe('Boundary type page', () => {
     })
     expectFieldsetError({
       document,
-      errorMessage: 'Select if you would like to draw a map or upload a file'
+      errorMessage: 'Select how you would like to show your red line boundary'
     })
   })
 
