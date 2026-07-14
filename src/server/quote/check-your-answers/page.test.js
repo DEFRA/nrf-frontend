@@ -89,7 +89,7 @@ describe('Check your answers page', () => {
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('Planning application type')
     expect(summaryList).toHaveTextContent('Full planning permission')
-    expect(summaryList).toHaveTextContent('Red line boundary')
+    expect(summaryList).toHaveTextContent('Upload a file')
     expect(summaryList).toHaveTextContent('Uploaded')
     expect(summaryList).toHaveTextContent('Number of units')
     expect(summaryList).toHaveTextContent('42')
@@ -103,7 +103,7 @@ describe('Check your answers page', () => {
     ).toHaveAttribute('href', planningTypePath)
     expect(
       getByRole(document, 'link', {
-        name: 'Changered line boundary'
+        name: 'Changeuploaded red line boundary'
       })
     ).toHaveAttribute('href', '/quote/upload-boundary')
     expect(
@@ -127,12 +127,62 @@ describe('Check your answers page', () => {
       cookie: updatedCookie
     })
     const summaryList = document.querySelector('.govuk-summary-list')
-    expect(summaryList).toHaveTextContent('Drawn')
+    expect(summaryList).toHaveTextContent('Draw on a map')
+    expect(summaryList).toHaveTextContent('Yes')
     expect(
       getByRole(document, 'link', {
-        name: 'Changered line boundary'
+        name: 'Changedrawn red line boundary'
       })
     ).toHaveAttribute('href', '/quote/draw-boundary')
+  })
+
+  it('should show the uploaded filename when present', async () => {
+    const uploadId = 'test-upload-id'
+    mswServer.use(
+      http.post(`${backendUrl}/boundary/check/${uploadId}`, () =>
+        HttpResponse.json({
+          boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
+          boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] },
+          boundaryMetadata: {},
+          intersectingEdps: [],
+          boundaryFilename: 'site-boundary.geojson'
+        })
+      )
+    )
+
+    let cookie = sessionCookie
+    ;({ cookie } = await submitForm({
+      requestUrl: boundaryTypePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie
+    }))
+
+    const checkResponse = await getServer().inject({
+      method: 'POST',
+      url: `/quote/check-boundary/${uploadId}`,
+      headers: { cookie }
+    })
+    cookie = checkResponse.headers['set-cookie']
+      ? [].concat(checkResponse.headers['set-cookie']).join('; ')
+      : cookie
+
+    const previewResponse = await getServer().inject({
+      method: 'POST',
+      url: '/quote/upload-preview-map',
+      headers: { cookie }
+    })
+    cookie = previewResponse.headers['set-cookie']
+      ? [].concat(previewResponse.headers['set-cookie']).join('; ')
+      : cookie
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    const summaryList = document.querySelector('.govuk-summary-list')
+    expect(summaryList).toHaveTextContent('site-boundary.geojson')
   })
 
   it('should redirect to the confirmation page if Submit is clicked', async () => {
