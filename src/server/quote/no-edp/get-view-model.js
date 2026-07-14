@@ -3,12 +3,10 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 
 const title = 'Nature restoration levy is not available in this area'
 
-export default function getViewModel(quoteData = {}) {
-  const backLinkPath = boundaryTypePath
-
+export default function getViewModel() {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
-    backLinkPath
+    backLinkPath: boundaryTypePath
   }
 }
