@@ -16,7 +16,7 @@ export function createMapDatasetsPlugin() {
         style: {
           stroke: '#FD0',
           fillPattern: 'horizontal-hatch',
-          fillPatternForegroundColor: '#FD0',
+          fillPatternForegroundColor: 'rgba(255, 221, 0, 0.6)',
           fillPatternBackgroundColor: 'transparent'
         }
       },
@@ -29,7 +29,7 @@ export function createMapDatasetsPlugin() {
         style: {
           stroke: '#f47738',
           fillPattern: 'vertical-hatch',
-          fillPatternForegroundColor: '#f47738',
+          fillPatternForegroundColor: 'rgba(244, 119, 56, 0.6)',
           fillPatternBackgroundColor: 'transparent'
         }
       }

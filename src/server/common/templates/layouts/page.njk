@@ -54,8 +54,15 @@
   {{ govukHeader({
     homepageUrl: "https://www.gov.uk/",
     classes: "app-header",
-    containerClasses: "govuk-width-container"
+    containerClasses: "govuk-width-container",
+    productName: ' - ' + serviceName if fullScreen else undefined
   }) }}
+{% endblock %}
+
+{% block govukServiceNavigation %}
+  {% if not fullScreen %}
+    {{ super() }}
+  {% endif %}
 {% endblock %}
 
 {% block pageTitle %}
@@ -63,16 +70,18 @@
 {% endblock %}
 
 {% block containerStart %}
-  {{ govukPhaseBanner({
-    tag: {
-      text: "Beta"
-    },
-    html: 'This is a new service. Help us improve it and <a class="govuk-link" href="' + phaseBanner.feedbackUrl + '" target="_blank" rel="noopener noreferrer">give your feedback (opens in new tab)</a>.',
-    attributes: {
-      role: "region",
-      "aria-label": "Give feedback"
-    }
-  }) }}
+  {% if not fullScreen %}
+    {{ govukPhaseBanner({
+      tag: {
+        text: "Beta"
+      },
+      html: 'This is a new service. Help us improve it and <a class="govuk-link" href="' + phaseBanner.feedbackUrl + '" target="_blank" rel="noopener noreferrer">give your feedback (opens in new tab)</a>.',
+      attributes: {
+        role: "region",
+        "aria-label": "Give feedback"
+      }
+    }) }}
+  {% endif %}
   {{ super() }}
 {% endblock %}
 

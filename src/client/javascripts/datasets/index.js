@@ -8,10 +8,9 @@ import {
 } from './map-datasets.js'
 import { wireFillOpacityOnZoom } from './fill-opacity-on-zoom.js'
 import { wireHideLayersOnDraw } from './hide-layers-on-draw.js'
+import { getContainerHeight, wireResizeMapHeight } from './resize-map-height.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-datasets-map'
-const MIN_CONTAINER_HEIGHT = 320
-const CONTAINER_BOTTOM_GAP = 16
 const DEFAULT_ZOOM = 8.5
 const NORFOLK_LNG = 1.1405503
 const NORFOLK_LAT = 52.7089441
@@ -26,15 +25,6 @@ function transformRequest(url) {
       : url
 
   return { url: absoluteUrl }
-}
-
-function getContainerHeight(mapEl) {
-  const mapTop = mapEl.getBoundingClientRect().top
-  const availableHeight = Math.floor(
-    window.innerHeight - mapTop - CONTAINER_BOTTOM_GAP
-  )
-
-  return `${Math.max(MIN_CONTAINER_HEIGHT, availableHeight)}px`
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -89,4 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
   wireFillOpacityOnZoom(interactiveMap, { fillLayerIds: FILL_LAYER_IDS })
 
   wireHideLayersOnDraw(interactiveMap, { layerIds: ALL_LAYER_IDS })
+
+  wireResizeMapHeight(mapElement)
 })

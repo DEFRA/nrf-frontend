@@ -1,5 +1,5 @@
-const ZOOM_THRESHOLD = 14
-const REDUCED_FILL_OPACITY = 0.2
+const ZOOM_THRESHOLD = 10
+const REDUCED_FILL_OPACITY = 0.3
 const DEFAULT_FILL_OPACITY = 1
 
 export function wireFillOpacityOnZoom(interactiveMap, { fillLayerIds }) {

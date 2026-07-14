@@ -52,19 +52,19 @@ describe('wireFillOpacityOnZoom', () => {
     expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
       'edp',
       'fill-opacity',
-      0.2
+      0.3
     )
     expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
       'excluded',
       'fill-opacity',
-      0.2
+      0.3
     )
   })
 
   it('applies full opacity when zoom is below the threshold', () => {
     const interactiveMap = createInteractiveMap()
     const mapInstance = createMapInstance({
-      zoom: 10,
+      zoom: 9,
       existingLayers: new Set(['edp'])
     })
 
@@ -107,7 +107,7 @@ describe('wireFillOpacityOnZoom', () => {
     expect(mapInstance.setPaintProperty).toHaveBeenCalledWith(
       'edp',
       'fill-opacity',
-      0.2
+      0.3
     )
 
     mapInstance.setPaintProperty.mockClear()
