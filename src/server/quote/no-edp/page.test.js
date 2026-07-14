@@ -28,11 +28,11 @@ describe('No EDP page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/upload-preview-map'
+      boundaryTypePath
     )
   })
 
-  it('should link back to draw-boundary when boundary entry type is draw', async () => {
+  it('should link back to boundary-type when boundary entry type is draw', async () => {
     const { cookie } = await submitForm({
       requestUrl: boundaryTypePath,
       server: getServer(),
@@ -48,7 +48,7 @@ describe('No EDP page', () => {
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/draw-boundary'
+      boundaryTypePath
     )
   })
 })
