@@ -1,14 +1,10 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.js'
-import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 
 const title = 'Nature restoration levy is not available in this area'
 
 export default function getViewModel(quoteData = {}) {
-  const backLinkPath =
-    quoteData.boundaryEntryType === 'draw'
-      ? drawBoundaryPath
-      : uploadPreviewMapPath
+  const backLinkPath = boundaryTypePath
 
   return {
     pageTitle: getPageTitle(title),
