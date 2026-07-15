@@ -54,15 +54,12 @@
   {{ govukHeader({
     homepageUrl: "https://www.gov.uk/",
     classes: "app-header",
-    containerClasses: "govuk-width-container",
-    productName: ' - ' + serviceName if fullScreen else undefined
+    containerClasses: "govuk-width-container"
   }) }}
 {% endblock %}
 
 {% block govukServiceNavigation %}
-  {% if not fullScreen %}
     {{ super() }}
-  {% endif %}
 {% endblock %}
 
 {% block pageTitle %}
