@@ -40,7 +40,8 @@ const redirectIfNotHousing = (isHousing, path, h) => {
   if (
     isHousing === 'no' &&
     path !== notHousingPath &&
-    path !== confirmHousingPath
+    path !== confirmHousingPath &&
+    path !== planningTypePath
   ) {
     return h.redirect(notHousingPath).takeover()
   }
