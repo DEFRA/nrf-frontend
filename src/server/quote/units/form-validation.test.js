@@ -27,29 +27,18 @@ describe('units form validation', () => {
         expect(error).toBeUndefined()
       })
 
-      it('passes for a string with spaces between digits ("3 4  5")', () => {
-        const { error, value } = getSchema().validate({
-          housingUnits: '3 4  5'
-        })
-        expect(error).toBeUndefined()
-        expect(value.housingUnits).toBe(345)
-      })
-
-      it('passes for a string with a thousand-separator comma ("1,000")', () => {
-        const { error, value } = getSchema().validate({
-          housingUnits: '1,000'
-        })
-        expect(error).toBeUndefined()
-        expect(value.housingUnits).toBe(1000)
-      })
-
-      it('passes for the maximum allowed value with thousand separators ("50,000")', () => {
-        const { error, value } = getSchema().validate({
-          housingUnits: '50,000'
-        })
-        expect(error).toBeUndefined()
-        expect(value.housingUnits).toBe(50000)
-      })
+      it.each([
+        ['spaces between digits', '3 4  5', 345],
+        ['a thousand-separator comma', '1,000', 1000],
+        ['the maximum allowed value with thousand separators', '50,000', 50000]
+      ])(
+        'passes for a string with %s (%s)',
+        (_description, input, expected) => {
+          const { error, value } = getSchema().validate({ housingUnits: input })
+          expect(error).toBeUndefined()
+          expect(value.housingUnits).toBe(expected)
+        }
+      )
     })
 
     describe('empty or missing input', () => {
