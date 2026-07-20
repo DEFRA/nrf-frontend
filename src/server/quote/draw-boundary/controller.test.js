@@ -48,9 +48,9 @@ describe('POST /quote/draw-boundary/check', () => {
     expect(checkBoundaryGeometry).toHaveBeenCalledWith(validGeometry)
   })
 
-  it('should propagate the backend status code and pass through geojson on backend failure', async () => {
+  it('should propagate the backend status code, resolve the failureReason to display copy, and pass through geojson on backend failure', async () => {
     vi.mocked(checkBoundaryGeometry).mockResolvedValue({
-      error: 'Invalid geometry',
+      failureReason: 'self_intersecting_geometry',
       geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } },
       statusCode: statusCodes.badRequest
     })
@@ -63,14 +63,15 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(JSON.parse(response.payload)).toEqual({
-      error: 'Invalid geometry',
+      error:
+        'The uploaded boundary contains invalid geometry (self-intersecting or crossing line segments). Please correct the boundary so that edges do not cross each other and try again.',
       geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } }
     })
   })
 
   it('should propagate a 502 from the backend when the impact assessor is unreachable', async () => {
     vi.mocked(checkBoundaryGeometry).mockResolvedValue({
-      error: 'Unable to contact impact assessor service',
+      failureReason: 'impact_assessor_unreachable',
       statusCode: statusCodes.badGateway
     })
 
@@ -82,13 +83,13 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badGateway)
     expect(JSON.parse(response.payload)).toEqual({
-      error: 'Unable to contact impact assessor service'
+      error: 'Unable to check the boundary right now. Please try again.'
     })
   })
 
   it('should default to 400 when the service returns no status code', async () => {
     vi.mocked(checkBoundaryGeometry).mockResolvedValue({
-      error: 'Unable to check boundary'
+      failureReason: 'boundary_check_failed'
     })
 
     const response = await getServer().inject({
@@ -99,7 +100,7 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(JSON.parse(response.payload)).toEqual({
-      error: 'Unable to check boundary'
+      error: 'Unable to check the boundary. Please try again.'
     })
   })
 

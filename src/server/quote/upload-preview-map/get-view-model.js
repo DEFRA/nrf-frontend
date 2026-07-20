@@ -2,6 +2,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
 export const title = 'Boundary Map'
 
@@ -9,11 +10,17 @@ function getMapStyleUrl() {
   return '/os-base-map/resources/styles'
 }
 
-export default function getViewModel(
+/**
+ * @param {object} params
+ * @param {object} [params.boundaryGeojson]
+ * @param {string} [params.boundaryFailureReason]
+ * @param {string} [params.boundaryFilename]
+ */
+export default function getViewModel({
   boundaryGeojson,
-  boundaryError = null,
+  boundaryFailureReason = null,
   boundaryFilename = null
-) {
+}) {
   const geometry = boundaryGeojson?.boundaryGeometryWgs84 ?? null
   const existingBoundaryMetadata = boundaryGeojson?.boundaryMetadata ?? null
   const intersectingEdps = boundaryGeojson?.intersectingEdps ?? []
@@ -64,9 +71,13 @@ export default function getViewModel(
     backLinkPath: uploadBoundaryPath,
     uploadBoundaryPath,
     drawBoundaryPath,
-    boundaryError,
+    boundaryError: boundaryFailureReason
+      ? getBoundaryErrorMessage(boundaryFailureReason)
+      : null,
     boundaryFilename,
     boundaryTypePath,
-    mapStyleUrl: getMapStyleUrl()
+    mapStyleUrl: getMapStyleUrl(),
+    uploadStatus: boundaryFailureReason ? 'failure' : 'success',
+    failureReason: boundaryFailureReason
   }
 }

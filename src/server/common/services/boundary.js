@@ -1,37 +1,20 @@
+import { BOUNDARY_ERRORS, KNOWN_BOUNDARY_ERROR_CODES } from '@defra/nrf-library'
 import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../helpers/logging/logger.js'
 import { postRequestToBackend } from './nrf-backend.js'
 
 const logger = createLogger()
 
-/**
- * Map a backend error response to a user-friendly error message.
- * Checks known error patterns and returns an appropriate message,
- * falling back to the raw backend error if no pattern matches.
- * @param {string} rawError - The raw error message from the backend
- * @param {number} statusCode - The HTTP status code
- * @param {object} payload - The full response payload
- * @returns {string}
- */
-function getResponseError(rawError, statusCode, payload) {
-  if (
-    statusCode === statusCodes.payloadTooLarge ||
-    /413|payload too large/i.test(rawError)
-  ) {
-    const maxSizeMb = payload?.maxFileSizeMb
-    const sizeDetail = maxSizeMb
-      ? ` The maximum file size allowed is ${maxSizeMb}MB.`
-      : ''
-    return `The uploaded boundary file is too large.${sizeDetail}`
-  }
-
-  return rawError
+function resolveFailureReason(code) {
+  return KNOWN_BOUNDARY_ERROR_CODES.has(code)
+    ? code
+    : BOUNDARY_ERRORS.SERVICE.CHECK_FAILED
 }
 
 /**
  * Send a boundary check request to the backend
  * @param {string} uploadId - The upload ID to check
- * @returns {Promise<{geojson?: object, error?: string}>}
+ * @returns {Promise<{geojson?: object, failureReason?: string}>}
  */
 export async function checkBoundary(uploadId) {
   const endpointPath = `/boundary/check/${uploadId}`
@@ -42,13 +25,15 @@ export async function checkBoundary(uploadId) {
     const { res, payload } = await postRequestToBackend({ endpointPath })
 
     if (res.statusCode >= statusCodes.badRequest) {
-      const rawError =
-        payload?.error ?? `Boundary check failed (${res.statusCode})`
+      const code = payload?.error
       logger.error(
-        `Boundary check error - uploadId: ${uploadId}, statusCode: ${res.statusCode}, error: ${rawError}`
+        { uploadId, statusCode: res.statusCode, code },
+        'Boundary check error'
       )
-      const error = getResponseError(rawError, res.statusCode, payload)
-      return { error, geojson: payload }
+      return {
+        failureReason: resolveFailureReason(code),
+        geojson: payload
+      }
     }
 
     return { geojson: payload }
@@ -59,14 +44,16 @@ export async function checkBoundary(uploadId) {
       error,
       `Error checking boundary - uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
-    const backendError = responsePayload?.error
-    if (backendError) {
+    const code = responsePayload?.error
+    if (code) {
       return {
-        error: getResponseError(backendError, statusCode, responsePayload),
+        failureReason: resolveFailureReason(code),
         geojson: responsePayload
       }
     }
-    return { error: 'Unable to check boundary' }
+    return {
+      failureReason: BOUNDARY_ERRORS.SERVICE.CHECK_FAILED
+    }
   }
 }
 
@@ -75,7 +62,7 @@ export async function checkBoundary(uploadId) {
  * Used by the draw map page where the user draws a polygon directly rather
  * than uploading a file.
  * @param {object} geometry - GeoJSON Polygon Geometry
- * @returns {Promise<{geojson?: object, error?: string, statusCode?: number}>}
+ * @returns {Promise<{geojson?: object, failureReason?: string, statusCode?: number}>}
  */
 export async function checkBoundaryGeometry(geometry) {
   try {
@@ -85,13 +72,16 @@ export async function checkBoundaryGeometry(geometry) {
     })
 
     if (res.statusCode >= statusCodes.badRequest) {
-      const rawError =
-        payload?.error ?? `Boundary check failed (${res.statusCode})`
+      const code = payload?.error
       logger.error(
-        `Boundary geometry check error - statusCode: ${res.statusCode}, error: ${rawError}`
+        { statusCode: res.statusCode, code },
+        'Boundary geometry check error'
       )
-      const error = getResponseError(rawError, res.statusCode, payload)
-      return { error, geojson: payload, statusCode: res.statusCode }
+      return {
+        failureReason: resolveFailureReason(code),
+        geojson: payload,
+        statusCode: res.statusCode
+      }
     }
 
     return { geojson: payload }
@@ -102,14 +92,17 @@ export async function checkBoundaryGeometry(geometry) {
       error,
       `Error checking boundary geometry - statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
-    const backendError = responsePayload?.error
-    if (backendError) {
+    const code = responsePayload?.error
+    if (code) {
       return {
-        error: getResponseError(backendError, statusCode, responsePayload),
+        failureReason: resolveFailureReason(code),
         geojson: responsePayload,
         statusCode
       }
     }
-    return { error: 'Unable to check boundary', statusCode }
+    return {
+      failureReason: BOUNDARY_ERRORS.SERVICE.CHECK_FAILED,
+      statusCode
+    }
   }
 }

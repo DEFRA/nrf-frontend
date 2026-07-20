@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import getViewModel from './get-view-model.js'
+import { BOUNDARY_ERRORS, MAX_BOUNDARY_FILE_SIZE_MB } from '@defra/nrf-library'
+import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
 describe('getViewModel', () => {
   it('should return featureCount of 1 and correct fields', () => {
     const geo = { type: 'FeatureCollection' }
     const result = getViewModel({
-      boundaryGeometryWgs84: geo,
-      intersectingEdps: []
+      boundaryGeojson: { boundaryGeometryWgs84: geo, intersectingEdps: [] }
     })
 
     expect(result.featureCount).toBe(1)
@@ -18,7 +19,7 @@ describe('getViewModel', () => {
   })
 
   it('should always return featureCount of 1', () => {
-    const response = {
+    const boundaryGeojson = {
       boundaryGeometryWgs84: {
         type: 'FeatureCollection',
         features: [
@@ -29,7 +30,7 @@ describe('getViewModel', () => {
       intersectingEdps: []
     }
 
-    const result = getViewModel(response)
+    const result = getViewModel({ boundaryGeojson })
 
     expect(result.featureCount).toBe(1)
   })
@@ -39,12 +40,12 @@ describe('getViewModel', () => {
       { name: 'EDP Area 1', attributes: {} },
       { name: 'EDP Area 2', attributes: {} }
     ]
-    const response = {
+    const boundaryGeojson = {
       boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
       intersectingEdps: edps
     }
 
-    const result = getViewModel(response)
+    const result = getViewModel({ boundaryGeojson })
 
     expect(result.intersectsEdp).toBeTruthy()
     expect(result.intersectingEdps).toEqual(
@@ -53,7 +54,7 @@ describe('getViewModel', () => {
   })
 
   it('should handle missing fields gracefully', () => {
-    const result = getViewModel({})
+    const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.featureCount).toBe(1)
     expect(result.intersectsEdp).toBeFalsy()
@@ -61,7 +62,7 @@ describe('getViewModel', () => {
   })
 
   it('should include uploadBoundaryPath and mapStyleUrl', () => {
-    const result = getViewModel({})
+    const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.uploadBoundaryPath).toBe('/quote/upload-boundary')
     expect(result.mapStyleUrl).toBeDefined()
@@ -103,12 +104,12 @@ describe('getViewModel', () => {
         overlap_percentage: 25.0
       }
     ]
-    const response = {
+    const boundaryGeojson = {
       boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
       intersectingEdps: edps
     }
 
-    const result = getViewModel(response)
+    const result = getViewModel({ boundaryGeojson })
 
     const boundary = JSON.parse(result.edpBoundaryGeojson)
     expect(boundary.type).toBe('FeatureCollection')
@@ -126,19 +127,19 @@ describe('getViewModel', () => {
 
   it('should return empty FeatureCollections when no EDPs have geometries', () => {
     const edps = [{ label: 'EDP Area 1', n2k_site_name: 'Site A' }]
-    const response = {
+    const boundaryGeojson = {
       boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] },
       intersectingEdps: edps
     }
 
-    const result = getViewModel(response)
+    const result = getViewModel({ boundaryGeojson })
 
     expect(JSON.parse(result.edpBoundaryGeojson).features).toHaveLength(0)
     expect(JSON.parse(result.edpIntersectionGeojson).features).toHaveLength(0)
   })
 
   it('should handle null boundaryGeojson with defaults', () => {
-    const result = getViewModel(null)
+    const result = getViewModel({ boundaryGeojson: null })
 
     expect(result.featureCount).toBe(1)
     expect(result.boundaryGeojson).toBe(JSON.stringify(null))
@@ -147,32 +148,75 @@ describe('getViewModel', () => {
     expect(result.boundaryError).toBeNull()
   })
 
-  it('should include boundaryError when provided', () => {
-    const result = getViewModel(null, 'Invalid geometry')
+  it('should include boundaryError when a failureReason is provided', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.SERVICE.CHECK_FAILED
+    })
 
-    expect(result.boundaryError).toBe('Invalid geometry')
+    expect(result.boundaryError).toBe(
+      getBoundaryErrorMessage(BOUNDARY_ERRORS.SERVICE.CHECK_FAILED)
+    )
     expect(result.featureCount).toBe(1)
     expect(result.boundaryGeojson).toBe(JSON.stringify(null))
   })
 
+  it('should set uploadStatus to success and failureReason to null when there is no failureReason', () => {
+    const result = getViewModel({ boundaryGeojson: {} })
+
+    expect(result.uploadStatus).toBe('success')
+    expect(result.failureReason).toBeNull()
+  })
+
+  it('should set uploadStatus to failure and pass through failureReason when there is one', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.SERVICE.CHECK_FAILED
+    })
+
+    expect(result.uploadStatus).toBe('failure')
+    expect(result.failureReason).toBe(BOUNDARY_ERRORS.SERVICE.CHECK_FAILED)
+  })
+
+  it('should map failureReason file_size_too_large to user-facing copy using the frontend max size constant', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.UPLOAD.FILE_SIZE_TOO_LARGE
+    })
+
+    expect(result.boundaryError).toBe(
+      `The uploaded boundary file is too large. The maximum file size allowed is ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`
+    )
+  })
+
+  it('should fall back to the generic message for an unrecognised failureReason code', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: 'some_new_code_the_frontend_does_not_know'
+    })
+
+    expect(result.boundaryError).toBe(
+      getBoundaryErrorMessage(BOUNDARY_ERRORS.SERVICE.CHECK_FAILED)
+    )
+  })
+
   it('should include boundaryTypePath', () => {
-    const result = getViewModel({})
+    const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.boundaryTypePath).toBe('/quote/boundary-type')
   })
 
   it('should include boundaryFilename when provided', () => {
-    const result = getViewModel(
-      { boundaryGeometryWgs84: null, intersectingEdps: [] },
-      null,
-      'site-boundary.shp'
-    )
+    const result = getViewModel({
+      boundaryGeojson: { boundaryGeometryWgs84: null, intersectingEdps: [] },
+      boundaryFilename: 'site-boundary.shp'
+    })
 
     expect(result.boundaryFilename).toBe('site-boundary.shp')
   })
 
   it('should default boundaryFilename to null', () => {
-    const result = getViewModel({})
+    const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.boundaryFilename).toBeNull()
   })
@@ -189,9 +233,11 @@ describe('getViewModel', () => {
     }
 
     const result = getViewModel({
-      boundaryGeometryWgs84: null,
-      intersectingEdps: [],
-      boundaryMetadata
+      boundaryGeojson: {
+        boundaryGeometryWgs84: null,
+        intersectingEdps: [],
+        boundaryMetadata
+      }
     })
 
     expect(result.existingBoundaryMetadata).toBe(
@@ -200,13 +246,13 @@ describe('getViewModel', () => {
   })
 
   it('should return JSON-stringified null as existingBoundaryMetadata when not present', () => {
-    const result = getViewModel({})
+    const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.existingBoundaryMetadata).toBe(JSON.stringify(null))
   })
 
   it('should return JSON-stringified null as existingBoundaryMetadata when boundaryGeojson is null', () => {
-    const result = getViewModel(null)
+    const result = getViewModel({ boundaryGeojson: null })
 
     expect(result.existingBoundaryMetadata).toBe(JSON.stringify(null))
   })

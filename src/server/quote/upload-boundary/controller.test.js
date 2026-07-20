@@ -18,8 +18,9 @@ describe('upload-boundary controller', () => {
     }
   }
 
-  const createMockRequest = () => ({
+  const createMockRequest = (session = {}) => ({
     yar: {
+      get: vi.fn().mockImplementation((key) => session[key] ?? null),
       set: vi.fn(),
       clear: vi.fn()
     },
@@ -40,7 +41,7 @@ describe('upload-boundary controller', () => {
     vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
   })
 
-  it('should clear stale boundaryGeojson and boundaryError from session', async () => {
+  it('should clear stale boundaryGeojson and boundaryFailureReason from session', async () => {
     const h = createMockH()
     const request = createMockRequest()
     vi.mocked(initiateUpload).mockResolvedValue({
@@ -51,7 +52,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
   })
 
   it('should render view with uploadUrl on successful initiate', async () => {
@@ -74,10 +75,40 @@ describe('upload-boundary controller', () => {
       'pendingUploadId',
       'test-upload-id'
     )
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'pendingUploadUrl',
+      '/upload-and-scan/test-upload-id'
+    )
     expect(h.view).toHaveBeenCalledWith(
       'quote/upload-boundary/index',
       expect.objectContaining({
         uploadUrl: '/upload-and-scan/test-upload-id'
+      })
+    )
+  })
+
+  it('should reuse an existing pending upload session instead of initiating a new one', async () => {
+    const h = createMockH()
+    const request = createMockRequest({
+      pendingUploadId: 'existing-upload-id',
+      pendingUploadUrl: '/upload-and-scan/existing-upload-id'
+    })
+
+    await handler(request, h)
+
+    expect(initiateUpload).not.toHaveBeenCalled()
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'pendingUploadId',
+      'existing-upload-id'
+    )
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'pendingUploadUrl',
+      '/upload-and-scan/existing-upload-id'
+    )
+    expect(h.view).toHaveBeenCalledWith(
+      'quote/upload-boundary/index',
+      expect.objectContaining({
+        uploadUrl: '/upload-and-scan/existing-upload-id'
       })
     )
   })
