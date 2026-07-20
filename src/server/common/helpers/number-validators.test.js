@@ -49,6 +49,30 @@ describe('createPlainIntegerValidator', () => {
       expect(value).toBe(12)
     })
 
+    it('accepts a string with a thousand-separator comma (1,2)', () => {
+      const { error, value } = schema.validate('1,2')
+      expect(error).toBeUndefined()
+      expect(value).toBe(12)
+    })
+
+    it('accepts a string with multiple commas (1,0,0)', () => {
+      const { error, value } = schema.validate('1,0,0')
+      expect(error).toBeUndefined()
+      expect(value).toBe(100)
+    })
+
+    it('accepts a leading comma (,12)', () => {
+      const { error, value } = schema.validate(',12')
+      expect(error).toBeUndefined()
+      expect(value).toBe(12)
+    })
+
+    it('accepts a trailing comma (12,)', () => {
+      const { error, value } = schema.validate('12,')
+      expect(error).toBeUndefined()
+      expect(value).toBe(12)
+    })
+
     it('accepts minimum value', () => {
       const { error, value } = schema.validate(1)
       expect(error).toBeUndefined()
@@ -79,6 +103,11 @@ describe('createPlainIntegerValidator', () => {
       const { error } = schema.validate(101)
       expect(error.details[0].message).toBe('Number too large')
     })
+
+    it('fails when a comma-separated value exceeds the maximum once stripped', () => {
+      const { error } = schema.validate('1,000')
+      expect(error.details[0].message).toBe('Number too large')
+    })
   })
 
   describe('decimal numbers', () => {
@@ -106,11 +135,6 @@ describe('createPlainIntegerValidator', () => {
 
     it('fails for text with units', () => {
       const { error } = schema.validate('25 units')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
-    })
-
-    it('fails for comma separator', () => {
-      const { error } = schema.validate('1,000')
       expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 

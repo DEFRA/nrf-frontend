@@ -23,6 +23,15 @@
               actions: { items: [{ href: "/quote/planning-type", text: "Change", visuallyHiddenText: "planning application type" }] }
             } if formSubmitData.planningType,
             {
+              key: { text: "Housing" },
+              value: { text: 'Yes' }
+            },
+            {
+              key: { text: "Number of units" },
+              value: { text: formSubmitData.housingUnits },
+              actions: { items: [{ href: "/quote/units", text: "Change", visuallyHiddenText: "number of units" }] }
+            } if formSubmitData.housingUnits,
+            {
               key: { text: "Draw on a map" },
               value: {
                 text: "Yes"
@@ -36,11 +45,6 @@
               },
               actions: { items: [{ href: "/quote/upload-boundary", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
             } if formSubmitData.boundaryEntryType === 'upload',
-            {
-              key: { text: "Number of units" },
-              value: { text: formSubmitData.housingUnits },
-              actions: { items: [{ href: "/quote/units", text: "Change", visuallyHiddenText: "number of units" }] }
-            } if formSubmitData.housingUnits,
             {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },

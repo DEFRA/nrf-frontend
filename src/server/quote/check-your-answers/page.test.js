@@ -89,6 +89,7 @@ describe('Check your answers page', () => {
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('Planning application type')
     expect(summaryList).toHaveTextContent('Full planning permission')
+    expect(summaryList).toHaveTextContent('Housing')
     expect(summaryList).toHaveTextContent('Upload a file')
     expect(summaryList).toHaveTextContent('Uploaded')
     expect(summaryList).toHaveTextContent('Number of units')
@@ -112,6 +113,63 @@ describe('Check your answers page', () => {
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email')
+  })
+
+  it('should list rows in order: planning type, housing, number of units, then the boundary answer', async () => {
+    let cookie = sessionCookie
+    ;({ cookie } = await submitForm({
+      requestUrl: '/quote/planning-type',
+      server: getServer(),
+      formData: { planningType: 'full-planning-permission' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: boundaryTypePath,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: residentialPath,
+      server: getServer(),
+      formData: { housingUnits: '42' },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    const keys = Array.from(
+      document.querySelectorAll('.govuk-summary-list__key')
+    ).map((key) => key.textContent.trim())
+
+    expect(keys).toEqual([
+      'Planning application type',
+      'Housing',
+      'Number of units',
+      'Upload a file'
+    ])
+  })
+
+  it('should show a static "Yes" value for the Housing row', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    const rows = Array.from(
+      document.querySelectorAll('.govuk-summary-list__row')
+    )
+    const housingRow = rows.find((row) =>
+      row
+        .querySelector('.govuk-summary-list__key')
+        .textContent.includes('Housing')
+    )
+    expect(
+      housingRow.querySelector('.govuk-summary-list__value')
+    ).toHaveTextContent('Yes')
   })
 
   it('should link to the map page if the boundary was drawn', async () => {

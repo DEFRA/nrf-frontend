@@ -2,6 +2,8 @@
  * Creates a Joi custom validator for plain positive integers.
  * Rejects scientific notation (1e3), plus/minus signs, decimal numbers,
  * and non-numeric input. Server-side validation for progressive enhancement.
+ * Thousand-separator commas (e.g. "50,000") are stripped before validation,
+ * regardless of placement, so users can type numbers naturally.
  *
  * Decimal numbers (e.g. 2.4) raise a distinct `number.integer` error,
  * separate from `number.min`, so callers can give an accurate message
@@ -20,7 +22,10 @@ const ERROR_MAX = 'number.max'
 
 export function createPlainIntegerValidator({ min, max }) {
   return function plainIntegerValidator(value, helpers) {
-    const cleanedValue = String(value).trim().replaceAll(/\s+/g, '')
+    const cleanedValue = String(value)
+      .trim()
+      .replaceAll(/\s+/g, '')
+      .replaceAll(',', '')
 
     // Reject empty
     if (cleanedValue === '') {
