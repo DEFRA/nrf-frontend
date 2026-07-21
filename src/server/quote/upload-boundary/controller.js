@@ -1,5 +1,4 @@
 import { initiateUpload } from '../../common/services/uploader.js'
-import { config } from '../../../config/config.js'
 import getViewModel from './get-view-model.js'
 import {
   getValidationFlashFromCache,
@@ -23,12 +22,7 @@ async function getUploadSession(request) {
     return { uploadId: existingUploadId, uploadUrl: existingUploadUrl }
   }
 
-  return initiateUpload({
-    redirect: '/quote/upload-received',
-    s3Bucket: config.get('cdpUploader.bucket'),
-    s3Path: config.get('cdpUploader.s3Path'),
-    metadata: {}
-  })
+  return initiateUpload({ redirect: '/quote/upload-received' })
 }
 
 export async function handler(request, h) {

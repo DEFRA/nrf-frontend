@@ -66,10 +66,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received',
-      s3Bucket: 'boundaries',
-      s3Path: 'boundaries/',
-      metadata: {}
+      redirect: '/quote/upload-received'
     })
     expect(request.yar.set).toHaveBeenCalledWith(
       'pendingUploadId',

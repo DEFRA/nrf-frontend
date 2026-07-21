@@ -23,7 +23,12 @@ export const checkBoundaryPath = '/quote/check-boundary/{id}'
  *     tags:
  *       - Quote
  *     summary: Check boundary
- *     description: Checks a boundary by ID (not yet implemented)
+ *     description: >
+ *       Runs the boundary check for an uploaded file by upload ID: fetches the
+ *       result from the backend, stores the geometry (or failure reason) in the
+ *       session, and redirects to the boundary preview map. The no-JS upload
+ *       flow reaches the same logic via the GET /quote/upload-received handler;
+ *       this route is a direct entry point to the check step.
  *     parameters:
  *       - in: path
  *         name: id
