@@ -57,11 +57,11 @@ describe('map controller', () => {
     redirect: vi.fn().mockReturnThis()
   })
 
-  const createMockRequest = (geojson = null, boundaryError = null) => ({
+  const createMockRequest = (geojson = null, boundaryFailureReason = null) => ({
     yar: {
       get: vi.fn().mockImplementation((key) => {
         if (key === 'boundaryGeojson') return geojson
-        if (key === 'boundaryError') return boundaryError
+        if (key === 'boundaryFailureReason') return boundaryFailureReason
         return null
       }),
       set: vi.fn(),
@@ -130,7 +130,7 @@ describe('map controller', () => {
 
     it('should render the view with error and geojson when both exist', () => {
       const h = createMockH()
-      const request = createMockRequest(mockGeojson, 'Invalid geometry')
+      const request = createMockRequest(mockGeojson, 'boundary_check_failed')
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
@@ -139,7 +139,7 @@ describe('map controller', () => {
         'quote/upload-preview-map/index',
         expect.objectContaining({
           pageHeading: 'Boundary Map',
-          boundaryError: 'Invalid geometry',
+          boundaryError: 'Unable to check the boundary. Please try again.',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry)
         })
@@ -148,7 +148,7 @@ describe('map controller', () => {
 
     it('should render the view with error and no geojson', () => {
       const h = createMockH()
-      const request = createMockRequest(null, 'Unable to check boundary')
+      const request = createMockRequest(null, 'boundary_check_failed')
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
@@ -157,9 +157,43 @@ describe('map controller', () => {
         'quote/upload-preview-map/index',
         expect.objectContaining({
           pageHeading: 'Boundary Map',
-          boundaryError: 'Unable to check boundary',
+          boundaryError: 'Unable to check the boundary. Please try again.',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(null)
+        })
+      )
+    })
+
+    it('should pass uploadStatus, failureReason, and mapped copy to the view when there is an error', () => {
+      const h = createMockH()
+      const request = createMockRequest(null, 'file_size_too_large')
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.objectContaining({
+          uploadStatus: 'failure',
+          failureReason: 'file_size_too_large',
+          boundaryError:
+            'The uploaded boundary file is too large. The maximum file size allowed is 2MB.'
+        })
+      )
+    })
+
+    it('should pass a success uploadStatus and null failureReason when there is no error', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        'quote/upload-preview-map/index',
+        expect.objectContaining({
+          uploadStatus: 'success',
+          failureReason: null
         })
       )
     })
@@ -188,7 +222,7 @@ describe('map controller', () => {
         boundaryFilename: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-      expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
@@ -204,7 +238,7 @@ describe('map controller', () => {
         boundaryFilename: null
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-      expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith('/quote/email')
     })
 

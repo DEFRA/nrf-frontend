@@ -242,7 +242,7 @@ describe('Boundary map page', () => {
 
   describe('when boundary check returns an error', () => {
     beforeEach(() => {
-      mockCheckBoundary({ error: 'Invalid geometry detected' })
+      mockCheckBoundary({ failureReason: 'self_intersecting_geometry' })
     })
 
     it('should display error summary', async () => {
@@ -254,7 +254,9 @@ describe('Boundary map page', () => {
       })
 
       expect(document.body.textContent).toContain('There is a problem')
-      expect(document.body.textContent).toContain('Invalid geometry detected')
+      expect(document.body.textContent).toContain(
+        'self-intersecting or crossing line segments'
+      )
     })
 
     it('should not show validated successfully message', async () => {

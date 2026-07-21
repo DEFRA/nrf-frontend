@@ -280,6 +280,22 @@ describe('uploader service', () => {
       )
     })
 
+    it('should forward the error message when the backend returns a 200 with an embedded error', async () => {
+      vi.mocked(Wreck.get).mockResolvedValue({
+        payload: {
+          uploadStatus: 'error',
+          error: 'Unable to check upload status'
+        }
+      })
+
+      const result = await getUploadStatus('test-upload-id')
+
+      expect(result).toEqual({
+        uploadStatus: 'error',
+        error: 'Unable to check upload status'
+      })
+    })
+
     it('should return unknown status when uploadStatus is missing from response', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({
         payload: {}

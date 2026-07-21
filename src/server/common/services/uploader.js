@@ -83,7 +83,8 @@ export async function getUploadStatus(uploadId) {
     })
 
     return {
-      uploadStatus: payload.uploadStatus ?? 'unknown'
+      uploadStatus: payload.uploadStatus ?? 'unknown',
+      ...(payload.error && { error: payload.error })
     }
   } catch (error) {
     const statusCode = error?.output?.statusCode
