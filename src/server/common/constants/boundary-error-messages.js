@@ -3,6 +3,9 @@ import { BOUNDARY_UPLOAD_FORMATS_TEXT } from './boundary-upload-hint.js'
 
 const { UPLOAD, GEOMETRY, SERVICE } = BOUNDARY_ERRORS
 
+const MISSING_REQUIRED_ZIP_FILES =
+  'The zipped file is missing one or more required files.'
+
 // User-facing copy for each boundary-check failure code.
 export const BOUNDARY_ERROR_MESSAGES = {
   [UPLOAD.FILE_SIZE_TOO_LARGE]: `The selected file must be smaller than ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`,
@@ -27,12 +30,9 @@ export const BOUNDARY_ERROR_MESSAGES = {
     'The uploaded zip contains a nested zip file. Nested zips are not allowed.',
   [UPLOAD.ZIP_UNSAFE_PATH]:
     'The uploaded zip contains an entry with an unsafe path. Please check the file and try again.',
-  [UPLOAD.ZIP_MISSING_SHAPEFILE]:
-    'The zipped file is missing one or more required files.',
-  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]:
-    'The zipped file is missing one or more required files.',
-  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]:
-    'The zipped file is missing one or more required files.',
+  [UPLOAD.ZIP_MISSING_SHAPEFILE]: MISSING_REQUIRED_ZIP_FILES,
+  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]: MISSING_REQUIRED_ZIP_FILES,
+  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]: MISSING_REQUIRED_ZIP_FILES,
   [UPLOAD.ZIP_AMBIGUOUS_FILENAME]:
     'The selected boundary filename appears more than once in the uploaded zip.',
   [UPLOAD.UNSUPPORTED_FILE_TYPE]: `The selected file must be ${BOUNDARY_UPLOAD_FORMATS_TEXT}`,
