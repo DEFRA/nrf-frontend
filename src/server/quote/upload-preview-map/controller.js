@@ -5,6 +5,8 @@ import {
 } from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { routePath as emailPath } from '../email/routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import getViewModel from './get-view-model.js'
 
 const logger = createLogger()
@@ -31,7 +33,10 @@ export function handler(request, h) {
   // send the user straight to the no-EDP page. Errors still render on this
   // page so the user can see what went wrong.
   if (!boundaryFailureReason && !intersectsEdp) {
-    logger.info('map - boundary does not intersect EDP, redirecting to no-edp')
+    logger.info(
+      { intersectsEdp },
+      'map - boundary does not intersect EDP, redirecting to no-edp'
+    )
     return h.redirect(noEdpPath)
   }
 
@@ -53,7 +58,7 @@ export function postHandler(request, h) {
 
   // if the user has previously saved from this screen and come back to it, the boundaryGeojson session key will have been cleared by this handler; so also check for the main quote session cache
   if (!boundaryGeojson && !quoteCache.boundaryGeojson) {
-    return h.redirect(uploadBoundaryPath)
+    return h.redirect(uploadBoundaryPath).code(statusCodes.redirectAfterPost)
   }
 
   // Lift the filename out of the geojson blob so it lives at the top of the
@@ -67,8 +72,13 @@ export function postHandler(request, h) {
     request.yar.clear('boundaryFailureReason')
   }
 
-  // This page only renders (and so only accepts a POST) for boundaries that
-  // intersect an EDP; non-intersecting boundaries are redirected to the
-  // no-EDP page on GET before the form is ever shown.
-  return h.redirect('/quote/email')
+  // The GET handler redirects non-intersecting boundaries away before the
+  // form renders, but guard the POST too in case of a stale or direct submit.
+  const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
+  const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
+  if (!intersectsEdp) {
+    return h.redirect(noEdpPath).code(statusCodes.redirectAfterPost)
+  }
+
+  return h.redirect(emailPath).code(statusCodes.redirectAfterPost)
 }

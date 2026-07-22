@@ -1,5 +1,6 @@
 import { getByRole, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
@@ -33,7 +34,20 @@ describe('Boundary map page', () => {
         headers: { cookie }
       })
 
-      expect(response.statusCode).toBe(302)
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe('/quote/no-edp')
+    })
+
+    it('redirects the form post to the no-edp page', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: {},
+        cookie
+      })
+
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe('/quote/no-edp')
     })
   })
@@ -45,7 +59,7 @@ describe('Boundary map page', () => {
       url: routePath,
       headers: { cookie: sessionCookie }
     })
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(statusCodes.found)
     expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 
@@ -119,7 +133,7 @@ describe('Boundary map page', () => {
         formData: {},
         cookie
       })
-      expect(response.statusCode).toBe(302)
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe('/quote/email')
     })
   })

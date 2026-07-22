@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handler, postHandler } from './controller.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as noEdpPath } from '../no-edp/routes.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn(),
@@ -54,7 +53,8 @@ describe('map controller', () => {
 
   const createMockH = () => ({
     view: vi.fn().mockReturnThis(),
-    redirect: vi.fn().mockReturnThis()
+    redirect: vi.fn().mockReturnThis(),
+    code: vi.fn().mockReturnThis()
   })
 
   const createMockRequest = (geojson = null, boundaryFailureReason = null) => ({
@@ -79,27 +79,6 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
-    })
-
-    it('should redirect to no-edp when a valid boundary does not intersect an EDP', () => {
-      const h = createMockH()
-      const request = createMockRequest(mockGeojson)
-      getQuoteDataFromCache.mockReturnValue({})
-
-      handler(request, h)
-
-      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
-      expect(h.view).not.toHaveBeenCalled()
-    })
-
-    it('should redirect to no-edp when the non-intersecting boundary is only in the quote cache', () => {
-      const h = createMockH()
-      const request = createMockRequest(null, null)
-      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockGeojson })
-
-      handler(request, h)
-
-      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
     it('should render the view with boundary data when it intersects an EDP', () => {

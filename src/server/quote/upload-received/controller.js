@@ -18,7 +18,13 @@ const STATUS_READY = 'ready'
 // preview. GEOMETRY and SERVICE failures keep the user on the preview page.
 const UPLOAD_REJECTION_CODES = new Set(Object.values(BOUNDARY_ERRORS.UPLOAD))
 
-function redirectToUploadWithError(failureReason, request, h) {
+/**
+ * @param {object} params
+ * @param {string} params.failureReason
+ * @param {object} params.request
+ * @param {object} params.h
+ */
+function redirectToUploadWithError({ failureReason, request, h }) {
   const validationErrors = mapValidationErrorsForDisplay([
     { path: ['file'], message: getBoundaryErrorMessage(failureReason) }
   ])
@@ -41,7 +47,11 @@ async function processBoundaryCheck(uploadId, request, h) {
     )
 
     if (UPLOAD_REJECTION_CODES.has(result.failureReason)) {
-      return redirectToUploadWithError(result.failureReason, request, h)
+      return redirectToUploadWithError({
+        failureReason: result.failureReason,
+        request,
+        h
+      })
     }
 
     if (result.geojson) {

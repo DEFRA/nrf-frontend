@@ -21,7 +21,7 @@
       <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
       {% if boundaryError %}
-        <p class="govuk-body">{{ boundaryError }} <a href="/quote/boundary-type">Upload a new file or draw on a map</a></p>
+        <p class="govuk-body">{{ boundaryError }} <a href="{{ boundaryTypePath }}" class="govuk-link">Upload a new file or draw on a map</a></p>
       {% endif %}
 
       {% if showMap %}
@@ -53,7 +53,7 @@
               text: "Save and continue",
               preventDoubleClick: true
             }) }}
-            <a href="/quote/boundary-type">Upload a new file or draw on a map</a>
+            <a href="{{ boundaryTypePath }}" class="govuk-link">Upload a new file or draw on a map</a>
           </div>
         </form>
       {% endif %}
