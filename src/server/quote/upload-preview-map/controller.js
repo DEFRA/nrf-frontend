@@ -24,9 +24,20 @@ export function handler(request, h) {
     return h.redirect(uploadBoundaryPath)
   }
 
+  const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
+  const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
+
+  // A valid boundary that intersects no EDP has nothing to preview here, so
+  // send the user straight to the no-EDP page. Errors still render on this
+  // page so the user can see what went wrong.
+  if (!boundaryFailureReason && !intersectsEdp) {
+    logger.info('map - boundary does not intersect EDP, redirecting to no-edp')
+    return h.redirect(noEdpPath)
+  }
+
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
   const viewModel = getViewModel({
-    boundaryGeojson: boundaryGeojson || quoteCache.boundaryGeojson,
+    boundaryGeojson: resolvedGeojson,
     boundaryFailureReason,
     boundaryFilename
   })
@@ -45,10 +56,6 @@ export function postHandler(request, h) {
     return h.redirect(uploadBoundaryPath)
   }
 
-  const intersectsEdp =
-    boundaryGeojson?.intersectingEdps?.length ??
-    quoteCache.boundaryGeojson?.intersectingEdps?.length ??
-    false
   // Lift the filename out of the geojson blob so it lives at the top of the
   // quote cache alongside other submit fields, and posts to the backend as a
   // top-level column rather than a buried property.
@@ -60,10 +67,8 @@ export function postHandler(request, h) {
     request.yar.clear('boundaryFailureReason')
   }
 
-  if (intersectsEdp) {
-    return h.redirect('/quote/email')
-  }
-
-  logger.info('map - boundary does not intersect EDP, saved to quote data')
-  return h.redirect(noEdpPath)
+  // This page only renders (and so only accepts a POST) for boundaries that
+  // intersect an EDP; non-intersecting boundaries are redirected to the
+  // no-EDP page on GET before the form is ever shown.
+  return h.redirect('/quote/email')
 }

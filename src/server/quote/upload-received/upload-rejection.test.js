@@ -65,7 +65,10 @@ describe('Upload rejected before geometry parsing', () => {
   it.each([
     'file_size_too_large',
     'file_contains_virus',
-    'file_rejected_by_uploader'
+    'file_rejected_by_uploader',
+    'upload_file_missing',
+    'unsupported_file_type',
+    'zip_missing_shapefile'
   ])(
     'redirects to the upload page with an error summary for %s',
     async (errorCode) => {
@@ -110,6 +113,15 @@ describe('Upload rejected before geometry parsing', () => {
 
     expect(
       getAllByText(document, 'The selected file contains a virus')
+    ).toHaveLength(2)
+  })
+
+  it('shows a select-a-file message when no file was uploaded', async () => {
+    stubUploadFlow('upload_file_missing', 400)
+    const document = await followRejection(await primeUploadSession())
+
+    expect(
+      getAllByText(document, 'Select a red line boundary file')
     ).toHaveLength(2)
   })
 })

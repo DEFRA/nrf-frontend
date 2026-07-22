@@ -12,8 +12,7 @@ export const BOUNDARY_ERROR_MESSAGES = {
     'The uploaded zip is too large once extracted. Please reduce the file size and try again.',
   [UPLOAD.UPLOAD_NOT_READY]:
     'The file upload has not finished processing. Please try again.',
-  [UPLOAD.UPLOAD_FILE_MISSING]:
-    'No file was found for this upload. Please try uploading the file again.',
+  [UPLOAD.UPLOAD_FILE_MISSING]: 'Select a red line boundary file',
   [UPLOAD.UPLOAD_STATUS_CHECK_FAILED]:
     'Unable to check the upload status. Please try again.',
   [UPLOAD.S3_DOWNLOAD_FAILED]:

@@ -81,22 +81,30 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
-    it('should render the view when geojson is absent from session but present in quote cache', () => {
+    it('should redirect to no-edp when a valid boundary does not intersect an EDP', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
+      expect(h.view).not.toHaveBeenCalled()
+    })
+
+    it('should redirect to no-edp when the non-intersecting boundary is only in the quote cache', () => {
       const h = createMockH()
       const request = createMockRequest(null, null)
       getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockGeojson })
 
       handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
-        expect.any(Object)
-      )
+      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
     })
 
-    it('should render the view with boundary data', () => {
+    it('should render the view with boundary data when it intersects an EDP', () => {
       const h = createMockH()
-      const request = createMockRequest(mockGeojson)
+      const request = createMockRequest(mockEdpGeojson)
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
@@ -115,7 +123,10 @@ describe('map controller', () => {
 
     it('should pass boundaryFilename from session geojson to the view', () => {
       const h = createMockH()
-      const request = createMockRequest(mockGeojsonWithFilename)
+      const request = createMockRequest({
+        ...mockEdpGeojson,
+        boundaryFilename: 'site-boundary.shp'
+      })
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
@@ -183,7 +194,7 @@ describe('map controller', () => {
 
     it('should pass a success uploadStatus and null failureReason when there is no error', () => {
       const h = createMockH()
-      const request = createMockRequest(mockGeojson)
+      const request = createMockRequest(mockEdpGeojson)
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
@@ -209,23 +220,7 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
-    it('should save and redirect to no-edp when boundary does not intersect EDP', () => {
-      const h = createMockH()
-      const request = createMockRequest(mockGeojson)
-      getQuoteDataFromCache.mockReturnValue({})
-
-      postHandler(request, h)
-
-      expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockGeojson,
-        boundaryFilename: null
-      })
-      expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
-      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
-    })
-
-    it('should save and redirect to email when boundary intersects EDP', () => {
+    it('should save the boundary and redirect to email', () => {
       const h = createMockH()
       const request = createMockRequest(mockEdpGeojson)
       getQuoteDataFromCache.mockReturnValue({})
@@ -254,19 +249,7 @@ describe('map controller', () => {
       })
     })
 
-    it('should not save to cache and should redirect based on cached boundary when session geojson is absent', () => {
-      const h = createMockH()
-      const request = createMockRequest(null)
-      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockGeojson })
-
-      postHandler(request, h)
-
-      expect(saveQuoteDataToCache).not.toHaveBeenCalled()
-      expect(request.yar.clear).not.toHaveBeenCalled()
-      expect(h.redirect).toHaveBeenCalledWith(noEdpPath)
-    })
-
-    it('should redirect to email based on cached boundary intersecting EDP when session geojson is absent', () => {
+    it('should not re-save when the boundary is only in the quote cache and should redirect to email', () => {
       const h = createMockH()
       const request = createMockRequest(null)
       getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockEdpGeojson })
@@ -274,6 +257,7 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+      expect(request.yar.clear).not.toHaveBeenCalled()
       expect(h.redirect).toHaveBeenCalledWith('/quote/email')
     })
   })

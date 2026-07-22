@@ -1,4 +1,4 @@
-import { UPLOAD_REJECTION_CODES } from '@defra/nrf-library'
+import { BOUNDARY_ERRORS } from '@defra/nrf-library'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
@@ -12,6 +12,11 @@ const logger = createLogger()
 const REFRESH_INTERVAL_SECONDS = 5
 const STATUS_PENDING = 'pending'
 const STATUS_READY = 'ready'
+
+// Every UPLOAD-group failure (size/zip/filename/CRS/uploader/infrastructure)
+// sends the user back to the upload page to retry — there is no geometry to
+// preview. GEOMETRY and SERVICE failures keep the user on the preview page.
+const UPLOAD_REJECTION_CODES = new Set(Object.values(BOUNDARY_ERRORS.UPLOAD))
 
 function redirectToUploadWithError(failureReason, request, h) {
   const validationErrors = mapValidationErrorsForDisplay([
@@ -35,9 +40,6 @@ async function processBoundaryCheck(uploadId, request, h) {
       `check-boundary failed - uploadId: ${uploadId}, failureReason: ${result.failureReason}`
     )
 
-    // Files rejected before geometry parsing (too large, virus) send the user
-    // back to the upload page to retry — the preview page has no geometry to
-    // show. Other failures fall through to the preview page with the error.
     if (UPLOAD_REJECTION_CODES.has(result.failureReason)) {
       return redirectToUploadWithError(result.failureReason, request, h)
     }
