@@ -15,100 +15,51 @@
 {% endblock %}
 
 {% block content %}
-<div class="govuk-grid-row">
+  <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
-        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
-        {% if boundaryError %}
-        {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: [{
-                text: boundaryError
-            }]
-        }) }}
-        {% else %}
-        <p class="govuk-body">
-            Your boundary file has been validated successfully.
-            {{ featureCount }} feature{{ "s" if featureCount != 1 }} found.
-        </p>
-        {% if boundaryFilename %}
-        {# boundaryFilename is user-controlled. Safe here because Nunjucks
-           autoescapes {{ }}, and the backend validates it against a strict
-           allowlist. Do NOT wrap in | safe or embed into data-* / inline-script. #}
-        <p class="govuk-body">
-            Uploaded file: <span class="govuk-!-font-weight-bold">{{ boundaryFilename }}</span>
-        </p>
-        {% endif %}
-        {% endif %}
+      {% if boundaryError %}
+        <p class="govuk-body">{{ boundaryError }} <a href="/quote/boundary-type">Upload a new file or draw on a map</a></p>
+      {% endif %}
 
-        <div id="boundary-map" class="govuk-!-margin-bottom-6"
-             data-geojson='{{ boundaryGeojson | safe }}'
-             data-edp-boundary-geojson='{{ edpBoundaryGeojson | safe }}'
-             data-existing-boundary-metadata='{{ existingBoundaryMetadata | safe }}'
-             data-map-style-url="{{ mapStyleUrl }}">
-        </div>
-        {% if intersectsEdp %}
+      {% if showMap %}
+      <div id="boundary-map" class="govuk-!-margin-bottom-6"
+           data-geojson='{{ boundaryGeojson | safe }}'
+           data-edp-boundary-geojson='{{ edpBoundaryGeojson | safe }}'
+           data-existing-boundary-metadata='{{ existingBoundaryMetadata | safe }}'
+           data-map-style-url="{{ mapStyleUrl }}">
+      </div>
+      {% endif %}
+      {% if intersectsEdp and not boundaryError %}
+        <h2 class="govuk-heading-m">Red line boundary</h2>
         <p class="govuk-body">
-            Your red line boundary is within {{ intersectingEdps | length }} EDP{{ "s" if intersectingEdps | length != 1 }}:
+          Your red line boundary is within {{ intersectingEdps | length }} Environmental Delivery
+          Plan{{ "s" if intersectingEdps | length != 1 }} (EDP):
         </p>
-        <ul class="govuk-list govuk-list--bullet">
-            {% for edp in intersectingEdps %}
+        <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-2">
+          {% for edp in intersectingEdps %}
             <li>
-              {{ edp.label }}{% if edp.natura2000SiteName %} ({{ edp.natura2000SiteName }}){% endif %}
-              {% if edp.overlap_area_ha %}
-              <br><span class="govuk-body-s govuk-!-margin-bottom-0">
-                Overlap: {{ edp.overlap_area_ha }} ha ({{ edp.overlap_percentage }}% of boundary)
-              </span>
-              {% endif %}
+              {{ edp.label }}{% if edp.natura2000SiteName %} ({{ edp.natura2000SiteName }}){% endif %}{% if edp.overlap_area_ha %} ({{ edp.overlap_percentage }}% of boundary){% endif %}
             </li>
-            {% endfor %}
+          {% endfor %}
         </ul>
-
+        <hr class="govuk-!-margin-top-8 govuk-!-margin-bottom-8" />
         <form method="post" novalidate>
-            {% include "partials/csrf-token.njk" %}
-
+          {% include "partials/csrf-token.njk" %}
+          <div class="govuk-button-group">
             {{ govukButton({
-                text: "Save and continue",
-                preventDoubleClick: true
+              text: "Save and continue",
+              preventDoubleClick: true
             }) }}
+            <a href="/quote/boundary-type">Upload a new file or draw on a map</a>
+          </div>
         </form>
+      {% endif %}
 
-        {% else %}
-
-        <h2 class="govuk-heading-m">EDP boundary check</h2>
-        {{ govukInsetText({
-            text: "There are no EDPs within the red line boundary."
-        }) }}
-
-        <form method="post" novalidate>
-            {% include "partials/csrf-token.njk" %}
-
-            {{ govukButton({
-                text: "Save and continue",
-                preventDoubleClick: true,
-                disabled: boundaryError
-            }) }}
-        </form>
-
-        {% endif %}
-
-        <p class="govuk-body">
-            <a href="{{ uploadBoundaryPath }}" class="govuk-link">Upload a different red line boundary file</a>
-        </p>
-
-      <p class="govuk-body govuk-!-margin-top-1">
-      <form method="post" novalidate action="/quote/boundary-type">
-        {% include "partials/csrf-token.njk" %}
-        <input type="hidden" name="boundaryEntryType" value="draw" />
-        {{ govukButton({
-          text: "Draw the boundary on a map instead",
-          classes: "govuk-button--secondary"
-        }) }}
-      </form>
-      </p>
     </div>
-</div>
+  </div>
 {% endblock %}
 
 {% block bodyEnd %}

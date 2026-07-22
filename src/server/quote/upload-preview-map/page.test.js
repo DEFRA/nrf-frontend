@@ -34,10 +34,10 @@ describe('Boundary map page', () => {
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'Boundary Map'
+        'Your uploaded red line boundary file'
       )
       expect(document.title).toBe(
-        'Boundary Map - Nature restoration levy - GOV.UK'
+        'Your uploaded red line boundary file - Nature restoration levy - GOV.UK'
       )
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',
@@ -301,7 +301,11 @@ describe('Boundary map page', () => {
       ).toHaveValue('draw')
     })
 
-    it('should still render the map container', async () => {
+    it('renders the map for a geometry error that carries geometry', async () => {
+      mockCheckBoundary({
+        geojson: boundaryGeojson,
+        failureReason: 'self_intersecting_geometry'
+      })
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -309,8 +313,19 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const mapEl = document.getElementById('boundary-map')
-      expect(mapEl).toBeInTheDocument()
+      expect(document.getElementById('boundary-map')).toBeInTheDocument()
+    })
+
+    it('hides the map when the error carries no geometry', async () => {
+      mockCheckBoundary({ failureReason: 'unsupported_crs' })
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      expect(document.getElementById('boundary-map')).not.toBeInTheDocument()
     })
 
     it('should disable the Save button on boundary error', async () => {

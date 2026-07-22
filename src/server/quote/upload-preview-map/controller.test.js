@@ -104,7 +104,7 @@ describe('map controller', () => {
       expect(h.view).toHaveBeenCalledWith(
         'quote/upload-preview-map/index',
         expect.objectContaining({
-          pageHeading: 'Boundary Map',
+          pageHeading: 'Your uploaded red line boundary file',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry),
           boundaryError: null,
@@ -138,7 +138,7 @@ describe('map controller', () => {
       expect(h.view).toHaveBeenCalledWith(
         'quote/upload-preview-map/index',
         expect.objectContaining({
-          pageHeading: 'Boundary Map',
+          pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry)
@@ -156,7 +156,7 @@ describe('map controller', () => {
       expect(h.view).toHaveBeenCalledWith(
         'quote/upload-preview-map/index',
         expect.objectContaining({
-          pageHeading: 'Boundary Map',
+          pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
           featureCount: 1,
           boundaryGeojson: JSON.stringify(null)
@@ -176,8 +176,7 @@ describe('map controller', () => {
         expect.objectContaining({
           uploadStatus: 'failure',
           failureReason: 'file_size_too_large',
-          boundaryError:
-            'The uploaded boundary file is too large. The maximum file size allowed is 2MB.'
+          boundaryError: 'The selected file must be smaller than 2MB.'
         })
       )
     })
