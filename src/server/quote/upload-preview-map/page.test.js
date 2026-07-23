@@ -97,7 +97,19 @@ describe('Boundary map page', () => {
       })
 
       expect(document.body.textContent).toContain('Kent Downs EDP')
-      expect(document.body.textContent).toContain('North Downs Woodlands')
+      expect(document.body.textContent).not.toContain('North Downs Woodlands')
+    })
+
+    it('should display the EDP overlap area and percentage', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      expect(document.body.textContent).toContain('overlap: 0.5')
+      expect(document.body.textContent).toContain('(25% of boundary)')
     })
 
     it('should show save and continue button', async () => {
