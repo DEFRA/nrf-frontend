@@ -27,7 +27,7 @@ describe('excluded-area getViewModel', () => {
   it('should use a placeholder back link when the boundary entry type is not set', () => {
     const viewModel = getViewModel()
 
-    expect(viewModel.backLinkPath).toBe('#')
+    expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
 
   it('should log an error and keep the placeholder back link when the boundary entry type is not recognised', () => {
@@ -37,6 +37,6 @@ describe('excluded-area getViewModel', () => {
       { boundaryEntryType: 'unknown' },
       'boundaryEntryType is not recognised'
     )
-    expect(viewModel.backLinkPath).toBe('#')
+    expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
 })

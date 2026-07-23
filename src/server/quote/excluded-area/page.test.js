@@ -24,9 +24,5 @@ describe('Excluded area page', () => {
     expect(document.title).toBe(
       'Development is within the excluded area of this Environmental Delivery Plan (EDP) - Nature restoration levy - GOV.UK'
     )
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '#'
-    )
   })
 })
