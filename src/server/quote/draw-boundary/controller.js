@@ -1,4 +1,5 @@
 import { checkBoundaryGeometry } from '../../common/services/boundary.js'
+import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
@@ -12,9 +13,12 @@ export async function checkBoundaryHandler(request, h) {
 
   const result = await checkBoundaryGeometry(geometry)
 
-  if (result.error) {
-    logger.error(`draw-boundary check failed - error: ${result.error}`)
-    const response = { error: result.error }
+  if (result.failureReason) {
+    logger.error(
+      { failureReason: result.failureReason },
+      'draw-boundary check failed'
+    )
+    const response = { error: getBoundaryErrorMessage(result.failureReason) }
     if (result.geojson) {
       response.geojson = result.geojson
     }

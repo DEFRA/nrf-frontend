@@ -13,21 +13,23 @@ async function processBoundaryCheck(uploadId, request, h) {
 
   const result = await checkBoundary(uploadId)
 
-  if (result.error) {
+  if (result.failureReason) {
     logger.error(
-      `check-boundary failed - uploadId: ${uploadId}, error: ${result.error}`
+      `check-boundary failed - uploadId: ${uploadId}, failureReason: ${result.failureReason}`
     )
     if (result.geojson) {
       request.yar.set('boundaryGeojson', result.geojson)
     }
-    request.yar.set('boundaryError', result.error)
+    request.yar.set('boundaryFailureReason', result.failureReason)
     request.yar.clear('pendingUploadId')
+    request.yar.clear('pendingUploadUrl')
     return h.redirect('/quote/upload-preview-map')
   }
 
   request.yar.set('boundaryGeojson', result.geojson)
   request.yar.clear('pendingUploadId')
-  request.yar.clear('boundaryError')
+  request.yar.clear('pendingUploadUrl')
+  request.yar.clear('boundaryFailureReason')
 
   return h.redirect('/quote/upload-preview-map')
 }
@@ -51,6 +53,15 @@ export async function handler(request, h) {
 
   const isProcessing =
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
+
+  if (!isProcessing) {
+    // Terminal, non-ready status (error/failed/unknown) — clear the pending
+    // upload so a retry via upload-boundary mints a fresh CDP Uploader
+    // session instead of reusing this dead one.
+    request.yar.clear('pendingUploadId')
+    request.yar.clear('pendingUploadUrl')
+  }
+
   const heading = 'Boundary file upload status'
   const viewModel = {
     pageTitle: getPageTitle(heading),

@@ -46,17 +46,18 @@ describe('upload-received controller', () => {
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
     expect(h.view).not.toHaveBeenCalled()
   })
 
-  it('should store error and redirect when status is ready but checkBoundary fails', async () => {
+  it('should store failureReason and redirect when status is ready but checkBoundary fails', async () => {
     const h = createMockH()
     const request = createMockRequest('test-upload-id')
     vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'ready' })
     vi.mocked(checkBoundary).mockResolvedValue({
-      error: 'Invalid geometry',
+      failureReason: 'file_size_too_large',
       geojson: { type: 'FeatureCollection', features: [] }
     })
 
@@ -64,10 +65,11 @@ describe('upload-received controller', () => {
 
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith(
-      'boundaryError',
-      'Invalid geometry'
+      'boundaryFailureReason',
+      'file_size_too_large'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
     expect(h.view).not.toHaveBeenCalled()
   })
@@ -127,6 +129,19 @@ describe('upload-received controller', () => {
       refreshInterval: null,
       errorMessage: 'Upload failed'
     })
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
+  })
+
+  it('does not clear the pending upload while still processing', async () => {
+    const h = createMockH()
+    const request = createMockRequest('test-upload-id')
+    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'pending' })
+
+    await handler(request, h)
+
+    expect(request.yar.clear).not.toHaveBeenCalledWith('pendingUploadId')
+    expect(request.yar.clear).not.toHaveBeenCalledWith('pendingUploadUrl')
   })
 })
 
@@ -149,7 +164,7 @@ describe('checkBoundaryHandler', () => {
     vi.clearAllMocks()
   })
 
-  it('should store geojson, clear error, and redirect on success', async () => {
+  it('should store geojson, clear pending upload, and redirect on success', async () => {
     const mockGeojson = { type: 'FeatureCollection', features: [] }
     vi.mocked(checkBoundary).mockResolvedValue({ geojson: mockGeojson })
 
@@ -161,17 +176,18 @@ describe('checkBoundaryHandler', () => {
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(request.yar.clear).toHaveBeenCalledWith('boundaryError')
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
+    expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
-  it('should store error and geojson and redirect to map when boundary check fails with geojson', async () => {
+  it('should store failureReason and geojson and redirect to map when boundary check fails with geojson', async () => {
     const mockGeojson = {
-      error: 'Invalid geometry',
+      error: 'self_intersecting_geometry',
       boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] }
     }
     vi.mocked(checkBoundary).mockResolvedValue({
-      error: 'Invalid geometry',
+      failureReason: 'self_intersecting_geometry',
       geojson: mockGeojson
     })
 
@@ -182,16 +198,16 @@ describe('checkBoundaryHandler', () => {
 
     expect(request.yar.set).toHaveBeenCalledWith('boundaryGeojson', mockGeojson)
     expect(request.yar.set).toHaveBeenCalledWith(
-      'boundaryError',
-      'Invalid geometry'
+      'boundaryFailureReason',
+      'self_intersecting_geometry'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
-  it('should store error without geojson and redirect to map when boundary check fails without geojson', async () => {
+  it('should store failureReason without geojson and redirect to map when boundary check fails without geojson', async () => {
     vi.mocked(checkBoundary).mockResolvedValue({
-      error: 'Unable to check boundary'
+      failureReason: 'boundary_check_failed'
     })
 
     const h = createMockH()
@@ -204,8 +220,8 @@ describe('checkBoundaryHandler', () => {
       expect.anything()
     )
     expect(request.yar.set).toHaveBeenCalledWith(
-      'boundaryError',
-      'Unable to check boundary'
+      'boundaryFailureReason',
+      'boundary_check_failed'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')

@@ -161,6 +161,17 @@ describe('checkForValidQuoteSession', () => {
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
+  it('continues on planning-type when isHousing is "no"', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
+    const request = makeRequest({ path: planningTypePath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
   it('continues without session check for non-GET requests', () => {
     const request = makeRequest({ path: '/quote/units', method: 'post' })
     const h = makeH()

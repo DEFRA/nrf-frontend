@@ -43,9 +43,7 @@
 
 {% block headerStart %}
   {% if not analyticsEnabled %}
-    <div style="background:#d4351c;padding:8px 15px 8px 15px" data-testid="analytics-disabled-banner">
-      <p class="govuk-body" style="color:#fff;margin-bottom:0">Analytics &amp; audit events disabled (<a href="/analytics-internal" style="color:#fff">Change</a>)</p>
-    </div>
+    {% include "partials/analytics-disabled.njk" %}
   {% endif %}
   {% include "partials/cookie-banner.njk" %}
 {% endblock %}
