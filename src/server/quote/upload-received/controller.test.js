@@ -12,6 +12,7 @@ describe('upload-received controller', () => {
     return {
       view: vi.fn().mockReturnValue({ header: headerMock }),
       redirect: vi.fn().mockReturnThis(),
+      code: vi.fn().mockReturnThis(),
       _headerMock: headerMock
     }
   }
@@ -52,12 +53,12 @@ describe('upload-received controller', () => {
     expect(h.view).not.toHaveBeenCalled()
   })
 
-  it('should store failureReason and redirect when status is ready but checkBoundary fails', async () => {
+  it('should store failureReason and redirect to preview map for a geometry failure', async () => {
     const h = createMockH()
     const request = createMockRequest('test-upload-id')
     vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'ready' })
     vi.mocked(checkBoundary).mockResolvedValue({
-      failureReason: 'file_size_too_large',
+      failureReason: 'self_intersecting_geometry',
       geojson: { type: 'FeatureCollection', features: [] }
     })
 
@@ -66,7 +67,7 @@ describe('upload-received controller', () => {
     expect(checkBoundary).toHaveBeenCalledWith('test-upload-id')
     expect(request.yar.set).toHaveBeenCalledWith(
       'boundaryFailureReason',
-      'file_size_too_large'
+      'self_intersecting_geometry'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')

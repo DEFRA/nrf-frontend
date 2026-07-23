@@ -1,18 +1,21 @@
 import { BOUNDARY_ERRORS, MAX_BOUNDARY_FILE_SIZE_MB } from '@defra/nrf-library'
+import { BOUNDARY_UPLOAD_FORMATS_TEXT } from './boundary-upload-hint.js'
 
 const { UPLOAD, GEOMETRY, SERVICE } = BOUNDARY_ERRORS
 
+const MISSING_REQUIRED_ZIP_FILES =
+  'The zipped file is missing one or more required files.'
+
 // User-facing copy for each boundary-check failure code.
 export const BOUNDARY_ERROR_MESSAGES = {
-  [UPLOAD.FILE_SIZE_TOO_LARGE]: `The uploaded boundary file is too large. The maximum file size allowed is ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`,
+  [UPLOAD.FILE_SIZE_TOO_LARGE]: `The selected file must be smaller than ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`,
   [UPLOAD.ZIP_ENTRY_TOO_LARGE]:
     'A file inside the uploaded zip is too large. Please reduce the file size and try again.',
   [UPLOAD.ZIP_TOTAL_TOO_LARGE]:
     'The uploaded zip is too large once extracted. Please reduce the file size and try again.',
   [UPLOAD.UPLOAD_NOT_READY]:
     'The file upload has not finished processing. Please try again.',
-  [UPLOAD.UPLOAD_FILE_MISSING]:
-    'No file was found for this upload. Please try uploading the file again.',
+  [UPLOAD.UPLOAD_FILE_MISSING]: 'Select a red line boundary file',
   [UPLOAD.UPLOAD_STATUS_CHECK_FAILED]:
     'Unable to check the upload status. Please try again.',
   [UPLOAD.S3_DOWNLOAD_FAILED]:
@@ -27,36 +30,30 @@ export const BOUNDARY_ERROR_MESSAGES = {
     'The uploaded zip contains a nested zip file. Nested zips are not allowed.',
   [UPLOAD.ZIP_UNSAFE_PATH]:
     'The uploaded zip contains an entry with an unsafe path. Please check the file and try again.',
-  [UPLOAD.ZIP_MISSING_SHAPEFILE]:
-    'The uploaded zip must contain a shapefile (.shp with .shx, .dbf and .prj companions).',
-  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]:
-    'The shapefile is missing required companion files. A shapefile zip must contain .shp, .shx, .dbf and .prj files with the same name.',
-  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]:
-    'The selected boundary file could not be found inside the uploaded zip.',
+  [UPLOAD.ZIP_MISSING_SHAPEFILE]: MISSING_REQUIRED_ZIP_FILES,
+  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]: MISSING_REQUIRED_ZIP_FILES,
+  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]: MISSING_REQUIRED_ZIP_FILES,
   [UPLOAD.ZIP_AMBIGUOUS_FILENAME]:
     'The selected boundary filename appears more than once in the uploaded zip.',
-  [UPLOAD.UNSUPPORTED_FILE_TYPE]:
-    'This file type is not supported. Use a GeoJSON (.geojson, .json), KML (.kml), or zipped Shapefile (.zip) file.',
+  [UPLOAD.UNSUPPORTED_FILE_TYPE]: `The selected file must be ${BOUNDARY_UPLOAD_FORMATS_TEXT}`,
   [UPLOAD.UNREADABLE_GEOMETRY_FILE]:
     'The uploaded file could not be read. Please check the file and try again.',
+  [UPLOAD.FILE_CONTAINS_VIRUS]: 'The selected file contains a virus',
   [UPLOAD.FILE_REJECTED_BY_UPLOADER]:
     'The uploaded file was rejected. Please check the file and try again.',
   [UPLOAD.UNSUPPORTED_CRS]:
-    'The uploaded boundary file uses an unsupported coordinate reference system (CRS). Please ensure your boundary file uses British National Grid (EPSG:27700) or WGS 84 (EPSG:4326) and try again.',
+    'The uploaded boundary file is using co-ordinates that are not recognised.',
   [UPLOAD.MISSING_CRS]:
-    'The uploaded boundary file has no coordinate reference system (CRS) defined. Please ensure your boundary file has a Coordinate Reference System defined and try again.',
+    'The uploaded boundary file is using co-ordinates that are not recognised.',
   [GEOMETRY.INVALID_GEOMETRY]:
     'The uploaded boundary geometry could not be processed. It contains incomplete or malformed coordinates.',
   [GEOMETRY.UNSUPPORTED_GEOMETRY_TYPE]:
     'Only Polygon geometry is supported. Please ensure the boundary forms a complete closed polygon shape.',
-  [GEOMETRY.SELF_INTERSECTING]:
-    'The uploaded boundary contains invalid geometry (self-intersecting or crossing line segments). Please correct the boundary so that edges do not cross each other and try again.',
-  [GEOMETRY.HAS_HOLES]:
-    'The uploaded boundary contains interior holes or gaps. The boundary must be a single continuous area without holes.',
+  [GEOMETRY.SELF_INTERSECTING]: 'The red line boundary is overlapping itself.',
+  [GEOMETRY.HAS_HOLES]: 'The red line boundary is not closed.',
   [GEOMETRY.DUPLICATE_VERTICES]:
     'The uploaded boundary contains duplicated or overlapping geometry (duplicate consecutive vertices). Please clean up the boundary and try again.',
-  [GEOMETRY.NO_POLYGON_FOUND]:
-    'No polygon geometry was found in the uploaded file.',
+  [GEOMETRY.NO_POLYGON_FOUND]: 'The red line boundary is missing.',
   [SERVICE.IMPACT_ASSESSOR_UNREACHABLE]:
     'Unable to check the boundary right now. Please try again.',
   [SERVICE.IMPACT_ASSESSOR_BAD_RESPONSE]:
