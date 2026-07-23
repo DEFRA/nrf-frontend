@@ -11,7 +11,7 @@ describe('getViewModel', () => {
     })
 
     expect(result.featureCount).toBe(1)
-    expect(result.pageHeading).toBe('Boundary Map')
+    expect(result.pageHeading).toBe('Your uploaded red line boundary file')
     expect(result.boundaryGeojson).toBe(JSON.stringify(geo))
     expect(result.intersectsEdp).toBeFalsy()
     expect(result.intersectingEdps).toEqual([])
@@ -185,8 +185,58 @@ describe('getViewModel', () => {
     })
 
     expect(result.boundaryError).toBe(
-      `The uploaded boundary file is too large. The maximum file size allowed is ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`
+      `The selected file must be smaller than ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`
     )
+  })
+
+  it('should use the error page heading and title when there is a failureReason', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.SERVICE.CHECK_FAILED
+    })
+
+    expect(result.pageHeading).toBe(
+      'Your red line boundary file contains an error'
+    )
+    expect(result.pageTitle).toContain(
+      'Your red line boundary file contains an error'
+    )
+  })
+
+  it('should use the success page heading when there is no failureReason', () => {
+    const result = getViewModel({ boundaryGeojson: {} })
+
+    expect(result.pageHeading).toBe('Your uploaded red line boundary file')
+  })
+
+  it('should show the map when geometry is present', () => {
+    const result = getViewModel({
+      boundaryGeojson: {
+        boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] }
+      }
+    })
+
+    expect(result.showMap).toBe(true)
+  })
+
+  it('should show the map for a geometry error that still carries geometry', () => {
+    const result = getViewModel({
+      boundaryGeojson: {
+        boundaryGeometryWgs84: { type: 'FeatureCollection', features: [] }
+      },
+      boundaryFailureReason: BOUNDARY_ERRORS.GEOMETRY.SELF_INTERSECTING
+    })
+
+    expect(result.showMap).toBe(true)
+  })
+
+  it('should hide the map when there is no geometry to draw', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.UPLOAD.UNSUPPORTED_CRS
+    })
+
+    expect(result.showMap).toBe(false)
   })
 
   it('should fall back to the generic message for an unrecognised failureReason code', () => {

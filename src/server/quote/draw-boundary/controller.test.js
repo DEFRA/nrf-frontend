@@ -1,5 +1,6 @@
 import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
@@ -63,8 +64,7 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(JSON.parse(response.payload)).toEqual({
-      error:
-        'The uploaded boundary contains invalid geometry (self-intersecting or crossing line segments). Please correct the boundary so that edges do not cross each other and try again.',
+      error: getBoundaryErrorMessage('self_intersecting_geometry'),
       geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } }
     })
   })

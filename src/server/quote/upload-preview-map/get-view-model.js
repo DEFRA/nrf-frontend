@@ -4,7 +4,8 @@ import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
-export const title = 'Boundary Map'
+export const title = 'Your uploaded red line boundary file'
+export const errorTitle = 'Your red line boundary file contains an error'
 
 function getMapStyleUrl() {
   return '/os-base-map/resources/styles'
@@ -58,13 +59,22 @@ export default function getViewModel({
     natura2000SiteName: edp.n2k_site_name // n2k = Natura 2000 (EU protected sites network)
   }))
 
+  const pageTitleText = boundaryFailureReason ? errorTitle : title
+
+  // Only render the map when there is geometry to draw. Errors like an
+  // unsupported/missing CRS or a rejected upload parse no geometry, so the
+  // map would be empty; geometry errors (e.g. self-intersecting) still carry
+  // the parsed shape and are worth showing.
+  const showMap = geometry != null
+
   return {
-    pageTitle: getPageTitle(title),
-    pageHeading: title,
+    pageTitle: getPageTitle(pageTitleText),
+    pageHeading: pageTitleText,
     boundaryGeojson: JSON.stringify(geometry),
     existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata),
     intersectingEdps: mappedEdps,
     intersectsEdp,
+    showMap,
     edpBoundaryGeojson,
     edpIntersectionGeojson,
     featureCount,
