@@ -22,28 +22,22 @@ function buildUploadUrl(path) {
 }
 
 /**
- * Initiate an upload session via the backend
+ * Initiate an upload session via the backend. The backend owns the CDP
+ * Uploader storage config (bucket, path, size limit); the frontend only
+ * supplies the post-upload redirect target, which is one of its own routes.
  * @param {object} options - Upload options
  * @param {string} options.redirect - URL to redirect to after upload
- * @param {string} options.s3Bucket - Destination S3 bucket
- * @param {string} [options.s3Path] - Optional path within the bucket
- * @param {object} [options.metadata] - Optional metadata
  * @returns {Promise<{uploadId: string, uploadUrl: string} | {error: string}>}
  */
-export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
+export async function initiateUpload({ redirect }) {
   const backendUrl = config.get('backend.apiUrl')
   const url = `${backendUrl}/upload/initiate`
 
-  logger.info({ url, s3Bucket, s3Path }, 'Initiating upload')
+  logger.info({ url, redirect }, 'Initiating upload')
 
   try {
     const { payload } = await Wreck.post(url, {
-      payload: JSON.stringify({
-        redirect,
-        s3Bucket,
-        s3Path,
-        metadata
-      }),
+      payload: JSON.stringify({ redirect }),
       headers: backendHeaders({ 'Content-Type': 'application/json' }),
       json: true
     })
@@ -57,7 +51,7 @@ export async function initiateUpload({ redirect, s3Bucket, s3Path, metadata }) {
     const responsePayload = error?.data?.payload
     logger.error(
       error,
-      `Error initiating upload - url: ${url}, backendUrl: ${backendUrl}, s3Bucket: ${s3Bucket}, s3Path: ${s3Path}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
+      `Error initiating upload - url: ${url}, backendUrl: ${backendUrl}, redirect: ${redirect}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
     )
     return {
       error: 'Unable to initiate upload'
