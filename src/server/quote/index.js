@@ -17,6 +17,7 @@ import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
 import routesQuoteDetails from './quote-details/routes.js'
 import routesQuoteDetailsResend from './quote-details/routes-resend.js'
+import routesExcludedArea from './excluded-area/routes.js'
 import { checkForValidQuoteSession } from './helpers/is-quote-session-in-progress/index.js'
 import { registerQuoteDetailsSessionCookie } from './quote-details/helpers/quote-details-session-cookie.js'
 
@@ -64,7 +65,8 @@ export const quote = {
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
         ...routesQuoteDetails,
-        ...routesQuoteDetailsResend
+        ...routesQuoteDetailsResend,
+        ...routesExcludedArea
       ])
     }
   }
