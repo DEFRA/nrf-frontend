@@ -1,10 +1,12 @@
-import { getByRole } from '@testing-library/dom'
+import { getByRole, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
+import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { checkBoundaryPath } from '../upload-received/routes.js'
 import {
   boundaryGeojson,
@@ -14,8 +16,7 @@ import {
 vi.mock('../../common/services/boundary.js')
 
 const boundaryCheckPath = checkBoundaryPath.replace('{id}', 'test-upload-id')
-const uploadLinkText = 'Upload a different red line boundary file'
-const drawButtonText = 'Draw the boundary on a map instead'
+const retryLinkText = 'Upload a new file or draw on a map'
 
 describe('Boundary map page', () => {
   const getServer = setupTestServer()
@@ -25,113 +26,19 @@ describe('Boundary map page', () => {
   })
 
   describe('when boundary does not intersect EDP', () => {
-    it('should render all page elements', async () => {
+    it('redirects to the no-edp page instead of rendering the map', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
+      const response = await getServer().inject({
+        method: 'GET',
+        url: routePath,
+        headers: { cookie }
       })
 
-      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'Boundary Map'
-      )
-      expect(document.title).toBe(
-        'Boundary Map - Nature restoration levy - GOV.UK'
-      )
-      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-        'href',
-        '/quote/upload-boundary'
-      )
-      const csrfToken = document.querySelector('form input[name="csrfToken"]')
-      expect(csrfToken).toBeInTheDocument()
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe('/quote/no-edp')
     })
 
-    it('should display no EDPs message', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
-      expect(document.body.textContent).toContain(
-        'There are no EDPs within the red line boundary.'
-      )
-    })
-
-    it('should show save and continue button', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
-      const saveButton = getByRole(document, 'button', {
-        name: 'Save and continue'
-      })
-      expect(saveButton).not.toBeDisabled()
-    })
-
-    it('should display feature count', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
-      const body = document.querySelector('main .govuk-body')
-      expect(body.textContent).toContain('1 feature found')
-    })
-
-    it('should include map container with geojson data and map scripts', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
-      const mapEl = document.getElementById('boundary-map')
-      expect(mapEl).toBeInTheDocument()
-      expect(mapEl.getAttribute('data-geojson')).toBeTruthy()
-      expect(mapEl.getAttribute('data-map-style-url')).toBeTruthy()
-
-      const mapCss = document.querySelector('link[href*="interactive-map"]')
-      expect(mapCss).toBeInTheDocument()
-
-      const scripts = Array.from(document.querySelectorAll('script[src]'))
-      const mapScripts = scripts.filter((s) =>
-        s.getAttribute('src').includes('interactive-map')
-      )
-      expect(mapScripts.length).toBeGreaterThanOrEqual(1)
-    })
-
-    it('should show upload another boundary file and draw boundary links', async () => {
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
-      const document = await loadPage({
-        requestUrl: routePath,
-        server: getServer(),
-        cookie
-      })
-
-      const uploadLink = getByRole(document, 'link', {
-        name: uploadLinkText
-      })
-      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
-
-      const drawButton = getByRole(document, 'button', { name: drawButtonText })
-      expect(drawButton).toBeInTheDocument()
-      const drawForm = drawButton.closest('form')
-      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
-      expect(
-        drawForm.querySelector('input[name="boundaryEntryType"]')
-      ).toHaveValue('draw')
-    })
-
-    it('should redirect to no-edp page on save and continue', async () => {
+    it('redirects the form post to the no-edp page', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const { response } = await submitForm({
         requestUrl: routePath,
@@ -139,7 +46,8 @@ describe('Boundary map page', () => {
         formData: {},
         cookie
       })
-      expect(response.statusCode).toBe(302)
+
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe('/quote/no-edp')
     })
   })
@@ -151,7 +59,7 @@ describe('Boundary map page', () => {
       url: routePath,
       headers: { cookie: sessionCookie }
     })
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(statusCodes.found)
     expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 
@@ -189,7 +97,19 @@ describe('Boundary map page', () => {
       })
 
       expect(document.body.textContent).toContain('Kent Downs EDP')
-      expect(document.body.textContent).toContain('North Downs Woodlands')
+      expect(document.body.textContent).not.toContain('North Downs Woodlands')
+    })
+
+    it('should display the EDP overlap area and percentage', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      expect(document.body.textContent).toContain('overlap: 0.5')
+      expect(document.body.textContent).toContain('(25% of boundary)')
     })
 
     it('should show save and continue button', async () => {
@@ -205,7 +125,7 @@ describe('Boundary map page', () => {
       ).toBeInTheDocument()
     })
 
-    it('should show upload another boundary file and draw boundary links', async () => {
+    it('should link back to the boundary type page to retry', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -213,18 +133,8 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const uploadLink = getByRole(document, 'link', {
-        name: uploadLinkText
-      })
-      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
-
-      const drawButton = getByRole(document, 'button', { name: drawButtonText })
-      expect(drawButton).toBeInTheDocument()
-      const drawForm = drawButton.closest('form')
-      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
-      expect(
-        drawForm.querySelector('input[name="boundaryEntryType"]')
-      ).toHaveValue('draw')
+      const retryLink = getByRole(document, 'link', { name: retryLinkText })
+      expect(retryLink).toHaveAttribute('href', '/quote/boundary-type')
     })
 
     it('should redirect to email on save and continue', async () => {
@@ -235,7 +145,7 @@ describe('Boundary map page', () => {
         formData: {},
         cookie
       })
-      expect(response.statusCode).toBe(302)
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe('/quote/email')
     })
   })
@@ -245,7 +155,7 @@ describe('Boundary map page', () => {
       mockCheckBoundary({ failureReason: 'self_intersecting_geometry' })
     })
 
-    it('should display error summary', async () => {
+    it('should display the error message', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -253,9 +163,8 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      expect(document.body.textContent).toContain('There is a problem')
       expect(document.body.textContent).toContain(
-        'self-intersecting or crossing line segments'
+        getBoundaryErrorMessage('self_intersecting_geometry')
       )
     })
 
@@ -270,7 +179,7 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).not.toContain('validated successfully')
     })
 
-    it('should show upload another file link', async () => {
+    it('should link back to the boundary type page to retry', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -278,13 +187,11 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const uploadLink = getByRole(document, 'link', {
-        name: uploadLinkText
-      })
-      expect(uploadLink).toHaveAttribute('href', '/quote/upload-boundary')
+      const retryLink = getByRole(document, 'link', { name: retryLinkText })
+      expect(retryLink).toHaveAttribute('href', '/quote/boundary-type')
     })
 
-    it('should show draw boundary button', async () => {
+    it('does not show a save and continue button on error', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -292,16 +199,16 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const drawButton = getByRole(document, 'button', { name: drawButtonText })
-      expect(drawButton).toBeInTheDocument()
-      const drawForm = drawButton.closest('form')
-      expect(drawForm).toHaveAttribute('action', '/quote/boundary-type')
       expect(
-        drawForm.querySelector('input[name="boundaryEntryType"]')
-      ).toHaveValue('draw')
+        queryByRole(document, 'button', { name: 'Save and continue' })
+      ).not.toBeInTheDocument()
     })
 
-    it('should still render the map container', async () => {
+    it('renders the map for a geometry error that carries geometry', async () => {
+      mockCheckBoundary({
+        geojson: boundaryGeojson,
+        failureReason: 'self_intersecting_geometry'
+      })
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -309,11 +216,11 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const mapEl = document.getElementById('boundary-map')
-      expect(mapEl).toBeInTheDocument()
+      expect(document.getElementById('boundary-map')).toBeInTheDocument()
     })
 
-    it('should disable the Save button on boundary error', async () => {
+    it('hides the map when the error carries no geometry', async () => {
+      mockCheckBoundary({ failureReason: 'unsupported_crs' })
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: routePath,
@@ -321,10 +228,7 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      const saveButton = getByRole(document, 'button', {
-        name: 'Save and continue'
-      })
-      expect(saveButton).toBeDisabled()
+      expect(document.getElementById('boundary-map')).not.toBeInTheDocument()
     })
   })
 })
