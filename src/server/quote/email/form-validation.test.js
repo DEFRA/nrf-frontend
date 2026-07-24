@@ -40,12 +40,12 @@ describe('email form validation', () => {
 
     it('fails when absent', () => {
       const { error } = getSchema().validate({})
-      expect(error.details[0].message).toBe('Enter an email address')
+      expect(error.details[0].message).toBe('Enter your email address')
     })
 
     it('fails when empty string', () => {
       const { error } = getSchema().validate({ email: '' })
-      expect(error.details[0].message).toBe('Enter an email address')
+      expect(error.details[0].message).toBe('Enter your email address')
     })
 
     it('fails for invalid format - no @ symbol', () => {
