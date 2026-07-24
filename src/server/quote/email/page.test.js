@@ -69,7 +69,7 @@ describe('Email page', () => {
     expectInputError({
       document,
       inputLabel: 'Enter your email address',
-      errorMessage: 'Enter an email address'
+      errorMessage: 'Enter your email address'
     })
   })
 
