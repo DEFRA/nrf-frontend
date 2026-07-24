@@ -3,7 +3,7 @@ import joi from 'joi'
 export const maxEmailLength = 254
 
 export const emailErrorMessages = {
-  required: 'Enter an email address',
+  required: 'Enter your email address',
   format: 'Enter an email address in the correct format, like name@example.com',
   maxLength: `Email address must be ${maxEmailLength} characters or less`,
   spaces: 'Email address must not contain spaces'
