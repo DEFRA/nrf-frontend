@@ -1,5 +1,5 @@
 const PANEL_ID = 'boundaryInfo'
-const PANEL_ROOT_ID = 'draw-boundary-datasets-boundary-info'
+const PANEL_ROOT_ID = 'draw-boundary-boundary-info'
 const SAVE_ACTION = 'save'
 const NOT_AVAILABLE_TEXT = 'Not available'
 

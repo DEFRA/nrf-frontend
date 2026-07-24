@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createDrawToolsPlugins, wireDrawTools } from './draw-tools.js'
 
-const MAP_ELEMENT_ID = 'draw-boundary-datasets-map'
+const MAP_ELEMENT_ID = 'draw-boundary-map'
 
 function createMapElement() {
   const el = document.createElement('div')

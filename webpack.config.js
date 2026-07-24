@@ -30,14 +30,11 @@ export default {
     application: {
       import: ['./javascripts/application.js', './stylesheets/application.scss']
     },
-    'boundary-map': {
-      import: './javascripts/boundary-map.js'
+    'upload-preview-map': {
+      import: './javascripts/map/upload-preview-map.js'
     },
     'draw-boundary-map': {
-      import: './javascripts/draw-boundary-map.js'
-    },
-    'draw-boundary-datasets-map': {
-      import: './javascripts/datasets/index.js'
+      import: './javascripts/map/index.js'
     }
   },
   experiments: {

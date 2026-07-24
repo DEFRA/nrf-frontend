@@ -43,6 +43,11 @@ describe('Draw boundary page', () => {
     )
     expect(mapStylesCss).toBeInTheDocument()
 
+    const datasetsCss = document.querySelector(
+      'link[href*="interactive-map/plugins/datasets/index.css"]'
+    )
+    expect(datasetsCss).toBeInTheDocument()
+
     const coreScript = document.querySelector(
       'script[src*="interactive-map/core/index.js"]'
     )
@@ -53,10 +58,20 @@ describe('Draw boundary page', () => {
     )
     expect(maplibreScript).toBeInTheDocument()
 
+    const datasetsScript = document.querySelector(
+      'script[src*="interactive-map/plugins/datasets/index.js"]'
+    )
+    expect(datasetsScript).toBeInTheDocument()
+
     const mapStylesScript = document.querySelector(
       'script[src*="interactive-map/plugins/map-styles/index.js"]'
     )
     expect(mapStylesScript).toBeInTheDocument()
+
+    const interactScript = document.querySelector(
+      'script[src*="interactive-map/plugins/interact/index.js"]'
+    )
+    expect(interactScript).toBeInTheDocument()
 
     const drawPluginScript = document.querySelector(
       'script[src*="interactive-map/plugins/draw-ml/index.js"]'

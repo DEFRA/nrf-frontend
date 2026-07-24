@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { wireBoundaryInfoPanel } from './boundary-info.js'
 
-const PANEL_ROOT_ID = 'draw-boundary-datasets-boundary-info'
+const PANEL_ROOT_ID = 'draw-boundary-boundary-info'
 
 // wireBoundaryInfoPanel registers a document-level click listener each time
 // it runs; without removing it, later tests' clicks would still trigger

@@ -1,4 +1,4 @@
-import { getMapStyles } from '../base-map/styles.js'
+import { getMapStyles } from './styles.js'
 import { wireBoundaryInfoPanel } from './boundary-info.js'
 import { createDrawToolsPlugins, wireDrawTools } from './draw-tools.js'
 import {
@@ -9,8 +9,12 @@ import {
 import { wireFillOpacityOnZoom } from './fill-opacity-on-zoom.js'
 import { wireHideLayersOnDraw } from './hide-layers-on-draw.js'
 import { getContainerHeight, wireResizeMapHeight } from './resize-map-height.js'
+import {
+  readExistingBoundary,
+  hydrateInitialDrawFeature
+} from './existing-boundary.js'
 
-const MAP_ELEMENT_ID = 'draw-boundary-datasets-map'
+const MAP_ELEMENT_ID = 'draw-boundary-map'
 const DEFAULT_ZOOM = 8.5
 const NORFOLK_LNG = 1.1405503
 const NORFOLK_LAT = 52.7089441
@@ -47,11 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
     regions: ['england']
   })
 
+  const { initialFeature, bounds, center } = readExistingBoundary(mapElement)
+
   const interactiveMap = new window.defra.InteractiveMap(MAP_ELEMENT_ID, {
     behaviour: 'inline',
     mapProvider: window.defra.maplibreProvider(),
     mapStyle: mapStyles[0],
-    center: [NORFOLK_LNG, NORFOLK_LAT],
+    center: center || [NORFOLK_LNG, NORFOLK_LAT],
+    bounds,
     zoom: DEFAULT_ZOOM,
     containerHeight: getContainerHeight(mapElement),
     transformRequest,
@@ -62,6 +69,19 @@ document.addEventListener('DOMContentLoaded', function () {
       drawPlugin,
       searchPlugin
     ]
+  })
+
+  // The draw-ml plugin creates its underlying MapboxDraw control asynchronously
+  // (a React effect gated on the map being ready), so drawPlugin.addFeature is a
+  // no-op if called straight from 'map:ready' — it silently drops the feature
+  // because the control doesn't exist yet. 'draw:ready' fires once that control
+  // has actually been created.
+  interactiveMap.on('draw:ready', function () {
+    const hydrated = hydrateInitialDrawFeature({ drawPlugin, initialFeature })
+
+    if (hydrated) {
+      interactiveMap.fitToBounds(initialFeature)
+    }
   })
 
   wireBoundaryInfoPanel(interactiveMap, {

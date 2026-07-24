@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const MAP_ELEMENT_ID = 'draw-boundary-datasets-map'
+const MAP_ELEMENT_ID = 'draw-boundary-map'
 
 function createMapElement(csrfToken = 'csrf-token') {
   const el = document.createElement('div')
@@ -12,13 +12,16 @@ function createMapElement(csrfToken = 'csrf-token') {
 }
 
 function createMockDefra() {
+  const mockMap = {
+    on: vi.fn(),
+    toggleButtonState: vi.fn(),
+    addButton: vi.fn(),
+    addPanel: vi.fn(),
+    fitToBounds: vi.fn()
+  }
+
   function MockInteractiveMap() {
-    return {
-      on: vi.fn(),
-      toggleButtonState: vi.fn(),
-      addButton: vi.fn(),
-      addPanel: vi.fn()
-    }
+    return mockMap
   }
 
   MockInteractiveMap._mock = vi.fn()
@@ -27,25 +30,33 @@ function createMockDefra() {
     InteractiveMap: new Proxy(MockInteractiveMap, {
       construct(_target, args) {
         MockInteractiveMap._mock(...args)
-        return new MockInteractiveMap()
+        return mockMap
       }
     }),
     maplibreProvider: vi.fn().mockReturnValue({ provider: 'maplibre' }),
     mapStylesPlugin: vi.fn().mockReturnValue({ id: 'mapStyles' }),
     searchPlugin: vi.fn().mockReturnValue({ id: 'search' }),
-    _mock: MockInteractiveMap._mock
+    _mock: MockInteractiveMap._mock,
+    _mockMap: mockMap,
+    _emit(eventName, ...args) {
+      mockMap.on.mock.calls
+        .filter((c) => c[0] === eventName)
+        .forEach((c) => c[1](...args))
+    }
   }
 }
 
 let initFn = null
 const originalAddEventListener = document.addEventListener.bind(document)
 
-describe('datasets index init', () => {
+describe('draw boundary map init', () => {
   const createDrawToolsPlugins = vi.fn()
   const wireDrawTools = vi.fn()
   const wireBoundaryInfoPanel = vi.fn()
   const wireFillOpacityOnZoom = vi.fn()
   const wireHideLayersOnDraw = vi.fn()
+  const readExistingBoundary = vi.fn()
+  const hydrateInitialDrawFeature = vi.fn()
 
   beforeEach(() => {
     document.body.innerHTML = ''
@@ -60,8 +71,14 @@ describe('datasets index init', () => {
     wireBoundaryInfoPanel.mockReset()
     wireFillOpacityOnZoom.mockReset()
     wireHideLayersOnDraw.mockReset()
+    readExistingBoundary.mockReset().mockReturnValue({
+      initialFeature: null,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReset()
 
-    vi.doMock('../base-map/styles.js', () => ({
+    vi.doMock('./styles.js', () => ({
       getMapStyles: () => [{ id: 'esri-tiles' }, { id: 'outdoor-os' }]
     }))
     vi.doMock('./map-datasets.js', () => ({
@@ -76,6 +93,10 @@ describe('datasets index init', () => {
     vi.doMock('./boundary-info.js', () => ({ wireBoundaryInfoPanel }))
     vi.doMock('./fill-opacity-on-zoom.js', () => ({ wireFillOpacityOnZoom }))
     vi.doMock('./hide-layers-on-draw.js', () => ({ wireHideLayersOnDraw }))
+    vi.doMock('./existing-boundary.js', () => ({
+      readExistingBoundary,
+      hydrateInitialDrawFeature
+    }))
 
     vi.spyOn(document, 'addEventListener').mockImplementation(
       (event, fn, ...rest) => {
@@ -161,6 +182,65 @@ describe('datasets index init', () => {
     expect(wireHideLayersOnDraw).toHaveBeenCalledWith(expect.any(Object), {
       layerIds: ['edp_boundaries', 'edp_boundaries-stroke']
     })
+  })
+
+  it('hydrates the initial draw feature once the draw plugin is ready, not on map:ready', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    const initialFeature = { type: 'Feature', geometry: { type: 'Polygon' } }
+    readExistingBoundary.mockReturnValue({
+      initialFeature,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReturnValue(true)
+
+    await loadModule()
+
+    mockDefra._emit('map:ready')
+    expect(hydrateInitialDrawFeature).not.toHaveBeenCalled()
+
+    mockDefra._emit('draw:ready')
+    expect(hydrateInitialDrawFeature).toHaveBeenCalledWith({
+      drawPlugin: { id: 'draw' },
+      initialFeature
+    })
+  })
+
+  it('zooms the map to fit the hydrated feature', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    const initialFeature = { type: 'Feature', geometry: { type: 'Polygon' } }
+    readExistingBoundary.mockReturnValue({
+      initialFeature,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReturnValue(true)
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledWith(initialFeature)
+  })
+
+  it('does not zoom the map when there is no feature to hydrate', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    readExistingBoundary.mockReturnValue({
+      initialFeature: null,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReturnValue(false)
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(mockDefra._mockMap.fitToBounds).not.toHaveBeenCalled()
   })
 
   it('resolves relative tile URLs to absolute URLs, leaving others untouched', async () => {
