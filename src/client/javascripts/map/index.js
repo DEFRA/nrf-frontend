@@ -71,6 +71,12 @@ document.addEventListener('DOMContentLoaded', function () {
     ]
   })
 
+  const boundaryInfoPanel = wireBoundaryInfoPanel(interactiveMap, {
+    checkUrl: '/quote/draw-boundary/check',
+    saveAndContinueUrl: '/quote/draw-boundary/save',
+    csrfToken: mapElement.dataset.csrfToken
+  })
+
   // The draw-ml plugin creates its underlying MapboxDraw control asynchronously
   // (a React effect gated on the map being ready), so drawPlugin.addFeature is a
   // no-op if called straight from 'map:ready' — it silently drops the feature
@@ -81,19 +87,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (hydrated) {
       interactiveMap.fitToBounds(initialFeature)
+      boundaryInfoPanel.checkExistingBoundary(initialFeature)
     }
-  })
-
-  wireBoundaryInfoPanel(interactiveMap, {
-    checkUrl: '/quote/draw-boundary/check',
-    saveAndContinueUrl: '/quote/draw-boundary/save',
-    csrfToken: mapElement.dataset.csrfToken
   })
 
   wireDrawTools(interactiveMap, {
     interactPlugin,
     drawPlugin,
-    mapElementId: MAP_ELEMENT_ID
+    mapElementId: MAP_ELEMENT_ID,
+    hasExistingBoundary: Boolean(initialFeature)
   })
 
   wireFillOpacityOnZoom(interactiveMap, { fillLayerIds: FILL_LAYER_IDS })

@@ -155,7 +155,7 @@ describe('upload preview map init', () => {
         mapStyle: { id: 'esri-tiles' },
         center: [1.1405503, 52.7089441],
         bounds: null,
-        containerHeight: '400px',
+        containerHeight: '100%',
         enableZoomControls: true,
         transformRequest: expect.any(Function),
         plugins: [{ id: 'datasets' }, { id: 'mapStyles' }]

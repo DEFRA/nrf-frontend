@@ -32,13 +32,14 @@ function createInteractiveMap() {
 
 function wireAndReady(options = {}) {
   const interactiveMap = createInteractiveMap()
-  wireBoundaryInfoPanel(interactiveMap, {
+  const api = wireBoundaryInfoPanel(interactiveMap, {
     checkUrl: '/quote/draw-boundary/check',
     saveAndContinueUrl: '/quote/draw-boundary/save',
     csrfToken: 'token-123',
     ...options
   })
   interactiveMap._emit('map:ready')
+  interactiveMap.checkExistingBoundary = api.checkExistingBoundary
   return interactiveMap
 }
 
@@ -127,6 +128,28 @@ describe('wireBoundaryInfoPanel', () => {
     expect(items).toHaveLength(2)
     expect(items[0].textContent).toBe('Yare Broads')
     expect(items[1].textContent).toBe('Bure Broads')
+  })
+
+  it('checks an existing boundary on demand, e.g. when hydrated on page load', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ isValid: true, intersectingEdps: [] })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const interactiveMap = wireAndReady()
+    interactiveMap.checkExistingBoundary({ geometry: { type: 'Polygon' } })
+
+    expect(interactiveMap.showPanel).toHaveBeenCalledWith('boundaryInfo')
+    await flushPromises()
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/quote/draw-boundary/check',
+      expect.objectContaining({
+        body: JSON.stringify({ geometry: { type: 'Polygon' } })
+      })
+    )
+    expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
   })
 
   it('shows "None" when there are no intersecting EDPs', async () => {

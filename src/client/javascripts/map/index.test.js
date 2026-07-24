@@ -68,7 +68,9 @@ describe('draw boundary map init', () => {
       drawPlugin: { id: 'draw' }
     })
     wireDrawTools.mockReset()
-    wireBoundaryInfoPanel.mockReset()
+    wireBoundaryInfoPanel
+      .mockReset()
+      .mockReturnValue({ checkExistingBoundary: vi.fn() })
     wireFillOpacityOnZoom.mockReset()
     wireHideLayersOnDraw.mockReset()
     readExistingBoundary.mockReset().mockReturnValue({
@@ -173,7 +175,8 @@ describe('draw boundary map init', () => {
       expect.objectContaining({
         interactPlugin: { id: 'interact' },
         drawPlugin: { id: 'draw' },
-        mapElementId: MAP_ELEMENT_ID
+        mapElementId: MAP_ELEMENT_ID,
+        hasExistingBoundary: false
       })
     )
     expect(wireFillOpacityOnZoom).toHaveBeenCalledWith(expect.any(Object), {
@@ -182,6 +185,25 @@ describe('draw boundary map init', () => {
     expect(wireHideLayersOnDraw).toHaveBeenCalledWith(expect.any(Object), {
       layerIds: ['edp_boundaries', 'edp_boundaries-stroke']
     })
+  })
+
+  it('tells the draw tools an existing boundary was loaded', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    const initialFeature = { type: 'Feature', geometry: { type: 'Polygon' } }
+    readExistingBoundary.mockReturnValue({
+      initialFeature,
+      bounds: null,
+      center: null
+    })
+
+    await loadModule()
+
+    expect(wireDrawTools).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ hasExistingBoundary: true })
+    )
   })
 
   it('hydrates the initial draw feature once the draw plugin is ready, not on map:ready', async () => {
@@ -224,6 +246,45 @@ describe('draw boundary map init', () => {
     mockDefra._emit('draw:ready')
 
     expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledWith(initialFeature)
+  })
+
+  it('checks the hydrated boundary so the boundary information panel renders on load', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    const initialFeature = { type: 'Feature', geometry: { type: 'Polygon' } }
+    readExistingBoundary.mockReturnValue({
+      initialFeature,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReturnValue(true)
+    const checkExistingBoundary = vi.fn()
+    wireBoundaryInfoPanel.mockReturnValue({ checkExistingBoundary })
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(checkExistingBoundary).toHaveBeenCalledWith(initialFeature)
+  })
+
+  it('does not check the boundary when there is no feature to hydrate', async () => {
+    createMapElement()
+    const mockDefra = createMockDefra()
+    globalThis.defra = mockDefra
+    readExistingBoundary.mockReturnValue({
+      initialFeature: null,
+      bounds: null,
+      center: null
+    })
+    hydrateInitialDrawFeature.mockReturnValue(false)
+    const checkExistingBoundary = vi.fn()
+    wireBoundaryInfoPanel.mockReturnValue({ checkExistingBoundary })
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(checkExistingBoundary).not.toHaveBeenCalled()
   })
 
   it('does not zoom the map when there is no feature to hydrate', async () => {

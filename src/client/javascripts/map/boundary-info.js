@@ -260,4 +260,10 @@ export function wireBoundaryInfoPanel(
     renderPanel({ summary: 'Draw a boundary to check it.' })
     interactiveMap.hidePanel(PANEL_ID)
   })
+
+  return {
+    checkExistingBoundary(feature) {
+      runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
+    }
+  }
 }

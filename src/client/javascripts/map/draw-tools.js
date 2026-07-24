@@ -16,9 +16,10 @@ export function createDrawToolsPlugins() {
   return { interactPlugin, drawPlugin }
 }
 
-function buildDrawStartPanel(onClick) {
+function buildDrawStartPanel(onClick, { hidden }) {
   const panel = document.createElement('div')
   panel.className = 'app-draw-start-panel'
+  panel.hidden = hidden
   // Matches the position, padding and shadow of the library's own
   // Cancel/Done action panel, using its CSS custom properties directly.
   panel.style.cssText = [
@@ -44,30 +45,39 @@ function buildDrawStartPanel(onClick) {
   return panel
 }
 
-function wireDrawStartPanel(interactiveMap, { mapElementId, startDraw }) {
+function wireDrawStartPanel(
+  interactiveMap,
+  { mapElementId, startDraw, hasExistingBoundary }
+) {
   const mapElement = document.getElementById(mapElementId)
   if (!mapElement) {
-    return
+    return { setHidden: function () {} }
   }
 
-  const panel = buildDrawStartPanel(startDraw)
+  const panel = buildDrawStartPanel(startDraw, { hidden: hasExistingBoundary })
   mapElement.appendChild(panel)
 
+  const setHidden = (hidden) => {
+    panel.hidden = hidden
+  }
+
   interactiveMap.on('draw:started', function () {
-    panel.hidden = true
+    setHidden(true)
   })
 
   interactiveMap.on('draw:created', function () {
-    panel.hidden = false
+    setHidden(false)
   })
 
   interactiveMap.on('draw:edited', function () {
-    panel.hidden = false
+    setHidden(false)
   })
 
   interactiveMap.on('draw:cancelled', function () {
-    panel.hidden = false
+    setHidden(false)
   })
+
+  return { setHidden }
 }
 
 function buildDrawToolsMenuItems({
@@ -75,7 +85,8 @@ function buildDrawToolsMenuItems({
   interactPlugin,
   drawPlugin,
   startDrawPolygon,
-  getSelectedFeatureIds
+  getSelectedFeatureIds,
+  setStartPanelHidden
 }) {
   return [
     {
@@ -97,6 +108,7 @@ function buildDrawToolsMenuItems({
         }
         interactiveMap.toggleButtonState('drawTools', 'hidden', true)
         interactPlugin.disable()
+        setStartPanelHidden(true)
       }
     },
     {
@@ -160,7 +172,7 @@ function wireSelectionEvents(interactiveMap, { setSelectedFeatureIds }) {
 
 export function wireDrawTools(
   interactiveMap,
-  { interactPlugin, drawPlugin, mapElementId }
+  { interactPlugin, drawPlugin, mapElementId, hasExistingBoundary = false }
 ) {
   let selectedFeatureIds = []
   const getSelectedFeatureIds = () => selectedFeatureIds
@@ -176,6 +188,15 @@ export function wireDrawTools(
   interactiveMap.on('map:ready', function () {
     interactPlugin.enable()
 
+    const { setHidden: setStartPanelHidden } = wireDrawStartPanel(
+      interactiveMap,
+      {
+        mapElementId,
+        startDraw: startDrawPolygon,
+        hasExistingBoundary
+      }
+    )
+
     interactiveMap.addButton('drawTools', {
       label: 'Draw tools',
       mobile: { slot: 'bottom-right' },
@@ -186,13 +207,9 @@ export function wireDrawTools(
         interactPlugin,
         drawPlugin,
         startDrawPolygon,
-        getSelectedFeatureIds
+        getSelectedFeatureIds,
+        setStartPanelHidden
       })
-    })
-
-    wireDrawStartPanel(interactiveMap, {
-      mapElementId,
-      startDraw: startDrawPolygon
     })
   })
 

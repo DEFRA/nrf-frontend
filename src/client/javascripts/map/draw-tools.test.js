@@ -100,7 +100,7 @@ describe('wireDrawTools', () => {
     )
   })
 
-  it('adds a Draw start panel to the map element', () => {
+  it('adds a visible Draw start panel to the map element when there is no existing boundary', () => {
     createMapElement()
     const interactiveMap = createInteractiveMap()
 
@@ -113,8 +113,26 @@ describe('wireDrawTools', () => {
 
     const panel = document.querySelector('.app-draw-start-panel')
     expect(panel).not.toBeNull()
+    expect(panel.hidden).toBe(false)
     const button = panel.querySelector('button')
     expect(button.textContent).toBe('Draw')
+  })
+
+  it('adds a hidden Draw start panel when an existing boundary has been loaded', () => {
+    createMapElement()
+    const interactiveMap = createInteractiveMap()
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin: createInteractPlugin(),
+      drawPlugin: createDrawPlugin(),
+      mapElementId: MAP_ELEMENT_ID,
+      hasExistingBoundary: true
+    })
+    interactiveMap._emit('map:ready')
+
+    const panel = document.querySelector('.app-draw-start-panel')
+    expect(panel).not.toBeNull()
+    expect(panel.hidden).toBe(true)
   })
 
   it('does not add a Draw start panel when the map element is missing', () => {
@@ -245,6 +263,32 @@ describe('wireDrawTools', () => {
       true
     )
     expect(interactPlugin.disable).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the Draw start panel when entering edit mode', () => {
+    createMapElement()
+    const interactiveMap = createInteractiveMap()
+    const interactPlugin = createInteractPlugin()
+    const drawPlugin = createDrawPlugin()
+    drawPlugin.editFeature.mockReturnValue(true)
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin,
+      drawPlugin,
+      mapElementId: MAP_ELEMENT_ID
+    })
+    interactiveMap._emit('map:ready')
+    const panel = document.querySelector('.app-draw-start-panel')
+
+    interactiveMap._emit('interact:selectionchange', {
+      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
+    })
+    getMenuItem(interactiveMap, 'editFeature').onClick()
+
+    expect(panel.hidden).toBe(true)
+
+    interactiveMap._emit('draw:edited')
+    expect(panel.hidden).toBe(false)
   })
 
   it('deletes the selected features', () => {

@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     center: center || DEFAULT_CENTER,
     bounds,
     maxZoom: BOUNDARY_MAP_MAX_ZOOM,
-    containerHeight: '400px',
+    containerHeight: '100%',
     enableZoomControls: true,
     transformRequest,
     plugins: [datasetsPlugin, mapStylesPlugin]
