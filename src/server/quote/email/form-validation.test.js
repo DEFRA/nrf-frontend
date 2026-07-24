@@ -3,30 +3,14 @@ import getSchema from './form-validation.js'
 
 describe('email form validation', () => {
   describe('email', () => {
-    it('passes for a valid email', () => {
-      const { error } = getSchema().validate({ email: 'test@example.com' })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for an uppercase email', () => {
-      const { error } = getSchema().validate({ email: 'USER@EXAMPLE.COM' })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for an email with subdomain', () => {
-      const { error } = getSchema().validate({
-        email: 'user.name@test.co.uk'
-      })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for an email with plus tag', () => {
-      const { error } = getSchema().validate({ email: 'user+tag@test.com' })
-      expect(error).toBeUndefined()
-    })
-
-    it('passes for an email with underscore', () => {
-      const { error } = getSchema().validate({ email: 'user_name@test.io' })
+    it.each([
+      ['passes for a valid email', 'test@example.com'],
+      ['passes for an uppercase email', 'USER@EXAMPLE.COM'],
+      ['passes for an email with subdomain', 'user.name@test.co.uk'],
+      ['passes for an email with plus tag', 'user+tag@test.com'],
+      ['passes for an email with underscore', 'user_name@test.io']
+    ])('%s', (_description, email) => {
+      const { error } = getSchema().validate({ email })
       expect(error).toBeUndefined()
     })
 
@@ -48,67 +32,55 @@ describe('email form validation', () => {
       expect(error.details[0].message).toBe('Enter your email address')
     })
 
-    it('fails for invalid format - no @ symbol', () => {
-      const { error } = getSchema().validate({ email: 'testemail.com' })
-      expect(error.details[0].message).toBe(
+    it.each([
+      [
+        'fails for invalid format - no @ symbol',
+        'testemail.com',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - no domain', () => {
-      const { error } = getSchema().validate({ email: 'test@' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - no domain',
+        'test@',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - no local part', () => {
-      const { error } = getSchema().validate({ email: '@domain.com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - no local part',
+        '@domain.com',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - no TLD', () => {
-      const { error } = getSchema().validate({ email: 'test@domain' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - no TLD',
+        'test@domain',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - space in email', () => {
-      const { error } = getSchema().validate({ email: 'test @domain.com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - space in email',
+        'test @domain.com',
         'Email address must not contain spaces'
-      )
-    })
-
-    it('fails for invalid format - double dots in domain', () => {
-      const { error } = getSchema().validate({ email: 'test@domain..com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - double dots in domain',
+        'test@domain..com',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - double @ symbol', () => {
-      const { error } = getSchema().validate({ email: 'test@@domain.com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - double @ symbol',
+        'test@@domain.com',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - comma instead of dot', () => {
-      const { error } = getSchema().validate({ email: 'test@domain,com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - comma instead of dot',
+        'test@domain,com',
         'Enter an email address in the correct format, like name@example.com'
-      )
-    })
-
-    it('fails for invalid format - space in domain', () => {
-      const { error } = getSchema().validate({ email: 'test@domain com' })
-      expect(error.details[0].message).toBe(
+      ],
+      [
+        'fails for invalid format - space in domain',
+        'test@domain com',
         'Email address must not contain spaces'
-      )
+      ]
+    ])('%s', (_description, email, expectedMessage) => {
+      const { error } = getSchema().validate({ email })
+      expect(error.details[0].message).toBe(expectedMessage)
     })
 
     it('fails when email exceeds maximum length', () => {

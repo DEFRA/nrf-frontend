@@ -13,76 +13,38 @@ describe('createPlainIntegerValidator', () => {
   })
 
   describe('valid inputs', () => {
-    it('accepts a valid integer', () => {
-      const { error, value } = schema.validate(6)
+    it.each([
+      ['accepts minimum value', 1, 1],
+      ['accepts a valid integer', 6, 6],
+      ['accepts maximum value', 100, 100]
+    ])('%s', (_description, input, expected) => {
+      const { error, value } = schema.validate(input)
       expect(error).toBeUndefined()
-      expect(value).toBe(6)
+      expect(value).toBe(expected)
     })
 
-    it('accepts a string number', () => {
-      const { error, value } = schema.validate('12')
+    it.each([
+      ['accepts a string number', '12', 12],
+      ['accepts a string with leading/trailing spaces (trimmed)', ' 12 ', 12],
+      ['accepts a string with spaces between digits (1 2)', '1 2', 12],
+      [
+        'accepts a string with multiple spaces between digits (1  4)',
+        '1  4',
+        14
+      ],
+      [
+        'accepts a string with spaces before, after, and between digits',
+        '  1 2  ',
+        12
+      ],
+      ['accepts a string with a thousand-separator comma (1,2)', '1,2', 12],
+      ['accepts a string with multiple commas (1,0,0)', '1,0,0', 100],
+      ['accepts a leading comma (,12)', ',12', 12],
+      ['accepts a trailing comma (12,)', '12,', 12]
+    ])('%s', (_description, input, expected) => {
+      const { error, value } = schema.validate(input)
       expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a string with leading/trailing spaces (trimmed)', () => {
-      const { error, value } = schema.validate(' 12 ')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a string with spaces between digits (1 2)', () => {
-      const { error, value } = schema.validate('1 2')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a string with multiple spaces between digits (1  4)', () => {
-      const { error, value } = schema.validate('1  4')
-      expect(error).toBeUndefined()
-      expect(value).toBe(14)
-    })
-
-    it('accepts a string with spaces before, after, and between digits', () => {
-      const { error, value } = schema.validate('  1 2  ')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a string with a thousand-separator comma (1,2)', () => {
-      const { error, value } = schema.validate('1,2')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a string with multiple commas (1,0,0)', () => {
-      const { error, value } = schema.validate('1,0,0')
-      expect(error).toBeUndefined()
-      expect(value).toBe(100)
-    })
-
-    it('accepts a leading comma (,12)', () => {
-      const { error, value } = schema.validate(',12')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts a trailing comma (12,)', () => {
-      const { error, value } = schema.validate('12,')
-      expect(error).toBeUndefined()
-      expect(value).toBe(12)
-    })
-
-    it('accepts minimum value', () => {
-      const { error, value } = schema.validate(1)
-      expect(error).toBeUndefined()
-      expect(value).toBe(1)
-    })
-
-    it('accepts maximum value', () => {
-      const { error, value } = schema.validate(100)
-      expect(error).toBeUndefined()
-      expect(value).toBe(100)
+      expect(value).toBe(expected)
     })
   })
 
@@ -128,23 +90,13 @@ describe('createPlainIntegerValidator', () => {
   })
 
   describe('invalid formats', () => {
-    it('fails for non-numeric characters', () => {
-      const { error } = schema.validate('abc')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
-    })
-
-    it('fails for text with units', () => {
-      const { error } = schema.validate('25 units')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
-    })
-
-    it('fails for scientific notation', () => {
-      const { error } = schema.validate('1e3')
-      expect(error.details[0].message).toBe('Enter a number using digits only')
-    })
-
-    it('fails for plus sign', () => {
-      const { error } = schema.validate('+10')
+    it.each([
+      ['fails for non-numeric characters', 'abc'],
+      ['fails for text with units', '25 units'],
+      ['fails for scientific notation', '1e3'],
+      ['fails for plus sign', '+10']
+    ])('%s', (_description, input) => {
+      const { error } = schema.validate(input)
       expect(error.details[0].message).toBe('Enter a number using digits only')
     })
 
