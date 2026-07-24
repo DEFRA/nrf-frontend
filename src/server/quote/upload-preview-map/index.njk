@@ -35,7 +35,7 @@
         <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
           {% for edp in intersectingEdps %}
             <li>
-              {{ edp.label }}{% if edp.overlap_area_ha %} overlap: {{ edp.overlap_area_ha }}{% endif %} {% if edp.overlap_percentage %}({{ edp.overlap_percentage }}% of boundary){% endif %}
+              {{ edp.label }}{% if edp.overlap_area_ha %} overlap: {{ edp.overlap_area_ha }} ha{% endif %}{% if edp.overlap_percentage %} ({{ edp.overlap_percentage }}% of boundary){% endif %}
             </li>
           {% endfor %}
         </ul>

@@ -151,28 +151,14 @@ describe('#swagger plugin', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /docs should return 404', async () => {
+    test.each([
+      ['/docs'],
+      ['/swagger.json'],
+      ['/swagger-ui/swagger-initializer.js']
+    ])('GET %s should return 404', async (url) => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/docs'
-      })
-
-      expect(statusCode).toBe(statusCodes.notFound)
-    })
-
-    test('GET /swagger.json should return 404', async () => {
-      const { statusCode } = await server.inject({
-        method: 'GET',
-        url: '/swagger.json'
-      })
-
-      expect(statusCode).toBe(statusCodes.notFound)
-    })
-
-    test('GET /swagger-ui/swagger-initializer.js should return 404', async () => {
-      const { statusCode } = await server.inject({
-        method: 'GET',
-        url: '/swagger-ui/swagger-initializer.js'
+        url
       })
 
       expect(statusCode).toBe(statusCodes.notFound)
