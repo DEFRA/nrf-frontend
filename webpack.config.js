@@ -30,11 +30,11 @@ export default {
     application: {
       import: ['./javascripts/application.js', './stylesheets/application.scss']
     },
-    'boundary-map': {
-      import: './javascripts/boundary-map.js'
+    'upload-preview-map': {
+      import: './javascripts/map/upload-preview-map.js'
     },
     'draw-boundary-map': {
-      import: './javascripts/draw-boundary-map.js'
+      import: './javascripts/map/index.js'
     }
   },
   experiments: {
@@ -214,6 +214,20 @@ export default {
         {
           from: path.join(
             interactiveMapPath,
+            'plugins/interact/dist/umd/index.js'
+          ),
+          to: 'interactive-map/plugins/interact/index.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/interact/dist/umd/im-interact-plugin.js'
+          ),
+          to: 'interactive-map/plugins/interact/im-interact-plugin.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
             'plugins/beta/draw-ml/dist/umd/index.js'
           ),
           to: 'interactive-map/plugins/draw-ml/index.js'
@@ -245,6 +259,34 @@ export default {
             'plugins/search/dist/css/index.css'
           ),
           to: 'interactive-map/plugins/search/index.css'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/datasets/dist/umd/index.js'
+          ),
+          to: 'interactive-map/plugins/datasets/index.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/datasets/dist/umd/im-datasets-plugin.js'
+          ),
+          to: 'interactive-map/plugins/datasets/im-datasets-plugin.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/datasets/dist/umd/im-datasets-ml-adapter.js'
+          ),
+          to: 'interactive-map/plugins/datasets/im-datasets-ml-adapter.js'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/beta/datasets/dist/css/index.css'
+          ),
+          to: 'interactive-map/plugins/datasets/index.css'
         },
         {
           from: path.join(dirname, 'src/client/data/vts'),

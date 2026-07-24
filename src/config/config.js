@@ -451,6 +451,12 @@ export const config = convict({
       format: Number,
       default: 86400,
       env: 'MAP_TILE_CACHE_CONTROL_MAX_AGE'
+    },
+    excludedAreasTileServerBaseUrl: {
+      doc: 'Base URL for the excluded areas vector tile source used by the draw boundary map.',
+      format: String,
+      default: 'https://nrf-frontend.test.cdp-int.defra.cloud',
+      env: 'EXCLUDED_AREAS_TILE_SERVER_BASE_URL'
     }
   },
   gtmId: {
