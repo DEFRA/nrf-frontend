@@ -108,7 +108,7 @@ describe('Boundary map page', () => {
         cookie
       })
 
-      expect(document.body.textContent).toContain('overlap: 0.5')
+      expect(document.body.textContent).toContain('overlap: 0.5 ha')
       expect(document.body.textContent).toContain('(25% of boundary)')
     })
 
