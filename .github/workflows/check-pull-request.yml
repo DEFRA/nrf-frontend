@@ -66,7 +66,6 @@ jobs:
     permissions:
       id-token: write
     env:
-      MAILINATOR_API_KEY: ${{ secrets.MAILINATOR_API_KEY }}
       NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
     steps:
       - uses: actions/checkout@v7
