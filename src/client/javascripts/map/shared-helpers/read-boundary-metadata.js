@@ -46,6 +46,9 @@ function normalizeInitialDrawFeature(value) {
   return null
 }
 
+/**
+ * @param {{ bottomLeft: number[], topRight: number[] }|null} bounds
+ */
 function getExistingBoundaryBounds(bounds) {
   return bounds
     ? [...(bounds.bottomLeft || {}), ...(bounds.topRight || {})]

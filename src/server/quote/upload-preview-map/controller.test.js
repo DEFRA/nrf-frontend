@@ -92,7 +92,6 @@ describe('map controller', () => {
         'quote/upload-preview-map/index',
         expect.objectContaining({
           pageHeading: 'Your uploaded red line boundary file',
-          featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry),
           boundaryError: null,
           boundaryFilename: null
@@ -130,7 +129,6 @@ describe('map controller', () => {
         expect.objectContaining({
           pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
-          featureCount: 1,
           boundaryGeojson: JSON.stringify(mockGeometry)
         })
       )
@@ -148,13 +146,12 @@ describe('map controller', () => {
         expect.objectContaining({
           pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
-          featureCount: 1,
           boundaryGeojson: JSON.stringify(null)
         })
       )
     })
 
-    it('should pass uploadStatus, failureReason, and mapped copy to the view when there is an error', () => {
+    it('should map failureReason to user-facing boundaryError copy', () => {
       const h = createMockH()
       const request = createMockRequest(null, 'file_size_too_large')
       getQuoteDataFromCache.mockReturnValue({})
@@ -164,25 +161,7 @@ describe('map controller', () => {
       expect(h.view).toHaveBeenCalledWith(
         'quote/upload-preview-map/index',
         expect.objectContaining({
-          uploadStatus: 'failure',
-          failureReason: 'file_size_too_large',
           boundaryError: 'The selected file must be smaller than 2MB.'
-        })
-      )
-    })
-
-    it('should pass a success uploadStatus and null failureReason when there is no error', () => {
-      const h = createMockH()
-      const request = createMockRequest(mockEdpGeojson)
-      getQuoteDataFromCache.mockReturnValue({})
-
-      handler(request, h)
-
-      expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
-        expect.objectContaining({
-          uploadStatus: 'success',
-          failureReason: null
         })
       )
     })

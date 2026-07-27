@@ -26,6 +26,9 @@ export function buildPanelHtml() {
   `
 }
 
+/**
+ * @param {{ hectares: number, acres: number }} area
+ */
 function formatArea(area) {
   if (area?.hectares == null || area?.acres == null) {
     return NOT_AVAILABLE_TEXT
@@ -33,6 +36,9 @@ function formatArea(area) {
   return `${area.hectares}ha (${area.acres} acres)`
 }
 
+/**
+ * @param {{ kilometres: number, miles: number }} perimeter
+ */
 function formatPerimeter(perimeter) {
   if (perimeter?.kilometres == null || perimeter?.miles == null) {
     return NOT_AVAILABLE_TEXT
@@ -40,6 +46,9 @@ function formatPerimeter(perimeter) {
   return `${perimeter.kilometres}km (${perimeter.miles} miles)`
 }
 
+/**
+ * @param {string|{ name?: string, label?: string, code?: string, id?: string }} edp
+ */
 function formatEdp(edp) {
   if (typeof edp === 'string') {
     return edp
