@@ -292,9 +292,7 @@ describe('wireBoundaryInfoPanel', () => {
     interactiveMap._emit('draw:delete')
 
     expect(interactiveMap.hidePanel).toHaveBeenCalledWith('boundaryInfo')
-    expect(panelText('[data-boundary-info-summary]')).toBe(
-      'Draw a boundary to check it.'
-    )
+    expect(panelHidden('[data-boundary-info-summary]')).toBe(true)
     expect(panelHidden('[data-boundary-action="save"]')).toBe(true)
   })
 

@@ -164,6 +164,7 @@ describe('upload preview map init', () => {
     )
   })
 
+  // styledata is a MapLibre GL JS map event: it fires whenever any part of the map's style changes or finishes loading (e.g. the style JSON loads, a source loads, a sprite/glyphs load). It's not a single-shot "style is fully ready" signal — it can fire multiple times as different pieces of the style come in.
   it('re-checks after every styledata event until the style is actually loaded', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance({ styleLoaded: false })

@@ -19,23 +19,26 @@ export function createDrawToolsPlugins() {
   return { interactPlugin, drawPlugin }
 }
 
+function buildDrawStartPanelHtml() {
+  return `
+    <div class="app-draw-start-panel">
+      <button class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" type="button">Draw</button>
+    </div>
+  `
+}
+
 /**
  * @param {Function} onClick
  * @param {{ hidden: boolean }} params
  */
 function buildDrawStartPanel(onClick, { hidden }) {
-  const panel = document.createElement('div')
-  panel.className = 'app-draw-start-panel'
+  const wrapper = document.createElement('div')
+  wrapper.innerHTML = buildDrawStartPanelHtml()
+
+  const panel = wrapper.firstElementChild
   panel.hidden = hidden
+  panel.querySelector('button').addEventListener('click', onClick)
 
-  const button = document.createElement('button')
-  button.type = 'button'
-  button.className =
-    'govuk-button govuk-button--primary govuk-!-margin-bottom-0'
-  button.textContent = 'Draw'
-  button.addEventListener('click', onClick)
-
-  panel.appendChild(button)
   return panel
 }
 

@@ -5,67 +5,9 @@ import {
   renderPanel,
   setSaveButtonDisabled
 } from './boundary-info-panel.js'
-import { logger } from '../../../logger/index.js'
+import { postJson } from './post-json.js'
 
 const PANEL_ID = 'boundaryInfo'
-
-/**
- * @param {string} url
- * @param {object} body
- * @param {{ csrfToken: string, parseJson?: boolean }} params
- * @returns {Promise<{ response: Response, payload: object|null }>}
- */
-async function postJson(url, body, { csrfToken, parseJson = true }) {
-  const headers = { 'Content-Type': 'application/json' }
-  if (csrfToken) {
-    headers['x-csrf-token'] = csrfToken
-  }
-
-  let response
-  try {
-    response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    })
-  } catch (error) {
-    logger.error(error, `Failed to POST to ${url}`)
-    throw error
-  }
-
-  if (!response.ok) {
-    logger.error(
-      new Error(`Received status ${response.status}`),
-      `POST to ${url} returned a non-OK response`
-    )
-  }
-
-  if (!parseJson) {
-    return { response, payload: null }
-  }
-
-  let payload = null
-  try {
-    payload = await response.json()
-  } catch (error) {
-    logger.error(error, 'Failed to parse JSON response')
-  }
-
-  return { response, payload }
-}
-
-/**
- * @param {{ checkUrl: string, csrfToken: string, feature: object }} params
- */
-async function checkBoundary({ checkUrl, csrfToken, feature }) {
-  const { response, payload } = await postJson(
-    checkUrl,
-    { geometry: feature?.geometry },
-    { csrfToken }
-  )
-
-  return { ok: response.ok, payload }
-}
 
 /**
  * @param {{ saveAndContinueUrl: string, csrfToken: string, state: object }} params
@@ -112,13 +54,13 @@ async function runBoundaryCheck(
   renderPanel({ summary: 'Checking boundary...' })
 
   try {
-    const { ok, payload } = await checkBoundary({
+    const { response, payload } = await postJson(
       checkUrl,
-      csrfToken,
-      feature
-    })
+      { geometry: feature?.geometry },
+      { csrfToken }
+    )
 
-    if (!ok) {
+    if (!response.ok) {
       renderPanel({
         error: payload?.error || 'An error occurred checking the boundary'
       })
@@ -203,7 +145,7 @@ export function wireBoundaryInfoPanel(
 
   function onDrawDelete() {
     state.latestPayload = null
-    renderPanel({ summary: 'Draw a boundary to check it.' })
+    renderPanel({ summary: '' })
     interactiveMap.hidePanel(PANEL_ID)
   }
 
