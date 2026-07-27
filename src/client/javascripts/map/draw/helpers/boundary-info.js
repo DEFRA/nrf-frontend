@@ -134,6 +134,10 @@ async function runBoundaryCheck(
   }
 }
 
+function onDrawStarted() {
+  setSaveButtonDisabled(true)
+}
+
 /**
  * @param {object} interactiveMap
  * @param {{ checkUrl: string, csrfToken: string, saveAndContinueUrl: string }} params
@@ -189,10 +193,6 @@ export function wireBoundaryInfoPanel(
 
   function onDrawEdited(feature) {
     runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-  }
-
-  function onDrawStarted() {
-    setSaveButtonDisabled(true)
   }
 
   function onDrawCancelled() {
