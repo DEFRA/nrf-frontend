@@ -36,9 +36,9 @@ describe('Check your answers page', () => {
       'Check your answers'
     )
     expect(
-      getByRole(document, 'button', { name: 'Submit' })
+      getByRole(document, 'button', { name: 'Confirm and submit' })
     ).toBeInTheDocument()
-    expect(getByRole(document, 'button', { name: 'Delete' })).toHaveAttribute(
+    expect(getByRole(document, 'link', { name: 'Delete' })).toHaveAttribute(
       'href',
       '/quote/delete-quote'
     )
@@ -90,7 +90,7 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('Planning application type')
     expect(summaryList).toHaveTextContent('Full planning permission')
     expect(summaryList).toHaveTextContent('Housing')
-    expect(summaryList).toHaveTextContent('Upload a file')
+    expect(summaryList).toHaveTextContent('Red line boundary')
     expect(summaryList).toHaveTextContent('Uploaded')
     expect(summaryList).toHaveTextContent('Number of units')
     expect(summaryList).toHaveTextContent('42')
@@ -149,7 +149,7 @@ describe('Check your answers page', () => {
       'Planning application type',
       'Housing',
       'Number of units',
-      'Upload a file'
+      'Red line boundary'
     ])
   })
 
@@ -185,8 +185,8 @@ describe('Check your answers page', () => {
       cookie: updatedCookie
     })
     const summaryList = document.querySelector('.govuk-summary-list')
-    expect(summaryList).toHaveTextContent('Draw on a map')
-    expect(summaryList).toHaveTextContent('Yes')
+    expect(summaryList).toHaveTextContent('Red line boundary')
+    expect(summaryList).toHaveTextContent('Added')
     expect(
       getByRole(document, 'link', {
         name: 'Changedrawn red line boundary'
