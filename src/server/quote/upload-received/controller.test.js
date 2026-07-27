@@ -149,7 +149,8 @@ describe('upload-received controller', () => {
 describe('checkBoundaryHandler', () => {
   const createMockH = () => ({
     view: vi.fn().mockReturnThis(),
-    redirect: vi.fn().mockReturnThis()
+    redirect: vi.fn().mockReturnThis(),
+    code: vi.fn().mockReturnThis()
   })
 
   const createMockRequest = () => ({
@@ -206,7 +207,7 @@ describe('checkBoundaryHandler', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
   })
 
-  it('should store failureReason without geojson and redirect to map when boundary check fails without geojson', async () => {
+  it('should redirect to the upload page for a service failure without geojson', async () => {
     vi.mocked(checkBoundary).mockResolvedValue({
       failureReason: 'boundary_check_failed'
     })
@@ -220,11 +221,12 @@ describe('checkBoundaryHandler', () => {
       'boundaryGeojson',
       expect.anything()
     )
-    expect(request.yar.set).toHaveBeenCalledWith(
+    expect(request.yar.set).not.toHaveBeenCalledWith(
       'boundaryFailureReason',
-      'boundary_check_failed'
+      expect.anything()
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
   })
 })
