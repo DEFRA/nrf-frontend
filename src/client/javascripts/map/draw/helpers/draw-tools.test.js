@@ -201,6 +201,27 @@ describe('wireDrawTools', () => {
     expect(drawPlugin.newPolygon).toHaveBeenCalledWith(expect.any(String))
   })
 
+  it('refocuses the map viewport after starting a polygon from the Draw button', async () => {
+    const mapElement = createMapElement()
+    const viewport = document.createElement('div')
+    viewport.setAttribute('role', 'application')
+    viewport.tabIndex = 0
+    mapElement.appendChild(viewport)
+    const interactiveMap = createInteractiveMap()
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin: createInteractPlugin(),
+      drawPlugin: createDrawPlugin(),
+      mapElementId: MAP_ELEMENT_ID
+    })
+    interactiveMap._emit('map:ready')
+
+    document.querySelector('.app-draw-start-panel button').click()
+    await new Promise((resolve) => window.requestAnimationFrame(resolve))
+
+    expect(document.activeElement).toBe(viewport)
+  })
+
   it('starts drawing a polygon from the drawPolygon menu item', () => {
     createMapElement()
     const interactiveMap = createInteractiveMap()

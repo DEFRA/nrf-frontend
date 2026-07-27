@@ -197,6 +197,18 @@ export function wireDrawTools(
   function startDrawPolygon() {
     interactiveMap.toggleButtonState('drawTools', 'hidden', true)
     drawPlugin.newPolygon(crypto.randomUUID())
+
+    // The library's own buttons refocus the map viewport after a click (see
+    // mapButtons.js), which the draw plugin's keydown handler requires for
+    // keyboard-placed vertices to register. Our custom "Draw" start-panel
+    // button (built outside the library's button system) needs to do the
+    // same refocus itself, or keyboard drawing silently does nothing.
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById(mapElementId)
+        ?.querySelector('[role="application"]')
+        ?.focus()
+    })
   }
 
   function addDrawToolsButton() {
