@@ -14,9 +14,15 @@ const STATUS_PENDING = 'pending'
 const STATUS_READY = 'ready'
 
 // Every UPLOAD-group failure (size/zip/filename/CRS/uploader/infrastructure)
-// sends the user back to the upload page to retry — there is no geometry to
-// preview. GEOMETRY and SERVICE failures keep the user on the preview page.
-const UPLOAD_REJECTION_CODES = new Set(Object.values(BOUNDARY_ERRORS.UPLOAD))
+// and every SERVICE-group failure (impact-assessor unreachable/bad response,
+// generic check failure) sends the user back to the upload page to retry —
+// there is no geometry to preview in either case. Only GEOMETRY failures
+// keep the user on the preview page, since the invalid geometry itself is
+// useful to show alongside the error.
+const UPLOAD_REJECTION_CODES = new Set([
+  ...Object.values(BOUNDARY_ERRORS.UPLOAD),
+  ...Object.values(BOUNDARY_ERRORS.SERVICE)
+])
 
 /**
  * @param {object} params
