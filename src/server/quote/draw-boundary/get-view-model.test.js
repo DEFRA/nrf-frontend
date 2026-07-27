@@ -15,6 +15,7 @@ describe('draw-boundary getViewModel', () => {
         mapStyleUrl: '/public/data/vts/test-style.json',
         impactAssessorLayers: expect.any(String),
         saveAndContinueUrl: '/quote/draw-boundary/save',
+        backLinkPath: '/quote/boundary-type',
         existingBoundaryGeojson: JSON.stringify(null)
       })
     )

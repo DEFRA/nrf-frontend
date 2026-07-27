@@ -31,10 +31,10 @@ export default {
       import: ['./javascripts/application.js', './stylesheets/application.scss']
     },
     'upload-preview-map': {
-      import: './javascripts/map/upload-preview-map.js'
+      import: './javascripts/map/upload/index.js'
     },
     'draw-boundary-map': {
-      import: './javascripts/map/index.js'
+      import: './javascripts/map/draw/index.js'
     }
   },
   experiments: {
@@ -179,30 +179,8 @@ export default {
           to: 'assets'
         },
         {
-          from: path.join(interactiveMapPath, 'dist/umd'),
-          to: 'interactive-map/core'
-        },
-        {
-          from: path.join(interactiveMapPath, 'providers/maplibre/dist/umd'),
-          to: 'interactive-map/maplibre'
-        },
-        {
           from: path.join(interactiveMapPath, 'dist/css/index.css'),
           to: 'interactive-map/interactive-map.css'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/map-styles/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/map-styles/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/map-styles/dist/umd/im-map-styles-plugin.js'
-          ),
-          to: 'interactive-map/plugins/map-styles/im-map-styles-plugin.js'
         },
         {
           from: path.join(
@@ -214,44 +192,9 @@ export default {
         {
           from: path.join(
             interactiveMapPath,
-            'plugins/interact/dist/umd/index.js'
+            'plugins/beta/scale-bar/dist/css/index.css'
           ),
-          to: 'interactive-map/plugins/interact/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/interact/dist/umd/im-interact-plugin.js'
-          ),
-          to: 'interactive-map/plugins/interact/im-interact-plugin.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/draw-ml/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/draw-ml/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/draw-ml/dist/umd/im-draw-ml-plugin.js'
-          ),
-          to: 'interactive-map/plugins/draw-ml/im-draw-ml-plugin.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/search/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/search/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/search/dist/umd/im-search-plugin.js'
-          ),
-          to: 'interactive-map/plugins/search/im-search-plugin.js'
+          to: 'interactive-map/plugins/scale-bar/index.css'
         },
         {
           from: path.join(
@@ -259,27 +202,6 @@ export default {
             'plugins/search/dist/css/index.css'
           ),
           to: 'interactive-map/plugins/search/index.css'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/datasets/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/datasets/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/datasets/dist/umd/im-datasets-plugin.js'
-          ),
-          to: 'interactive-map/plugins/datasets/im-datasets-plugin.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/datasets/dist/umd/im-datasets-ml-adapter.js'
-          ),
-          to: 'interactive-map/plugins/datasets/im-datasets-ml-adapter.js'
         },
         {
           from: path.join(

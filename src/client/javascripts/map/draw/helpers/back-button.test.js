@@ -1,0 +1,61 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { wireBackButton } from './back-button.js'
+
+function createInteractiveMap() {
+  const handlers = {}
+  return {
+    on: vi.fn((event, callback) => {
+      handlers[event] = callback
+    }),
+    addButton: vi.fn(),
+    _emit: (event, payload) => handlers[event]?.(payload)
+  }
+}
+
+describe('wireBackButton', () => {
+  beforeEach(() => {
+    vi.stubGlobal('location', { assign: vi.fn() })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('does nothing before map:ready has fired', () => {
+    const interactiveMap = createInteractiveMap()
+    wireBackButton(interactiveMap, { backLinkPath: '/quote/boundary-type' })
+
+    expect(interactiveMap.addButton).not.toHaveBeenCalled()
+  })
+
+  it('adds a back button to the top-left slot, before the search control', () => {
+    const interactiveMap = createInteractiveMap()
+    wireBackButton(interactiveMap, { backLinkPath: '/quote/boundary-type' })
+
+    interactiveMap._emit('map:ready')
+
+    expect(interactiveMap.addButton).toHaveBeenCalledWith(
+      'back',
+      expect.objectContaining({
+        label: 'Back',
+        iconSvgContent: expect.stringContaining('<path'),
+        mobile: { slot: 'top-left', order: 1 },
+        tablet: { slot: 'top-left', order: 1 },
+        desktop: { slot: 'top-left', order: 1 }
+      })
+    )
+  })
+
+  it('navigates to the back link path when clicked', () => {
+    const interactiveMap = createInteractiveMap()
+    wireBackButton(interactiveMap, { backLinkPath: '/quote/boundary-type' })
+
+    interactiveMap._emit('map:ready')
+    const { onClick } = interactiveMap.addButton.mock.calls[0][1]
+    onClick()
+
+    expect(window.location.assign).toHaveBeenCalledWith('/quote/boundary-type')
+  })
+})

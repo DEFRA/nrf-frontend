@@ -1,0 +1,345 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojson.js'
+import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
+
+const MAP_ELEMENT_ID = 'draw-boundary-map'
+const CHECK_URL = `${window.location.origin}/quote/draw-boundary/check`
+
+const mswServer = setupMswServer()
+
+const mocks = vi.hoisted(() => ({
+  interactiveMapConstruct: vi.fn(),
+  maplibreProvider: vi.fn(),
+  mapStylesPlugin: vi.fn(),
+  scaleBarPlugin: vi.fn(),
+  searchPlugin: vi.fn(),
+  interactPlugin: vi.fn(),
+  drawMLPlugin: vi.fn(),
+  datasetsPlugin: vi.fn()
+}))
+
+vi.mock('@defra/interactive-map', () => ({
+  InteractiveMap: new Proxy(function MockInteractiveMap() {}, {
+    construct(_target, args) {
+      return mocks.interactiveMapConstruct(...args)
+    }
+  })
+}))
+vi.mock('@defra/interactive-map/providers/maplibre', () => ({
+  default: mocks.maplibreProvider
+}))
+vi.mock('@defra/interactive-map/plugins/map-styles', () => ({
+  default: mocks.mapStylesPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/scale-bar', () => ({
+  default: mocks.scaleBarPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/search', () => ({
+  default: mocks.searchPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/interact', () => ({
+  default: mocks.interactPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/draw-ml', () => ({
+  default: mocks.drawMLPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/datasets', () => ({
+  default: mocks.datasetsPlugin
+}))
+
+function createMapElement({
+  csrfToken = 'csrf-token',
+  backLinkPath = '/quote/boundary-type',
+  existingBoundaryGeojson,
+  existingBoundaryMetadata
+} = {}) {
+  const el = document.createElement('div')
+  el.id = MAP_ELEMENT_ID
+  el.dataset.csrfToken = csrfToken
+  el.dataset.backLinkPath = backLinkPath
+  if (existingBoundaryGeojson !== undefined) {
+    el.dataset.existingBoundaryGeojson = JSON.stringify(existingBoundaryGeojson)
+  }
+  if (existingBoundaryMetadata !== undefined) {
+    el.dataset.existingBoundaryMetadata = JSON.stringify(
+      existingBoundaryMetadata
+    )
+  }
+  document.body.appendChild(el)
+  return el
+}
+
+function createMockMapInstance() {
+  return {
+    getZoom: vi.fn().mockReturnValue(5),
+    getLayer: vi.fn().mockReturnValue(true),
+    setPaintProperty: vi.fn(),
+    setLayoutProperty: vi.fn(),
+    on: vi.fn()
+  }
+}
+
+function createMockInteractiveMap() {
+  return {
+    on: vi.fn(),
+    addPanel: vi.fn(),
+    addButton: vi.fn(),
+    showPanel: vi.fn(),
+    hidePanel: vi.fn(),
+    toggleButtonState: vi.fn(),
+    fitToBounds: vi.fn()
+  }
+}
+
+function configureMocks() {
+  const mockMap = createMockInteractiveMap()
+
+  mocks.interactiveMapConstruct.mockReturnValue(mockMap)
+  mocks.maplibreProvider.mockReturnValue({ provider: 'maplibre' })
+  mocks.mapStylesPlugin.mockReturnValue({ id: 'mapStyles' })
+  mocks.scaleBarPlugin.mockReturnValue({ id: 'scaleBar' })
+  mocks.searchPlugin.mockReturnValue({ id: 'search' })
+  mocks.interactPlugin.mockReturnValue({
+    id: 'interact',
+    enable: vi.fn(),
+    disable: vi.fn(),
+    clear: vi.fn()
+  })
+  mocks.drawMLPlugin.mockReturnValue({
+    newPolygon: vi.fn(),
+    editFeature: vi.fn(),
+    deleteFeature: vi.fn(),
+    addFeature: vi.fn()
+  })
+  mocks.datasetsPlugin.mockReturnValue({ id: 'datasets' })
+
+  return {
+    _mock: mocks.interactiveMapConstruct,
+    _mockMap: mockMap,
+    drawMLPlugin: mocks.drawMLPlugin,
+    _emit(eventName, ...args) {
+      mockMap.on.mock.calls
+        .filter((c) => c[0] === eventName)
+        .forEach((c) => c[1](...args))
+    }
+  }
+}
+
+let initFn = null
+const originalAddEventListener = document.addEventListener.bind(document)
+
+describe('draw boundary map init', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+    mswServer.use(
+      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true }))
+    )
+
+    vi.spyOn(document, 'addEventListener').mockImplementation(
+      (event, fn, ...rest) => {
+        if (event === 'DOMContentLoaded') {
+          initFn = fn
+        } else {
+          originalAddEventListener(event, fn, ...rest)
+        }
+      }
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  async function loadModule() {
+    await import('./index.js')
+    initFn?.()
+  }
+
+  it('does nothing when the map element does not exist', async () => {
+    const mockDefra = configureMocks()
+
+    await loadModule()
+
+    expect(mockDefra._mock).not.toHaveBeenCalled()
+  })
+
+  it('creates the map with the expected options and plugins', async () => {
+    createMapElement({ csrfToken: 'csrf-token-123' })
+    const mockDefra = configureMocks()
+
+    await loadModule()
+
+    expect(mockDefra._mock).toHaveBeenCalledWith(
+      MAP_ELEMENT_ID,
+      expect.objectContaining({
+        behaviour: 'inline',
+        center: [1.1405503, 52.7089441],
+        zoom: 8.5,
+        mapStyle: expect.objectContaining({ id: 'esri-tiles' }),
+        containerHeight: '100%',
+        transformRequest: expect.any(Function),
+        plugins: expect.arrayContaining([
+          { id: 'datasets' },
+          { id: 'mapStyles' },
+          { id: 'scaleBar' },
+          expect.objectContaining({ id: 'interact' }),
+          expect.objectContaining({ newPolygon: expect.any(Function) }),
+          { id: 'search' }
+        ])
+      })
+    )
+  })
+
+  it('suppresses map tile errors', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+    const mapInstance = createMockMapInstance()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: mapInstance })
+
+    const errorCall = mapInstance.on.mock.calls.find((c) => c[0] === 'error')
+    expect(errorCall).toBeTruthy()
+    expect(() =>
+      errorCall[1]({ error: new Error('tile load failed') })
+    ).not.toThrow()
+  })
+
+  it('adds the boundary information panel when the map is ready', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: createMockMapInstance() })
+
+    expect(mockDefra._mockMap.addPanel).toHaveBeenCalledWith(
+      'boundaryInfo',
+      expect.objectContaining({ label: 'Boundary information' })
+    )
+  })
+
+  it('adds the draw tools button when the map is ready', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: createMockMapInstance() })
+
+    expect(mockDefra._mockMap.addButton).toHaveBeenCalledWith(
+      'drawTools',
+      expect.objectContaining({ label: 'Draw tools' })
+    )
+  })
+
+  it('adds a back button linking to the boundary type page when the map is ready', async () => {
+    createMapElement({ backLinkPath: '/quote/boundary-type' })
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: createMockMapInstance() })
+
+    expect(mockDefra._mockMap.addButton).toHaveBeenCalledWith(
+      'back',
+      expect.objectContaining({
+        label: 'Back',
+        mobile: { slot: 'top-left', order: 1 },
+        tablet: { slot: 'top-left', order: 1 },
+        desktop: { slot: 'top-left', order: 1 },
+        onClick: expect.any(Function)
+      })
+    )
+
+    const { onClick } = mockDefra._mockMap.addButton.mock.calls.find(
+      (call) => call[0] === 'back'
+    )[1]
+    vi.stubGlobal('location', { assign: vi.fn() })
+    onClick()
+    expect(window.location.assign).toHaveBeenCalledWith('/quote/boundary-type')
+  })
+
+  it('hydrates the initial draw feature once the draw plugin is ready, not on map:ready', async () => {
+    createMapElement({ existingBoundaryGeojson: validGeojson })
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: createMockMapInstance() })
+    const drawPlugin = mockDefra.drawMLPlugin.mock.results[0].value
+    expect(drawPlugin.addFeature).not.toHaveBeenCalled()
+
+    mockDefra._emit('draw:ready')
+    expect(drawPlugin.addFeature).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'Feature',
+        geometry: validGeojson.features[0].geometry
+      })
+    )
+  })
+
+  it('zooms the map to fit the hydrated feature', async () => {
+    createMapElement({ existingBoundaryGeojson: validGeojson })
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'Feature' })
+    )
+  })
+
+  it('checks the hydrated boundary so the boundary information panel renders on load', async () => {
+    createMapElement({ existingBoundaryGeojson: validGeojson })
+    const mockDefra = configureMocks()
+    let capturedMethod
+    mswServer.use(
+      http.post(CHECK_URL, ({ request }) => {
+        capturedMethod = request.method
+        return HttpResponse.json({ isValid: true })
+      })
+    )
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    await vi.waitFor(() => expect(capturedMethod).toBe('POST'))
+  })
+
+  it('does not zoom the map when there is no feature to hydrate', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+
+    await loadModule()
+    mockDefra._emit('draw:ready')
+
+    expect(mockDefra._mockMap.fitToBounds).not.toHaveBeenCalled()
+  })
+
+  it('wires fill opacity and layer visibility handling to the underlying map instance', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+    const mapInstance = createMockMapInstance()
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: mapInstance })
+
+    expect(mapInstance.on).toHaveBeenCalledWith('zoomend', expect.any(Function))
+    expect(mapInstance.on).toHaveBeenCalledWith('idle', expect.any(Function))
+  })
+
+  it('resolves relative tile URLs to absolute URLs, leaving others untouched', async () => {
+    createMapElement()
+    const mockDefra = configureMocks()
+
+    await loadModule()
+
+    const options = mockDefra._mock.mock.calls[0][1]
+    expect(options.transformRequest('/impact-assessor-map/tiles/x')).toEqual({
+      url: `${window.location.origin}/impact-assessor-map/tiles/x`
+    })
+    expect(options.transformRequest('https://example.com/tile')).toEqual({
+      url: 'https://example.com/tile'
+    })
+  })
+})

@@ -32,6 +32,7 @@ describe('Draw boundary page', () => {
       '/quote/draw-boundary/save'
     )
     expect(mapEl).toHaveAttribute('data-existing-boundary-geojson', 'null')
+    expect(mapEl).toHaveAttribute('data-back-link-path', '/quote/boundary-type')
 
     const mapCss = document.querySelector(
       'link[href*="interactive-map/interactive-map.css"]'
@@ -48,35 +49,10 @@ describe('Draw boundary page', () => {
     )
     expect(datasetsCss).toBeInTheDocument()
 
-    const coreScript = document.querySelector(
-      'script[src*="interactive-map/core/index.js"]'
+    const scaleBarCss = document.querySelector(
+      'link[href*="interactive-map/plugins/scale-bar/index.css"]'
     )
-    expect(coreScript).toBeInTheDocument()
-
-    const maplibreScript = document.querySelector(
-      'script[src*="interactive-map/maplibre/index.js"]'
-    )
-    expect(maplibreScript).toBeInTheDocument()
-
-    const datasetsScript = document.querySelector(
-      'script[src*="interactive-map/plugins/datasets/index.js"]'
-    )
-    expect(datasetsScript).toBeInTheDocument()
-
-    const mapStylesScript = document.querySelector(
-      'script[src*="interactive-map/plugins/map-styles/index.js"]'
-    )
-    expect(mapStylesScript).toBeInTheDocument()
-
-    const interactScript = document.querySelector(
-      'script[src*="interactive-map/plugins/interact/index.js"]'
-    )
-    expect(interactScript).toBeInTheDocument()
-
-    const drawPluginScript = document.querySelector(
-      'script[src*="interactive-map/plugins/draw-ml/index.js"]'
-    )
-    expect(drawPluginScript).toBeInTheDocument()
+    expect(scaleBarCss).toBeInTheDocument()
 
     const mapScript = document.querySelector('script[src*="draw-boundary-map"]')
     expect(mapScript).toBeInTheDocument()
@@ -84,15 +60,6 @@ describe('Draw boundary page', () => {
       'src',
       expect.stringContaining('draw-boundary-map')
     )
-    const uploadButton = getByRole(document, 'button', {
-      name: 'Upload a red line boundary file instead'
-    })
-    expect(uploadButton).toBeInTheDocument()
-    const uploadForm = uploadButton.closest('form')
-    expect(uploadForm).toHaveAttribute('action', '/quote/boundary-type')
-    expect(
-      uploadForm.querySelector('input[name="boundaryEntryType"]')
-    ).toHaveValue('upload')
   })
 
   it('populates map element dataset attributes from cached boundaryGeojson session data', async () => {
