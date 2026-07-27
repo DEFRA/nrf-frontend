@@ -68,7 +68,6 @@ afterEach(() => {
     document.removeEventListener(event, handler, options)
   })
   document.body.innerHTML = ''
-  vi.unstubAllGlobals()
 })
 
 describe('wireBoundaryInfoPanel', () => {

@@ -7,6 +7,7 @@ export default defineConfig({
     globalSetup: ['.vite/global-setup.js'],
     environment: 'node',
     mockReset: true,
+    unstubGlobals: true,
     testTimeout: 10000,
     maxWorkers: '50%',
     minWorkers: 1,

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojson.js'
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
@@ -64,10 +64,6 @@ describe('draw boundary map init', () => {
     )
 
     interceptDOMContentLoaded()
-  })
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
   })
 
   it('does nothing when the map element does not exist', async () => {

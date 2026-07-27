@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { wireBackButton } from './back-button.js'
 
@@ -17,10 +17,6 @@ function createInteractiveMap() {
 describe('wireBackButton', () => {
   beforeEach(() => {
     vi.stubGlobal('location', { assign: vi.fn() })
-  })
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
   })
 
   it('does nothing before map:ready has fired', () => {
