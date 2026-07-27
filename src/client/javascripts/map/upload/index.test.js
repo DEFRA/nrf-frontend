@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojson.js'
 import { createInteractiveMapConstructMock } from '../test-utils/interactive-map-construct-mock.js'
 import { createModuleLoader } from '../test-utils/module-loader.js'
+import { createMapElement } from './test-utils/create-map-element.js'
+import { createMockMapInstance } from './test-utils/mock-map-instance.js'
+import { configureMocks } from './test-utils/configure-mocks.js'
 
 const MAP_ELEMENT_ID = 'boundary-map'
 
@@ -32,63 +35,6 @@ vi.mock('@defra/interactive-map/plugins/datasets', () => ({
   default: mocks.datasetsPlugin
 }))
 
-function createMapElement({
-  existingBoundaryGeojson,
-  existingBoundaryMetadata
-} = {}) {
-  const el = document.createElement('div')
-  el.id = MAP_ELEMENT_ID
-  if (existingBoundaryGeojson !== undefined) {
-    el.dataset.existingBoundaryGeojson =
-      typeof existingBoundaryGeojson === 'string'
-        ? existingBoundaryGeojson
-        : JSON.stringify(existingBoundaryGeojson)
-  }
-  if (existingBoundaryMetadata !== undefined) {
-    el.dataset.existingBoundaryMetadata =
-      typeof existingBoundaryMetadata === 'string'
-        ? existingBoundaryMetadata
-        : JSON.stringify(existingBoundaryMetadata)
-  }
-  document.body.appendChild(el)
-  return el
-}
-
-function createMockMapInstance({ styleLoaded = true } = {}) {
-  return {
-    getSource: vi.fn().mockReturnValue(null),
-    addSource: vi.fn(),
-    addLayer: vi.fn(),
-    isStyleLoaded: vi.fn().mockReturnValue(styleLoaded),
-    getZoom: vi.fn().mockReturnValue(5),
-    getLayer: vi.fn().mockReturnValue(true),
-    setPaintProperty: vi.fn(),
-    once: vi.fn(),
-    on: vi.fn()
-  }
-}
-
-function configureMocks(mapInstance) {
-  const mockMap = { on: vi.fn() }
-
-  mocks.interactiveMapConstruct.mockReturnValue(mockMap)
-  mocks.maplibreProvider.mockReturnValue({ provider: 'maplibre' })
-  mocks.mapStylesPlugin.mockReturnValue({ id: 'mapStyles' })
-  mocks.scaleBarPlugin.mockReturnValue({ id: 'scaleBar' })
-  mocks.datasetsPlugin.mockReturnValue({ id: 'datasets' })
-
-  return {
-    _mock: mocks.interactiveMapConstruct,
-    mapStylesPlugin: mocks.mapStylesPlugin,
-    _mockMap: mockMap,
-    _triggerReady() {
-      mockMap.on.mock.calls
-        .filter((c) => c[0] === 'map:ready')
-        .forEach((c) => c[1]({ map: mapInstance }))
-    }
-  }
-}
-
 const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
   () => import('./index.js')
 )
@@ -101,7 +47,7 @@ describe('upload preview map init', () => {
   })
 
   it('does nothing when the map element does not exist', async () => {
-    const mockDefra = configureMocks(createMockMapInstance())
+    const mockDefra = configureMocks(mocks, createMockMapInstance())
 
     await loadModule()
 
@@ -110,7 +56,7 @@ describe('upload preview map init', () => {
 
   it('creates the map with zoom controls and the datasets and map styles plugins', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
-    const mockDefra = configureMocks(createMockMapInstance())
+    const mockDefra = configureMocks(mocks, createMockMapInstance())
 
     await loadModule()
 
@@ -146,7 +92,7 @@ describe('upload preview map init', () => {
         }
       }
     })
-    const mockDefra = configureMocks(createMockMapInstance())
+    const mockDefra = configureMocks(mocks, createMockMapInstance())
 
     await loadModule()
 
@@ -162,7 +108,7 @@ describe('upload preview map init', () => {
   it('adds the boundary source and layers when the map is ready', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance()
-    const mockDefra = configureMocks(mapInstance)
+    const mockDefra = configureMocks(mocks, mapInstance)
 
     await loadModule()
     mockDefra._triggerReady()
@@ -198,7 +144,7 @@ describe('upload preview map init', () => {
   it('waits for the style to finish loading before adding the boundary source', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance({ styleLoaded: false })
-    const mockDefra = configureMocks(mapInstance)
+    const mockDefra = configureMocks(mocks, mapInstance)
 
     await loadModule()
     mockDefra._triggerReady()
@@ -221,7 +167,7 @@ describe('upload preview map init', () => {
   it('re-checks after every styledata event until the style is actually loaded', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance({ styleLoaded: false })
-    const mockDefra = configureMocks(mapInstance)
+    const mockDefra = configureMocks(mocks, mapInstance)
 
     await loadModule()
     mockDefra._triggerReady()
@@ -246,7 +192,7 @@ describe('upload preview map init', () => {
   it('suppresses map tile errors', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance()
-    const mockDefra = configureMocks(mapInstance)
+    const mockDefra = configureMocks(mocks, mapInstance)
 
     await loadModule()
     mockDefra._triggerReady()
@@ -261,7 +207,7 @@ describe('upload preview map init', () => {
   it('wires fill opacity on zoom with the EDP fill layer ids', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
     const mapInstance = createMockMapInstance()
-    const mockDefra = configureMocks(mapInstance)
+    const mockDefra = configureMocks(mocks, mapInstance)
 
     await loadModule()
     mockDefra._triggerReady()

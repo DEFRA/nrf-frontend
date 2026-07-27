@@ -5,6 +5,9 @@ import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojs
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
 import { createInteractiveMapConstructMock } from '../test-utils/interactive-map-construct-mock.js'
 import { createModuleLoader } from '../test-utils/module-loader.js'
+import { createMapElement } from './test-utils/create-map-element.js'
+import { createMockMapInstance } from './test-utils/mock-map-instance.js'
+import { configureMocks } from './test-utils/configure-mocks.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 const CHECK_URL = `${window.location.origin}/quote/draw-boundary/check`
@@ -49,84 +52,6 @@ vi.mock('@defra/interactive-map/plugins/datasets', () => ({
   default: mocks.datasetsPlugin
 }))
 
-function createMapElement({
-  csrfToken = 'csrf-token',
-  backLinkPath = '/quote/boundary-type',
-  existingBoundaryGeojson,
-  existingBoundaryMetadata
-} = {}) {
-  const el = document.createElement('div')
-  el.id = MAP_ELEMENT_ID
-  el.dataset.csrfToken = csrfToken
-  el.dataset.backLinkPath = backLinkPath
-  if (existingBoundaryGeojson !== undefined) {
-    el.dataset.existingBoundaryGeojson = JSON.stringify(existingBoundaryGeojson)
-  }
-  if (existingBoundaryMetadata !== undefined) {
-    el.dataset.existingBoundaryMetadata = JSON.stringify(
-      existingBoundaryMetadata
-    )
-  }
-  document.body.appendChild(el)
-  return el
-}
-
-function createMockMapInstance() {
-  return {
-    getZoom: vi.fn().mockReturnValue(5),
-    getLayer: vi.fn().mockReturnValue(true),
-    setPaintProperty: vi.fn(),
-    setLayoutProperty: vi.fn(),
-    on: vi.fn()
-  }
-}
-
-function createMockInteractiveMap() {
-  return {
-    on: vi.fn(),
-    addPanel: vi.fn(),
-    addButton: vi.fn(),
-    showPanel: vi.fn(),
-    hidePanel: vi.fn(),
-    toggleButtonState: vi.fn(),
-    fitToBounds: vi.fn()
-  }
-}
-
-function configureMocks() {
-  const mockMap = createMockInteractiveMap()
-
-  mocks.interactiveMapConstruct.mockReturnValue(mockMap)
-  mocks.maplibreProvider.mockReturnValue({ provider: 'maplibre' })
-  mocks.mapStylesPlugin.mockReturnValue({ id: 'mapStyles' })
-  mocks.scaleBarPlugin.mockReturnValue({ id: 'scaleBar' })
-  mocks.searchPlugin.mockReturnValue({ id: 'search' })
-  mocks.interactPlugin.mockReturnValue({
-    id: 'interact',
-    enable: vi.fn(),
-    disable: vi.fn(),
-    clear: vi.fn()
-  })
-  mocks.drawMLPlugin.mockReturnValue({
-    newPolygon: vi.fn(),
-    editFeature: vi.fn(),
-    deleteFeature: vi.fn(),
-    addFeature: vi.fn()
-  })
-  mocks.datasetsPlugin.mockReturnValue({ id: 'datasets' })
-
-  return {
-    _mock: mocks.interactiveMapConstruct,
-    _mockMap: mockMap,
-    drawMLPlugin: mocks.drawMLPlugin,
-    _emit(eventName, ...args) {
-      mockMap.on.mock.calls
-        .filter((c) => c[0] === eventName)
-        .forEach((c) => c[1](...args))
-    }
-  }
-}
-
 const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
   () => import('./index.js')
 )
@@ -146,7 +71,7 @@ describe('draw boundary map init', () => {
   })
 
   it('does nothing when the map element does not exist', async () => {
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
 
@@ -155,7 +80,7 @@ describe('draw boundary map init', () => {
 
   it('creates the map with the expected options and plugins', async () => {
     createMapElement({ csrfToken: 'csrf-token-123' })
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
 
@@ -182,7 +107,7 @@ describe('draw boundary map init', () => {
 
   it('suppresses map tile errors', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
     const mapInstance = createMockMapInstance()
 
     await loadModule()
@@ -197,7 +122,7 @@ describe('draw boundary map init', () => {
 
   it('adds the boundary information panel when the map is ready', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('map:ready', { map: createMockMapInstance() })
@@ -210,7 +135,7 @@ describe('draw boundary map init', () => {
 
   it('adds the draw tools button when the map is ready', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('map:ready', { map: createMockMapInstance() })
@@ -223,7 +148,7 @@ describe('draw boundary map init', () => {
 
   it('adds a back button linking to the boundary type page when the map is ready', async () => {
     createMapElement({ backLinkPath: '/quote/boundary-type' })
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('map:ready', { map: createMockMapInstance() })
@@ -249,7 +174,7 @@ describe('draw boundary map init', () => {
 
   it('hydrates the initial draw feature once the draw plugin is ready, not on map:ready', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('map:ready', { map: createMockMapInstance() })
@@ -267,7 +192,7 @@ describe('draw boundary map init', () => {
 
   it('zooms the map to fit the hydrated feature', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('draw:ready')
@@ -279,7 +204,7 @@ describe('draw boundary map init', () => {
 
   it('checks the hydrated boundary so the boundary information panel renders on load', async () => {
     createMapElement({ existingBoundaryGeojson: validGeojson })
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
     let capturedMethod
     mswServer.use(
       http.post(CHECK_URL, ({ request }) => {
@@ -296,7 +221,7 @@ describe('draw boundary map init', () => {
 
   it('does not zoom the map when there is no feature to hydrate', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
     mockDefra._emit('draw:ready')
@@ -306,7 +231,7 @@ describe('draw boundary map init', () => {
 
   it('wires fill opacity and layer visibility handling to the underlying map instance', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
     const mapInstance = createMockMapInstance()
 
     await loadModule()
@@ -318,7 +243,7 @@ describe('draw boundary map init', () => {
 
   it('resolves relative tile URLs to absolute URLs, leaving others untouched', async () => {
     createMapElement()
-    const mockDefra = configureMocks()
+    const mockDefra = configureMocks(mocks)
 
     await loadModule()
 
