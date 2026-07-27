@@ -39,7 +39,8 @@
     "swagger-jsdoc": {
       "yaml": "2.0.0-1"
     },
-    "joi": "$joi"
+    "joi": "$joi",
+    "brace-expansion": "5.0.8"
   },
   "dependencies": {
     "@defra/cdp-auditing": "^0.6.1",
