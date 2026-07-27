@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojson.js'
+import { createInteractiveMapConstructMock } from '../test-utils/interactive-map-construct-mock.js'
+import { createModuleLoader } from '../test-utils/module-loader.js'
 
 const MAP_ELEMENT_ID = 'boundary-map'
 
@@ -13,11 +15,9 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@defra/interactive-map', () => ({
-  InteractiveMap: new Proxy(function MockInteractiveMap() {}, {
-    construct(_target, args) {
-      return mocks.interactiveMapConstruct(...args)
-    }
-  })
+  InteractiveMap: createInteractiveMapConstructMock(
+    mocks.interactiveMapConstruct
+  )
 }))
 vi.mock('@defra/interactive-map/providers/maplibre', () => ({
   default: mocks.maplibreProvider
@@ -89,28 +89,16 @@ function configureMocks(mapInstance) {
   }
 }
 
-let initFn = null
-const originalAddEventListener = document.addEventListener.bind(document)
+const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
+  () => import('./index.js')
+)
 
 describe('upload preview map init', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
 
-    vi.spyOn(document, 'addEventListener').mockImplementation(
-      (event, fn, ...rest) => {
-        if (event === 'DOMContentLoaded') {
-          initFn = fn
-        } else {
-          originalAddEventListener(event, fn, ...rest)
-        }
-      }
-    )
+    interceptDOMContentLoaded()
   })
-
-  async function loadModule() {
-    await import('./index.js')
-    initFn?.()
-  }
 
   it('does nothing when the map element does not exist', async () => {
     const mockDefra = configureMocks(createMockMapInstance())

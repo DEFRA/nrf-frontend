@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { validGeojson } from '../../../../test-utils/fixtures/boundary-map-geojson.js'
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
+import { createInteractiveMapConstructMock } from '../test-utils/interactive-map-construct-mock.js'
+import { createModuleLoader } from '../test-utils/module-loader.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 const CHECK_URL = `${window.location.origin}/quote/draw-boundary/check`
@@ -21,11 +23,9 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@defra/interactive-map', () => ({
-  InteractiveMap: new Proxy(function MockInteractiveMap() {}, {
-    construct(_target, args) {
-      return mocks.interactiveMapConstruct(...args)
-    }
-  })
+  InteractiveMap: createInteractiveMapConstructMock(
+    mocks.interactiveMapConstruct
+  )
 }))
 vi.mock('@defra/interactive-map/providers/maplibre', () => ({
   default: mocks.maplibreProvider
@@ -127,8 +127,9 @@ function configureMocks() {
   }
 }
 
-let initFn = null
-const originalAddEventListener = document.addEventListener.bind(document)
+const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
+  () => import('./index.js')
+)
 
 describe('draw boundary map init', () => {
   beforeEach(() => {
@@ -137,25 +138,12 @@ describe('draw boundary map init', () => {
       http.post(CHECK_URL, () => HttpResponse.json({ isValid: true }))
     )
 
-    vi.spyOn(document, 'addEventListener').mockImplementation(
-      (event, fn, ...rest) => {
-        if (event === 'DOMContentLoaded') {
-          initFn = fn
-        } else {
-          originalAddEventListener(event, fn, ...rest)
-        }
-      }
-    )
+    interceptDOMContentLoaded()
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
   })
-
-  async function loadModule() {
-    await import('./index.js')
-    initFn?.()
-  }
 
   it('does nothing when the map element does not exist', async () => {
     const mockDefra = configureMocks()

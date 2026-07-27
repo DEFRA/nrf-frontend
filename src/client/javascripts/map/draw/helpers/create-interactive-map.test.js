@@ -1,14 +1,11 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest'
+import { createInteractiveMapConstructMock } from '../../test-utils/interactive-map-construct-mock.js'
 
 const mockConstruct = vi.hoisted(() => vi.fn())
 
 vi.mock('@defra/interactive-map', () => ({
-  InteractiveMap: new Proxy(function MockInteractiveMap() {}, {
-    construct(_target, args) {
-      return mockConstruct(...args)
-    }
-  })
+  InteractiveMap: createInteractiveMapConstructMock(mockConstruct)
 }))
 vi.mock('@defra/interactive-map/providers/maplibre', () => ({
   default: vi.fn()
