@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import webpack from 'webpack'
 import CopyPlugin from 'copy-webpack-plugin'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
@@ -172,6 +173,12 @@ export default {
   plugins: [
     new CleanWebpackPlugin(),
     new WebpackAssetsManifest(),
+    // @defra/interactive-map's datasets plugin lazily loads an ESRI adapter
+    // chunk that we never trigger (we only ever configure the maplibre
+    // provider), but webpack still needs to resolve it to build that chunk.
+    // @arcgis/core is a huge, unused peer dependency we don't want to
+    // install just to satisfy that resolution.
+    new webpack.IgnorePlugin({ resourceRegExp: /^@arcgis\/core/ }),
     new CopyPlugin({
       patterns: [
         {
@@ -206,7 +213,7 @@ export default {
         {
           from: path.join(
             interactiveMapPath,
-            'plugins/beta/datasets/dist/css/index.css'
+            'plugins/datasets/dist/css/index.css'
           ),
           to: 'interactive-map/plugins/datasets/index.css'
         },

@@ -77,7 +77,7 @@ body:has(.app-draw-boundary) {
   bottom: calc(var(--primary-gap) * 2);
   transform: translateX(-50%);
   z-index: 1;
-  background-color: var(--background-color, #fff);
+  background-color: var(--background-color, #ffffff);
   padding: var(--panel-margin, 15px);
   border-radius: var(--panel-border-radius, 0);
   box-shadow: var(--panel-box-shadow);
