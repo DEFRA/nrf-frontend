@@ -27,7 +27,10 @@ describe('Upload rejected before geometry parsing', () => {
     'zip_missing_shapefile',
     'impact_assessor_unreachable',
     'impact_assessor_bad_response',
-    'boundary_check_failed'
+    'boundary_check_failed',
+    'invalid_geometry',
+    'unsupported_geometry_type',
+    'no_polygon_found'
   ])(
     'redirects to the upload page with an error summary for %s',
     async (errorCode) => {

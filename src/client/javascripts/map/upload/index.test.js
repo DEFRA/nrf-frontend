@@ -150,13 +150,13 @@ describe('upload preview map init', () => {
     mockDefra._triggerReady()
 
     expect(mapInstance.addSource).not.toHaveBeenCalled()
-    expect(mapInstance.once).toHaveBeenCalledWith(
-      'styledata',
-      expect.any(Function)
+    const styleDataCall = mapInstance.on.mock.calls.find(
+      (c) => c[0] === 'styledata'
     )
+    expect(styleDataCall).toBeTruthy()
 
     mapInstance.isStyleLoaded.mockReturnValue(true)
-    mapInstance.once.mock.calls[0][1]()
+    styleDataCall[1]()
 
     expect(mapInstance.addSource).toHaveBeenCalledWith(
       'boundary',
@@ -173,21 +173,44 @@ describe('upload preview map init', () => {
     await loadModule()
     mockDefra._triggerReady()
 
-    expect(mapInstance.once).toHaveBeenCalledTimes(1)
+    const styleDataCalls = () =>
+      mapInstance.on.mock.calls.filter((c) => c[0] === 'styledata')
+    expect(styleDataCalls()).toHaveLength(1)
+    const onStyleData = styleDataCalls()[0][1]
 
-    // Style still isn't loaded after the first 'styledata' — should re-subscribe
-    mapInstance.once.mock.calls[0][1]()
+    // Style still isn't loaded after the first 'styledata'
+    onStyleData()
     expect(mapInstance.addSource).not.toHaveBeenCalled()
-    expect(mapInstance.once).toHaveBeenCalledTimes(2)
 
     // Now the style has finished loading
     mapInstance.isStyleLoaded.mockReturnValue(true)
-    mapInstance.once.mock.calls[1][1]()
+    onStyleData()
 
     expect(mapInstance.addSource).toHaveBeenCalledWith(
       'boundary',
       expect.objectContaining({ type: 'geojson' })
     )
+  })
+
+  it('re-adds the boundary source after a base map style switch clears it', async () => {
+    createMapElement({ existingBoundaryGeojson: validGeojson })
+    const mapInstance = createMockMapInstance()
+    const mockDefra = configureMocks(mocks, mapInstance)
+
+    await loadModule()
+    mockDefra._triggerReady()
+    expect(mapInstance.addSource).toHaveBeenCalledTimes(1)
+
+    // Simulate switching the base map style: maplibre's setStyle() clears
+    // the manually-added source, then 'styledata' fires again once the new
+    // style has loaded.
+    mapInstance.getSource.mockReturnValue(null)
+    const onStyleData = mapInstance.on.mock.calls.find(
+      (c) => c[0] === 'styledata'
+    )[1]
+    onStyleData()
+
+    expect(mapInstance.addSource).toHaveBeenCalledTimes(2)
   })
 
   it('suppresses map tile errors', async () => {

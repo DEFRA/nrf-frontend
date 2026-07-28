@@ -69,29 +69,27 @@ const BOUNDARY_COLOR = 'rgba(212,53,28,1)'
 const BOUNDARY_FILL_OPACITY = 0.1
 const BOUNDARY_LINE_WIDTH = 2
 
-// A single once('style.load', ...) listener can miss the point at which the
-// style actually finishes loading — 'styledata' fires multiple times while a
-// style is being built up, so re-check isStyleLoaded() after every occurrence
-// rather than trusting the first one.
-function whenStyleReady(map, callback) {
-  if (map.isStyleLoaded()) {
-    callback()
-    return
-  }
-
-  function onStyleData() {
-    whenStyleReady(map, callback)
-  }
-
-  map.once('styledata', onStyleData)
-}
-
 /**
  * @param {object} map
  * @param {object|null} initialFeature
  */
 export function wireSavedBoundary(map, initialFeature) {
-  whenStyleReady(map, () =>
+  // A single once('style.load', ...) listener can miss the point at which
+  // the style actually finishes loading — 'styledata' fires multiple times
+  // while a style is being built up, so re-check isStyleLoaded() on every
+  // occurrence rather than trusting the first one.
+  //
+  // This listener is kept subscribed (not once()) rather than detached after
+  // the first successful render, because switching the base map style (via
+  // the map styles panel) calls maplibre's setStyle(), which fully replaces
+  // the style and clears any manually-added sources/layers — including this
+  // boundary. Re-running on every styledata event re-adds it after a style
+  // switch too; renderSavedBoundary is a no-op while the source still exists.
+  function renderIfStyleReady() {
+    if (!map.isStyleLoaded()) {
+      return
+    }
+
     renderSavedBoundary(map, {
       sourceId: BOUNDARY_SOURCE_ID,
       geojson: initialFeature,
@@ -99,5 +97,8 @@ export function wireSavedBoundary(map, initialFeature) {
       fillOpacity: BOUNDARY_FILL_OPACITY,
       lineWidth: BOUNDARY_LINE_WIDTH
     })
-  )
+  }
+
+  renderIfStyleReady()
+  map.on('styledata', renderIfStyleReady)
 }

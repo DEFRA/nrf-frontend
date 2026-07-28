@@ -263,7 +263,8 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: boundaryGeojsonWithEdp
+      boundaryGeojson: boundaryGeojsonWithEdp,
+      boundaryFilename: null
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/email')
@@ -277,7 +278,8 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
-      boundaryGeojson: validBoundaryGeojson
+      boundaryGeojson: validBoundaryGeojson,
+      boundaryFilename: null
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe(noEdpPath)
