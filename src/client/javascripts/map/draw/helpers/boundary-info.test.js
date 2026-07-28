@@ -154,6 +154,49 @@ describe('wireBoundaryInfoPanel', () => {
     expect(requestCount).toBe(1)
   })
 
+  it('blocks clicks on the Done button while a check is in flight, and unblocks once it resolves', async () => {
+    let resolveCheck
+    mswServer.use(
+      http.post(
+        CHECK_URL,
+        () =>
+          new Promise((resolve) => {
+            resolveCheck = () =>
+              resolve(
+                HttpResponse.json({ isValid: true, intersectingEdps: [] })
+              )
+          })
+      )
+    )
+
+    const interactiveMap = wireAndReady()
+    interactiveMap._emit('draw:created', { geometry: {} })
+
+    expect(document.body.classList.contains('app-draw-boundary-checking')).toBe(
+      true
+    )
+
+    const doneButton = document.createElement('button')
+    doneButton.className = 'im-c-map-button--draw-done'
+    document.body.appendChild(doneButton)
+    const innerClickSpy = vi.fn()
+    doneButton.addEventListener('click', innerClickSpy)
+
+    doneButton.click()
+    expect(innerClickSpy).not.toHaveBeenCalled()
+
+    await vi.waitFor(() => expect(resolveCheck).toBeDefined())
+    resolveCheck()
+    await vi.waitFor(() =>
+      expect(
+        document.body.classList.contains('app-draw-boundary-checking')
+      ).toBe(false)
+    )
+
+    doneButton.click()
+    expect(innerClickSpy).toHaveBeenCalledTimes(1)
+  })
+
   it('logs and treats the response as empty when the check response body is not valid JSON', async () => {
     mswServer.use(http.post(CHECK_URL, () => new HttpResponse('not json')))
     const loggerErrorSpy = vi

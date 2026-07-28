@@ -69,6 +69,14 @@ body:has(.app-draw-boundary) {
   margin-right: -3px;
 }
 
+// Dims and blocks pointer interaction with the Done button while a boundary
+// check is in flight (see boundary-info.js), so it can't be clicked again
+// before the current /check request resolves.
+.app-draw-boundary-checking .im-c-map-button--draw-done {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 // Matches the position, padding and shadow of the library's own
 // Cancel/Done action panel, using its CSS custom properties directly.
 .app-draw-start-panel {
