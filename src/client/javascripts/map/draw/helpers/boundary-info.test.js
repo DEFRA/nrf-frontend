@@ -19,23 +19,23 @@ const mswServer = setupMswServer()
 // earlier tests' closures against the (recreated) same-id panel DOM.
 const documentListeners = []
 const originalAddEventListener = document.addEventListener.bind(document)
-document.addEventListener = (event, handler, options) => {
-  documentListeners.push([event, handler, options])
-  originalAddEventListener(event, handler, options)
+document.addEventListener = (eventType, handler, options) => {
+  documentListeners.push([eventType, handler, options])
+  originalAddEventListener(eventType, handler, options)
 }
 
 function createInteractiveMap() {
   const handlers = {}
   return {
-    on: vi.fn((event, callback) => {
-      handlers[event] = callback
+    on: vi.fn((eventType, callback) => {
+      handlers[eventType] = callback
     }),
     addPanel: vi.fn((_id, config) => {
       document.body.insertAdjacentHTML('beforeend', config.html)
     }),
     showPanel: vi.fn(),
     hidePanel: vi.fn(),
-    _emit: (event, payload) => handlers[event]?.(payload)
+    _emit: (eventType, payload) => handlers[eventType]?.(payload)
   }
 }
 
@@ -64,8 +64,8 @@ function panelHidden(selector) {
 }
 
 afterEach(() => {
-  documentListeners.splice(0).forEach(([event, handler, options]) => {
-    document.removeEventListener(event, handler, options)
+  documentListeners.splice(0).forEach(([eventType, handler, options]) => {
+    document.removeEventListener(eventType, handler, options)
   })
   document.body.innerHTML = ''
 })

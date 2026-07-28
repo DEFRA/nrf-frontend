@@ -6,11 +6,11 @@ import { wireBackButton } from './back-button.js'
 function createInteractiveMap() {
   const handlers = {}
   return {
-    on: vi.fn((event, callback) => {
-      handlers[event] = callback
+    on: vi.fn((eventType, callback) => {
+      handlers[eventType] = callback
     }),
     addButton: vi.fn(),
-    _emit: (event, payload) => handlers[event]?.(payload)
+    _emit: (eventType, payload) => handlers[eventType]?.(payload)
   }
 }
 

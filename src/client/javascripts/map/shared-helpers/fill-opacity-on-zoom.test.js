@@ -6,10 +6,10 @@ import { wireFillOpacityOnZoom } from './fill-opacity-on-zoom.js'
 function createInteractiveMap() {
   const handlers = {}
   return {
-    on: vi.fn((event, callback) => {
-      handlers[event] = callback
+    on: vi.fn((eventType, callback) => {
+      handlers[eventType] = callback
     }),
-    _emit: (event, payload) => handlers[event]?.(payload)
+    _emit: (eventType, payload) => handlers[eventType]?.(payload)
   }
 }
 
@@ -19,10 +19,10 @@ function createMapInstance({ zoom = 8, existingLayers = new Set() } = {}) {
     getZoom: vi.fn(() => zoom),
     getLayer: vi.fn((layerId) => existingLayers.has(layerId)),
     setPaintProperty: vi.fn(),
-    on: vi.fn((event, callback) => {
-      handlers[event] = callback
+    on: vi.fn((eventType, callback) => {
+      handlers[eventType] = callback
     }),
-    _emit: (event) => handlers[event]?.(),
+    _emit: (eventType) => handlers[eventType]?.(),
     _setZoom: (value) => {
       zoom = value
     }

@@ -6,10 +6,10 @@ import { wireHideLayersOnDraw } from './hide-layers-on-draw.js'
 function createInteractiveMap() {
   const handlers = {}
   return {
-    on: vi.fn((event, callback) => {
-      handlers[event] = callback
+    on: vi.fn((eventType, callback) => {
+      handlers[eventType] = callback
     }),
-    _emit: (event, payload) => handlers[event]?.(payload)
+    _emit: (eventType, payload) => handlers[eventType]?.(payload)
   }
 }
 
@@ -52,7 +52,7 @@ describe('wireHideLayersOnDraw', () => {
 
   it.each(['draw:created', 'draw:edited', 'draw:cancelled'])(
     'shows layers again on %s',
-    (event) => {
+    (eventType) => {
       const interactiveMap = createInteractiveMap()
       const mapInstance = createMapInstance({
         existingLayers: new Set(['edp'])
@@ -60,7 +60,7 @@ describe('wireHideLayersOnDraw', () => {
 
       wireHideLayersOnDraw(interactiveMap, { layerIds: ['edp'] })
       interactiveMap._emit('map:ready', { map: mapInstance })
-      interactiveMap._emit(event)
+      interactiveMap._emit(eventType)
 
       expect(mapInstance.setLayoutProperty).toHaveBeenCalledWith(
         'edp',
