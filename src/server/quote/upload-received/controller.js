@@ -19,8 +19,9 @@ const STATUS_READY = 'ready'
 // there is no geometry to preview in either case. Most GEOMETRY failures
 // keep the user on the preview page, since the invalid geometry itself is
 // useful to show alongside the error — except INVALID_GEOMETRY,
-// UNSUPPORTED_GEOMETRY_TYPE and NO_POLYGON_FOUND, where impact-assessor has
-// no usable geometry to hand back, so there's nothing to preview either.
+// UNSUPPORTED_GEOMETRY_TYPE and NO_POLYGON_FOUND, which are rejected by
+// impact-assessor before any geometry is parsed, so there's no usable
+// geometry to hand back and nothing to preview either.
 const UPLOAD_REJECTION_CODES = new Set([
   ...Object.values(BOUNDARY_ERRORS.UPLOAD),
   ...Object.values(BOUNDARY_ERRORS.SERVICE),
