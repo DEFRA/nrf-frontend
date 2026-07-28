@@ -99,6 +99,78 @@ function onDrawStarted() {
 
 /**
  * @param {object} interactiveMap
+ */
+function addBoundaryInfoPanel(interactiveMap) {
+  interactiveMap.addPanel(PANEL_ID, {
+    label: 'Boundary information',
+    focus: false,
+    html: buildPanelHtml(),
+    mobile: { slot: 'left-top', modal: false, open: false, dismissible: false },
+    tablet: {
+      slot: 'right-bottom',
+      modal: false,
+      width: '340px',
+      open: false,
+      dismissible: false
+    },
+    desktop: {
+      slot: 'right-bottom',
+      modal: false,
+      width: '340px',
+      open: false,
+      dismissible: false
+    }
+  })
+}
+
+/**
+ * @param {object} state
+ * @param {MouseEvent} clickEvent
+ */
+function onDoneClickCapture(state, clickEvent) {
+  if (!state.checkInFlight) {
+    return
+  }
+  if (clickEvent.target.closest(DONE_BUTTON_SELECTOR)) {
+    clickEvent.preventDefault()
+    clickEvent.stopImmediatePropagation()
+  }
+}
+
+/**
+ * @param {object} state
+ * @param {{ saveAndContinueUrl: string, csrfToken: string }} params
+ * @param {MouseEvent} clickEvent
+ */
+function onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent) {
+  const button = clickEvent.target.closest(
+    `#${PANEL_ROOT_ID} [data-boundary-action="${SAVE_ACTION}"]`
+  )
+  if (!button || button.disabled) {
+    return
+  }
+
+  submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
+}
+
+function onDrawCancelled(state) {
+  if (state.latestPayload) {
+    setSaveButtonDisabled(false)
+  }
+}
+
+/**
+ * @param {object} interactiveMap
+ * @param {object} state
+ */
+function onDrawDelete(interactiveMap, state) {
+  state.latestPayload = null
+  renderPanel({ summary: '' })
+  interactiveMap.hidePanel(PANEL_ID)
+}
+
+/**
+ * @param {object} interactiveMap
  * @param {{ checkUrl: string, csrfToken: string, saveAndContinueUrl: string }} params
  */
 export function wireBoundaryInfoPanel(
@@ -106,88 +178,25 @@ export function wireBoundaryInfoPanel(
   { checkUrl, csrfToken, saveAndContinueUrl }
 ) {
   const state = { latestPayload: null, checkInFlight: false }
-
-  function addBoundaryInfoPanel() {
-    interactiveMap.addPanel(PANEL_ID, {
-      label: 'Boundary information',
-      focus: false,
-      html: buildPanelHtml(),
-      mobile: {
-        slot: 'left-top',
-        modal: false,
-        open: false,
-        dismissible: false
-      },
-      tablet: {
-        slot: 'right-bottom',
-        modal: false,
-        width: '340px',
-        open: false,
-        dismissible: false
-      },
-      desktop: {
-        slot: 'right-bottom',
-        modal: false,
-        width: '340px',
-        open: false,
-        dismissible: false
-      }
-    })
-  }
-
-  function onDoneClickCapture(clickEvent) {
-    if (!state.checkInFlight) {
-      return
-    }
-    if (clickEvent.target.closest(DONE_BUTTON_SELECTOR)) {
-      clickEvent.preventDefault()
-      clickEvent.stopImmediatePropagation()
-    }
-  }
-
-  function onSaveClick(clickEvent) {
-    const button = clickEvent.target.closest(
-      `#${PANEL_ROOT_ID} [data-boundary-action="${SAVE_ACTION}"]`
-    )
-    if (!button || button.disabled) {
-      return
-    }
-
-    submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
-  }
-
-  function onDrawCreated(feature) {
+  const runCheck = (feature) =>
     runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-  }
 
-  function onDrawEdited(feature) {
-    runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-  }
-
-  function onDrawCancelled() {
-    if (state.latestPayload) {
-      setSaveButtonDisabled(false)
-    }
-  }
-
-  function onDrawDelete() {
-    state.latestPayload = null
-    renderPanel({ summary: '' })
-    interactiveMap.hidePanel(PANEL_ID)
-  }
-
-  interactiveMap.on('map:ready', addBoundaryInfoPanel)
-  document.addEventListener('click', onSaveClick)
-  document.addEventListener('click', onDoneClickCapture, true)
-  interactiveMap.on('draw:created', onDrawCreated)
-  interactiveMap.on('draw:edited', onDrawEdited)
+  interactiveMap.on('map:ready', () => addBoundaryInfoPanel(interactiveMap))
+  document.addEventListener('click', (clickEvent) =>
+    onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent)
+  )
+  document.addEventListener(
+    'click',
+    (clickEvent) => onDoneClickCapture(state, clickEvent),
+    true
+  )
+  interactiveMap.on('draw:created', runCheck)
+  interactiveMap.on('draw:edited', runCheck)
   interactiveMap.on('draw:started', onDrawStarted)
-  interactiveMap.on('draw:cancelled', onDrawCancelled)
-  interactiveMap.on('draw:delete', onDrawDelete)
+  interactiveMap.on('draw:cancelled', () => onDrawCancelled(state))
+  interactiveMap.on('draw:delete', () => onDrawDelete(interactiveMap, state))
 
   return {
-    checkExistingBoundary(feature) {
-      runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-    }
+    checkExistingBoundary: runCheck
   }
 }
