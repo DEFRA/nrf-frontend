@@ -8,6 +8,14 @@ import {
 import { postJson } from './post-json.js'
 
 const PANEL_ID = 'boundaryInfo'
+// The library's own Done button ('drawDone' -> 'im-c-map-button--draw-done')
+// re-derives its disabled state from the plugin's vertex count each render,
+// so toggling it via interactiveMap.toggleButtonState gets immediately
+// reverted. Blocking the click in the capture phase (before it reaches the
+// library's own bubble-phase handler) and dimming it via a body class is the
+// only way to hold it disabled for the duration of an in-flight check.
+const DONE_BUTTON_SELECTOR = '.im-c-map-button--draw-done'
+const CHECKING_BODY_CLASS = 'app-draw-boundary-checking'
 
 /**
  * @param {{ saveAndContinueUrl: string, csrfToken: string, state: object }} params
@@ -53,6 +61,7 @@ async function runBoundaryCheck(
     return
   }
   state.checkInFlight = true
+  document.body.classList.add(CHECKING_BODY_CLASS)
 
   state.latestPayload = null
   interactiveMap.showPanel(PANEL_ID)
@@ -80,6 +89,7 @@ async function runBoundaryCheck(
     })
   } finally {
     state.checkInFlight = false
+    document.body.classList.remove(CHECKING_BODY_CLASS)
   }
 }
 
@@ -125,6 +135,16 @@ export function wireBoundaryInfoPanel(
     })
   }
 
+  function onDoneClickCapture(clickEvent) {
+    if (!state.checkInFlight) {
+      return
+    }
+    if (clickEvent.target.closest(DONE_BUTTON_SELECTOR)) {
+      clickEvent.preventDefault()
+      clickEvent.stopImmediatePropagation()
+    }
+  }
+
   function onSaveClick(clickEvent) {
     const button = clickEvent.target.closest(
       `#${PANEL_ROOT_ID} [data-boundary-action="${SAVE_ACTION}"]`
@@ -158,6 +178,7 @@ export function wireBoundaryInfoPanel(
 
   interactiveMap.on('map:ready', addBoundaryInfoPanel)
   document.addEventListener('click', onSaveClick)
+  document.addEventListener('click', onDoneClickCapture, true)
   interactiveMap.on('draw:created', onDrawCreated)
   interactiveMap.on('draw:edited', onDrawEdited)
   interactiveMap.on('draw:started', onDrawStarted)
