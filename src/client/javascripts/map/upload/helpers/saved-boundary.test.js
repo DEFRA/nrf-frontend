@@ -121,7 +121,7 @@ describe('wireSavedBoundary', () => {
       addSource: vi.fn(),
       addLayer: vi.fn(),
       isStyleLoaded: vi.fn().mockReturnValue(styleLoaded),
-      once: vi.fn()
+      on: vi.fn()
     }
   }
 
@@ -168,14 +168,48 @@ describe('wireSavedBoundary', () => {
     wireSavedBoundary(map, geojson)
 
     expect(map.addSource).not.toHaveBeenCalled()
-    expect(map.once).toHaveBeenCalledWith('styledata', expect.any(Function))
+    expect(map.on).toHaveBeenCalledWith('styledata', expect.any(Function))
 
     map.isStyleLoaded.mockReturnValue(true)
-    map.once.mock.calls[0][1]()
+    map.on.mock.calls[0][1]()
 
     expect(map.addSource).toHaveBeenCalledWith('boundary', {
       type: 'geojson',
       data: geojson
     })
+  })
+
+  it('re-renders the boundary after a base map style switch clears it', () => {
+    const map = createMapMock()
+    const geojson = {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-1.5, 52.0] }
+    }
+
+    wireSavedBoundary(map, geojson)
+    expect(map.addSource).toHaveBeenCalledTimes(1)
+
+    // Simulate setStyle() clearing the manually-added source, then the new
+    // style finishing loading — styledata fires again for the new style.
+    map.getSource.mockReturnValue(null)
+    map.on.mock.calls[0][1]()
+
+    expect(map.addSource).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not re-add the boundary while the existing source is still present', () => {
+    const map = createMapMock()
+    const geojson = {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-1.5, 52.0] }
+    }
+
+    wireSavedBoundary(map, geojson)
+    expect(map.addSource).toHaveBeenCalledTimes(1)
+
+    map.getSource.mockReturnValue({})
+    map.on.mock.calls[0][1]()
+
+    expect(map.addSource).toHaveBeenCalledTimes(1)
   })
 })
