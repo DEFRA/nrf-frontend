@@ -14,7 +14,6 @@ export function createMockMapInstance({ styleLoaded = true } = {}) {
     getZoom: vi.fn().mockReturnValue(MOCK_ZOOM_LEVEL),
     getLayer: vi.fn().mockReturnValue(true),
     setPaintProperty: vi.fn(),
-    once: vi.fn(),
     on: vi.fn()
   }
 }

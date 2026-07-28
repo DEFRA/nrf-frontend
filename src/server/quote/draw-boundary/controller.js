@@ -55,7 +55,13 @@ export function saveBoundaryHandler(request, h) {
     intersectingEdps
   }
 
-  saveQuoteDataToCache(request, { boundaryGeojson: boundaryGeojsonToCache })
+  // Explicitly clear boundaryFilename — drawn boundaries never have one, but
+  // saveQuoteDataToCache only merges keys it's given, so a filename left
+  // over from a previously abandoned upload would otherwise stick around.
+  saveQuoteDataToCache(request, {
+    boundaryGeojson: boundaryGeojsonToCache,
+    boundaryFilename: null
+  })
 
   logger.info('draw-boundary boundary saved to quote cache')
 

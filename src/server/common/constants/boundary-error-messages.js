@@ -50,9 +50,11 @@ export const BOUNDARY_ERROR_MESSAGES = {
   [GEOMETRY.UNSUPPORTED_GEOMETRY_TYPE]:
     'Only Polygon geometry is supported. Please ensure the boundary forms a complete closed polygon shape.',
   [GEOMETRY.SELF_INTERSECTING]: 'The red line boundary is overlapping itself.',
-  [GEOMETRY.HAS_HOLES]: 'The red line boundary is not closed.',
+  [GEOMETRY.HAS_HOLES]:
+    'The red line boundary contains a hole. Please provide a boundary without gaps.',
   [GEOMETRY.DUPLICATE_VERTICES]:
     'The uploaded boundary contains duplicated or overlapping geometry (duplicate consecutive vertices). Please clean up the boundary and try again.',
+  [GEOMETRY.UNCLOSED_RING]: 'The red line boundary is not closed.',
   [GEOMETRY.NO_POLYGON_FOUND]: 'The red line boundary is missing.',
   [SERVICE.IMPACT_ASSESSOR_UNREACHABLE]:
     'Unable to check the boundary right now. Please try again.',
