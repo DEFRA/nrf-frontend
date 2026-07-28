@@ -16,12 +16,17 @@ const STATUS_READY = 'ready'
 // Every UPLOAD-group failure (size/zip/filename/CRS/uploader/infrastructure)
 // and every SERVICE-group failure (impact-assessor unreachable/bad response,
 // generic check failure) sends the user back to the upload page to retry —
-// there is no geometry to preview in either case. Only GEOMETRY failures
+// there is no geometry to preview in either case. Most GEOMETRY failures
 // keep the user on the preview page, since the invalid geometry itself is
-// useful to show alongside the error.
+// useful to show alongside the error — except INVALID_GEOMETRY,
+// UNSUPPORTED_GEOMETRY_TYPE and NO_POLYGON_FOUND, where impact-assessor has
+// no usable geometry to hand back, so there's nothing to preview either.
 const UPLOAD_REJECTION_CODES = new Set([
   ...Object.values(BOUNDARY_ERRORS.UPLOAD),
-  ...Object.values(BOUNDARY_ERRORS.SERVICE)
+  ...Object.values(BOUNDARY_ERRORS.SERVICE),
+  BOUNDARY_ERRORS.GEOMETRY.INVALID_GEOMETRY,
+  BOUNDARY_ERRORS.GEOMETRY.UNSUPPORTED_GEOMETRY_TYPE,
+  BOUNDARY_ERRORS.GEOMETRY.NO_POLYGON_FOUND
 ])
 
 /**
