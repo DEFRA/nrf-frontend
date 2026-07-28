@@ -49,6 +49,11 @@ async function runBoundaryCheck(
   { checkUrl, csrfToken, state },
   feature
 ) {
+  if (state.checkInFlight) {
+    return
+  }
+  state.checkInFlight = true
+
   state.latestPayload = null
   interactiveMap.showPanel(PANEL_ID)
   renderPanel({ summary: 'Checking boundary...' })
@@ -73,6 +78,8 @@ async function runBoundaryCheck(
     renderPanel({
       error: 'An error occurred checking the boundary'
     })
+  } finally {
+    state.checkInFlight = false
   }
 }
 
@@ -88,7 +95,7 @@ export function wireBoundaryInfoPanel(
   interactiveMap,
   { checkUrl, csrfToken, saveAndContinueUrl }
 ) {
-  const state = { latestPayload: null }
+  const state = { latestPayload: null, checkInFlight: false }
 
   function addBoundaryInfoPanel() {
     interactiveMap.addPanel(PANEL_ID, {
