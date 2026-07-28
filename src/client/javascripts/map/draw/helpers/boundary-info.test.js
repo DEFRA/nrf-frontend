@@ -134,6 +134,26 @@ describe('wireBoundaryInfoPanel', () => {
     expect(items[1].textContent).toBe('Bure Broads')
   })
 
+  it('ignores a duplicate check trigger while one is already in flight', async () => {
+    let requestCount = 0
+    mswServer.use(
+      http.post(CHECK_URL, async () => {
+        requestCount += 1
+        return HttpResponse.json({ isValid: true, intersectingEdps: [] })
+      })
+    )
+
+    const interactiveMap = wireAndReady()
+    interactiveMap._emit('draw:created', { geometry: { type: 'Polygon' } })
+    interactiveMap._emit('draw:created', { geometry: { type: 'Polygon' } })
+
+    await vi.waitFor(() =>
+      expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
+    )
+
+    expect(requestCount).toBe(1)
+  })
+
   it('logs and treats the response as empty when the check response body is not valid JSON', async () => {
     mswServer.use(http.post(CHECK_URL, () => new HttpResponse('not json')))
     const loggerErrorSpy = vi
