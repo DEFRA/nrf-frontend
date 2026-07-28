@@ -22,7 +22,7 @@
 {# Import custom components globally #}
 {% from "heading/macro.njk" import appHeading %}
 
-{% set mainClasses = "app-main-wrapper" %}
+{% set mainClasses = mainClasses or "app-main-wrapper" %}
 {% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
 
 {% block head %}

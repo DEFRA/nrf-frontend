@@ -79,7 +79,7 @@ describe('Boundary map page', () => {
       const mapEl = document.getElementById('boundary-map')
       expect(mapEl).toBeInTheDocument()
       expect(mapEl).toHaveAttribute(
-        'data-geojson',
+        'data-existing-boundary-geojson',
         JSON.stringify(boundaryGeojsonWithEdp.boundaryGeometryWgs84)
       )
       expect(mapEl).toHaveAttribute(

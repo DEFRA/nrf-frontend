@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import webpack from 'webpack'
 import CopyPlugin from 'copy-webpack-plugin'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
@@ -30,11 +31,11 @@ export default {
     application: {
       import: ['./javascripts/application.js', './stylesheets/application.scss']
     },
-    'boundary-map': {
-      import: './javascripts/boundary-map.js'
+    'upload-preview-map': {
+      import: './javascripts/map/upload/index.js'
     },
     'draw-boundary-map': {
-      import: './javascripts/draw-boundary-map.js'
+      import: './javascripts/map/draw/index.js'
     }
   },
   experiments: {
@@ -172,6 +173,12 @@ export default {
   plugins: [
     new CleanWebpackPlugin(),
     new WebpackAssetsManifest(),
+    // @defra/interactive-map's datasets plugin lazily loads an ESRI adapter
+    // chunk that we never trigger (we only ever configure the maplibre
+    // provider), but webpack still needs to resolve it to build that chunk.
+    // @arcgis/core is a huge, unused peer dependency we don't want to
+    // install just to satisfy that resolution.
+    new webpack.IgnorePlugin({ resourceRegExp: /^@arcgis\/core/ }),
     new CopyPlugin({
       patterns: [
         {
@@ -179,30 +186,8 @@ export default {
           to: 'assets'
         },
         {
-          from: path.join(interactiveMapPath, 'dist/umd'),
-          to: 'interactive-map/core'
-        },
-        {
-          from: path.join(interactiveMapPath, 'providers/maplibre/dist/umd'),
-          to: 'interactive-map/maplibre'
-        },
-        {
           from: path.join(interactiveMapPath, 'dist/css/index.css'),
           to: 'interactive-map/interactive-map.css'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/map-styles/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/map-styles/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/map-styles/dist/umd/im-map-styles-plugin.js'
-          ),
-          to: 'interactive-map/plugins/map-styles/im-map-styles-plugin.js'
         },
         {
           from: path.join(
@@ -214,30 +199,9 @@ export default {
         {
           from: path.join(
             interactiveMapPath,
-            'plugins/beta/draw-ml/dist/umd/index.js'
+            'plugins/beta/scale-bar/dist/css/index.css'
           ),
-          to: 'interactive-map/plugins/draw-ml/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/beta/draw-ml/dist/umd/im-draw-ml-plugin.js'
-          ),
-          to: 'interactive-map/plugins/draw-ml/im-draw-ml-plugin.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/search/dist/umd/index.js'
-          ),
-          to: 'interactive-map/plugins/search/index.js'
-        },
-        {
-          from: path.join(
-            interactiveMapPath,
-            'plugins/search/dist/umd/im-search-plugin.js'
-          ),
-          to: 'interactive-map/plugins/search/im-search-plugin.js'
+          to: 'interactive-map/plugins/scale-bar/index.css'
         },
         {
           from: path.join(
@@ -245,6 +209,13 @@ export default {
             'plugins/search/dist/css/index.css'
           ),
           to: 'interactive-map/plugins/search/index.css'
+        },
+        {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/datasets/dist/css/index.css'
+          ),
+          to: 'interactive-map/plugins/datasets/index.css'
         },
         {
           from: path.join(dirname, 'src/client/data/vts'),
