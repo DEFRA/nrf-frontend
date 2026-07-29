@@ -23,11 +23,12 @@ function createInteractiveMap() {
   const handlers = {}
   return {
     on: vi.fn((eventType, callback) => {
-      handlers[eventType] = callback
+      ;(handlers[eventType] ??= []).push(callback)
     }),
     addButton: vi.fn(),
     toggleButtonState: vi.fn(),
-    _emit: (eventType, payload) => handlers[eventType]?.(payload)
+    _emit: (eventType, payload) =>
+      handlers[eventType]?.forEach((handler) => handler(payload))
   }
 }
 
@@ -151,7 +152,7 @@ describe('wireDrawTools', () => {
     expect(document.querySelector('.app-draw-start-panel')).toBeNull()
   })
 
-  it('hides the Draw start panel while drawing and shows it again afterwards', () => {
+  it('hides the Draw start panel while drawing and keeps it hidden once a boundary exists', () => {
     createMapElement()
     const interactiveMap = createInteractiveMap()
 
@@ -167,14 +168,28 @@ describe('wireDrawTools', () => {
     expect(panel.hidden).toBe(true)
 
     interactiveMap._emit('draw:created')
-    expect(panel.hidden).toBe(false)
+    expect(panel.hidden).toBe(true)
 
     interactiveMap._emit('draw:started')
     interactiveMap._emit('draw:edited')
-    expect(panel.hidden).toBe(false)
+    expect(panel.hidden).toBe(true)
+  })
+
+  it('shows the Draw start panel again after cancelling with no existing boundary', () => {
+    createMapElement()
+    const interactiveMap = createInteractiveMap()
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin: createInteractPlugin(),
+      drawPlugin: createDrawPlugin(),
+      mapElementId: MAP_ELEMENT_ID
+    })
+    interactiveMap._emit('map:ready')
+    const panel = document.querySelector('.app-draw-start-panel')
 
     interactiveMap._emit('draw:started')
     interactiveMap._emit('draw:cancelled')
+
     expect(panel.hidden).toBe(false)
   })
 
@@ -312,7 +327,7 @@ describe('wireDrawTools', () => {
     expect(panel.hidden).toBe(true)
 
     interactiveMap._emit('draw:edited')
-    expect(panel.hidden).toBe(false)
+    expect(panel.hidden).toBe(true)
   })
 
   it('deletes the selected features', () => {
@@ -419,6 +434,61 @@ describe('wireDrawTools', () => {
     )
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'deleteFeature',
+      'disabled',
+      true
+    )
+  })
+
+  it('disables drawing a new polygon once a boundary exists, until it is deleted', () => {
+    createMapElement()
+    const interactiveMap = createInteractiveMap()
+    const interactPlugin = createInteractPlugin()
+    const drawPlugin = createDrawPlugin()
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin,
+      drawPlugin,
+      mapElementId: MAP_ELEMENT_ID
+    })
+    interactiveMap._emit('map:ready')
+    const panel = document.querySelector('.app-draw-start-panel')
+
+    interactiveMap._emit('draw:created')
+
+    expect(panel.hidden).toBe(true)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawPolygon',
+      'disabled',
+      true
+    )
+
+    interactiveMap._emit('interact:selectionchange', {
+      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
+    })
+    getMenuItem(interactiveMap, 'deleteFeature').onClick()
+
+    expect(panel.hidden).toBe(false)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawPolygon',
+      'disabled',
+      false
+    )
+  })
+
+  it('starts with the drawPolygon menu item disabled when an existing boundary is passed in', () => {
+    createMapElement()
+    const interactiveMap = createInteractiveMap()
+
+    wireDrawTools(interactiveMap, {
+      interactPlugin: createInteractPlugin(),
+      drawPlugin: createDrawPlugin(),
+      mapElementId: MAP_ELEMENT_ID,
+      hasExistingBoundary: true
+    })
+    interactiveMap._emit('map:ready')
+
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawPolygon',
       'disabled',
       true
     )
