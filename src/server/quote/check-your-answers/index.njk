@@ -55,12 +55,11 @@
 
         <p class="govuk-body">You will receive an indicative nature restoration levy quote, based on the details you provided. For the purposes of section 72 of the Planning and Infrastructure Act 2025, this quote will not commit you to pay the nature restoration levy and will not disapply any relevant environmental obligations. A Local Planning Authority must not accept this quote as part of any planning and decision-making processes.</p>
 
-        <form method="post" novalidate>
+        <form method="post" novalidate data-disable-on-submit>
           {% include "partials/csrf-token.njk" %}
           <div class="govuk-button-group">
             {{ govukButton({
-              text: "Confirm and submit",
-              preventDoubleClick: true
+              text: "Confirm and submit"
             }) }}
             <a class="govuk-link" href="/quote/delete-quote">Delete</a>
           </div>
