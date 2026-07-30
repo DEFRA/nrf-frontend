@@ -443,7 +443,7 @@ export const config = convict({
     tileRedisCacheTtlSeconds: {
       doc: 'Time-to-live, in seconds, for cached vector tiles stored in Redis.',
       format: Number,
-      default: 86400,
+      default: 60 * 60 * 24 * 30,
       env: 'MAP_TILE_REDIS_CACHE_TTL_SECONDS'
     },
     tileCacheControlMaxAge: {
