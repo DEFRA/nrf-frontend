@@ -39,7 +39,18 @@ function createInteractiveMap() {
   }
 }
 
-function wireAndReady(options = {}) {
+function createMapInstance({ existingLayers = new Set() } = {}) {
+  return {
+    getLayer: vi.fn((layerId) =>
+      existingLayers.has(layerId) ? { source: `${layerId}-source` } : null
+    ),
+    getSource: vi.fn(() => true),
+    removeLayer: vi.fn(),
+    removeSource: vi.fn()
+  }
+}
+
+function wireAndReady(options = {}, mapReadyPayload) {
   const interactiveMap = createInteractiveMap()
   const api = wireBoundaryInfoPanel(interactiveMap, {
     checkUrl: CHECK_URL,
@@ -47,7 +58,7 @@ function wireAndReady(options = {}) {
     csrfToken: 'token-123',
     ...options
   })
-  interactiveMap._emit('map:ready')
+  interactiveMap._emit('map:ready', mapReadyPayload)
   interactiveMap.checkExistingBoundary = api.checkExistingBoundary
   return interactiveMap
 }
@@ -387,6 +398,41 @@ describe('wireBoundaryInfoPanel', () => {
     await vi.waitFor(() => expect(assignMock).toHaveBeenCalled())
     expect(assignMock).toHaveBeenCalledWith(
       expect.stringContaining('/quote/email')
+    )
+  })
+
+  it('stops tile loading before following a redirect', async () => {
+    mswServer.use(
+      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(SAVE_URL, () =>
+        HttpResponse.redirect('http://localhost:3000/quote/email', 303)
+      ),
+      http.get(
+        'http://localhost:3000/quote/email',
+        () => new HttpResponse(null)
+      )
+    )
+    vi.stubGlobal('location', { ...window.location, assign: vi.fn() })
+    const mapInstance = createMapInstance({
+      existingLayers: new Set(['edp_boundaries'])
+    })
+
+    const interactiveMap = wireAndReady({}, { map: mapInstance })
+    interactiveMap._emit('draw:created', { geometry: {} })
+    await vi.waitFor(() =>
+      expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
+    )
+
+    const saveButton = document
+      .getElementById(PANEL_ROOT_ID)
+      .querySelector('[data-boundary-action="save"]')
+    saveButton.click()
+
+    await vi.waitFor(() =>
+      expect(mapInstance.removeLayer).toHaveBeenCalledWith('edp_boundaries')
+    )
+    expect(mapInstance.removeSource).toHaveBeenCalledWith(
+      'edp_boundaries-source'
     )
   })
 

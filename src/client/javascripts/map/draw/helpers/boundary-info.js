@@ -6,6 +6,8 @@ import {
   setSaveButtonDisabled
 } from './boundary-info-panel.js'
 import { postJson } from './post-json.js'
+import { stopTileLoading } from './stop-tile-loading.js'
+import { ALL_LAYER_IDS } from '../../shared-helpers/datasets.js'
 
 const PANEL_ID = 'boundaryInfo'
 // The library's own Done button ('drawDone' -> 'im-c-map-button--draw-done')
@@ -40,6 +42,11 @@ async function submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state }) {
   }
 
   if (response.redirected) {
+    // Navigation is guaranteed from here, so it's safe to abort any tile
+    // requests still in flight from panning/zooming while drawing — they'd
+    // otherwise keep competing for the same-origin connection pool that the
+    // destination page's own requests need.
+    stopTileLoading(state.mapInstance, ALL_LAYER_IDS)
     window.location.assign(response.url)
     return
   }
@@ -177,11 +184,14 @@ export function wireBoundaryInfoPanel(
   interactiveMap,
   { checkUrl, csrfToken, saveAndContinueUrl }
 ) {
-  const state = { latestPayload: null, checkInFlight: false }
+  const state = { latestPayload: null, checkInFlight: false, mapInstance: null }
   const runCheck = (feature) =>
     runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
 
-  interactiveMap.on('map:ready', () => addBoundaryInfoPanel(interactiveMap))
+  interactiveMap.on('map:ready', (mapReadyEvent) => {
+    state.mapInstance = mapReadyEvent?.map ?? null
+    addBoundaryInfoPanel(interactiveMap)
+  })
   document.addEventListener('click', (clickEvent) =>
     onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent)
   )
