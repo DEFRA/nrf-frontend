@@ -8,6 +8,14 @@ import {
 import { postJson } from './post-json.js'
 
 const PANEL_ID = 'boundaryInfo'
+// The library's own Done button ('drawDone' -> 'im-c-map-button--draw-done')
+// re-derives its disabled state from the plugin's vertex count each render,
+// so toggling it via interactiveMap.toggleButtonState gets immediately
+// reverted. Blocking the click in the capture phase (before it reaches the
+// library's own bubble-phase handler) and dimming it via a body class is the
+// only way to hold it disabled for the duration of an in-flight check.
+const DONE_BUTTON_SELECTOR = '.im-c-map-button--draw-done'
+const CHECKING_BODY_CLASS = 'app-draw-boundary-checking'
 
 /**
  * @param {{ saveAndContinueUrl: string, csrfToken: string, state: object }} params
@@ -53,6 +61,7 @@ async function runBoundaryCheck(
     return
   }
   state.checkInFlight = true
+  document.body.classList.add(CHECKING_BODY_CLASS)
 
   state.latestPayload = null
   interactiveMap.showPanel(PANEL_ID)
@@ -80,11 +89,84 @@ async function runBoundaryCheck(
     })
   } finally {
     state.checkInFlight = false
+    document.body.classList.remove(CHECKING_BODY_CLASS)
   }
 }
 
 function onDrawStarted() {
   setSaveButtonDisabled(true)
+}
+
+/**
+ * @param {object} interactiveMap
+ */
+function addBoundaryInfoPanel(interactiveMap) {
+  interactiveMap.addPanel(PANEL_ID, {
+    label: 'Boundary information',
+    focus: false,
+    html: buildPanelHtml(),
+    mobile: { slot: 'left-top', modal: false, open: false, dismissible: false },
+    tablet: {
+      slot: 'right-bottom',
+      modal: false,
+      width: '340px',
+      open: false,
+      dismissible: false
+    },
+    desktop: {
+      slot: 'right-bottom',
+      modal: false,
+      width: '340px',
+      open: false,
+      dismissible: false
+    }
+  })
+}
+
+/**
+ * @param {object} state
+ * @param {MouseEvent} clickEvent
+ */
+function onDoneClickCapture(state, clickEvent) {
+  if (!state.checkInFlight) {
+    return
+  }
+  if (clickEvent.target.closest(DONE_BUTTON_SELECTOR)) {
+    clickEvent.preventDefault()
+    clickEvent.stopImmediatePropagation()
+  }
+}
+
+/**
+ * @param {object} state
+ * @param {{ saveAndContinueUrl: string, csrfToken: string }} params
+ * @param {MouseEvent} clickEvent
+ */
+function onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent) {
+  const button = clickEvent.target.closest(
+    `#${PANEL_ROOT_ID} [data-boundary-action="${SAVE_ACTION}"]`
+  )
+  if (!button || button.disabled) {
+    return
+  }
+
+  submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
+}
+
+function onDrawCancelled(state) {
+  if (state.latestPayload) {
+    setSaveButtonDisabled(false)
+  }
+}
+
+/**
+ * @param {object} interactiveMap
+ * @param {object} state
+ */
+function onDrawDelete(interactiveMap, state) {
+  state.latestPayload = null
+  renderPanel({ summary: '' })
+  interactiveMap.hidePanel(PANEL_ID)
 }
 
 /**
@@ -96,77 +178,25 @@ export function wireBoundaryInfoPanel(
   { checkUrl, csrfToken, saveAndContinueUrl }
 ) {
   const state = { latestPayload: null, checkInFlight: false }
-
-  function addBoundaryInfoPanel() {
-    interactiveMap.addPanel(PANEL_ID, {
-      label: 'Boundary information',
-      focus: false,
-      html: buildPanelHtml(),
-      mobile: {
-        slot: 'left-top',
-        modal: false,
-        open: false,
-        dismissible: false
-      },
-      tablet: {
-        slot: 'right-bottom',
-        modal: false,
-        width: '340px',
-        open: false,
-        dismissible: false
-      },
-      desktop: {
-        slot: 'right-bottom',
-        modal: false,
-        width: '340px',
-        open: false,
-        dismissible: false
-      }
-    })
-  }
-
-  function onSaveClick(clickEvent) {
-    const button = clickEvent.target.closest(
-      `#${PANEL_ROOT_ID} [data-boundary-action="${SAVE_ACTION}"]`
-    )
-    if (!button || button.disabled) {
-      return
-    }
-
-    submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
-  }
-
-  function onDrawCreated(feature) {
+  const runCheck = (feature) =>
     runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-  }
 
-  function onDrawEdited(feature) {
-    runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-  }
-
-  function onDrawCancelled() {
-    if (state.latestPayload) {
-      setSaveButtonDisabled(false)
-    }
-  }
-
-  function onDrawDelete() {
-    state.latestPayload = null
-    renderPanel({ summary: '' })
-    interactiveMap.hidePanel(PANEL_ID)
-  }
-
-  interactiveMap.on('map:ready', addBoundaryInfoPanel)
-  document.addEventListener('click', onSaveClick)
-  interactiveMap.on('draw:created', onDrawCreated)
-  interactiveMap.on('draw:edited', onDrawEdited)
+  interactiveMap.on('map:ready', () => addBoundaryInfoPanel(interactiveMap))
+  document.addEventListener('click', (clickEvent) =>
+    onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent)
+  )
+  document.addEventListener(
+    'click',
+    (clickEvent) => onDoneClickCapture(state, clickEvent),
+    true
+  )
+  interactiveMap.on('draw:created', runCheck)
+  interactiveMap.on('draw:edited', runCheck)
   interactiveMap.on('draw:started', onDrawStarted)
-  interactiveMap.on('draw:cancelled', onDrawCancelled)
-  interactiveMap.on('draw:delete', onDrawDelete)
+  interactiveMap.on('draw:cancelled', () => onDrawCancelled(state))
+  interactiveMap.on('draw:delete', () => onDrawDelete(interactiveMap, state))
 
   return {
-    checkExistingBoundary(feature) {
-      runBoundaryCheck(interactiveMap, { checkUrl, csrfToken, state }, feature)
-    }
+    checkExistingBoundary: runCheck
   }
 }
