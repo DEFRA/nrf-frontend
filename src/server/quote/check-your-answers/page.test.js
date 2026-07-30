@@ -38,6 +38,9 @@ describe('Check your answers page', () => {
     expect(
       getByRole(document, 'button', { name: 'Confirm and submit' })
     ).toBeInTheDocument()
+    expect(
+      document.querySelector('form[data-disable-on-submit]')
+    ).toBeInTheDocument()
     expect(getByRole(document, 'link', { name: 'Delete' })).toHaveAttribute(
       'href',
       '/quote/delete-quote'
