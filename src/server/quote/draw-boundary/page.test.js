@@ -24,6 +24,9 @@ describe('Draw boundary page', () => {
     const footer = document.querySelector('.govuk-footer')
     expect(footer).not.toBeInTheDocument()
 
+    const phaseBanner = document.querySelector('.govuk-phase-banner')
+    expect(phaseBanner).not.toBeInTheDocument()
+
     const mapEl = document.getElementById('draw-boundary-map')
     expect(mapEl).toBeInTheDocument()
     expect(mapEl).toHaveAttribute('data-map-style-url')

@@ -105,7 +105,7 @@ function addBoundaryInfoPanel(interactiveMap) {
     label: 'Boundary information',
     focus: false,
     html: buildPanelHtml(),
-    mobile: { slot: 'left-top', modal: false, open: false, dismissible: false },
+    mobile: { slot: 'drawer', modal: false, open: false, dismissible: false },
     tablet: {
       slot: 'right-bottom',
       modal: false,

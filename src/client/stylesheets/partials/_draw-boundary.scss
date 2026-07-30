@@ -13,6 +13,18 @@ body:has(.app-draw-boundary) {
   flex-direction: column;
 }
 
+// Reclaims vertical space for the map on small screens, where the header and
+// service navigation would otherwise take up a disproportionate share of the
+// viewport.
+@media (max-width: 640px) {
+  body:has(.app-draw-boundary) {
+    .govuk-header,
+    .govuk-service-navigation {
+      display: none;
+    }
+  }
+}
+
 .govuk-width-container:has(.app-draw-boundary) {
   display: flex;
   flex-direction: column;

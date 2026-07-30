@@ -1,0 +1,95 @@
+// Custom layout for the "Boundary information" map panel. Built from plain
+// rules rather than govuk-summary-list/govuk-heading-s/utility classes,
+// since this panel lives inside the interactive map's own panel chrome
+// rather than a standard GOV.UK page layout.
+.app-boundary-info-panel [data-boundary-info-summary][hidden],
+.app-boundary-info-panel [data-boundary-info-error][hidden],
+.app-boundary-info-panel [data-boundary-info-results][hidden],
+.app-boundary-info-panel [data-boundary-info-edps][hidden] {
+  display: none;
+}
+
+.app-boundary-info-panel__heading {
+  margin: 0 0 15px;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.app-boundary-info-panel__summary {
+  margin: 0 0 15px;
+}
+
+.app-boundary-info-panel__stats {
+  margin: 0 0 20px;
+}
+
+.app-boundary-info-panel__stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.app-boundary-info-panel__stats-row:first-child {
+  border-top: 1px solid #b1b4b6;
+}
+
+.app-boundary-info-panel__stats-key {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.app-boundary-info-panel__stats-value {
+  margin: 0;
+  text-align: right;
+}
+
+.app-boundary-info-panel__edps-intro {
+  margin: 0 0 10px;
+}
+
+.app-boundary-info-panel__edp-list {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.app-boundary-info-panel__edp-item {
+  margin-bottom: 15px;
+}
+
+.app-boundary-info-panel__edp-item:last-child {
+  margin-bottom: 0;
+}
+
+.app-boundary-info-panel__edp-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-boundary-info-panel__edp-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  background-color: #feca57;
+  border: 1px solid #0b0c0c;
+}
+
+.app-boundary-info-panel__edp-name {
+  font-weight: 700;
+}
+
+.app-boundary-info-panel__edp-description {
+  margin: 5px 0 0 22px;
+  font-size: 0.9375rem;
+  color: #505a5f;
+}
+
+.app-boundary-info-panel__action-button {
+  width: 100%;
+}
