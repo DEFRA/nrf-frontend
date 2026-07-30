@@ -6,6 +6,7 @@ import {
   Radios,
   SkipLink
 } from 'govuk-frontend'
+import { initDisableSubmitButtons } from './forms/disable-submit-button.js'
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,4 +15,5 @@ document.addEventListener('DOMContentLoaded', () => {
   createAll(ErrorSummary)
   createAll(Radios)
   createAll(SkipLink)
+  initDisableSubmitButtons()
 })
