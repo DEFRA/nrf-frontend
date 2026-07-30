@@ -18,16 +18,29 @@ body:has(.app-draw-boundary) {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  // A flex item with auto side-margins (how govuk-width-container centres
-  // itself) loses its "stretch, then centre within that" sizing and instead
-  // shrinks to fit its content. Forcing width: 100% here — and on the phase
-  // banner below, which has the same auto-margin centring and is now also a
-  // flex child of this container — keeps both sized against the viewport
-  // instead of collapsing to their content's natural width.
-  width: 100%;
 
-  > .govuk-phase-banner {
+  // GOV.UK Frontend's desktop breakpoint (1020px) is where
+  // govuk-width-container's side gutters switch from a fixed margin to
+  // margin: auto centring. Only at that point does a flex item with
+  // auto side-margins lose its "stretch, then centre within that" sizing
+  // and shrink to fit its content instead — so width: 100% (on this
+  // container and the phase banner below, its flex sibling) is only
+  // needed here to counteract that.
+  //
+  // Below 1020px the gutter margin is a fixed pixel value, so the
+  // default flex stretch already sizes this container correctly against
+  // the viewport. Applying width: 100% unconditionally at those widths
+  // instead overrides that correct width to the full viewport, while the
+  // fixed gutter margin still applies on top of it — overflowing the
+  // viewport by the gutter width and breaking the vw-based full-bleed
+  // calc() on .app-main-wrapper--draw-boundary below, which relies on
+  // this container being genuinely centred against the viewport.
+  @media (min-width: 1020px) {
     width: 100%;
+
+    > .govuk-phase-banner {
+      width: 100%;
+    }
   }
 }
 
