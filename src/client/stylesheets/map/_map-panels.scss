@@ -1,7 +1,14 @@
+// The [hidden] attribute alone isn't enough for the save button: GOV.UK
+// Frontend's .govuk-button rule sets display: inline-block at the same
+// specificity as the [hidden] UA-stylesheet rule and comes later in the
+// cascade, so it wins and the button stays visible (and clickable) while
+// hidden — this list restores [hidden]'s effect for every element the
+// panel toggles, in case any of them ever carry a conflicting display rule.
 .app-boundary-info-panel [data-boundary-info-summary][hidden],
 .app-boundary-info-panel [data-boundary-info-error][hidden],
 .app-boundary-info-panel [data-boundary-info-results][hidden],
-.app-boundary-info-panel [data-boundary-info-edps][hidden] {
+.app-boundary-info-panel [data-boundary-info-edps][hidden],
+.app-boundary-info-panel [data-boundary-action="save"][hidden] {
   display: none;
 }
 

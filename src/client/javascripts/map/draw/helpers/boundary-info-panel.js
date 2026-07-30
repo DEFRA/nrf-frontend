@@ -4,7 +4,7 @@ const NOT_AVAILABLE_TEXT = 'Not available'
 
 export function buildPanelHtml() {
   return `
-    <div id="${PANEL_ROOT_ID}">
+    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel">
       <p class="govuk-body-s govuk-!-margin-bottom-2" data-boundary-info-summary>Draw a boundary to check it.</p>
       <p class="govuk-error-message govuk-!-margin-bottom-2" data-boundary-info-error hidden></p>
       <dl class="govuk-summary-list govuk-!-margin-bottom-3" data-boundary-info-results hidden>
@@ -100,7 +100,7 @@ export function renderPanel({ summary, error, results }) {
 
   resultsEl.hidden = !results
   edpsEl.hidden = !results
-  saveButton.hidden = !results?.isValid
+  saveButton.hidden = !results
   saveButton.disabled = false
 
   if (!results) {

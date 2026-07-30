@@ -105,7 +105,6 @@ describe('wireBoundaryInfoPanel', () => {
           body: await request.json()
         }
         return HttpResponse.json({
-          isValid: true,
           boundaryMetadata: {
             area: { hectares: 12, acres: 30 },
             perimeter: { kilometres: 4, miles: 2.5 }
@@ -150,7 +149,7 @@ describe('wireBoundaryInfoPanel', () => {
     mswServer.use(
       http.post(CHECK_URL, async () => {
         requestCount += 1
-        return HttpResponse.json({ isValid: true, intersectingEdps: [] })
+        return HttpResponse.json({ intersectingEdps: [] })
       })
     )
 
@@ -173,9 +172,7 @@ describe('wireBoundaryInfoPanel', () => {
         () =>
           new Promise((resolve) => {
             resolveCheck = () =>
-              resolve(
-                HttpResponse.json({ isValid: true, intersectingEdps: [] })
-              )
+              resolve(HttpResponse.json({ intersectingEdps: [] }))
           })
       )
     )
@@ -231,7 +228,7 @@ describe('wireBoundaryInfoPanel', () => {
     mswServer.use(
       http.post(CHECK_URL, async ({ request }) => {
         capturedBody = await request.json()
-        return HttpResponse.json({ isValid: true, intersectingEdps: [] })
+        return HttpResponse.json({ intersectingEdps: [] })
       })
     )
 
@@ -248,9 +245,7 @@ describe('wireBoundaryInfoPanel', () => {
 
   it('shows "None" when there are no intersecting EDPs', async () => {
     mswServer.use(
-      http.post(CHECK_URL, () =>
-        HttpResponse.json({ isValid: true, intersectingEdps: [] })
-      )
+      http.post(CHECK_URL, () => HttpResponse.json({ intersectingEdps: [] }))
     )
 
     const interactiveMap = wireAndReady()
@@ -329,9 +324,7 @@ describe('wireBoundaryInfoPanel', () => {
   })
 
   it('re-enables the save button on cancel only if a valid result exists', async () => {
-    mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true }))
-    )
+    mswServer.use(http.post(CHECK_URL, () => HttpResponse.json({})))
 
     const interactiveMap = wireAndReady()
     const saveButton = document
@@ -353,9 +346,7 @@ describe('wireBoundaryInfoPanel', () => {
   })
 
   it('resets and hides the panel on draw:delete', async () => {
-    mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true }))
-    )
+    mswServer.use(http.post(CHECK_URL, () => HttpResponse.json({})))
 
     const interactiveMap = wireAndReady()
     interactiveMap._emit('draw:created', { geometry: {} })
@@ -372,7 +363,7 @@ describe('wireBoundaryInfoPanel', () => {
 
   it('submits save and continue and follows a redirect', async () => {
     mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(CHECK_URL, () => HttpResponse.json({})),
       http.post(SAVE_URL, () =>
         HttpResponse.redirect('http://localhost:3000/quote/email', 303)
       ),
@@ -403,7 +394,7 @@ describe('wireBoundaryInfoPanel', () => {
 
   it('stops tile loading before following a redirect', async () => {
     mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(CHECK_URL, () => HttpResponse.json({})),
       http.post(SAVE_URL, () =>
         HttpResponse.redirect('http://localhost:3000/quote/email', 303)
       ),
@@ -438,7 +429,7 @@ describe('wireBoundaryInfoPanel', () => {
 
   it('re-enables the save button when the save request does not redirect', async () => {
     mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(CHECK_URL, () => HttpResponse.json({})),
       http.post(SAVE_URL, () => HttpResponse.json({}, { status: 500 }))
     )
     const loggerErrorSpy = vi
@@ -467,7 +458,7 @@ describe('wireBoundaryInfoPanel', () => {
 
   it('re-enables the save button when the save request throws', async () => {
     mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(CHECK_URL, () => HttpResponse.json({})),
       http.post(SAVE_URL, () => HttpResponse.error())
     )
     const loggerErrorSpy = vi
@@ -497,7 +488,7 @@ describe('wireBoundaryInfoPanel', () => {
   it('does nothing when the save button is clicked while disabled', async () => {
     let saveWasCalled = false
     mswServer.use(
-      http.post(CHECK_URL, () => HttpResponse.json({ isValid: true })),
+      http.post(CHECK_URL, () => HttpResponse.json({})),
       http.post(SAVE_URL, () => {
         saveWasCalled = true
         return HttpResponse.json({})
