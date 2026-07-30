@@ -1,27 +1,32 @@
 // @vitest-environment jsdom
+/* global PageTransitionEvent: readonly */
 import { afterEach, describe, expect, it } from 'vitest'
+import { fireEvent, getByRole } from '@testing-library/dom'
+import userEvent from '@testing-library/user-event'
 import {
   disableSubmitButtonOnSubmit,
   initDisableSubmitButtons
 } from './disable-submit-button.js'
 
-function mountForm() {
+const FORM_NAME = 'Confirm details'
+const SUBMIT_BUTTON_NAME = 'Confirm and submit'
+
+// Mounts a form fixture. A submit listener prevents the default navigation so
+// the submit event still fires under jsdom without its "not implemented"
+// navigation handling.
+function mountForm({ formAttributes = '', innerHtml } = {}) {
   document.body.innerHTML = `
-    <form id="test-form">
-      <button type="submit">Confirm and submit</button>
+    <form aria-label="${FORM_NAME}" ${formAttributes}>
+      ${innerHtml ?? `<button type="submit">${SUBMIT_BUTTON_NAME}</button>`}
     </form>
   `
-  return document.getElementById('test-form')
+  const form = getByRole(document.body, 'form', { name: FORM_NAME })
+  form.addEventListener('submit', (event) => event.preventDefault())
+  return form
 }
 
-function submitButton() {
-  return document.querySelector('button[type="submit"]')
-}
-
-function dispatchPageshow(persisted) {
-  const pageshowEvent = new Event('pageshow')
-  Object.defineProperty(pageshowEvent, 'persisted', { value: persisted })
-  window.dispatchEvent(pageshowEvent)
+function getSubmitButton() {
+  return getByRole(document.body, 'button', { name: SUBMIT_BUTTON_NAME })
 }
 
 afterEach(() => {
@@ -29,54 +34,53 @@ afterEach(() => {
 })
 
 describe('disableSubmitButtonOnSubmit', () => {
-  it('disables the submit button when the form is submitted', () => {
+  it('disables the submit button when the form is submitted', async () => {
     const form = mountForm()
+    const submitButton = getSubmitButton()
     disableSubmitButtonOnSubmit(form)
 
-    form.dispatchEvent(new Event('submit'))
+    await userEvent.click(submitButton)
 
-    expect(submitButton().disabled).toBe(true)
+    expect(submitButton).toBeDisabled()
   })
 
-  it('re-enables the submit button when the page is restored from the back/forward cache', () => {
+  it('re-enables the submit button when the page is restored from the back/forward cache', async () => {
     const form = mountForm()
+    const submitButton = getSubmitButton()
     disableSubmitButtonOnSubmit(form)
 
-    form.dispatchEvent(new Event('submit'))
-    dispatchPageshow(true)
+    await userEvent.click(submitButton)
+    fireEvent(window, new PageTransitionEvent('pageshow', { persisted: true }))
 
-    expect(submitButton().disabled).toBe(false)
+    expect(submitButton).toBeEnabled()
   })
 
-  it('leaves the submit button disabled on a normal page load', () => {
+  it('leaves the submit button disabled on a normal page load', async () => {
     const form = mountForm()
+    const submitButton = getSubmitButton()
     disableSubmitButtonOnSubmit(form)
 
-    form.dispatchEvent(new Event('submit'))
-    dispatchPageshow(false)
+    await userEvent.click(submitButton)
+    fireEvent(window, new PageTransitionEvent('pageshow', { persisted: false }))
 
-    expect(submitButton().disabled).toBe(true)
+    expect(submitButton).toBeDisabled()
   })
 
   it('does nothing when the form has no submit button', () => {
-    document.body.innerHTML = '<form id="test-form"></form>'
-    const form = document.getElementById('test-form')
+    const form = mountForm({ innerHtml: '' })
 
     expect(() => disableSubmitButtonOnSubmit(form)).not.toThrow()
   })
 })
 
 describe('initDisableSubmitButtons', () => {
-  it('wires up every form marked with data-disable-on-submit', () => {
-    document.body.innerHTML = `
-      <form data-disable-on-submit>
-        <button type="submit">Confirm and submit</button>
-      </form>
-    `
+  it('wires up every form marked with data-disable-on-submit', async () => {
+    mountForm({ formAttributes: 'data-disable-on-submit' })
+    const submitButton = getSubmitButton()
     initDisableSubmitButtons()
 
-    document.querySelector('form').dispatchEvent(new Event('submit'))
+    await userEvent.click(submitButton)
 
-    expect(submitButton().disabled).toBe(true)
+    expect(submitButton).toBeDisabled()
   })
 })
