@@ -41,4 +41,16 @@ describe('stopTileLoading', () => {
     expect(map.removeLayer).not.toHaveBeenCalled()
     expect(map.removeSource).not.toHaveBeenCalled()
   })
+
+  it('removes the layer but skips the source when the source no longer exists', () => {
+    const map = createMapInstance({
+      layers: { edp_boundaries: { source: 'edp_boundaries' } }
+    })
+    map.getSource.mockReturnValue(false)
+
+    stopTileLoading(map, ['edp_boundaries'])
+
+    expect(map.removeLayer).toHaveBeenCalledWith('edp_boundaries')
+    expect(map.removeSource).not.toHaveBeenCalled()
+  })
 })
