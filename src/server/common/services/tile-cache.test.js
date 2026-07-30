@@ -63,18 +63,19 @@ describe('tile-cache', () => {
   })
 
   describe('isCacheableTilePath', () => {
-    it.each(['tiles/edp_boundaries/8/130/85.mvt'])(
-      'accepts tile path %s',
-      (path) => {
-        expect(isCacheableTilePath(path)).toBe(true)
-      }
-    )
+    it.each([
+      'tiles/edp_boundaries/8/130/85.mvt',
+      'tiles/edp_excluded_areas/8/130/85.mvt'
+    ])('accepts tile path %s', (path) => {
+      expect(isCacheableTilePath(path)).toBe(true)
+    })
 
     it.each([
       '',
       'boundary-validation',
       'tiles/edp_boundaries/8/130/85.json',
       'tiles/edp_boundaries/8/130.mvt',
+      'tiles/edp_excluded_areas/8/130/85.json',
       'tiles/lpa_boundaries/12/2048/1361.mvt'
     ])('rejects non-tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(false)

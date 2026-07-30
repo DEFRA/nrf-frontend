@@ -53,6 +53,7 @@ describe('renderPanel', () => {
     )
     expect(panelHidden('[data-boundary-info-results]')).toBe(true)
     expect(panelHidden('[data-boundary-info-edps]')).toBe(true)
+    expect(panelHidden('[data-boundary-action="save"]')).toBe(true)
   })
 
   it('renders an error message', () => {
@@ -69,7 +70,6 @@ describe('renderPanel', () => {
 
     renderPanel({
       results: {
-        isValid: true,
         boundaryMetadata: {
           area: { hectares: 12, acres: 30 },
           perimeter: { kilometres: 4, miles: 2.5 }
@@ -92,7 +92,7 @@ describe('renderPanel', () => {
   it('shows "None" when there are no intersecting EDPs', () => {
     mountPanel()
 
-    renderPanel({ results: { isValid: true, intersectingEdps: [] } })
+    renderPanel({ results: { intersectingEdps: [] } })
 
     const items = document
       .getElementById(PANEL_ROOT_ID)
@@ -100,14 +100,6 @@ describe('renderPanel', () => {
     expect(items).toHaveLength(1)
     expect(items[0].textContent).toBe('None')
     expect(panelText('[data-boundary-info-area]')).toBe('Not available')
-  })
-
-  it('hides the save button when the result is invalid', () => {
-    mountPanel()
-
-    renderPanel({ results: { isValid: false, intersectingEdps: [] } })
-
-    expect(panelHidden('[data-boundary-action="save"]')).toBe(true)
   })
 })
 

@@ -9,6 +9,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
+const thirtyDaysSeconds = 2592000
 
 const SESSION_RATE_LIMIT_MAX = 60
 const SESSION_RATE_LIMIT_MAX_TEST = 35
@@ -443,7 +444,7 @@ export const config = convict({
     tileRedisCacheTtlSeconds: {
       doc: 'Time-to-live, in seconds, for cached vector tiles stored in Redis.',
       format: Number,
-      default: 86400,
+      default: thirtyDaysSeconds,
       env: 'MAP_TILE_REDIS_CACHE_TTL_SECONDS'
     },
     tileCacheControlMaxAge: {

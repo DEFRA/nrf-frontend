@@ -4,7 +4,8 @@ import { buildRedisClient } from '../helpers/redis-client.js'
 
 const logger = createLogger()
 const keyPrefix = 'tile:'
-const tilePathPattern = /^tiles\/edp_boundaries\/\d+\/\d+\/\d+\.mvt$/
+const tilePathPattern =
+  /^tiles\/(edp_boundaries|edp_excluded_areas)\/\d+\/\d+\/\d+\.mvt$/
 
 let client = null
 
