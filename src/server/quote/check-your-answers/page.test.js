@@ -104,18 +104,18 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changeplanning application type'
       })
-    ).toHaveAttribute('href', planningTypePath)
+    ).toHaveAttribute('href', `${planningTypePath}?change=true`)
     expect(
       getByRole(document, 'link', {
         name: 'Changeuploaded red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/upload-boundary')
+    ).toHaveAttribute('href', '/quote/upload-preview-map?change=true')
     expect(
       getByRole(document, 'link', { name: 'Changenumber of units' })
-    ).toHaveAttribute('href', '/quote/units')
+    ).toHaveAttribute('href', '/quote/units?change=true')
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
-    ).toHaveAttribute('href', '/quote/email')
+    ).toHaveAttribute('href', '/quote/email?change=true')
   })
 
   it('should list rows in order: planning type, housing, number of units, then the boundary answer', async () => {
@@ -194,7 +194,7 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changedrawn red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/draw-boundary')
+    ).toHaveAttribute('href', '/quote/draw-boundary?change=true')
   })
 
   it('should show the uploaded filename when present', async () => {

@@ -46,6 +46,21 @@ describe('getViewModel', () => {
     expect(result.uploadBoundaryPath).toBe('/quote/upload-boundary')
   })
 
+  it('should default backLinkPath to upload-boundary when not changing', () => {
+    const result = getViewModel({ boundaryGeojson: {} })
+
+    expect(result.backLinkPath).toBe('/quote/upload-boundary')
+  })
+
+  it('should link back to check-your-answers when change=true is in the query', () => {
+    const result = getViewModel({
+      boundaryGeojson: {},
+      query: { change: 'true' }
+    })
+
+    expect(result.backLinkPath).toBe('/quote/check-your-answers')
+  })
+
   it('should handle null boundaryGeojson with defaults', () => {
     const result = getViewModel({ boundaryGeojson: null })
 
