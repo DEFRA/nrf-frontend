@@ -35,6 +35,18 @@ describe('Email page', () => {
     expect(csrfToken).toBeInTheDocument()
   })
 
+  it('should link back to check-your-answers when loaded with change=true', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/check-your-answers'
+    )
+  })
+
   it("should remember the user's previously entered email", async () => {
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: routePath,

@@ -44,7 +44,8 @@ export function handler(request, h) {
   const viewModel = getViewModel({
     boundaryGeojson: resolvedGeojson,
     boundaryFailureReason,
-    boundaryFilename
+    boundaryFilename,
+    query: request.query
   })
 
   return h.view('quote/upload-preview-map/index', {

@@ -2,12 +2,13 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
 export const title = 'Enter your email address'
 const logger = createLogger()
 
-export default function getViewModel(quoteData = {}) {
+export default function getViewModel(quoteData = {}, query = {}) {
   let backLinkPath = boundaryTypePath
   /**
    * TODO: store the list of possible boundary entry types in a single location and import it here, rather than hardcoding the values in this function.
@@ -22,6 +23,11 @@ export default function getViewModel(quoteData = {}) {
       { boundaryEntryType: quoteData.boundaryEntryType },
       'boundaryEntryType is not recognised'
     )
+  }
+
+  // When editing from check-your-answers, always return there regardless of how the boundary was entered
+  if (query.change && query.change === 'true') {
+    backLinkPath = checkYourAnswersPath
   }
 
   return {

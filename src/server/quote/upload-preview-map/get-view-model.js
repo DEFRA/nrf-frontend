@@ -1,6 +1,7 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
 export const title = 'Your uploaded red line boundary file'
@@ -11,11 +12,13 @@ export const errorTitle = 'Your red line boundary file contains an error'
  * @param {object} [params.boundaryGeojson]
  * @param {string} [params.boundaryFailureReason]
  * @param {string} [params.boundaryFilename]
+ * @param {object} [params.query]
  */
 export default function getViewModel({
   boundaryGeojson,
   boundaryFailureReason = null,
-  boundaryFilename = null
+  boundaryFilename = null,
+  query = {}
 }) {
   const geometry = boundaryGeojson?.boundaryGeometryWgs84 ?? null
   const existingBoundaryMetadata = boundaryGeojson?.boundaryMetadata ?? null
@@ -30,6 +33,11 @@ export default function getViewModel({
   // the parsed shape and are worth showing.
   const showMap = geometry != null
 
+  // When editing from check-your-answers, always return there instead of the
+  // upload page
+  const backLinkPath =
+    query.change === 'true' ? checkYourAnswersPath : uploadBoundaryPath
+
   return {
     pageTitle: getPageTitle(pageTitleText),
     pageHeading: pageTitleText,
@@ -38,7 +46,7 @@ export default function getViewModel({
     intersectingEdps,
     intersectsEdp,
     showMap,
-    backLinkPath: uploadBoundaryPath,
+    backLinkPath,
     uploadBoundaryPath,
     boundaryError: boundaryFailureReason
       ? getBoundaryErrorMessage(boundaryFailureReason)
