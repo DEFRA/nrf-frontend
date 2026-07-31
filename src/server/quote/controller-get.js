@@ -14,7 +14,7 @@ export const quoteController = ({ routeId, getViewModel }) => ({
       validationErrors = formValidationErrors.validationErrors
       clearValidationFlashFromCache(request)
     }
-    const baseViewModel = await getViewModel(quoteData)
+    const baseViewModel = await getViewModel(quoteData, request.query)
     const viewModel = {
       ...baseViewModel,
       formSubmitData: quoteData,

@@ -51,4 +51,19 @@ describe('email getViewModel', () => {
     )
     expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
+
+  it('should link back to check-your-answers when change=true is in the query', () => {
+    const viewModel = getViewModel(
+      { boundaryEntryType: 'draw' },
+      { change: 'true' }
+    )
+
+    expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
+  })
+
+  it('should link back to check-your-answers on change=true regardless of boundary entry type', () => {
+    const viewModel = getViewModel({}, { change: 'true' })
+
+    expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
+  })
 })

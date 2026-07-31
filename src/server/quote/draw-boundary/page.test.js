@@ -88,4 +88,19 @@ describe('Draw boundary page', () => {
       JSON.stringify(boundaryGeojsonWithEdp.boundaryMetadata)
     )
   })
+
+  it('should set the back link to check-your-answers when loaded with change=true', async () => {
+    const cookie = await withValidQuoteSession(getServer())
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie
+    })
+
+    const mapEl = document.getElementById('draw-boundary-map')
+    expect(mapEl).toHaveAttribute(
+      'data-back-link-path',
+      '/quote/check-your-answers'
+    )
+  })
 })
