@@ -4,7 +4,11 @@ import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-m
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
-import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
+import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
+import {
+  boundaryGeojsonWithEdp,
+  boundaryGeojsonWithExcludedArea
+} from '../../../test-utils/fixtures/boundary-geojson.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn()
@@ -250,6 +254,7 @@ describe('POST /quote/draw-boundary/save', () => {
 
   const validBoundaryGeojson = {
     intersectingEdps: [],
+    intersectingExcludedAreas: [],
     boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
     boundaryMetadata: { areaHa: 1 },
     boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] }
@@ -268,6 +273,21 @@ describe('POST /quote/draw-boundary/save', () => {
     })
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/quote/email')
+  })
+
+  it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: { boundaryGeojson: boundaryGeojsonWithExcludedArea }
+    })
+
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
+      boundaryGeojson: boundaryGeojsonWithExcludedArea,
+      boundaryFilename: null
+    })
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(excludedAreaPath)
   })
 
   it('saves and redirects to no-edp when there are no intersections', async () => {
@@ -298,6 +318,7 @@ describe('POST /quote/draw-boundary/save', () => {
 
   it.each([
     'intersectingEdps',
+    'intersectingExcludedAreas',
     'boundaryGeometryWgs84',
     'boundaryMetadata',
     'boundaryGeometryOriginal'
