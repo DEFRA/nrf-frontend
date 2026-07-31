@@ -148,6 +148,20 @@ describe('Boundary map page', () => {
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe('/quote/email')
     })
+
+    it('should link back to check-your-answers when loaded with change=true', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: `${routePath}?change=true`,
+        server: getServer(),
+        cookie
+      })
+
+      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+        'href',
+        '/quote/check-your-answers'
+      )
+    })
   })
 
   describe('when boundary check returns an error', () => {

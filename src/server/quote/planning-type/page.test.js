@@ -44,6 +44,18 @@ describe('Planning type page', () => {
     expect(csrfToken).toBeInTheDocument()
   })
 
+  it('should link back to check-your-answers when loaded with change=true', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/check-your-answers'
+    )
+  })
+
   it('should show a validation error after an invalid form submission', async () => {
     const { response, cookie } = await submitForm({
       requestUrl: routePath,
