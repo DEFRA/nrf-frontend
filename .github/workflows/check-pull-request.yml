@@ -67,6 +67,7 @@ jobs:
       id-token: write
     env:
       NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
+      OS_API_KEY: ${{ secrets.OS_API_KEY }}
     steps:
       - uses: actions/checkout@v7
       - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
