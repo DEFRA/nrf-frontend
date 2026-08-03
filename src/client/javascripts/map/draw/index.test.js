@@ -238,8 +238,11 @@ describe('draw boundary map init', () => {
     await loadModule()
     mockDefra._emit('draw:ready')
 
-    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'Feature' })
+    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledTimes(1)
+    const [bufferedBounds] = mockDefra._mockMap.fitToBounds.mock.calls[0]
+    expect(bufferedBounds).toHaveLength(4)
+    bufferedBounds.forEach((value, index) =>
+      expect(value).toBeCloseTo([-1.55, 51.95, -1.35, 52.15][index])
     )
   })
 
