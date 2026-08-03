@@ -15,17 +15,15 @@ const logInvalidQuoteData = (request) => {
 export const saveQuoteDataToCache = (request, quoteData) => {
   const existingQuoteCache = getQuoteDataFromCache(request) ?? {}
 
-  const boundaryChanged = ['boundaryGeojson', 'boundaryEntryType'].some(
-    (key) => key in quoteData
-  )
+  const boundaryEntryTypeChanged =
+    'boundaryEntryType' in quoteData &&
+    quoteData.boundaryEntryType !== existingQuoteCache.boundaryEntryType
 
-  // When the boundary changes, clear all answers that depend on it
-  if (boundaryChanged) {
+  // When the boundary entry type changes, clear the boundary geojson
+  if (boundaryEntryTypeChanged) {
     quoteData = {
       ...quoteData,
-      boundaryGeojson: quoteData.boundaryEntryType
-        ? null
-        : quoteData.boundaryGeojson
+      boundaryGeojson: null
     }
   }
 
