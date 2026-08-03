@@ -72,7 +72,18 @@ describe('wireSavedBoundary', () => {
     const interactiveMap = createInteractiveMap()
     const initialFeature = {
       type: 'Feature',
-      geometry: { type: 'Polygon', coordinates: [] }
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+            [0, 0]
+          ]
+        ]
+      }
     }
 
     wireSavedBoundary(interactiveMap, {
@@ -88,7 +99,7 @@ describe('wireSavedBoundary', () => {
     expect(addFeature).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'Feature' })
     )
-    expect(interactiveMap.fitToBounds).toHaveBeenCalledWith(initialFeature)
+    expect(interactiveMap.fitToBounds).toHaveBeenCalledWith([-1, -1, 3, 3])
     expect(checkExistingBoundary).toHaveBeenCalledWith(initialFeature)
   })
 
