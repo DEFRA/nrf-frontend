@@ -56,6 +56,8 @@ export const BOUNDARY_ERROR_MESSAGES = {
     'The uploaded boundary contains duplicated or overlapping geometry (duplicate consecutive vertices). Please clean up the boundary and try again.',
   [GEOMETRY.UNCLOSED_RING]: 'The red line boundary is not closed.',
   [GEOMETRY.NO_POLYGON_FOUND]: 'The red line boundary is missing.',
+  [GEOMETRY.COORDINATES_OUT_OF_RANGE]:
+    'The red line boundary uses co-ordinates that are outside the supported area.',
   [SERVICE.IMPACT_ASSESSOR_UNREACHABLE]:
     'Unable to check the boundary right now. Please try again.',
   [SERVICE.IMPACT_ASSESSOR_BAD_RESPONSE]:

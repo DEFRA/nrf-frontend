@@ -57,6 +57,10 @@ export default [
           boundaryGeojson: joi
             .object({
               intersectingEdps: joi.array().items(joi.object()).required(),
+              intersectingExcludedAreas: joi
+                .array()
+                .items(joi.string())
+                .required(),
               boundaryGeometryWgs84: joi.object().required(),
               boundaryMetadata: joi.object().required(),
               boundaryGeometryOriginal: joi.object().required()
