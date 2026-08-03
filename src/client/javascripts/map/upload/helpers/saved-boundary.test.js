@@ -63,7 +63,8 @@ describe('renderSavedBoundary', () => {
     expect(result).toBe(true)
     expect(map.addSource).toHaveBeenCalledWith('boundary', {
       type: 'geojson',
-      data: geojson
+      data: geojson,
+      tolerance: 0
     })
     expect(map.addLayer).toHaveBeenCalledWith({
       id: 'boundary-fill',
@@ -136,7 +137,8 @@ describe('wireSavedBoundary', () => {
 
     expect(map.addSource).toHaveBeenCalledWith('boundary', {
       type: 'geojson',
-      data: geojson
+      data: geojson,
+      tolerance: 0
     })
     expect(map.addLayer).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -175,7 +177,8 @@ describe('wireSavedBoundary', () => {
 
     expect(map.addSource).toHaveBeenCalledWith('boundary', {
       type: 'geojson',
-      data: geojson
+      data: geojson,
+      tolerance: 0
     })
   })
 
