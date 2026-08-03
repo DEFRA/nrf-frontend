@@ -6,6 +6,7 @@ import {
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as noEdpPath } from '../no-edp/routes.js'
 import { routePath as emailPath } from '../email/routes.js'
+import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import getViewModel from './get-view-model.js'
 
@@ -28,10 +29,22 @@ export function handler(request, h) {
 
   const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
   const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
+  const intersectsExcludedArea =
+    resolvedGeojson?.intersectingExcludedAreas?.length > 0
 
-  // A valid boundary that intersects no EDP has nothing to preview here, so
-  // send the user straight to the no-EDP page. Errors still render on this
-  // page so the user can see what went wrong.
+  // A valid boundary that won't reach the email step has nothing to preview
+  // here, so send the user straight to the relevant outcome page. An excluded
+  // area makes the boundary ineligible for the EDP and takes precedence over
+  // the no-EDP route. Errors still render on this page so the user can see
+  // what went wrong.
+  if (!boundaryFailureReason && intersectsExcludedArea) {
+    logger.info(
+      { intersectsExcludedArea },
+      'map - boundary intersects an excluded area, redirecting to excluded-area'
+    )
+    return h.redirect(excludedAreaPath)
+  }
+
   if (!boundaryFailureReason && !intersectsEdp) {
     logger.info(
       { intersectsEdp },
@@ -77,6 +90,11 @@ export function postHandler(request, h) {
   // form renders, but guard the POST too in case of a stale or direct submit.
   const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
   const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
+  const intersectsExcludedArea =
+    resolvedGeojson?.intersectingExcludedAreas?.length > 0
+  if (intersectsExcludedArea) {
+    return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
+  }
   if (!intersectsEdp) {
     return h.redirect(noEdpPath).code(statusCodes.redirectAfterPost)
   }

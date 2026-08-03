@@ -34,7 +34,8 @@ export const boundaryGeojson = {
       bottomLeft: [1.427283, 52.678713]
     }
   },
-  intersectingEdps: []
+  intersectingEdps: [],
+  intersectingExcludedAreas: []
 }
 
 export const boundaryGeojsonWithEdp = {
@@ -70,6 +71,7 @@ export const boundaryGeojsonWithEdp = {
       overlap_percentage: 25.0
     }
   ],
+  intersectingExcludedAreas: [],
   boundaryMetadata: {
     area: {
       hectares: 1.2,
@@ -87,4 +89,12 @@ export const boundaryGeojsonWithEdp = {
       bottomLeft: [1.427283, 52.678713]
     }
   }
+}
+
+export const boundaryGeojsonWithExcludedArea = {
+  ...boundaryGeojson,
+  // The impact assessor skips the EDP query when an excluded area intersects,
+  // so intersectingEdps is empty here by contract.
+  intersectingEdps: [],
+  intersectingExcludedAreas: ['River Wensum Exclusion Zone']
 }

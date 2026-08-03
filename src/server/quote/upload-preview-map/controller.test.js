@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handler, postHandler } from './controller.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
+import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn(),
@@ -24,6 +25,14 @@ describe('map controller', () => {
   const mockGeojsonWithFilename = {
     ...mockGeojson,
     boundaryFilename: 'site-boundary.shp'
+  }
+
+  // The impact assessor skips the EDP query when an excluded area intersects,
+  // so intersectingEdps is empty here by contract.
+  const mockExcludedAreaGeojson = {
+    boundaryGeometryWgs84: mockGeometry,
+    intersectingEdps: [],
+    intersectingExcludedAreas: ['River Wensum Exclusion Zone']
   }
 
   const mockEdpGeojson = {
@@ -79,6 +88,16 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
+    })
+
+    it('should redirect to excluded-area when the boundary intersects an excluded area', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockExcludedAreaGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
     })
 
     it('should render the view with boundary data when it intersects an EDP', () => {
@@ -192,6 +211,22 @@ describe('map controller', () => {
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+    })
+
+    it('should save the boundary and redirect to excluded-area when it intersects an excluded area', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockExcludedAreaGeojson)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+        boundaryGeojson: mockExcludedAreaGeojson,
+        boundaryFilename: null
+      })
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
+      expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
     })
 
     it('should lift boundaryFilename from boundaryGeojson when saving to cache', () => {
