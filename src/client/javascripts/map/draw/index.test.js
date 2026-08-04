@@ -91,7 +91,6 @@ describe('draw boundary map init', () => {
         transformRequest: expect.any(Function),
         plugins: expect.arrayContaining([
           { id: 'datasets' },
-          { id: 'mapStyles' },
           { id: 'scaleBar' },
           expect.objectContaining({ id: 'interact' }),
           expect.objectContaining({ newPolygon: expect.any(Function) }),
@@ -99,6 +98,52 @@ describe('draw boundary map init', () => {
         ])
       })
     )
+  })
+
+  it('moves the styles button to the top-right slot above the zoom controls, without a label', async () => {
+    createMapElement()
+    const mockDefra = configureMocks(mocks)
+
+    await loadModule()
+
+    const { plugins } = mockDefra._mock.mock.calls[0][1]
+    const mapStylesConfig = plugins.find((plugin) => plugin.id === 'mapStyles')
+
+    const topRightNoLabel = { slot: 'right-top', showLabel: false }
+    expect(mapStylesConfig.manifest.buttons).toEqual([
+      {
+        id: 'mapStyles',
+        mobile: topRightNoLabel,
+        tablet: topRightNoLabel,
+        desktop: topRightNoLabel
+      }
+    ])
+  })
+
+  it('opens the styles panel beside its button on tablet/desktop, and as a drawer on mobile', async () => {
+    createMapElement()
+    const mockDefra = configureMocks(mocks)
+
+    await loadModule()
+
+    const { plugins } = mockDefra._mock.mock.calls[0][1]
+    const mapStylesConfig = plugins.find((plugin) => plugin.id === 'mapStyles')
+
+    const drawer = { slot: 'drawer', modal: true, dismissible: true }
+    const besideButton = {
+      slot: 'map-styles-button',
+      modal: true,
+      width: '400px',
+      dismissible: true
+    }
+    expect(mapStylesConfig.manifest.panels).toEqual([
+      {
+        id: 'mapStyles',
+        mobile: drawer,
+        tablet: besideButton,
+        desktop: besideButton
+      }
+    ])
   })
 
   it('suppresses map tile errors', async () => {
@@ -193,8 +238,11 @@ describe('draw boundary map init', () => {
     await loadModule()
     mockDefra._emit('draw:ready')
 
-    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'Feature' })
+    expect(mockDefra._mockMap.fitToBounds).toHaveBeenCalledTimes(1)
+    const [bufferedBounds] = mockDefra._mockMap.fitToBounds.mock.calls[0]
+    expect(bufferedBounds).toHaveLength(4)
+    bufferedBounds.forEach((value, index) =>
+      expect(value).toBeCloseTo([-1.55, 51.95, -1.35, 52.15][index])
     )
   })
 

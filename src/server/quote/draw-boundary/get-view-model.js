@@ -24,7 +24,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
     impactAssessorLayers: config.get('map.impactAssessorLayers'),
     boundaryValidationUrl: checkPath,
     saveAndContinueUrl: savePath,
-    backLinkPath: backLinkPath,
+    backLinkPath,
     existingBoundaryGeojson: JSON.stringify(existingBoundaryGeojson),
     existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata)
   }

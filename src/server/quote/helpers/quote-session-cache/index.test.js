@@ -66,6 +66,32 @@ describe('Save and retrieve quote data from session cache', () => {
       )
     })
 
+    it('does not clear boundaryGeojson when boundaryEntryType is resaved unchanged', () => {
+      const request = {
+        yar: {
+          get: vi.fn().mockReturnValue({
+            planningType: 'full-planning-permission',
+            isHousing: 'yes',
+            boundaryEntryType: 'draw',
+            boundaryGeojson: { type: 'Polygon' },
+            housingUnits: 10,
+            email: 'test@example.com'
+          }),
+          set: vi.fn(),
+          clear: vi.fn()
+        },
+        logger: { error: vi.fn() }
+      }
+      saveQuoteDataToCache(request, { boundaryEntryType: 'draw' })
+      expect(request.yar.set).toHaveBeenCalledWith(
+        'quote',
+        expect.objectContaining({
+          boundaryEntryType: 'draw',
+          boundaryGeojson: { type: 'Polygon' }
+        })
+      )
+    })
+
     it('does not clear dependent answers when saving a non-boundary property', () => {
       const request = {
         yar: {

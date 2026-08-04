@@ -14,6 +14,24 @@ import { toAbsoluteUrl } from '../shared-helpers/to-absolute-url.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 
+// Moves the styles button into the same top-right slot as the zoom
+// controls, above them (buttons render before the zoom group when neither
+// specifies an explicit order — see interactive-map's slot ordering), and
+// drops its label so it matches the icon-only zoom buttons beside it.
+const TOP_RIGHT_NO_LABEL = { slot: 'right-top', showLabel: false }
+
+// Moves the styles panel to open beside its (now top-right) button on
+// tablet/desktop, using the button-adjacent slot so it tracks the button
+// rather than duplicating 'right-top' — see interactive-map's
+// button-adjacent panel slots. Mobile keeps the default drawer.
+const STYLES_PANEL_DRAWER = { slot: 'drawer', modal: true, dismissible: true }
+const STYLES_PANEL_TOP_RIGHT = {
+  slot: 'map-styles-button',
+  modal: true,
+  width: '400px',
+  dismissible: true
+}
+
 function initDrawBoundaryMap() {
   const mapElement = document.getElementById(MAP_ELEMENT_ID)
 
@@ -37,7 +55,27 @@ function initDrawBoundaryMap() {
     center,
     plugins: [
       datasetsPlugin,
-      mapStylesPlugin,
+      {
+        ...mapStylesPlugin,
+        manifest: {
+          buttons: [
+            {
+              id: 'mapStyles',
+              mobile: TOP_RIGHT_NO_LABEL,
+              tablet: TOP_RIGHT_NO_LABEL,
+              desktop: TOP_RIGHT_NO_LABEL
+            }
+          ],
+          panels: [
+            {
+              id: 'mapStyles',
+              mobile: STYLES_PANEL_DRAWER,
+              tablet: STYLES_PANEL_TOP_RIGHT,
+              desktop: STYLES_PANEL_TOP_RIGHT
+            }
+          ]
+        }
+      },
       scaleBarPlugin,
       interactPlugin,
       drawPlugin,
