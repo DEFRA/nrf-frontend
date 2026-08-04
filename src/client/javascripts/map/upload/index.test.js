@@ -119,7 +119,8 @@ describe('upload preview map init', () => {
         type: 'Feature',
         geometry: validGeojson.features[0].geometry,
         properties: {}
-      }
+      },
+      tolerance: 0
     })
     expect(mapInstance.addLayer).toHaveBeenCalledWith({
       id: 'boundary-fill',

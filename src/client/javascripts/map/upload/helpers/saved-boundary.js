@@ -30,7 +30,14 @@ export function renderSavedBoundary(
 
   map.addSource(sourceId, {
     type: 'geojson',
-    data: geojson
+    data: geojson,
+    // Disable geojson-vt's simplification: a small red line boundary (e.g. a
+    // single building footprint a few metres across) gets simplified down to
+    // a degenerate/zero-area shape in the low-zoom internal tiles, so it
+    // silently disappears when the map is zoomed out. This is a single
+    // static shape, not a large dataset needing LOD simplification, so full
+    // precision at every zoom is cheap.
+    tolerance: 0
   })
 
   map.addLayer({

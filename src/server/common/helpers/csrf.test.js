@@ -44,12 +44,16 @@ describe('#csrf', () => {
 
   describe('skip', () => {
     test('Should return false when not in test environment', () => {
-      expect(csrf.options.skip()).toBe(false)
+      expect(csrf.options.skip({ path: '/quote/draw-boundary' })).toBe(false)
     })
 
     test('Should return true in test environment', () => {
       mockConfigGet.mockReturnValue(true)
-      expect(csrf.options.skip()).toBe(true)
+      expect(csrf.options.skip({ path: '/quote/draw-boundary' })).toBe(true)
+    })
+
+    test('Should return true for /api/browser-logs regardless of environment', () => {
+      expect(csrf.options.skip({ path: '/api/browser-logs' })).toBe(true)
     })
   })
 })
