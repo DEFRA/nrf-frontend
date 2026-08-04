@@ -176,11 +176,14 @@ describe('wireDrawTools', () => {
       mapElementId: MAP_ELEMENT_ID
     })
     interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
 
     interactiveMap._emit('draw:created')
 
-    expect(panel.hidden).toBe(true)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      true
+    )
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'drawPolygon',
       'disabled',
@@ -192,7 +195,11 @@ describe('wireDrawTools', () => {
     })
     getMenuItem(interactiveMap, 'deleteFeature').onClick()
 
-    expect(panel.hidden).toBe(false)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      false
+    )
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'drawPolygon',
       'disabled',

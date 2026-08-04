@@ -32,6 +32,12 @@ const STYLES_PANEL_TOP_RIGHT = {
   dismissible: true
 }
 
+// Orders the search button after the back button (order: 1) in the shared
+// top-left slot on tablet/desktop, so it renders before the Key button —
+// which keeps its default, unordered position and so naturally falls after
+// any explicitly-ordered buttons. See interactive-map's slot ordering.
+const TOP_LEFT_SEARCH_SECOND = { slot: 'top-left', showLabel: false, order: 2 }
+
 function initDrawBoundaryMap() {
   const mapElement = document.getElementById(MAP_ELEMENT_ID)
 
@@ -79,7 +85,18 @@ function initDrawBoundaryMap() {
       scaleBarPlugin,
       interactPlugin,
       drawPlugin,
-      searchPlugin
+      {
+        ...searchPlugin,
+        manifest: {
+          buttons: [
+            {
+              id: 'search',
+              tablet: TOP_LEFT_SEARCH_SECOND,
+              desktop: TOP_LEFT_SEARCH_SECOND
+            }
+          ]
+        }
+      }
     ]
   })
 

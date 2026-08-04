@@ -106,17 +106,25 @@ describe('draw tools menu', () => {
       mapElementId: MAP_ELEMENT_ID
     })
     interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
 
     interactiveMap._emit('interact:selectionchange', {
       selectedFeatures: [{ featureId: 'f1', layerId: FILL_LAYER_ID }]
     })
     getMenuItem(interactiveMap, 'editFeature').onClick()
 
-    expect(panel.hidden).toBe(true)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      true
+    )
 
+    interactiveMap.toggleButtonState.mockClear()
     interactiveMap._emit('draw:edited')
-    expect(panel.hidden).toBe(true)
+    expect(interactiveMap.toggleButtonState).not.toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      false
+    )
   })
 
   it('deletes the selected features', () => {

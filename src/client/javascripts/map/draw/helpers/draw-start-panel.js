@@ -1,47 +1,33 @@
-function buildDrawStartPanelHtml() {
-  return `
-    <div class="app-draw-start-panel">
-      <button class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" type="button">Draw</button>
-    </div>
-  `
-}
+const BUTTON_ID = 'drawStart'
 
-/**
- * @param {Function} onClick
- * @param {{ hidden: boolean }} params
- */
-function buildDrawStartPanel(onClick, { hidden }) {
-  const wrapper = document.createElement('div')
-  wrapper.innerHTML = buildDrawStartPanelHtml()
-
-  const panel = wrapper.firstElementChild
-  panel.hidden = hidden
-  panel.querySelector('button').addEventListener('click', onClick)
-
-  return panel
-}
-
-function noop() {}
+// The 'actions' slot is where interactive-map renders its own primary,
+// bottom-centred controls (e.g. the Cancel/Done buttons shown while
+// drawing), so targeting it here gives the "Draw" call to action the same
+// native positioning and styling at every breakpoint, with no custom DOM
+// or CSS needed.
+const ACTIONS_SLOT = { slot: 'actions' }
 
 /**
  * @param {object} interactiveMap
- * @param {{ mapElementId: string, startDraw: Function, hasExistingBoundary: boolean, getHasBoundary: Function }} params
+ * @param {{ startDraw: Function, hasExistingBoundary: boolean, getHasBoundary: Function }} params
  */
 export function wireDrawStartPanel(
   interactiveMap,
-  { mapElementId, startDraw, hasExistingBoundary, getHasBoundary }
+  { startDraw, hasExistingBoundary, getHasBoundary }
 ) {
-  const mapElement = document.getElementById(mapElementId)
-  if (!mapElement) {
-    return { setHidden: noop }
-  }
-
-  const panel = buildDrawStartPanel(startDraw, { hidden: hasExistingBoundary })
-  mapElement.appendChild(panel)
+  interactiveMap.addButton(BUTTON_ID, {
+    label: 'Draw',
+    variant: 'primary',
+    mobile: ACTIONS_SLOT,
+    tablet: ACTIONS_SLOT,
+    desktop: ACTIONS_SLOT,
+    onClick: startDraw
+  })
 
   const setHidden = (hidden) => {
-    panel.hidden = hidden
+    interactiveMap.toggleButtonState(BUTTON_ID, 'hidden', hidden)
   }
+  setHidden(hasExistingBoundary)
 
   function onDrawStarted() {
     setHidden(true)

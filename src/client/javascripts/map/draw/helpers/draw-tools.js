@@ -198,7 +198,6 @@ export function wireDrawTools(
     interactPlugin.enable()
 
     const startPanel = wireDrawStartPanel(interactiveMap, {
-      mapElementId,
       startDraw: startDrawPolygon,
       hasExistingBoundary: hasBoundary,
       getHasBoundary
