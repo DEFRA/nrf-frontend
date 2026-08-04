@@ -7,7 +7,8 @@ export function createInteractiveMap() {
   const handlers = {}
   return {
     on: vi.fn((eventType, callback) => {
-      ;(handlers[eventType] ??= []).push(callback)
+      handlers[eventType] ??= []
+      handlers[eventType].push(callback)
     }),
     addButton: vi.fn(),
     toggleButtonState: vi.fn(),

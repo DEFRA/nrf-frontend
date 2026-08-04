@@ -38,68 +38,66 @@ const STYLES_PANEL_TOP_RIGHT = {
 // any explicitly-ordered buttons. See interactive-map's slot ordering.
 const TOP_LEFT_SEARCH_SECOND = { slot: 'top-left', showLabel: false, order: 2 }
 
-function initDrawBoundaryMap() {
-  const mapElement = document.getElementById(MAP_ELEMENT_ID)
-
-  if (!mapElement) {
-    return
-  }
-
-  const { mapStyles, datasetsPlugin, mapStylesPlugin, scaleBarPlugin } =
-    createCommonMapPlugins()
-  const { interactPlugin, drawPlugin } = createDrawToolsPlugins()
-  const searchPlugin = createSearchPlugin({
-    osNamesURL: '/os-names-search?query={query}',
-    regions: ['england']
-  })
-
-  const { initialFeature, bounds, center } = readExistingBoundary(mapElement)
-
-  const interactiveMap = createInteractiveMap(MAP_ELEMENT_ID, {
-    mapStyles,
-    bounds,
-    center,
-    plugins: [
-      datasetsPlugin,
-      {
-        ...mapStylesPlugin,
-        manifest: {
-          buttons: [
-            {
-              id: 'mapStyles',
-              mobile: TOP_RIGHT_NO_LABEL,
-              tablet: TOP_RIGHT_NO_LABEL,
-              desktop: TOP_RIGHT_NO_LABEL
-            }
-          ],
-          panels: [
-            {
-              id: 'mapStyles',
-              mobile: STYLES_PANEL_DRAWER,
-              tablet: STYLES_PANEL_TOP_RIGHT,
-              desktop: STYLES_PANEL_TOP_RIGHT
-            }
-          ]
-        }
-      },
-      scaleBarPlugin,
-      interactPlugin,
-      drawPlugin,
-      {
-        ...searchPlugin,
-        manifest: {
-          buttons: [
-            {
-              id: 'search',
-              tablet: TOP_LEFT_SEARCH_SECOND,
-              desktop: TOP_LEFT_SEARCH_SECOND
-            }
-          ]
-        }
+/**
+ * @param {{ datasetsPlugin: object, mapStylesPlugin: object, scaleBarPlugin: object, interactPlugin: object, drawPlugin: object, searchPlugin: object }} params
+ */
+function buildMapPlugins({
+  datasetsPlugin,
+  mapStylesPlugin,
+  scaleBarPlugin,
+  interactPlugin,
+  drawPlugin,
+  searchPlugin
+}) {
+  return [
+    datasetsPlugin,
+    {
+      ...mapStylesPlugin,
+      manifest: {
+        buttons: [
+          {
+            id: 'mapStyles',
+            mobile: TOP_RIGHT_NO_LABEL,
+            tablet: TOP_RIGHT_NO_LABEL,
+            desktop: TOP_RIGHT_NO_LABEL
+          }
+        ],
+        panels: [
+          {
+            id: 'mapStyles',
+            mobile: STYLES_PANEL_DRAWER,
+            tablet: STYLES_PANEL_TOP_RIGHT,
+            desktop: STYLES_PANEL_TOP_RIGHT
+          }
+        ]
       }
-    ]
-  })
+    },
+    scaleBarPlugin,
+    interactPlugin,
+    drawPlugin,
+    {
+      ...searchPlugin,
+      manifest: {
+        buttons: [
+          {
+            id: 'search',
+            tablet: TOP_LEFT_SEARCH_SECOND,
+            desktop: TOP_LEFT_SEARCH_SECOND
+          }
+        ]
+      }
+    }
+  ]
+}
 
+/**
+ * @param {object} interactiveMap
+ * @param {{ mapElement: HTMLElement, interactPlugin: object, drawPlugin: object, initialFeature: object|null }} params
+ */
+function wireDrawBoundaryMap(
+  interactiveMap,
+  { mapElement, interactPlugin, drawPlugin, initialFeature }
+) {
   interactiveMap.on('map:ready', (mapReadyEvent) =>
     wireMapErrorLogging(mapReadyEvent.map)
   )
@@ -130,6 +128,45 @@ function initDrawBoundaryMap() {
 
   wireBackButton(interactiveMap, {
     backLinkPath: mapElement.dataset.backLinkPath
+  })
+}
+
+function initDrawBoundaryMap() {
+  const mapElement = document.getElementById(MAP_ELEMENT_ID)
+
+  if (!mapElement) {
+    return
+  }
+
+  const { mapStyles, datasetsPlugin, mapStylesPlugin, scaleBarPlugin } =
+    createCommonMapPlugins()
+  const { interactPlugin, drawPlugin } = createDrawToolsPlugins()
+  const searchPlugin = createSearchPlugin({
+    osNamesURL: '/os-names-search?query={query}',
+    regions: ['england']
+  })
+
+  const { initialFeature, bounds, center } = readExistingBoundary(mapElement)
+
+  const interactiveMap = createInteractiveMap(MAP_ELEMENT_ID, {
+    mapStyles,
+    bounds,
+    center,
+    plugins: buildMapPlugins({
+      datasetsPlugin,
+      mapStylesPlugin,
+      scaleBarPlugin,
+      interactPlugin,
+      drawPlugin,
+      searchPlugin
+    })
+  })
+
+  wireDrawBoundaryMap(interactiveMap, {
+    mapElement,
+    interactPlugin,
+    drawPlugin,
+    initialFeature
   })
 }
 
