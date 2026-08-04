@@ -17,10 +17,8 @@
             {% include "partials/csrf-token.njk" %}
             <input type="hidden" name="confirmDeleteQuote" value="Yes">
             <div class="govuk-button-group">
-                {{ govukButton({
-                    text: "Yes"
-                }) }}
-                <a class="govuk-link govuk-button govuk-button--secondary" href="{{ backLinkPath }}">No</a>
+                {{ govukButton({ text: "Delete", classes: "govuk-button--warning" }) }}
+                <a class="govuk-link" href="/quote/check-your-answers">Cancel</a>
             </div>
         </form>
     </div>
