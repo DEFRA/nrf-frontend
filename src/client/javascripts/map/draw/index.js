@@ -103,7 +103,8 @@ function initDrawBoundaryMap() {
     interactPlugin,
     drawPlugin,
     mapElementId: MAP_ELEMENT_ID,
-    hasExistingBoundary: Boolean(initialFeature)
+    hasExistingBoundary: Boolean(initialFeature),
+    initialBoundaryFeatureId: initialFeature?.id ?? null
   })
 
   wireFillOpacityOnZoom(interactiveMap, { fillLayerIds: FILL_LAYER_IDS })

@@ -71,8 +71,19 @@ export function readExistingBoundary(mapElement) {
     errorMessage: 'Failed to parse existing boundary metadata'
   })
 
+  const initialFeature = normalizeInitialDrawFeature(existingBoundaryGeojson)
+
+  // Resolved once here (rather than deferring to hydrateInitialDrawFeature)
+  // so the same id is available immediately to callers — e.g. the draw map
+  // hands it to wireDrawTools as initialBoundaryFeatureId, letting the
+  // boundary info panel's Edit button address this feature before any
+  // draw:created/edited event has fired.
+  if (initialFeature) {
+    initialFeature.id ??= crypto.randomUUID()
+  }
+
   return {
-    initialFeature: normalizeInitialDrawFeature(existingBoundaryGeojson),
+    initialFeature,
     bounds: getExistingBoundaryBounds(existingBoundaryMetadata?.bounds),
     center: existingBoundaryMetadata?.centre ?? null
   }

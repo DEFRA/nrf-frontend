@@ -5,6 +5,11 @@ import { http, HttpResponse } from 'msw'
 import { wireBoundaryInfoPanel } from './boundary-info.js'
 import { logger } from '../../../logger/index.js'
 import { setupMswServer } from '../../../../../test-utils/setup-msw-server.js'
+import { trackDocumentListeners } from '../../../../../test-utils/track-document-listeners.js'
+import {
+  createInteractiveMap,
+  createMapInstance
+} from '../test-utils/mock-boundary-info.js'
 
 // Node's fetch (unlike a browser's) doesn't resolve relative URLs against
 // window.location, so absolute URLs are needed here for MSW to intercept them.
@@ -17,38 +22,7 @@ const mswServer = setupMswServer()
 // wireBoundaryInfoPanel registers a document-level click listener each time
 // it runs; without removing it, later tests' clicks would still trigger
 // earlier tests' closures against the (recreated) same-id panel DOM.
-const documentListeners = []
-const originalAddEventListener = document.addEventListener.bind(document)
-document.addEventListener = (eventType, handler, options) => {
-  documentListeners.push([eventType, handler, options])
-  originalAddEventListener(eventType, handler, options)
-}
-
-function createInteractiveMap() {
-  const handlers = {}
-  return {
-    on: vi.fn((eventType, callback) => {
-      handlers[eventType] = callback
-    }),
-    addPanel: vi.fn((_id, config) => {
-      document.body.insertAdjacentHTML('beforeend', config.html)
-    }),
-    showPanel: vi.fn(),
-    hidePanel: vi.fn(),
-    _emit: (eventType, payload) => handlers[eventType]?.(payload)
-  }
-}
-
-function createMapInstance({ existingLayers = new Set() } = {}) {
-  return {
-    getLayer: vi.fn((layerId) =>
-      existingLayers.has(layerId) ? { source: `${layerId}-source` } : null
-    ),
-    getSource: vi.fn(() => true),
-    removeLayer: vi.fn(),
-    removeSource: vi.fn()
-  }
-}
+trackDocumentListeners()
 
 function wireAndReady(options = {}, mapReadyPayload) {
   const interactiveMap = createInteractiveMap()
@@ -73,13 +47,6 @@ function panelText(selector) {
 function panelHidden(selector) {
   return document.getElementById(PANEL_ROOT_ID).querySelector(selector).hidden
 }
-
-afterEach(() => {
-  documentListeners.splice(0).forEach(([eventType, handler, options]) => {
-    document.removeEventListener(eventType, handler, options)
-  })
-  document.body.innerHTML = ''
-})
 
 describe('wireBoundaryInfoPanel', () => {
   it('adds the boundary info panel on map:ready', () => {

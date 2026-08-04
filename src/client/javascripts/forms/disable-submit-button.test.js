@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /* global PageTransitionEvent: readonly */
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { fireEvent, getByRole } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import {
@@ -28,10 +28,6 @@ function mountForm({ formAttributes = '', innerHtml } = {}) {
 function getSubmitButton() {
   return getByRole(document.body, 'button', { name: SUBMIT_BUTTON_NAME })
 }
-
-afterEach(() => {
-  document.body.innerHTML = ''
-})
 
 describe('disableSubmitButtonOnSubmit', () => {
   it('disables the submit button when the form is submitted', async () => {
