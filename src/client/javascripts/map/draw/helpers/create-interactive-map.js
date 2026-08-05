@@ -21,6 +21,9 @@ export function createInteractiveMap(
     bounds,
     zoom: DEFAULT_ZOOM,
     containerHeight: '100%',
+    // Avoids a spurious history.replaceState() on the initial map move,
+    // which can trigger a GTM History Change-based Page View a second time.
+    urlPosition: 'none',
     transformRequest,
     plugins
   })

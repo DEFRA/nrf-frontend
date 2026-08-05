@@ -52,6 +52,8 @@ export default function getViewModel({
       ? getBoundaryErrorMessage(boundaryFailureReason)
       : null,
     boundaryFilename,
-    boundaryTypePath
+    boundaryTypePath,
+    uploadStatus: boundaryFailureReason ? 'fail' : 'success',
+    failureReason: boundaryFailureReason
   }
 }

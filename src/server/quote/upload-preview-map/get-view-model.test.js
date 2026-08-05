@@ -160,6 +160,25 @@ describe('getViewModel', () => {
     expect(result.boundaryTypePath).toBe('/quote/boundary-type')
   })
 
+  it('should report uploadStatus success and no failureReason when there is no failure', () => {
+    const result = getViewModel({ boundaryGeojson: {} })
+
+    expect(result.uploadStatus).toBe('success')
+    expect(result.failureReason).toBeNull()
+  })
+
+  it('should report uploadStatus fail and the raw failureReason code when there is a failure', () => {
+    const result = getViewModel({
+      boundaryGeojson: null,
+      boundaryFailureReason: BOUNDARY_ERRORS.UPLOAD.FILE_SIZE_TOO_LARGE
+    })
+
+    expect(result.uploadStatus).toBe('fail')
+    expect(result.failureReason).toBe(
+      BOUNDARY_ERRORS.UPLOAD.FILE_SIZE_TOO_LARGE
+    )
+  })
+
   it('should include boundaryFilename when provided', () => {
     const result = getViewModel({
       boundaryGeojson: { boundaryGeometryWgs84: null, intersectingEdps: [] },

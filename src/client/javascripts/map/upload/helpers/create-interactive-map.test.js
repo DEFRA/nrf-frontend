@@ -41,6 +41,7 @@ describe('createInteractiveMap', () => {
         containerHeight: '100%',
         enableZoomControls: true,
         enableFullscreen: true,
+        urlPosition: 'none',
         transformRequest: expect.any(Function),
         plugins
       })

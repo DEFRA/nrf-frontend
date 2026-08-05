@@ -38,6 +38,7 @@ describe('createInteractiveMap', () => {
         bounds: null,
         zoom: 8.5,
         containerHeight: '100%',
+        urlPosition: 'none',
         transformRequest: expect.any(Function),
         plugins
       })

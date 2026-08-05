@@ -155,4 +155,44 @@ describe('upload-boundary controller', () => {
       })
     )
   })
+
+  it('should push uploadStatus fail and the failureReason code from the dedicated session key', async () => {
+    const h = createMockH()
+    const request = createMockRequest({
+      uploadRejectionReason: 'file_size_too_large'
+    })
+    vi.mocked(initiateUpload).mockResolvedValue({
+      uploadId: 'test-upload-id',
+      uploadUrl: '/upload-and-scan/test-upload-id'
+    })
+
+    await handler(request, h)
+
+    expect(request.yar.clear).toHaveBeenCalledWith('uploadRejectionReason')
+    expect(h.view).toHaveBeenCalledWith(
+      'quote/upload-boundary/index',
+      expect.objectContaining({
+        uploadStatus: 'fail',
+        failureReason: 'file_size_too_large'
+      })
+    )
+  })
+
+  it('should not push uploadStatus when there is no uploadRejectionReason in session', async () => {
+    const h = createMockH()
+    const request = createMockRequest()
+    vi.mocked(initiateUpload).mockResolvedValue({
+      uploadId: 'test-upload-id',
+      uploadUrl: '/upload-and-scan/test-upload-id'
+    })
+
+    await handler(request, h)
+
+    expect(h.view).toHaveBeenCalledWith(
+      'quote/upload-boundary/index',
+      expect.not.objectContaining({
+        uploadStatus: expect.anything()
+      })
+    )
+  })
 })
