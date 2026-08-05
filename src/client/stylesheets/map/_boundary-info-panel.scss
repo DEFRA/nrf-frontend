@@ -1,3 +1,11 @@
+@use "../../../../node_modules/govuk-frontend/dist/govuk/index" as *;
+
+.app-boundary-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(2);
+}
+
 // Custom layout for the "Boundary information" map panel. Built from plain
 // rules rather than govuk-summary-list/govuk-heading-s/utility classes,
 // since this panel lives inside the interactive map's own panel chrome
@@ -17,18 +25,14 @@
 }
 
 .app-boundary-info-panel__summary {
-  margin: 0 0 15px;
-}
-
-.app-boundary-info-panel__stats {
-  margin: 0 0 20px;
+  margin: 0 0 govuk-spacing(2);
 }
 
 .app-boundary-info-panel__stats-row {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 0;
+  gap: govuk-spacing(2);
+  padding: govuk-spacing(2) 0;
   border-bottom: 1px solid #b1b4b6;
 }
 

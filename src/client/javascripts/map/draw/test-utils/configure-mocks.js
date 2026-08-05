@@ -16,7 +16,8 @@ export function configureMocks(mocks) {
     id: 'interact',
     enable: vi.fn(),
     disable: vi.fn(),
-    clear: vi.fn()
+    clear: vi.fn(),
+    selectFeature: vi.fn()
   })
   mocks.drawMLPlugin.mockReturnValue({
     newPolygon: vi.fn(),

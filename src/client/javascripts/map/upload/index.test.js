@@ -41,8 +41,6 @@ const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
 
 describe('upload preview map init', () => {
   beforeEach(() => {
-    document.body.innerHTML = ''
-
     interceptDOMContentLoaded()
   })
 
@@ -117,6 +115,7 @@ describe('upload preview map init', () => {
       type: 'geojson',
       data: {
         type: 'Feature',
+        id: expect.any(String),
         geometry: validGeojson.features[0].geometry,
         properties: {}
       },
