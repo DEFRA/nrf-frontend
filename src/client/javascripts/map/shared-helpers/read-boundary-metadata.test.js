@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { readExistingBoundary } from './read-boundary-metadata.js'
 
 function createMapElement() {
@@ -9,10 +9,6 @@ function createMapElement() {
 }
 
 describe('readExistingBoundary', () => {
-  afterEach(() => {
-    document.body.innerHTML = ''
-  })
-
   it('returns nulls when no dataset attributes are present', () => {
     const mapEl = createMapElement()
 

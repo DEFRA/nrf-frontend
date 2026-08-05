@@ -101,17 +101,3 @@ body:has(.app-draw-boundary) {
   opacity: 0.5;
   pointer-events: none;
 }
-
-// Matches the position, padding and shadow of the library's own
-// Cancel/Done action panel, using its CSS custom properties directly.
-.app-draw-start-panel {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--primary-gap) * 2);
-  transform: translateX(-50%);
-  z-index: 1;
-  background-color: var(--background-color, #ffffff);
-  padding: var(--panel-margin, 15px);
-  border-radius: var(--panel-border-radius, 0);
-  box-shadow: var(--panel-box-shadow);
-}

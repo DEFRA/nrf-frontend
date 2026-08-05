@@ -1,4 +1,5 @@
 export const PANEL_ROOT_ID = 'draw-boundary-boundary-info'
+export const EDIT_ACTION = 'edit'
 export const SAVE_ACTION = 'save'
 const NOT_AVAILABLE_TEXT = 'Not available'
 
@@ -21,6 +22,7 @@ export function buildPanelHtml() {
         <p class="app-boundary-info-panel__edps-intro">Your red line boundary is in:</p>
         <ul class="app-boundary-info-panel__edp-list" data-boundary-info-intersections></ul>
       </div>
+      <button class="govuk-button govuk-button--secondary app-boundary-info-panel__action-button" data-boundary-action="${EDIT_ACTION}" type="button" hidden>Edit</button>
       <button class="govuk-button app-boundary-info-panel__action-button" data-boundary-action="${SAVE_ACTION}" type="button" hidden>Save and continue</button>
     </div>
   `
@@ -128,6 +130,9 @@ export function renderPanel({ summary, error, results }) {
   const intersectionsEl = panelRoot.querySelector(
     '[data-boundary-info-intersections]'
   )
+  const editButton = panelRoot.querySelector(
+    `[data-boundary-action="${EDIT_ACTION}"]`
+  )
   const saveButton = panelRoot.querySelector(
     `[data-boundary-action="${SAVE_ACTION}"]`
   )
@@ -140,6 +145,7 @@ export function renderPanel({ summary, error, results }) {
 
   resultsEl.hidden = !results
   edpsEl.hidden = !results
+  editButton.hidden = !results
   saveButton.hidden = !results
   saveButton.disabled = false
 

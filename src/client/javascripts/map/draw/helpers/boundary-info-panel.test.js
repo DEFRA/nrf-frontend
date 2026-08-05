@@ -1,15 +1,11 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   PANEL_ROOT_ID,
-  buildPanelHtml,
   renderPanel,
   setSaveButtonDisabled
 } from './boundary-info-panel.js'
-
-function mountPanel() {
-  document.body.insertAdjacentHTML('beforeend', buildPanelHtml())
-}
+import { mountBoundaryInfoPanel } from '../test-utils/mount-boundary-info-panel.js'
 
 function panelText(selector) {
   return document
@@ -22,13 +18,9 @@ function panelHidden(selector) {
   return document.getElementById(PANEL_ROOT_ID).querySelector(selector).hidden
 }
 
-afterEach(() => {
-  document.body.innerHTML = ''
-})
-
 describe('buildPanelHtml', () => {
   it('renders a panel with the default summary message', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
 
     expect(document.getElementById(PANEL_ROOT_ID)).not.toBeNull()
     expect(panelText('[data-boundary-info-summary]')).toBe(
@@ -44,7 +36,7 @@ describe('renderPanel', () => {
   })
 
   it('renders a summary message and hides results', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
 
     renderPanel({ summary: 'Checking boundary...' })
 
@@ -57,7 +49,7 @@ describe('renderPanel', () => {
   })
 
   it('renders an error message', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
 
     renderPanel({ error: 'Invalid geometry' })
 
@@ -66,7 +58,7 @@ describe('renderPanel', () => {
   })
 
   it('renders results with area, perimeter and intersecting EDPs', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
 
     renderPanel({
       results: {
@@ -90,7 +82,7 @@ describe('renderPanel', () => {
   })
 
   it('shows "None" when there are no intersecting EDPs', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
 
     renderPanel({ results: { intersectingEdps: [] } })
 
@@ -109,7 +101,7 @@ describe('setSaveButtonDisabled', () => {
   })
 
   it('disables and enables the save button', () => {
-    mountPanel()
+    mountBoundaryInfoPanel()
     const saveButton = document
       .getElementById(PANEL_ROOT_ID)
       .querySelector('[data-boundary-action="save"]')

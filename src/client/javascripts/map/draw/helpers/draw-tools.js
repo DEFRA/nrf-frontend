@@ -1,13 +1,19 @@
 import createInteractPlugin from '@defra/interactive-map/plugins/interact'
 import createDrawMLPlugin from '@defra/interactive-map/plugins/draw-ml'
+import { EDIT_ACTION, PANEL_ROOT_ID } from './boundary-info-panel.js'
+import { wireDrawStartPanel } from './draw-start-panel.js'
+import { buildDrawToolsMenuItems } from './draw-tools-menu.js'
 
-const DRAW_LAYERS = new Set(['fill-inactive.cold', 'stroke-inactive.cold'])
+const FILL_LAYER_ID = 'fill-inactive.cold'
+const STROKE_LAYER_ID = 'stroke-inactive.cold'
+const DRAW_LAYERS = new Set([FILL_LAYER_ID, STROKE_LAYER_ID])
+const DRAW_FEATURE_ID_PROPERTY = 'id'
 
 export function createDrawToolsPlugins() {
   const interactPlugin = createInteractPlugin({
     layers: [
-      { layerId: 'fill-inactive.cold', idProperty: 'id' },
-      { layerId: 'stroke-inactive.cold', idProperty: 'id' }
+      { layerId: FILL_LAYER_ID, idProperty: DRAW_FEATURE_ID_PROPERTY },
+      { layerId: STROKE_LAYER_ID, idProperty: DRAW_FEATURE_ID_PROPERTY }
     ],
     interactionModes: ['selectFeature'],
     multiSelect: true,
@@ -19,120 +25,7 @@ export function createDrawToolsPlugins() {
   return { interactPlugin, drawPlugin }
 }
 
-function buildDrawStartPanelHtml() {
-  return `
-    <div class="app-draw-start-panel">
-      <button class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" type="button">Draw</button>
-    </div>
-  `
-}
-
-/**
- * @param {Function} onClick
- * @param {{ hidden: boolean }} params
- */
-function buildDrawStartPanel(onClick, { hidden }) {
-  const wrapper = document.createElement('div')
-  wrapper.innerHTML = buildDrawStartPanelHtml()
-
-  const panel = wrapper.firstElementChild
-  panel.hidden = hidden
-  panel.querySelector('button').addEventListener('click', onClick)
-
-  return panel
-}
-
 function noop() {}
-
-/**
- * @param {object} interactiveMap
- * @param {{ mapElementId: string, startDraw: Function, hasExistingBoundary: boolean, getHasBoundary: Function }} params
- */
-function wireDrawStartPanel(
-  interactiveMap,
-  { mapElementId, startDraw, hasExistingBoundary, getHasBoundary }
-) {
-  const mapElement = document.getElementById(mapElementId)
-  if (!mapElement) {
-    return { setHidden: noop }
-  }
-
-  const panel = buildDrawStartPanel(startDraw, { hidden: hasExistingBoundary })
-  mapElement.appendChild(panel)
-
-  const setHidden = (hidden) => {
-    panel.hidden = hidden
-  }
-
-  function onDrawStarted() {
-    setHidden(true)
-  }
-
-  function onDrawCancelled() {
-    setHidden(getHasBoundary())
-  }
-
-  interactiveMap.on('draw:started', onDrawStarted)
-  interactiveMap.on('draw:cancelled', onDrawCancelled)
-
-  return { setHidden }
-}
-
-/**
- * @param {{ interactiveMap: object, interactPlugin: object, drawPlugin: object, startDrawPolygon: Function, getSelectedFeatureIds: Function, setBoundaryState: Function }} params
- */
-function buildDrawToolsMenuItems({
-  interactiveMap,
-  interactPlugin,
-  drawPlugin,
-  startDrawPolygon,
-  getSelectedFeatureIds,
-  setBoundaryState
-}) {
-  function onEditFeatureClick() {
-    if (!drawPlugin.editFeature(getSelectedFeatureIds()[0])) {
-      return
-    }
-    interactiveMap.toggleButtonState('drawTools', 'hidden', true)
-    interactPlugin.disable()
-    setBoundaryState(true)
-  }
-
-  function onDeleteFeatureClick() {
-    drawPlugin.deleteFeature(getSelectedFeatureIds())
-    interactPlugin.clear()
-    interactiveMap.toggleButtonState('drawTools', 'hidden', false)
-    interactiveMap.toggleButtonState('editFeature', 'disabled', true)
-    interactiveMap.toggleButtonState('deleteFeature', 'disabled', true)
-    setBoundaryState(false)
-  }
-
-  return [
-    {
-      id: 'drawPolygon',
-      label: 'Draw polygon',
-      iconSvgContent:
-        '<path d="M19.5 7v10M4.5 7v10M7 19.5h10M7 4.5h10"/><path d="M22 18v3a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1zm0-15v3a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1zM7 18v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1zM7 3v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1z"/>',
-      onClick: startDrawPolygon
-    },
-    {
-      id: 'editFeature',
-      label: 'Edit feature',
-      iconSvgContent:
-        '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
-      isDisabled: true,
-      onClick: onEditFeatureClick
-    },
-    {
-      id: 'deleteFeature',
-      label: 'Delete feature',
-      iconSvgContent:
-        '<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-      isDisabled: true,
-      onClick: onDeleteFeatureClick
-    }
-  ]
-}
 
 /**
  * @param {object} interactiveMap
@@ -189,12 +82,84 @@ function wireSelectionEvents(
 }
 
 /**
+ * Lets the boundary info panel's Edit button select and edit the current
+ * boundary feature, tracking its id across the draw session (and across a
+ * boundary hydrated from a previous session, via initialBoundaryFeatureId)
+ * since the panel has no direct reference to the drawn feature itself.
+ *
  * @param {object} interactiveMap
- * @param {{ interactPlugin: object, drawPlugin: object, mapElementId: string, hasExistingBoundary?: boolean }} params
+ * @param {{ interactPlugin: object, drawPlugin: object, initialBoundaryFeatureId: string|null, setBoundaryState: Function }} params
+ */
+function wireBoundaryInfoEdit(
+  interactiveMap,
+  { interactPlugin, drawPlugin, initialBoundaryFeatureId, setBoundaryState }
+) {
+  let boundaryFeatureId = initialBoundaryFeatureId
+
+  function editBoundaryFeature() {
+    if (!boundaryFeatureId) {
+      return
+    }
+
+    interactPlugin.selectFeature({
+      featureId: boundaryFeatureId,
+      layerId: FILL_LAYER_ID,
+      idProperty: DRAW_FEATURE_ID_PROPERTY
+    })
+
+    if (!drawPlugin.editFeature(boundaryFeatureId)) {
+      return
+    }
+    interactiveMap.toggleButtonState('drawTools', 'hidden', true)
+    interactPlugin.disable()
+    setBoundaryState(true)
+  }
+
+  /**
+   * @param {MouseEvent} clickEvent
+   */
+  function onBoundaryInfoEditClick(clickEvent) {
+    const button = clickEvent.target.closest(
+      `#${PANEL_ROOT_ID} [data-boundary-action="${EDIT_ACTION}"]`
+    )
+    if (!button) {
+      return
+    }
+    editBoundaryFeature()
+  }
+
+  /**
+   * @param {object} feature
+   */
+  function onBoundaryFeatureSaved(feature) {
+    boundaryFeatureId = feature?.id ?? boundaryFeatureId
+    setBoundaryState(true)
+  }
+
+  function onBoundaryFeatureDeleted() {
+    boundaryFeatureId = null
+  }
+
+  document.addEventListener('click', onBoundaryInfoEditClick)
+
+  interactiveMap.on('draw:created', onBoundaryFeatureSaved)
+  interactiveMap.on('draw:edited', onBoundaryFeatureSaved)
+  interactiveMap.on('draw:delete', onBoundaryFeatureDeleted)
+}
+
+/**
+ * @param {object} interactiveMap
+ * @param {{ interactPlugin: object, drawPlugin: object, mapElementId: string, hasExistingBoundary?: boolean, initialBoundaryFeatureId?: string|null }} params
  */
 export function wireDrawTools(
   interactiveMap,
-  { interactPlugin, drawPlugin, mapElementId, hasExistingBoundary = false }
+  {
+    interactPlugin,
+    drawPlugin,
+    mapElementId,
+    hasExistingBoundary = false,
+    initialBoundaryFeatureId = null
+  }
 ) {
   let selectedFeatureIds = []
   let hasBoundary = hasExistingBoundary
@@ -206,10 +171,10 @@ export function wireDrawTools(
   }
   const getHasBoundary = () => hasBoundary
 
-  function setBoundaryState(value) {
-    hasBoundary = value
-    setStartPanelHidden(hasBoundary)
-    interactiveMap.toggleButtonState('drawPolygon', 'disabled', hasBoundary)
+  function setBoundaryState(boundaryExists) {
+    hasBoundary = boundaryExists
+    setStartPanelHidden(boundaryExists)
+    interactiveMap.toggleButtonState('drawPolygon', 'disabled', boundaryExists)
   }
 
   function startDrawPolygon() {
@@ -233,7 +198,6 @@ export function wireDrawTools(
     interactPlugin.enable()
 
     const startPanel = wireDrawStartPanel(interactiveMap, {
-      mapElementId,
       startDraw: startDrawPolygon,
       hasExistingBoundary: hasBoundary,
       getHasBoundary
@@ -259,9 +223,13 @@ export function wireDrawTools(
   }
 
   interactiveMap.on('map:ready', addDrawToolsButton)
-  interactiveMap.on('draw:created', () => setBoundaryState(true))
-  interactiveMap.on('draw:edited', () => setBoundaryState(true))
 
   wireDrawStateEvents(interactiveMap, { interactPlugin })
   wireSelectionEvents(interactiveMap, { setSelectedFeatureIds, getHasBoundary })
+  wireBoundaryInfoEdit(interactiveMap, {
+    interactPlugin,
+    drawPlugin,
+    initialBoundaryFeatureId,
+    setBoundaryState
+  })
 }

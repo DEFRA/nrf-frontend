@@ -8,6 +8,7 @@ import { createModuleLoader } from '../test-utils/module-loader.js'
 import { createMapElement } from './test-utils/create-map-element.js'
 import { createMockMapInstance } from './test-utils/mock-map-instance.js'
 import { configureMocks } from './test-utils/configure-mocks.js'
+import { PANEL_ROOT_ID } from './helpers/boundary-info-panel.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 const CHECK_URL = `${window.location.origin}/quote/draw-boundary/check`
@@ -58,7 +59,6 @@ const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
 
 describe('draw boundary map init', () => {
   beforeEach(() => {
-    document.body.innerHTML = ''
     mswServer.use(
       http.post(CHECK_URL, () => HttpResponse.json({ isValid: true }))
     )
@@ -94,7 +94,7 @@ describe('draw boundary map init', () => {
           { id: 'scaleBar' },
           expect.objectContaining({ id: 'interact' }),
           expect.objectContaining({ newPolygon: expect.any(Function) }),
-          { id: 'search' }
+          expect.objectContaining({ id: 'search' })
         ])
       })
     )
@@ -116,6 +116,25 @@ describe('draw boundary map init', () => {
         mobile: topRightNoLabel,
         tablet: topRightNoLabel,
         desktop: topRightNoLabel
+      }
+    ])
+  })
+
+  it('orders the search button after the back button, before the Key button, on tablet/desktop', async () => {
+    createMapElement()
+    const mockDefra = configureMocks(mocks)
+
+    await loadModule()
+
+    const { plugins } = mockDefra._mock.mock.calls[0][1]
+    const searchConfig = plugins.find((plugin) => plugin.id === 'search')
+
+    const topLeftSearchSecond = { slot: 'top-left', showLabel: false, order: 2 }
+    expect(searchConfig.manifest.buttons).toEqual([
+      {
+        id: 'search',
+        tablet: topLeftSearchSecond,
+        desktop: topLeftSearchSecond
       }
     ])
   })
@@ -261,6 +280,25 @@ describe('draw boundary map init', () => {
     mockDefra._emit('draw:ready')
 
     await vi.waitFor(() => expect(capturedMethod).toBe('POST'))
+  })
+
+  it('lets the boundary info panel Edit button edit a boundary hydrated from a previous session', async () => {
+    createMapElement({ existingBoundaryGeojson: validGeojson })
+    const mockDefra = configureMocks(mocks)
+
+    await loadModule()
+    mockDefra._emit('map:ready', { map: createMockMapInstance() })
+    mockDefra._emit('draw:ready')
+    const editButton = () =>
+      document
+        .getElementById(PANEL_ROOT_ID)
+        .querySelector('[data-boundary-action="edit"]')
+    await vi.waitFor(() => expect(editButton().hidden).toBe(false))
+
+    editButton().click()
+
+    const drawPlugin = mockDefra.drawMLPlugin.mock.results[0].value
+    expect(drawPlugin.editFeature).toHaveBeenCalledWith(expect.any(String))
   })
 
   it('does not zoom the map when there is no feature to hydrate', async () => {

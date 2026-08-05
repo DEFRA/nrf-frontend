@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@defra/interactive-map/plugins/interact', () => ({
   default: vi.fn()
@@ -9,51 +9,32 @@ vi.mock('@defra/interactive-map/plugins/draw-ml', () => ({ default: vi.fn() }))
 import mockCreateInteractPlugin from '@defra/interactive-map/plugins/interact'
 import mockCreateDrawMLPlugin from '@defra/interactive-map/plugins/draw-ml'
 import { createDrawToolsPlugins, wireDrawTools } from './draw-tools.js'
+import { PANEL_ROOT_ID } from './boundary-info-panel.js'
+import { trackDocumentListeners } from '../../../../../test-utils/track-document-listeners.js'
+import { createMapElement } from '../test-utils/create-map-element.js'
+import { mountBoundaryInfoPanel } from '../test-utils/mount-boundary-info-panel.js'
+import {
+  createInteractiveMap,
+  createInteractPlugin,
+  createDrawPlugin,
+  getMenuItem,
+  FILL_LAYER_ID,
+  STROKE_LAYER_ID
+} from '../test-utils/mock-draw-tools.js'
 
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 
-function createMapElement() {
-  const el = document.createElement('div')
-  el.id = MAP_ELEMENT_ID
-  document.body.appendChild(el)
-  return el
-}
+// wireDrawTools registers a document-level click listener each time it
+// runs; without removing it, later tests' clicks would still trigger
+// earlier tests' closures against the (recreated) same-id panel DOM.
+trackDocumentListeners()
 
-function createInteractiveMap() {
-  const handlers = {}
-  return {
-    on: vi.fn((eventType, callback) => {
-      ;(handlers[eventType] ??= []).push(callback)
-    }),
-    addButton: vi.fn(),
-    toggleButtonState: vi.fn(),
-    _emit: (eventType, payload) =>
-      handlers[eventType]?.forEach((handler) => handler(payload))
-  }
+function clickBoundaryInfoEditButton() {
+  document
+    .getElementById(PANEL_ROOT_ID)
+    .querySelector('[data-boundary-action="edit"]')
+    .click()
 }
-
-function createInteractPlugin() {
-  return { enable: vi.fn(), disable: vi.fn(), clear: vi.fn() }
-}
-
-function createDrawPlugin() {
-  return {
-    newPolygon: vi.fn(),
-    editFeature: vi.fn(),
-    deleteFeature: vi.fn()
-  }
-}
-
-function getMenuItem(interactiveMap, id) {
-  const call = interactiveMap.addButton.mock.calls.find(
-    ([buttonId]) => buttonId === 'drawTools'
-  )
-  return call[1].menuItems.find((item) => item.id === id)
-}
-
-afterEach(() => {
-  document.body.innerHTML = ''
-})
 
 describe('createDrawToolsPlugins', () => {
   it('creates the interact and draw plugins via the imported plugin factories', () => {
@@ -68,8 +49,8 @@ describe('createDrawToolsPlugins', () => {
     expect(mockCreateInteractPlugin).toHaveBeenCalledWith(
       expect.objectContaining({
         layers: [
-          { layerId: 'fill-inactive.cold', idProperty: 'id' },
-          { layerId: 'stroke-inactive.cold', idProperty: 'id' }
+          { layerId: FILL_LAYER_ID, idProperty: 'id' },
+          { layerId: STROKE_LAYER_ID, idProperty: 'id' }
         ]
       })
     )
@@ -101,262 +82,6 @@ describe('wireDrawTools', () => {
           expect.objectContaining({ id: 'deleteFeature' })
         ])
       })
-    )
-  })
-
-  it('adds a visible Draw start panel to the map element when there is no existing boundary', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-
-    const panel = document.querySelector('.app-draw-start-panel')
-    expect(panel).not.toBeNull()
-    expect(panel.hidden).toBe(false)
-    const button = panel.querySelector('button')
-    expect(button.textContent).toBe('Draw')
-  })
-
-  it('adds a hidden Draw start panel when an existing boundary has been loaded', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: MAP_ELEMENT_ID,
-      hasExistingBoundary: true
-    })
-    interactiveMap._emit('map:ready')
-
-    const panel = document.querySelector('.app-draw-start-panel')
-    expect(panel).not.toBeNull()
-    expect(panel.hidden).toBe(true)
-  })
-
-  it('does not add a Draw start panel when the map element is missing', () => {
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: 'missing-element'
-    })
-    interactiveMap._emit('map:ready')
-
-    expect(document.querySelector('.app-draw-start-panel')).toBeNull()
-  })
-
-  it('hides the Draw start panel while drawing and keeps it hidden once a boundary exists', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
-
-    interactiveMap._emit('draw:started')
-    expect(panel.hidden).toBe(true)
-
-    interactiveMap._emit('draw:created')
-    expect(panel.hidden).toBe(true)
-
-    interactiveMap._emit('draw:started')
-    interactiveMap._emit('draw:edited')
-    expect(panel.hidden).toBe(true)
-  })
-
-  it('shows the Draw start panel again after cancelling with no existing boundary', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
-
-    interactiveMap._emit('draw:started')
-    interactiveMap._emit('draw:cancelled')
-
-    expect(panel.hidden).toBe(false)
-  })
-
-  it('starts drawing a polygon when the Draw button is clicked', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const drawPlugin = createDrawPlugin()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-
-    const button = document.querySelector('.app-draw-start-panel button')
-    button.click()
-
-    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
-      'drawTools',
-      'hidden',
-      true
-    )
-    expect(drawPlugin.newPolygon).toHaveBeenCalledWith(expect.any(String))
-  })
-
-  it('refocuses the map viewport after starting a polygon from the Draw button', async () => {
-    const mapElement = createMapElement()
-    const viewport = document.createElement('div')
-    viewport.setAttribute('role', 'application')
-    viewport.tabIndex = 0
-    mapElement.appendChild(viewport)
-    const interactiveMap = createInteractiveMap()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin: createDrawPlugin(),
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-
-    document.querySelector('.app-draw-start-panel button').click()
-    await new Promise((resolve) => window.requestAnimationFrame(resolve))
-
-    expect(document.activeElement).toBe(viewport)
-  })
-
-  it('starts drawing a polygon from the drawPolygon menu item', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const drawPlugin = createDrawPlugin()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin: createInteractPlugin(),
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-
-    getMenuItem(interactiveMap, 'drawPolygon').onClick()
-
-    expect(drawPlugin.newPolygon).toHaveBeenCalledWith(expect.any(String))
-  })
-
-  it('does nothing further when editFeature has no feature to edit', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const interactPlugin = createInteractPlugin()
-    const drawPlugin = createDrawPlugin()
-    drawPlugin.editFeature.mockReturnValue(false)
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin,
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-    interactiveMap.toggleButtonState.mockClear()
-
-    getMenuItem(interactiveMap, 'editFeature').onClick()
-
-    expect(interactiveMap.toggleButtonState).not.toHaveBeenCalled()
-    expect(interactPlugin.disable).not.toHaveBeenCalled()
-  })
-
-  it('enters edit mode when editFeature succeeds', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const interactPlugin = createInteractPlugin()
-    const drawPlugin = createDrawPlugin()
-    drawPlugin.editFeature.mockReturnValue(true)
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin,
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-
-    interactiveMap._emit('interact:selectionchange', {
-      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
-    })
-
-    getMenuItem(interactiveMap, 'editFeature').onClick()
-
-    expect(drawPlugin.editFeature).toHaveBeenCalledWith('f1')
-    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
-      'drawTools',
-      'hidden',
-      true
-    )
-    expect(interactPlugin.disable).toHaveBeenCalledTimes(1)
-  })
-
-  it('hides the Draw start panel when entering edit mode', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const interactPlugin = createInteractPlugin()
-    const drawPlugin = createDrawPlugin()
-    drawPlugin.editFeature.mockReturnValue(true)
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin,
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
-
-    interactiveMap._emit('interact:selectionchange', {
-      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
-    })
-    getMenuItem(interactiveMap, 'editFeature').onClick()
-
-    expect(panel.hidden).toBe(true)
-
-    interactiveMap._emit('draw:edited')
-    expect(panel.hidden).toBe(true)
-  })
-
-  it('deletes the selected features', () => {
-    createMapElement()
-    const interactiveMap = createInteractiveMap()
-    const interactPlugin = createInteractPlugin()
-    const drawPlugin = createDrawPlugin()
-
-    wireDrawTools(interactiveMap, {
-      interactPlugin,
-      drawPlugin,
-      mapElementId: MAP_ELEMENT_ID
-    })
-    interactiveMap._emit('map:ready')
-    interactiveMap._emit('interact:selectionchange', {
-      selectedFeatures: [
-        { featureId: 'f1', layerId: 'fill-inactive.cold' },
-        { featureId: 'f2', layerId: 'stroke-inactive.cold' }
-      ]
-    })
-
-    getMenuItem(interactiveMap, 'deleteFeature').onClick()
-
-    expect(drawPlugin.deleteFeature).toHaveBeenCalledWith(['f1', 'f2'])
-    expect(interactPlugin.clear).toHaveBeenCalledTimes(1)
-    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
-      'drawTools',
-      'hidden',
-      false
     )
   })
 
@@ -397,7 +122,7 @@ describe('wireDrawTools', () => {
     })
 
     interactiveMap._emit('interact:selectionchange', {
-      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
+      selectedFeatures: [{ featureId: 'f1', layerId: FILL_LAYER_ID }]
     })
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'editFeature',
@@ -451,11 +176,14 @@ describe('wireDrawTools', () => {
       mapElementId: MAP_ELEMENT_ID
     })
     interactiveMap._emit('map:ready')
-    const panel = document.querySelector('.app-draw-start-panel')
 
     interactiveMap._emit('draw:created')
 
-    expect(panel.hidden).toBe(true)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      true
+    )
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'drawPolygon',
       'disabled',
@@ -463,11 +191,15 @@ describe('wireDrawTools', () => {
     )
 
     interactiveMap._emit('interact:selectionchange', {
-      selectedFeatures: [{ featureId: 'f1', layerId: 'fill-inactive.cold' }]
+      selectedFeatures: [{ featureId: 'f1', layerId: FILL_LAYER_ID }]
     })
     getMenuItem(interactiveMap, 'deleteFeature').onClick()
 
-    expect(panel.hidden).toBe(false)
+    expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+      'drawStart',
+      'hidden',
+      false
+    )
     expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
       'drawPolygon',
       'disabled',
@@ -492,5 +224,137 @@ describe('wireDrawTools', () => {
       'disabled',
       true
     )
+  })
+
+  describe('editing from the boundary info panel', () => {
+    const BOUNDARY_FEATURE_ID = 'boundary-1'
+
+    it('does nothing when there is no boundary to edit yet', () => {
+      mountBoundaryInfoPanel()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID
+      })
+
+      clickBoundaryInfoEditButton()
+
+      expect(interactPlugin.selectFeature).not.toHaveBeenCalled()
+      expect(drawPlugin.editFeature).not.toHaveBeenCalled()
+    })
+
+    it('selects and edits the boundary drawn this session when the Edit button is clicked', () => {
+      mountBoundaryInfoPanel()
+      createMapElement()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+      drawPlugin.editFeature.mockReturnValue(true)
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID
+      })
+      interactiveMap._emit('map:ready')
+      interactiveMap._emit('draw:created', { id: BOUNDARY_FEATURE_ID })
+
+      clickBoundaryInfoEditButton()
+
+      expect(interactPlugin.selectFeature).toHaveBeenCalledWith({
+        featureId: BOUNDARY_FEATURE_ID,
+        layerId: FILL_LAYER_ID,
+        idProperty: 'id'
+      })
+      expect(drawPlugin.editFeature).toHaveBeenCalledWith(BOUNDARY_FEATURE_ID)
+      expect(interactiveMap.toggleButtonState).toHaveBeenCalledWith(
+        'drawTools',
+        'hidden',
+        true
+      )
+      expect(interactPlugin.disable).toHaveBeenCalledTimes(1)
+    })
+
+    it('edits a boundary that was hydrated from a previous session', () => {
+      mountBoundaryInfoPanel()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+      drawPlugin.editFeature.mockReturnValue(true)
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID,
+        hasExistingBoundary: true,
+        initialBoundaryFeatureId: 'saved-boundary-1'
+      })
+
+      clickBoundaryInfoEditButton()
+
+      expect(drawPlugin.editFeature).toHaveBeenCalledWith('saved-boundary-1')
+    })
+
+    it('does not enter edit mode when editFeature fails', () => {
+      mountBoundaryInfoPanel()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+      drawPlugin.editFeature.mockReturnValue(false)
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID,
+        initialBoundaryFeatureId: BOUNDARY_FEATURE_ID
+      })
+
+      clickBoundaryInfoEditButton()
+
+      expect(interactiveMap.toggleButtonState).not.toHaveBeenCalled()
+      expect(interactPlugin.disable).not.toHaveBeenCalled()
+    })
+
+    it('forgets the boundary feature once it is deleted', () => {
+      mountBoundaryInfoPanel()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+      drawPlugin.editFeature.mockReturnValue(true)
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID,
+        initialBoundaryFeatureId: BOUNDARY_FEATURE_ID
+      })
+      interactiveMap._emit('draw:delete')
+
+      clickBoundaryInfoEditButton()
+
+      expect(drawPlugin.editFeature).not.toHaveBeenCalled()
+    })
+
+    it('ignores clicks outside the Edit button', () => {
+      mountBoundaryInfoPanel()
+      const interactiveMap = createInteractiveMap()
+      const interactPlugin = createInteractPlugin()
+      const drawPlugin = createDrawPlugin()
+
+      wireDrawTools(interactiveMap, {
+        interactPlugin,
+        drawPlugin,
+        mapElementId: MAP_ELEMENT_ID,
+        initialBoundaryFeatureId: BOUNDARY_FEATURE_ID
+      })
+
+      document.body.click()
+
+      expect(interactPlugin.selectFeature).not.toHaveBeenCalled()
+    })
   })
 })

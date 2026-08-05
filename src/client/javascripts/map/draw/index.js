@@ -32,6 +32,105 @@ const STYLES_PANEL_TOP_RIGHT = {
   dismissible: true
 }
 
+// Orders the search button after the back button (order: 1) in the shared
+// top-left slot on tablet/desktop, so it renders before the Key button —
+// which keeps its default, unordered position and so naturally falls after
+// any explicitly-ordered buttons. See interactive-map's slot ordering.
+const TOP_LEFT_SEARCH_SECOND = { slot: 'top-left', showLabel: false, order: 2 }
+
+/**
+ * @param {{ datasetsPlugin: object, mapStylesPlugin: object, scaleBarPlugin: object, interactPlugin: object, drawPlugin: object, searchPlugin: object }} params
+ */
+function buildMapPlugins({
+  datasetsPlugin,
+  mapStylesPlugin,
+  scaleBarPlugin,
+  interactPlugin,
+  drawPlugin,
+  searchPlugin
+}) {
+  return [
+    datasetsPlugin,
+    {
+      ...mapStylesPlugin,
+      manifest: {
+        buttons: [
+          {
+            id: 'mapStyles',
+            mobile: TOP_RIGHT_NO_LABEL,
+            tablet: TOP_RIGHT_NO_LABEL,
+            desktop: TOP_RIGHT_NO_LABEL
+          }
+        ],
+        panels: [
+          {
+            id: 'mapStyles',
+            mobile: STYLES_PANEL_DRAWER,
+            tablet: STYLES_PANEL_TOP_RIGHT,
+            desktop: STYLES_PANEL_TOP_RIGHT
+          }
+        ]
+      }
+    },
+    scaleBarPlugin,
+    interactPlugin,
+    drawPlugin,
+    {
+      ...searchPlugin,
+      manifest: {
+        buttons: [
+          {
+            id: 'search',
+            tablet: TOP_LEFT_SEARCH_SECOND,
+            desktop: TOP_LEFT_SEARCH_SECOND
+          }
+        ]
+      }
+    }
+  ]
+}
+
+/**
+ * @param {object} interactiveMap
+ * @param {{ mapElement: HTMLElement, interactPlugin: object, drawPlugin: object, initialFeature: object|null }} params
+ */
+function wireDrawBoundaryMap(
+  interactiveMap,
+  { mapElement, interactPlugin, drawPlugin, initialFeature }
+) {
+  interactiveMap.on('map:ready', (mapReadyEvent) =>
+    wireMapErrorLogging(mapReadyEvent.map)
+  )
+
+  const boundaryInfoPanel = wireBoundaryInfoPanel(interactiveMap, {
+    checkUrl: toAbsoluteUrl('/quote/draw-boundary/check'),
+    saveAndContinueUrl: toAbsoluteUrl('/quote/draw-boundary/save'),
+    csrfToken: mapElement.dataset.csrfToken
+  })
+
+  wireSavedBoundary(interactiveMap, {
+    drawPlugin,
+    initialFeature,
+    boundaryInfoPanel
+  })
+
+  wireDrawTools(interactiveMap, {
+    interactPlugin,
+    drawPlugin,
+    mapElementId: MAP_ELEMENT_ID,
+    hasExistingBoundary: Boolean(initialFeature),
+    initialBoundaryFeatureId: initialFeature?.id ?? null
+  })
+
+  wireFillOpacityOnZoom(interactiveMap, { fillLayerIds: FILL_LAYER_IDS })
+
+  wireHideLayersOnDraw(interactiveMap, { layerIds: ALL_LAYER_IDS })
+
+  wireBackButton(interactiveMap, {
+    backLinkPath: mapElement.dataset.backLinkPath
+  })
+}
+
 function initDrawBoundaryMap() {
   const mapElement = document.getElementById(MAP_ELEMENT_ID)
 
@@ -53,65 +152,21 @@ function initDrawBoundaryMap() {
     mapStyles,
     bounds,
     center,
-    plugins: [
+    plugins: buildMapPlugins({
       datasetsPlugin,
-      {
-        ...mapStylesPlugin,
-        manifest: {
-          buttons: [
-            {
-              id: 'mapStyles',
-              mobile: TOP_RIGHT_NO_LABEL,
-              tablet: TOP_RIGHT_NO_LABEL,
-              desktop: TOP_RIGHT_NO_LABEL
-            }
-          ],
-          panels: [
-            {
-              id: 'mapStyles',
-              mobile: STYLES_PANEL_DRAWER,
-              tablet: STYLES_PANEL_TOP_RIGHT,
-              desktop: STYLES_PANEL_TOP_RIGHT
-            }
-          ]
-        }
-      },
+      mapStylesPlugin,
       scaleBarPlugin,
       interactPlugin,
       drawPlugin,
       searchPlugin
-    ]
+    })
   })
 
-  interactiveMap.on('map:ready', (mapReadyEvent) =>
-    wireMapErrorLogging(mapReadyEvent.map)
-  )
-
-  const boundaryInfoPanel = wireBoundaryInfoPanel(interactiveMap, {
-    checkUrl: toAbsoluteUrl('/quote/draw-boundary/check'),
-    saveAndContinueUrl: toAbsoluteUrl('/quote/draw-boundary/save'),
-    csrfToken: mapElement.dataset.csrfToken
-  })
-
-  wireSavedBoundary(interactiveMap, {
-    drawPlugin,
-    initialFeature,
-    boundaryInfoPanel
-  })
-
-  wireDrawTools(interactiveMap, {
+  wireDrawBoundaryMap(interactiveMap, {
+    mapElement,
     interactPlugin,
     drawPlugin,
-    mapElementId: MAP_ELEMENT_ID,
-    hasExistingBoundary: Boolean(initialFeature)
-  })
-
-  wireFillOpacityOnZoom(interactiveMap, { fillLayerIds: FILL_LAYER_IDS })
-
-  wireHideLayersOnDraw(interactiveMap, { layerIds: ALL_LAYER_IDS })
-
-  wireBackButton(interactiveMap, {
-    backLinkPath: mapElement.dataset.backLinkPath
+    initialFeature
   })
 }
 
