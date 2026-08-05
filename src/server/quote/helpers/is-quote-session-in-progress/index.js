@@ -5,6 +5,9 @@ import { routePath as startPath } from '../../start/routes.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
 import { routePath as notHousingPath } from '../../not-housing/routes.js'
+import { routePath as excludedAreaPath } from '../../excluded-area/routes.js'
+import { routePath as emailPath } from '../../email/routes.js'
+import { routePath as checkyouranswersPath } from '../../check-your-answers/routes.js'
 import { referencePattern, tokenPattern } from '../../quote-details/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 
@@ -24,6 +27,17 @@ const isExempt = (path) =>
   exemptPaths.has(path) ||
   quoteDetailsPattern.test(path) ||
   resendPattern.test(path)
+
+const redirectIfExcludedArea = (intersectingExcludedAreas, path, h) => {
+  const intersectsExcludedArea = intersectingExcludedAreas.length > 0
+  if (
+    intersectsExcludedArea &&
+    (path === emailPath || path === checkyouranswersPath)
+  ) {
+    return h.redirect(excludedAreaPath).takeover()
+  }
+  return undefined
+}
 
 const redirectIfPlanningTypeOther = (planningType, path, h) => {
   if (
@@ -62,8 +76,13 @@ export const checkForValidQuoteSession = (request, h) => {
     return h.redirect(startPath).takeover()
   }
 
-  const { planningType, isHousing } = quoteData
+  const { planningType, isHousing, boundaryGeojson } = quoteData
   return (
+    redirectIfExcludedArea(
+      boundaryGeojson?.intersectingExcludedAreas || [],
+      request.path,
+      h
+    ) ??
     redirectIfPlanningTypeOther(planningType, request.path, h) ??
     redirectIfNotHousing(isHousing, request.path, h) ??
     h.continue

@@ -8,6 +8,9 @@ import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
 import { routePath as notHousingPath } from '../../not-housing/routes.js'
+import { routePath as excludedAreaPath } from '../../excluded-area/routes.js'
+import { routePath as emailPath } from '../../email/routes.js'
+import { routePath as checkyouranswersPath } from '../../check-your-answers/routes.js'
 
 vi.mock('../quote-session-cache/index.js')
 
@@ -23,6 +26,10 @@ const makeH = () => {
 }
 
 describe('checkForValidQuoteSession', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('continues when a quote session exists', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       planningType: 'full-planning-permission'
@@ -164,6 +171,47 @@ describe('checkForValidQuoteSession', () => {
   it('continues on planning-type when isHousing is "no"', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
     const request = makeRequest({ path: planningTypePath })
+    const h = makeH()
+
+    const result = checkForValidQuoteSession(request, h)
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it('redirects to excluded-area when boundary intersects an excluded area on the email page', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      boundaryGeojson: {
+        intersectingExcludedAreas: ['River Wensum Exclusion Zone']
+      }
+    })
+    const request = makeRequest({ path: emailPath })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
+  })
+
+  it('redirects to excluded-area when boundary intersects an excluded area on the check-your-answers page', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      boundaryGeojson: {
+        intersectingExcludedAreas: ['River Wensum Exclusion Zone']
+      }
+    })
+    const request = makeRequest({ path: checkyouranswersPath })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
+  })
+
+  it('continues on the email page when boundary has no intersecting excluded areas', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({
+      boundaryGeojson: { intersectingExcludedAreas: [] }
+    })
+    const request = makeRequest({ path: emailPath })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)
