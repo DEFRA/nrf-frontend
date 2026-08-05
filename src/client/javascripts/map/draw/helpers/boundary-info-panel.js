@@ -10,7 +10,8 @@ const EDP_HEADING = 'Environmental Delivery Plan (EDP)'
 
 export function buildPanelHtml() {
   return `
-    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel">
+    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel govuk-!-padding-top-3">
+      <h2 class="govuk-heading-s govuk-!-margin-bottom-0" data-boundary-info-heading>Boundary information</h2>
       <p class="govuk-body-s app-boundary-info-panel__summary" data-boundary-info-summary>Draw a boundary to check it.</p>
       <p class="govuk-body-s app-boundary-info-panel__error" data-boundary-info-error hidden></p>
       <dl class="app-boundary-info-panel__stats" data-boundary-info-results hidden>
@@ -56,17 +57,31 @@ function formatPerimeter(perimeter) {
 }
 
 /**
- * @param {string|{ name?: string, label?: string, code?: string, id?: string }} edp
+ * The boundary check API's EDP attributes are sourced from a shapefile and
+ * can be missing per-feature (e.g. label is null where the source data has
+ * no "Label" attribute), so several fallbacks are tried before giving up —
+ * returning null rather than the raw object so callers can omit the name
+ * line entirely instead of dumping unreadable JSON.
+ *
+ * @param {string|{ label?: string, n2k_site_name?: string, name?: string, code?: string, id?: string }} edp
+ * @returns {string|null}
  */
 function formatEdp(edp) {
   if (typeof edp === 'string') {
     return edp
   }
-  return edp?.name || edp?.label || edp?.code || edp?.id || JSON.stringify(edp)
+  return (
+    edp?.label ||
+    edp?.n2k_site_name ||
+    edp?.name ||
+    edp?.code ||
+    edp?.id ||
+    null
+  )
 }
 
 /**
- * @param {string|{ name?: string, label?: string, code?: string, id?: string }} edp
+ * @param {string|{ label?: string, n2k_site_name?: string, name?: string, code?: string, id?: string }} edp
  */
 function buildEdpListItem(edp) {
   const item = document.createElement('li')
@@ -88,12 +103,16 @@ function buildEdpListItem(edp) {
   name.className = 'govuk-body-s app-boundary-info-panel__edp-name'
   name.textContent = EDP_HEADING
 
-  const descriptionEl = document.createElement('p')
-  descriptionEl.className =
-    'govuk-body-s app-boundary-info-panel__edp-description'
-  descriptionEl.textContent = formatEdp(edp)
+  const edpName = formatEdp(edp)
+  text.append(name)
+  if (edpName) {
+    const descriptionEl = document.createElement('p')
+    descriptionEl.className =
+      'govuk-body-s app-boundary-info-panel__edp-description'
+    descriptionEl.textContent = edpName
+    text.append(descriptionEl)
+  }
 
-  text.append(name, descriptionEl)
   item.append(swatchWrap, text)
 
   return item
@@ -134,6 +153,7 @@ export function renderPanel({ summary, error, results }) {
     return
   }
 
+  const headingEl = panelRoot.querySelector('[data-boundary-info-heading]')
   const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
   const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
   const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
@@ -156,17 +176,7 @@ export function renderPanel({ summary, error, results }) {
   errorEl.textContent = error || ''
   errorEl.hidden = !error
 
-  const panelEl = panelRoot.closest('.im-c-panel')
-  const headingEl = panelEl?.querySelector('.im-c-panel__heading')
-  if (headingEl) {
-    headingEl.classList.remove('im-e-heading-m')
-    headingEl.classList.add('govuk-heading-s')
-    headingEl.classList.toggle('govuk-visually-hidden', Boolean(error))
-  }
-  panelEl?.classList.toggle(
-    'app-boundary-info-panel--heading-hidden',
-    Boolean(error)
-  )
+  headingEl.classList.toggle('govuk-visually-hidden', Boolean(error))
 
   resultsEl.hidden = !results
   edpsEl.hidden = !results

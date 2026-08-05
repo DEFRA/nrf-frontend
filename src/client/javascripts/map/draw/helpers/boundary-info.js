@@ -116,20 +116,31 @@ function addBoundaryInfoPanel(interactiveMap) {
     label: 'Boundary information',
     focus: false,
     html: buildPanelHtml(),
-    mobile: { slot: 'drawer', modal: false, open: false, dismissible: false },
+    // The library's own heading (used for the panel's aria-labelledby) is
+    // kept screen-reader-only in favour of our own heading in buildPanelHtml,
+    // which we can toggle visually hidden/visible per render state.
+    mobile: {
+      slot: 'drawer',
+      modal: false,
+      open: false,
+      dismissible: false,
+      showLabel: false
+    },
     tablet: {
       slot: 'right-bottom',
       modal: false,
       width: '340px',
       open: false,
-      dismissible: false
+      dismissible: false,
+      showLabel: false
     },
     desktop: {
       slot: 'right-bottom',
       modal: false,
       width: '340px',
       open: false,
-      dismissible: false
+      dismissible: false,
+      showLabel: false
     }
   })
 }

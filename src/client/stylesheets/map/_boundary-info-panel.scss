@@ -18,13 +18,6 @@
   display: none;
 }
 
-// The heading normally supplies the panel's top padding. When it's visually
-// hidden for an error state, restore top padding to match the body's
-// existing bottom padding (var(--panel-margin)) so spacing stays balanced.
-.im-c-panel.app-boundary-info-panel--heading-hidden .im-c-panel__body {
-  padding-top: var(--panel-margin);
-}
-
 .app-boundary-info-panel__error {
   margin: 0;
   color: govuk-colour("black");

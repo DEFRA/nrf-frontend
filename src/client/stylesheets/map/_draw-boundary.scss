@@ -1,3 +1,5 @@
+@use "../../../../node_modules/govuk-frontend/dist/govuk/index" as *;
+
 // Full-bleed layout for the draw-boundary page: rather than guessing the
 // viewport height left over for the map with a magic-number calc(), each
 // ancestor down to the map is made a flex column with a definite height, so
@@ -22,6 +24,27 @@ body:has(.app-draw-boundary) {
     .govuk-service-navigation {
       display: none;
     }
+  }
+}
+
+// The map's own back button sits at the standard 15px (govuk-spacing(3))
+// inset from the viewport edge, rather than the header/service navigation's
+// usual centred, max-width govuk-width-container — so their content is left-
+// aligned with it, both are switched to the same full-width, fixed-gutter
+// layout here. govuk-header__container--full-width is GOV.UK Frontend's own
+// modifier for this; service navigation has no equivalent, so its inner
+// govuk-width-container is overridden to match by hand.
+body:has(.app-draw-boundary) {
+  .govuk-header__container {
+    max-width: none;
+    margin: 0;
+    padding: 0 govuk-spacing(3);
+  }
+
+  .govuk-service-navigation .govuk-width-container {
+    max-width: none;
+    margin: 0;
+    padding: 0 govuk-spacing(3);
   }
 }
 
