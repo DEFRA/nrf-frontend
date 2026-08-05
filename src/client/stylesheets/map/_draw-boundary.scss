@@ -9,12 +9,6 @@ html:has(.app-draw-boundary) {
   height: 100%;
 }
 
-body:has(.app-draw-boundary) {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
 // Reclaims vertical space for the map on small screens, where the header and
 // service navigation would otherwise take up a disproportionate share of the
 // viewport.
@@ -35,6 +29,10 @@ body:has(.app-draw-boundary) {
 // modifier for this; service navigation has no equivalent, so its inner
 // govuk-width-container is overridden to match by hand.
 body:has(.app-draw-boundary) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .govuk-header__container {
     max-width: none;
     margin: 0;
@@ -123,4 +121,9 @@ body:has(.app-draw-boundary) {
 .app-draw-boundary-checking .im-c-map-button--draw-done {
   opacity: 0.5;
   pointer-events: none;
+}
+
+// hide the defra map's select button (shown on touch interfaces only) as redundant - we already have Draw & Edit buttons
+.im-c-button-wrapper--select-at-target {
+  display:none;
 }
