@@ -13,7 +13,7 @@
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
         <p class="govuk-body">This will permanently delete your quote. You can create a new quote.</p>
 
-        <form method="post" novalidate>
+        <form method="post" novalidate data-disable-on-submit>
             {% include "partials/csrf-token.njk" %}
             <input type="hidden" name="confirmDeleteQuote" value="Yes">
             <div class="govuk-button-group">
