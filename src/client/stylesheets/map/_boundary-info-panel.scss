@@ -3,7 +3,7 @@
 .app-boundary-info-panel {
   display: flex;
   flex-direction: column;
-  gap: govuk-spacing(2);
+  gap: govuk-spacing(3);
 }
 
 // Custom layout for the "Boundary information" map panel. Built from plain
@@ -18,9 +18,16 @@
   display: none;
 }
 
-.app-boundary-info-panel__heading {
-  margin: 0 0 15px;
-  font-size: 1.125rem;
+// The heading normally supplies the panel's top padding. When it's visually
+// hidden for an error state, restore top padding to match the body's
+// existing bottom padding (var(--panel-margin)) so spacing stays balanced.
+.im-c-panel.app-boundary-info-panel--heading-hidden .im-c-panel__body {
+  padding-top: var(--panel-margin);
+}
+
+.app-boundary-info-panel__error {
+  margin: 0;
+  color: govuk-colour("black");
   font-weight: 700;
 }
 
@@ -37,7 +44,7 @@
 }
 
 .app-boundary-info-panel__stats-row:first-child {
-  border-top: 1px solid #b1b4b6;
+  padding-top: govuk-spacing(1);
 }
 
 .app-boundary-info-panel__stats-key {
@@ -52,10 +59,6 @@
   text-align: right;
 }
 
-.app-boundary-info-panel__edps-intro {
-  margin: 0 0 10px;
-}
-
 .app-boundary-info-panel__edp-list {
   margin: 0 0 20px;
   padding: 0;
@@ -63,6 +66,9 @@
 }
 
 .app-boundary-info-panel__edp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   margin-bottom: 15px;
 }
 
@@ -70,19 +76,24 @@
   margin-bottom: 0;
 }
 
-.app-boundary-info-panel__edp-heading {
+// Matches govuk-body-s's line-height, so centring the swatch inside this
+// wrapper lines it up with the vertical centre of the name's text line,
+// without a hard-coded pixel nudge.
+.app-boundary-info-panel__edp-swatch-wrap {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-shrink: 0;
+  height: 1.25rem;
 }
 
 .app-boundary-info-panel__edp-swatch {
-  display: inline-block;
-  flex-shrink: 0;
   width: 14px;
   height: 14px;
-  background-color: #feca57;
   border: 1px solid #0b0c0c;
+}
+
+.app-boundary-info-panel__edp-text {
+  min-width: 0;
 }
 
 .app-boundary-info-panel__edp-name {
@@ -90,9 +101,14 @@
 }
 
 .app-boundary-info-panel__edp-description {
-  margin: 5px 0 0 22px;
-  font-size: 0.9375rem;
+  margin: 5px 0 0;
   color: #505a5f;
+}
+
+.app-boundary-info-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(2);
 }
 
 .app-boundary-info-panel__action-button {

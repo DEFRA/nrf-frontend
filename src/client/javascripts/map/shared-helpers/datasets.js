@@ -5,6 +5,7 @@ export const ALL_LAYER_IDS = FILL_LAYER_IDS.flatMap((id) => [
   id,
   `${id}-stroke`
 ])
+export const EDP_BOUNDARY_STROKE_COLOUR = '#FD0'
 
 export function createMapDatasetsPlugin() {
   return createDatasetsPlugin({
@@ -16,7 +17,7 @@ export function createMapDatasetsPlugin() {
         sourceLayer: 'edp_boundaries',
         showInKey: true,
         style: {
-          stroke: '#FD0',
+          stroke: EDP_BOUNDARY_STROKE_COLOUR,
           fillPattern: 'horizontal-hatch',
           fillPatternForegroundColor: 'rgba(255, 221, 0, 0.6)',
           fillPatternBackgroundColor: 'transparent'

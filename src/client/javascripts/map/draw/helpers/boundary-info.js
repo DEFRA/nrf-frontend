@@ -100,8 +100,12 @@ async function runBoundaryCheck(
   }
 }
 
-function onDrawStarted() {
+/**
+ * @param {object} interactiveMap
+ */
+function onDrawModeStarted(interactiveMap) {
   setSaveButtonDisabled(true)
+  interactiveMap.hidePanel(PANEL_ID)
 }
 
 /**
@@ -160,9 +164,14 @@ function onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent) {
   submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
 }
 
-function onDrawCancelled(state) {
+/**
+ * @param {object} interactiveMap
+ * @param {object} state
+ */
+function onDrawCancelled(interactiveMap, state) {
   if (state.latestPayload) {
     setSaveButtonDisabled(false)
+    interactiveMap.showPanel(PANEL_ID)
   }
 }
 
@@ -202,8 +211,11 @@ export function wireBoundaryInfoPanel(
   )
   interactiveMap.on('draw:created', runCheck)
   interactiveMap.on('draw:edited', runCheck)
-  interactiveMap.on('draw:started', onDrawStarted)
-  interactiveMap.on('draw:cancelled', () => onDrawCancelled(state))
+  interactiveMap.on('draw:started', () => onDrawModeStarted(interactiveMap))
+  interactiveMap.on('draw:editstart', () => onDrawModeStarted(interactiveMap))
+  interactiveMap.on('draw:cancelled', () =>
+    onDrawCancelled(interactiveMap, state)
+  )
   interactiveMap.on('draw:delete', () => onDrawDelete(interactiveMap, state))
 
   return {

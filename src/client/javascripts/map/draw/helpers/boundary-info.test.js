@@ -107,8 +107,14 @@ describe('wireBoundaryInfoPanel', () => {
       .getElementById(PANEL_ROOT_ID)
       .querySelectorAll('[data-boundary-info-intersections] li')
     expect(items).toHaveLength(2)
-    expect(items[0].textContent).toBe('Yare Broads')
-    expect(items[1].textContent).toBe('Bure Broads')
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-description')
+        .textContent
+    ).toBe('Yare Broads')
+    expect(
+      items[1].querySelector('.app-boundary-info-panel__edp-description')
+        .textContent
+    ).toBe('Bure Broads')
   })
 
   it('ignores a duplicate check trigger while one is already in flight', async () => {
@@ -210,7 +216,7 @@ describe('wireBoundaryInfoPanel', () => {
     expect(capturedBody).toEqual({ geometry: { type: 'Polygon' } })
   })
 
-  it('shows "None" when there are no intersecting EDPs', async () => {
+  it('shows the unsupported area message when there are no intersecting EDPs', async () => {
     mswServer.use(
       http.post(CHECK_URL, () => HttpResponse.json({ intersectingEdps: [] }))
     )
@@ -229,7 +235,9 @@ describe('wireBoundaryInfoPanel', () => {
     const items = document
       .getElementById(PANEL_ROOT_ID)
       .querySelectorAll('[data-boundary-info-intersections] li')
-    expect(items[0].textContent).toBe('None')
+    expect(items[0].textContent).toBe(
+      'An area not supported by an Environmental Delivery Plan (EDP)'
+    )
     expect(panelText('[data-boundary-info-area]')).toBe('Not available')
   })
 
@@ -290,7 +298,33 @@ describe('wireBoundaryInfoPanel', () => {
     expect(saveButton.disabled).toBe(true)
   })
 
-  it('re-enables the save button on cancel only if a valid result exists', async () => {
+  it('hides the panel while drawing or editing, and shows it again once the check runs', async () => {
+    mswServer.use(http.post(CHECK_URL, () => HttpResponse.json({})))
+
+    const interactiveMap = wireAndReady()
+
+    interactiveMap._emit('draw:started')
+    expect(interactiveMap.hidePanel).toHaveBeenCalledWith('boundaryInfo')
+
+    interactiveMap._emit('draw:created', { geometry: {} })
+    expect(interactiveMap.showPanel).toHaveBeenCalledWith('boundaryInfo')
+    await vi.waitFor(() =>
+      expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
+    )
+
+    interactiveMap.hidePanel.mockClear()
+    interactiveMap._emit('draw:editstart')
+    expect(interactiveMap.hidePanel).toHaveBeenCalledWith('boundaryInfo')
+
+    interactiveMap.showPanel.mockClear()
+    interactiveMap._emit('draw:edited', { geometry: {} })
+    expect(interactiveMap.showPanel).toHaveBeenCalledWith('boundaryInfo')
+    await vi.waitFor(() =>
+      expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
+    )
+  })
+
+  it('re-shows the panel and re-enables the save button on cancel only if a valid result exists', async () => {
     mswServer.use(http.post(CHECK_URL, () => HttpResponse.json({})))
 
     const interactiveMap = wireAndReady()
@@ -301,6 +335,7 @@ describe('wireBoundaryInfoPanel', () => {
     interactiveMap._emit('draw:started')
     interactiveMap._emit('draw:cancelled')
     expect(saveButton.disabled).toBe(true)
+    expect(interactiveMap.showPanel).not.toHaveBeenCalled()
 
     interactiveMap._emit('draw:created', { geometry: {} })
     await vi.waitFor(() =>
@@ -308,8 +343,10 @@ describe('wireBoundaryInfoPanel', () => {
     )
 
     interactiveMap._emit('draw:started')
+    interactiveMap.showPanel.mockClear()
     interactiveMap._emit('draw:cancelled')
     expect(saveButton.disabled).toBe(false)
+    expect(interactiveMap.showPanel).toHaveBeenCalledWith('boundaryInfo')
   })
 
   it('resets and hides the panel on draw:delete', async () => {
