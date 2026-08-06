@@ -44,6 +44,7 @@ function redirectToUploadWithError({ failureReason, request, h }) {
     { path: ['file'], message: getBoundaryErrorMessage(failureReason) }
   ])
   saveValidationFlashToCache(request, { validationErrors })
+  request.yar.set('uploadRejectionReason', failureReason)
   request.yar.clear('pendingUploadId')
   request.yar.clear('pendingUploadUrl')
   return h

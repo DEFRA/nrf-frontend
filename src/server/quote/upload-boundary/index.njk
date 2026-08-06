@@ -2,6 +2,11 @@
 
 {% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
+{% block head %}
+  {% include "partials/gtm-upload-result.njk" %}
+  {{ super() }}
+{% endblock %}
+
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
 {% endblock %}

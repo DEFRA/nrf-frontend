@@ -3,6 +3,7 @@
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
 {% block head %}
+  {% include "partials/gtm-upload-result.njk" %}
   {{ super() }}
   <script src="{{ getAssetPath('upload-preview-map.js') }}" defer nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">

@@ -1,6 +1,8 @@
-import { getByRole, queryByRole } from '@testing-library/dom'
+import { getByRole, queryByRole, within } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { config } from '../../../config/config.js'
+
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
@@ -243,6 +245,86 @@ describe('Boundary map page', () => {
       })
 
       expect(document.getElementById('boundary-map')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('GTM upload_result event', () => {
+    const TEST_GTM_ID = 'GTM-TEST123'
+
+    beforeEach(() => {
+      config.set('gtmId', TEST_GTM_ID)
+    })
+
+    afterEach(() => {
+      config.set('gtmId', null)
+    })
+
+    it('pushes rlb_status and rlb_failure_reason when the boundary check fails', async () => {
+      mockCheckBoundary({
+        failureReason: 'self_intersecting_geometry'
+      })
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const { getByTestId } = within(document.documentElement)
+      const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain('rlb_status: "fail"')
+      expect(script.textContent).toContain(
+        'rlb_failure_reason: "self_intersecting_geometry"'
+      )
+    })
+
+    it('pushes upload_result before the GTM init snippet, so it is in the data model before the Page View event fires', async () => {
+      mockCheckBoundary({
+        failureReason: 'self_intersecting_geometry'
+      })
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const scriptTestIds = Array.from(
+        document.querySelectorAll('script[data-testid]')
+      ).map((script) => script.getAttribute('data-testid'))
+
+      expect(scriptTestIds.indexOf('gtm-upload-result')).toBeLessThan(
+        scriptTestIds.indexOf('gtm-head')
+      )
+    })
+
+    it('pushes rlb_status success without a failure_reason when the boundary check succeeds', async () => {
+      mockCheckBoundary({ geojson: boundaryGeojsonWithEdp })
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const { getByTestId } = within(document.documentElement)
+      const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain('rlb_status: "success"')
+      expect(script.textContent).not.toContain('rlb_failure_reason')
+    })
+
+    it('does not push when analytics/GTM is disabled', async () => {
+      config.set('gtmId', null)
+      mockCheckBoundary({ geojson: boundaryGeojsonWithEdp })
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const { queryByTestId } = within(document.documentElement)
+      expect(queryByTestId('gtm-upload-result')).toBeNull()
     })
   })
 })

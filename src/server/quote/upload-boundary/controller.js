@@ -38,6 +38,12 @@ export async function handler(request, h) {
     clearValidationFlashFromCache(request)
   }
 
+  // One-shot: set by upload-received when the previous upload was rejected
+  const uploadRejectionReason = request.yar.get('uploadRejectionReason')
+  if (uploadRejectionReason) {
+    request.yar.clear('uploadRejectionReason')
+  }
+
   const uploadSession = await getUploadSession(request)
 
   if (uploadSession.error) {
@@ -55,6 +61,10 @@ export async function handler(request, h) {
     uploadUrl: uploadSession.uploadUrl,
     ...(flash?.validationErrors && {
       validationErrors: flash.validationErrors
+    }),
+    ...(uploadRejectionReason && {
+      uploadStatus: 'fail',
+      failureReason: uploadRejectionReason
     })
   })
 }
