@@ -1,6 +1,7 @@
 import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
@@ -28,7 +29,7 @@ describe('No EDP page', () => {
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      boundaryTypePath
+      uploadBoundaryPath
     )
   })
 
@@ -48,7 +49,7 @@ describe('No EDP page', () => {
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      boundaryTypePath
+      uploadBoundaryPath
     )
   })
 })
