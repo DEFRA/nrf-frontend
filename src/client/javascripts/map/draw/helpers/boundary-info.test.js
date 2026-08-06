@@ -110,7 +110,8 @@ describe('wireBoundaryInfoPanel', () => {
     expect(window.dataLayer).toContainEqual({
       event: 'rlb_boundary_validation',
       rlb_option: 'draw',
-      rlb_status: 'success'
+      rlb_status: 'success',
+      rlb_failure_reason: undefined
     })
     const items = document
       .getElementById(PANEL_ROOT_ID)
@@ -281,6 +282,47 @@ describe('wireBoundaryInfoPanel', () => {
       rlb_option: 'draw',
       rlb_status: 'fail',
       rlb_failure_reason: 'invalid_geometry'
+    })
+  })
+
+  it('does not carry a stale rlb_failure_reason over to a later successful check', async () => {
+    mswServer.use(
+      http.post(CHECK_URL, () =>
+        HttpResponse.json(
+          { error: 'Invalid geometry', failureReason: 'invalid_geometry' },
+          { status: 400 }
+        )
+      )
+    )
+    const interactiveMap = wireAndReady()
+    interactiveMap._emit('draw:edited', { geometry: {} })
+
+    await vi.waitFor(() =>
+      expect(panelText('[data-boundary-info-error]')).toBe('Invalid geometry')
+    )
+
+    mswServer.use(
+      http.post(CHECK_URL, () =>
+        HttpResponse.json({
+          boundaryMetadata: {
+            area: { hectares: 12, acres: 30 },
+            perimeter: { kilometres: 4, miles: 2.5 }
+          },
+          intersectingEdps: []
+        })
+      )
+    )
+    interactiveMap._emit('draw:edited', { geometry: {} })
+
+    await vi.waitFor(() =>
+      expect(panelHidden('[data-boundary-info-results]')).toBe(false)
+    )
+
+    expect(window.dataLayer).toContainEqual({
+      event: 'rlb_boundary_validation',
+      rlb_option: 'draw',
+      rlb_status: 'success',
+      rlb_failure_reason: undefined
     })
   })
 
