@@ -122,8 +122,3 @@ body:has(.app-draw-boundary) {
   opacity: 0.5;
   pointer-events: none;
 }
-
-// hide the defra map's select button (shown on touch interfaces only) as redundant - we already have Draw & Edit buttons
-.im-c-button-wrapper--select-at-target {
-  display:none;
-}
