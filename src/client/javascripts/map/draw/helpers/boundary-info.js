@@ -100,8 +100,12 @@ async function runBoundaryCheck(
   }
 }
 
-function onDrawStarted() {
+/**
+ * @param {object} interactiveMap
+ */
+function onDrawModeStarted(interactiveMap) {
   setSaveButtonDisabled(true)
+  interactiveMap.hidePanel(PANEL_ID)
 }
 
 /**
@@ -112,20 +116,31 @@ function addBoundaryInfoPanel(interactiveMap) {
     label: 'Boundary information',
     focus: false,
     html: buildPanelHtml(),
-    mobile: { slot: 'drawer', modal: false, open: false, dismissible: false },
+    // The library's own heading (used for the panel's aria-labelledby) is
+    // kept screen-reader-only in favour of our own heading in buildPanelHtml,
+    // which we can toggle visually hidden/visible per render state.
+    mobile: {
+      slot: 'drawer',
+      modal: false,
+      open: false,
+      dismissible: false,
+      showLabel: false
+    },
     tablet: {
       slot: 'right-bottom',
       modal: false,
       width: '340px',
       open: false,
-      dismissible: false
+      dismissible: false,
+      showLabel: false
     },
     desktop: {
       slot: 'right-bottom',
       modal: false,
       width: '340px',
       open: false,
-      dismissible: false
+      dismissible: false,
+      showLabel: false
     }
   })
 }
@@ -160,9 +175,14 @@ function onSaveClick(state, { saveAndContinueUrl, csrfToken }, clickEvent) {
   submitSaveAndContinue({ saveAndContinueUrl, csrfToken, state })
 }
 
-function onDrawCancelled(state) {
+/**
+ * @param {object} interactiveMap
+ * @param {object} state
+ */
+function onDrawCancelled(interactiveMap, state) {
   if (state.latestPayload) {
     setSaveButtonDisabled(false)
+    interactiveMap.showPanel(PANEL_ID)
   }
 }
 
@@ -202,8 +222,11 @@ export function wireBoundaryInfoPanel(
   )
   interactiveMap.on('draw:created', runCheck)
   interactiveMap.on('draw:edited', runCheck)
-  interactiveMap.on('draw:started', onDrawStarted)
-  interactiveMap.on('draw:cancelled', () => onDrawCancelled(state))
+  interactiveMap.on('draw:started', () => onDrawModeStarted(interactiveMap))
+  interactiveMap.on('draw:editstart', () => onDrawModeStarted(interactiveMap))
+  interactiveMap.on('draw:cancelled', () =>
+    onDrawCancelled(interactiveMap, state)
+  )
   interactiveMap.on('draw:delete', () => onDrawDelete(interactiveMap, state))
 
   return {

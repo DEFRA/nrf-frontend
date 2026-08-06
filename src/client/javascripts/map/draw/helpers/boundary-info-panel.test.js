@@ -77,11 +77,59 @@ describe('renderPanel', () => {
       .getElementById(PANEL_ROOT_ID)
       .querySelectorAll('[data-boundary-info-intersections] li')
     expect(items).toHaveLength(2)
-    expect(items[0].textContent).toBe('Yare Broads')
-    expect(items[1].textContent).toBe('Bure Broads')
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-name').textContent
+    ).toBe('Environmental Delivery Plan (EDP)')
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-description')
+        .textContent
+    ).toBe('Yare Broads')
+    expect(
+      items[1].querySelector('.app-boundary-info-panel__edp-description')
+        .textContent
+    ).toBe('Bure Broads')
   })
 
-  it('shows "None" when there are no intersecting EDPs', () => {
+  it('falls back to n2k_site_name when the EDP has no label', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({
+      results: {
+        intersectingEdps: [{ label: null, n2k_site_name: 'River Wensum SAC' }]
+      }
+    })
+
+    const items = document
+      .getElementById(PANEL_ROOT_ID)
+      .querySelectorAll('[data-boundary-info-intersections] li')
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-description')
+        .textContent
+    ).toBe('River Wensum SAC')
+  })
+
+  it('omits the name line when the EDP has no identifiable name', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({
+      results: {
+        intersectingEdps: [{ label: null, n2k_site_name: null }]
+      }
+    })
+
+    const items = document
+      .getElementById(PANEL_ROOT_ID)
+      .querySelectorAll('[data-boundary-info-intersections] li')
+    expect(items).toHaveLength(1)
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-name').textContent
+    ).toBe('Environmental Delivery Plan (EDP)')
+    expect(
+      items[0].querySelector('.app-boundary-info-panel__edp-description')
+    ).toBeNull()
+  })
+
+  it('shows the unsupported area message when there are no intersecting EDPs', () => {
     mountBoundaryInfoPanel()
 
     renderPanel({ results: { intersectingEdps: [] } })
@@ -90,7 +138,9 @@ describe('renderPanel', () => {
       .getElementById(PANEL_ROOT_ID)
       .querySelectorAll('[data-boundary-info-intersections] li')
     expect(items).toHaveLength(1)
-    expect(items[0].textContent).toBe('None')
+    expect(items[0].textContent).toBe(
+      'An area not supported by an Environmental Delivery Plan (EDP)'
+    )
     expect(panelText('[data-boundary-info-area]')).toBe('Not available')
   })
 })
