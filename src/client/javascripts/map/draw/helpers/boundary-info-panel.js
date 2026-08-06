@@ -180,7 +180,7 @@ export function renderPanel({ summary, error, results }) {
 
   resultsEl.hidden = !results
   edpsEl.hidden = !results
-  editButton.hidden = !results
+  editButton.hidden = !results && !error
   saveButton.hidden = !results
   saveButton.disabled = false
 
