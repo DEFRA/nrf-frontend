@@ -57,6 +57,15 @@ describe('renderPanel', () => {
     expect(panelHidden('[data-boundary-info-error]')).toBe(false)
   })
 
+  it('shows the edit button but not the save button on an error, so an invalid boundary (e.g. self-overlapping) can be corrected', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({ error: 'The red line boundary is overlapping itself.' })
+
+    expect(panelHidden('[data-boundary-action="edit"]')).toBe(false)
+    expect(panelHidden('[data-boundary-action="save"]')).toBe(true)
+  })
+
   it('renders results with area, perimeter and intersecting EDPs', () => {
     mountBoundaryInfoPanel()
 
