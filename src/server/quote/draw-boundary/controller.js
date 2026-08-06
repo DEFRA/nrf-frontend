@@ -19,7 +19,10 @@ export async function checkBoundaryHandler(request, h) {
       { failureReason: result.failureReason },
       'draw-boundary check failed'
     )
-    const response = { error: getBoundaryErrorMessage(result.failureReason) }
+    const response = {
+      error: getBoundaryErrorMessage(result.failureReason),
+      failureReason: result.failureReason
+    }
     if (result.geojson) {
       response.geojson = result.geojson
     }

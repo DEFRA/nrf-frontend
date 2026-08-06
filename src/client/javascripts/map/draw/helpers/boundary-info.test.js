@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 
 import { wireBoundaryInfoPanel } from './boundary-info.js'
@@ -49,6 +49,10 @@ function panelHidden(selector) {
 }
 
 describe('wireBoundaryInfoPanel', () => {
+  beforeEach(() => {
+    window.dataLayer = []
+  })
+
   it('adds the boundary info panel on map:ready', () => {
     const interactiveMap = wireAndReady()
 
@@ -103,6 +107,11 @@ describe('wireBoundaryInfoPanel', () => {
     })
     expect(panelText('[data-boundary-info-perimeter]')).toBe('4km (2.5 miles)')
     expect(panelHidden('[data-boundary-action="save"]')).toBe(false)
+    expect(window.dataLayer).toContainEqual({
+      event: 'rlb_boundary_validation',
+      rlb_option: 'draw',
+      rlb_status: 'success'
+    })
     const items = document
       .getElementById(PANEL_ROOT_ID)
       .querySelectorAll('[data-boundary-info-intersections] li')
@@ -244,7 +253,10 @@ describe('wireBoundaryInfoPanel', () => {
   it('renders the backend error message when the check request fails', async () => {
     mswServer.use(
       http.post(CHECK_URL, () =>
-        HttpResponse.json({ error: 'Invalid geometry' }, { status: 400 })
+        HttpResponse.json(
+          { error: 'Invalid geometry', failureReason: 'invalid_geometry' },
+          { status: 400 }
+        )
       )
     )
     const loggerErrorSpy = vi
@@ -264,6 +276,12 @@ describe('wireBoundaryInfoPanel', () => {
       expect.any(Error),
       `POST to ${CHECK_URL} returned a non-OK response`
     )
+    expect(window.dataLayer).toContainEqual({
+      event: 'rlb_boundary_validation',
+      rlb_option: 'draw',
+      rlb_status: 'fail',
+      rlb_failure_reason: 'invalid_geometry'
+    })
   })
 
   it('renders a generic error message when the check request throws', async () => {
@@ -285,6 +303,12 @@ describe('wireBoundaryInfoPanel', () => {
       expect.any(Error),
       `Failed to POST to ${CHECK_URL}`
     )
+    expect(window.dataLayer).toContainEqual({
+      event: 'rlb_boundary_validation',
+      rlb_option: 'draw',
+      rlb_status: 'fail',
+      rlb_failure_reason: 'boundary_check_request_error'
+    })
   })
 
   it('disables the save button while drawing starts', () => {
