@@ -1,4 +1,4 @@
-import { getByRole, getByText } from '@testing-library/dom'
+import { getByRole, getByText, within } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -98,6 +98,28 @@ describe('Upload boundary page', () => {
       )
     ).toBeInTheDocument()
     expect(document.querySelector('main form')).not.toBeInTheDocument()
+  })
+
+  describe('GTM upload_result event', () => {
+    const TEST_GTM_ID = 'GTM-TEST123'
+
+    beforeEach(() => {
+      config.set('gtmId', TEST_GTM_ID)
+    })
+
+    afterEach(() => {
+      config.set('gtmId', null)
+    })
+
+    it('does not push on a normal page load with no upload rejection', async () => {
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer()
+      })
+
+      const { queryByTestId } = within(document.documentElement)
+      expect(queryByTestId('gtm-upload-result')).toBeNull()
+    })
   })
 
   it('returns 429 once the session has hit the request limit', async () => {

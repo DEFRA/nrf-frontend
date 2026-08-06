@@ -1,7 +1,8 @@
-import { getAllByText, getByRole } from '@testing-library/dom'
+import { getAllByText, getByRole, within } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { config } from '../../../config/config.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { stubUploadFlow } from '../../../test-utils/stub-upload-flow.js'
@@ -95,5 +96,46 @@ describe('Upload rejected before geometry parsing', () => {
     expect(
       getAllByText(document, 'Select a red line boundary file')
     ).toHaveLength(2)
+  })
+
+  describe('GTM upload_result event on the upload page', () => {
+    const TEST_GTM_ID = 'GTM-TEST123'
+
+    beforeEach(() => {
+      config.set('gtmId', TEST_GTM_ID)
+    })
+
+    afterEach(() => {
+      config.set('gtmId', null)
+    })
+
+    it('pushes rlb_status fail and the raw error code on the redirected-to upload page', async () => {
+      stubRejection('file_size_too_large')
+      const cookie = await primeUploadSession(getServer())
+      const document = await followUploadRejection({
+        server: getServer(),
+        cookie
+      })
+
+      const { getByTestId } = within(document.documentElement)
+      const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain('rlb_status: "fail"')
+      expect(script.textContent).toContain(
+        'rlb_failure_reason: "file_size_too_large"'
+      )
+    })
+
+    it('does not push when analytics/GTM is disabled', async () => {
+      config.set('gtmId', null)
+      stubRejection('file_size_too_large')
+      const cookie = await primeUploadSession(getServer())
+      const document = await followUploadRejection({
+        server: getServer(),
+        cookie
+      })
+
+      const { queryByTestId } = within(document.documentElement)
+      expect(queryByTestId('gtm-upload-result')).toBeNull()
+    })
   })
 })

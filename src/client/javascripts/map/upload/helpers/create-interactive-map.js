@@ -25,6 +25,11 @@ export function createInteractiveMap(
     containerHeight: '100%',
     enableZoomControls: true,
     enableFullscreen: true,
+    // A read-only preview of an already-uploaded boundary has no use for a
+    // shareable pan/zoom URL, and the library's default 'sync' behaviour
+    // calls history.replaceState() on the initial fitBounds — which can
+    // trigger a GTM History Change-based Page View a second time.
+    urlPosition: 'none',
     transformRequest,
     plugins
   })

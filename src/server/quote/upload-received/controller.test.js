@@ -229,4 +229,20 @@ describe('checkBoundaryHandler', () => {
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
   })
+
+  it('should store the raw failureReason code in a dedicated session key for an upload rejection', async () => {
+    vi.mocked(checkBoundary).mockResolvedValue({
+      failureReason: 'boundary_check_failed'
+    })
+
+    const h = createMockH()
+    const request = createMockRequest()
+
+    await checkBoundaryHandler(request, h)
+
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'uploadRejectionReason',
+      'boundary_check_failed'
+    )
+  })
 })

@@ -1,0 +1,14 @@
+{% if analyticsEnabled and gtmId and uploadStatus %}
+{# Pushed before super() (which triggers the GTM init snippet's own
+   event:'gtm.js' push) so rlb_status/rlb_failure_reason are already in
+   GTM's data model when the Page View trigger evaluates.
+   rlb_failure_reason is only included when there's an actual failure. #}
+<script nonce="{{ nonce }}" data-testid="gtm-upload-result">
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    rlb_option: 'upload',
+    rlb_status: {{ uploadStatus | dump | safe }}{% if failureReason %},
+    rlb_failure_reason: {{ failureReason | dump | safe }}{% endif %}
+  });
+</script>
+{% endif %}
