@@ -107,14 +107,6 @@ body:has(.app-draw-boundary) {
   min-height: govuk-spacing(8);
 }
 
-// addButton's iconSvgContent is inserted inside the library's own <svg>
-// wrapper, so we can't attach the library's im-c-icon--narrow class to it
-// directly — replicate that class's rule, scoped to this button instead.
-.im-c-map-button--back .im-c-icon {
-  margin-left: govuk-spacing(-1);
-  margin-right: govuk-spacing(-1);
-}
-
 // Dims and blocks pointer interaction with the Done button while a boundary
 // check is in flight (see boundary-info.js), so it can't be clicked again
 // before the current /check request resolves.
