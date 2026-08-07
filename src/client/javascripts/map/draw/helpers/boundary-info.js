@@ -23,7 +23,11 @@ function pushBoundaryValidationEvent({ status, failureReason }) {
     event: 'rlb_boundary_validation',
     rlb_option: 'draw',
     rlb_status: status,
-    ...(status === 'fail' && { rlb_failure_reason: failureReason })
+    // dataLayer.push merges into GTM's persistent data model rather than
+    // replacing it, so a stale rlb_failure_reason from a previous failed
+    // check would otherwise leak into a later successful event unless it's
+    // explicitly cleared here.
+    rlb_failure_reason: status === 'fail' ? failureReason : undefined
   })
 }
 // The library's own Done button ('drawDone' -> 'im-c-map-button--draw-done')
