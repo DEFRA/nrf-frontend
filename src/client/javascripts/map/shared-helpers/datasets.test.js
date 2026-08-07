@@ -33,7 +33,8 @@ describe('datasets', () => {
       datasets: [
         expect.objectContaining({
           id: 'edp_boundaries',
-          label: 'Nature Restoration Fund nutrients levy',
+          label:
+            'Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)',
           sourceLayer: 'edp_boundaries',
           showInKey: true,
           tiles: ['/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt'],

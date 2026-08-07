@@ -1,8 +1,8 @@
 .app-layer-legend-swatch {
   display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 2px solid currentcolor;
-  margin-right: 0.6rem;
+  width: govuk-spacing(5);
+  height: govuk-spacing(5);
+  border: 1px solid currentcolor;
+  margin-right: govuk-spacing(2);
   vertical-align: -0.2rem;
 }

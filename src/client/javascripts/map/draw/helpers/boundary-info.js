@@ -10,6 +10,26 @@ import { stopTileLoading } from './stop-tile-loading.js'
 import { ALL_LAYER_IDS } from '../../shared-helpers/datasets.js'
 
 const PANEL_ID = 'boundaryInfo'
+// Client-only reason: the check request never got a response (network
+// failure, timeout, etc), so there's no backend failureReason to report.
+const CHECK_REQUEST_ERROR_REASON = 'boundary_check_request_error'
+
+/**
+ * @param {{ status: 'success'|'fail', failureReason?: string }} params
+ */
+function pushBoundaryValidationEvent({ status, failureReason }) {
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({
+    event: 'rlb_boundary_validation',
+    rlb_option: 'draw',
+    rlb_status: status,
+    // dataLayer.push merges into GTM's persistent data model rather than
+    // replacing it, so a stale rlb_failure_reason from a previous failed
+    // check would otherwise leak into a later successful event unless it's
+    // explicitly cleared here.
+    rlb_failure_reason: status === 'fail' ? failureReason : undefined
+  })
+}
 // The library's own Done button ('drawDone' -> 'im-c-map-button--draw-done')
 // re-derives its disabled state from the plugin's vertex count each render,
 // so toggling it via interactiveMap.toggleButtonState gets immediately
@@ -82,6 +102,10 @@ async function runBoundaryCheck(
     )
 
     if (!response.ok) {
+      pushBoundaryValidationEvent({
+        status: 'fail',
+        failureReason: payload?.failureReason || CHECK_REQUEST_ERROR_REASON
+      })
       renderPanel({
         error: payload?.error || 'An error occurred checking the boundary'
       })
@@ -89,8 +113,13 @@ async function runBoundaryCheck(
     }
 
     state.latestPayload = payload
+    pushBoundaryValidationEvent({ status: 'success' })
     renderPanel({ results: payload })
   } catch {
+    pushBoundaryValidationEvent({
+      status: 'fail',
+      failureReason: CHECK_REQUEST_ERROR_REASON
+    })
     renderPanel({
       error: 'An error occurred checking the boundary'
     })

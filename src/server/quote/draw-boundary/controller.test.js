@@ -69,6 +69,7 @@ describe('POST /quote/draw-boundary/check', () => {
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(JSON.parse(response.payload)).toEqual({
       error: getBoundaryErrorMessage('self_intersecting_geometry'),
+      failureReason: 'self_intersecting_geometry',
       geojson: { boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] } }
     })
   })
@@ -87,7 +88,8 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badGateway)
     expect(JSON.parse(response.payload)).toEqual({
-      error: 'Unable to check the boundary right now. Please try again.'
+      error: 'Unable to check the boundary right now. Please try again.',
+      failureReason: 'impact_assessor_unreachable'
     })
   })
 
@@ -104,7 +106,8 @@ describe('POST /quote/draw-boundary/check', () => {
 
     expect(response.statusCode).toBe(statusCodes.badRequest)
     expect(JSON.parse(response.payload)).toEqual({
-      error: 'Unable to check the boundary. Please try again.'
+      error: 'Unable to check the boundary. Please try again.',
+      failureReason: 'boundary_check_failed'
     })
   })
 
