@@ -1,11 +1,8 @@
 import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
-import { submitForm } from '../../../test-utils/submit-form.js'
 
 describe('No EDP page', () => {
   const getServer = setupTestServer()
@@ -15,7 +12,7 @@ describe('No EDP page', () => {
     async () => (sessionCookie = await withValidQuoteSession(getServer()))
   )
 
-  it('should render a page heading, title and back link', async () => {
+  it('should render a page heading and a title', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
@@ -26,30 +23,6 @@ describe('No EDP page', () => {
     )
     expect(document.title).toBe(
       'Nature restoration levy is not available in this area - Nature restoration levy - GOV.UK'
-    )
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      uploadBoundaryPath
-    )
-  })
-
-  it('should link back to boundary-type when boundary entry type is draw', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: boundaryTypePath,
-      server: getServer(),
-      formData: { boundaryEntryType: 'draw' },
-      cookie: sessionCookie
-    })
-
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getServer(),
-      cookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      uploadBoundaryPath
     )
   })
 })
