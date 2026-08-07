@@ -115,7 +115,7 @@ export async function handler(request, h) {
     request.yar.clear('pendingUploadUrl')
   }
 
-  const heading = 'Boundary file upload status'
+  const heading = 'Checking your file…'
   const viewModel = {
     pageTitle: getPageTitle(heading),
     pageHeading: heading,

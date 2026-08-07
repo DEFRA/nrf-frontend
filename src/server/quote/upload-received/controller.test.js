@@ -83,9 +83,8 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
+      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageHeading: 'Checking your file…',
       status: 'pending',
       isProcessing: true,
       refreshInterval: 5,
@@ -101,9 +100,8 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
+      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageHeading: 'Checking your file…',
       status: 'initiated',
       isProcessing: true,
       refreshInterval: 5,
@@ -122,9 +120,8 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
+      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageHeading: 'Checking your file…',
       status: 'error',
       isProcessing: false,
       refreshInterval: null,

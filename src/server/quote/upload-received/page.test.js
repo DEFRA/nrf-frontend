@@ -70,20 +70,17 @@ describe('Upload received page', () => {
   it('should render page heading and title when processing', async () => {
     const document = await loadPageWithSession({ server: getServer() })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Boundary file upload status'
+      'Checking your file…'
     )
     expect(document.title).toBe(
-      'Boundary file upload status - Nature restoration levy - GOV.UK'
+      'Checking your file… - Nature restoration levy - GOV.UK'
     )
   })
 
   it('should show processing message when status is pending', async () => {
     const document = await loadPageWithSession({ server: getServer() })
     expect(
-      getByText(document, 'Your file is being processed.')
-    ).toBeInTheDocument()
-    expect(
-      getByText(document, 'This page will automatically refresh.')
+      getByText(document, 'This may take a few seconds.')
     ).toBeInTheDocument()
   })
 
@@ -107,7 +104,7 @@ describe('Upload received page', () => {
     expect(response.headers.location).toBe('/quote/upload-preview-map')
   })
 
-  it('should show try again and draw boundary links when upload error occurs', async () => {
+  it('should show try again link when upload error occurs', async () => {
     vi.mocked(getUploadStatus).mockResolvedValue({
       uploadStatus: 'error',
       error: 'Upload failed'
@@ -119,10 +116,5 @@ describe('Upload received page', () => {
       name: 'Try uploading another file'
     })
     expect(tryAgainLink).toHaveAttribute('href', '/quote/upload-boundary')
-
-    const drawLink = getByRole(document, 'link', {
-      name: 'Draw the red line boundary instead'
-    })
-    expect(drawLink).toHaveAttribute('href', '/quote/boundary-type')
   })
 })

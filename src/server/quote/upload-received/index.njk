@@ -1,4 +1,5 @@
 {% extends "layouts/page.njk" %}
+{% from "loading-spinner/macro.njk" import appLoadingSpinner %}
 
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
@@ -11,36 +12,13 @@
 
 {% block content %}
 <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds-from-desktop">
-
-        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
-
-        {% if errorMessage %}
-        {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: [{
-                text: errorMessage
-            }]
-        }) }}
-
-        <p class="govuk-body">
-            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
-        </p>
-        <p class="govuk-body">
-            <a href="/quote/boundary-type" class="govuk-link">Draw the red line boundary instead</a>
-        </p>
-        {% endif %}
-
+    <div class="govuk-grid-column">
         {% if isProcessing %}
-        <p class="govuk-body">Your file is being processed.</p>
-        <p class="govuk-body">This page will automatically refresh.</p>
-        <p class="govuk-body">
-            <strong>Status:</strong> {{ status }}
-        </p>
+          {{ appLoadingSpinner({ caption: pageHeading}) }}
         {% else %}
-        <p class="govuk-body">
-            <strong>Status:</strong> {{ status }}
-        </p>
+          <p class="govuk-body">
+            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
+          </p>
         {% endif %}
 
     </div>
