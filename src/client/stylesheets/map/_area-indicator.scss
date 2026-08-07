@@ -10,7 +10,7 @@
 .app-area-indicator-border {
   position: absolute;
   inset: 0;
-  border: 8px solid transparent;
+  border: govuk-spacing(3) solid transparent;
   box-sizing: border-box;
 }
 
@@ -18,7 +18,7 @@
   @include govuk-font($size: 16, $weight: bold);
 
   position: absolute;
-  bottom: 12px; // 8px border + 4px gap
+  bottom: govuk-spacing(3);
   left: 50%;
   transform: translateX(-50%);
   color: govuk-colour("black");
