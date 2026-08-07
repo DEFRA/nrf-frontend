@@ -3,3 +3,4 @@
 @use "variables";
 @use "helpers";
 @use "map";
+@forward "../../server/common/components/loading-spinner/loading-spinner";

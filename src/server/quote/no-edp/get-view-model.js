@@ -26,6 +26,6 @@ export default function getViewModel(quoteData = {}) {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
-    backLinkPath: backLinkPath
+    backLinkPath
   }
 }

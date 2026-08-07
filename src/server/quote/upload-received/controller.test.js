@@ -83,13 +83,9 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
-      status: 'pending',
-      isProcessing: true,
-      refreshInterval: 5,
-      errorMessage: undefined
+      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageHeading: 'Checking your file…',
+      refreshInterval: 5
     })
   })
 
@@ -101,17 +97,13 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
-      status: 'initiated',
-      isProcessing: true,
-      refreshInterval: 5,
-      errorMessage: undefined
+      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageHeading: 'Checking your file…',
+      refreshInterval: 5
     })
   })
 
-  it('should render view without refresh when status is error', async () => {
+  it('should redirect to upload-boundary with an error when status is a terminal failure', async () => {
     const h = createMockH()
     const request = createMockRequest('test-upload-id')
     vi.mocked(getUploadStatus).mockResolvedValue({
@@ -121,15 +113,12 @@ describe('upload-received controller', () => {
 
     await handler(request, h)
 
-    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
-      pageTitle:
-        'Boundary file upload status - Nature restoration levy - GOV.UK',
-      pageHeading: 'Boundary file upload status',
-      status: 'error',
-      isProcessing: false,
-      refreshInterval: null,
-      errorMessage: 'Upload failed'
-    })
+    expect(h.view).not.toHaveBeenCalled()
+    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'uploadRejectionReason',
+      'upload_status_check_failed'
+    )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
   })
