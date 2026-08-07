@@ -12,7 +12,7 @@ describe('Excluded area page', () => {
     async () => (sessionCookie = await withValidQuoteSession(getServer()))
   )
 
-  it('should render a page heading, title and back link', async () => {
+  it('should render a page heading and a title', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
