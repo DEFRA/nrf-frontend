@@ -104,17 +104,25 @@ describe('Upload received page', () => {
     expect(response.headers.location).toBe('/quote/upload-preview-map')
   })
 
-  it('should show try again link when upload error occurs', async () => {
+  it('should redirect to upload-boundary when upload error occurs', async () => {
     vi.mocked(getUploadStatus).mockResolvedValue({
       uploadStatus: 'error',
       error: 'Upload failed'
     })
 
-    const document = await loadPageWithSession({ server: getServer() })
-
-    const tryAgainLink = getByRole(document, 'link', {
-      name: 'Try uploading another file'
+    const setupResponse = await getServer().inject({
+      method: 'GET',
+      url: '/__test-setup-session'
     })
-    expect(tryAgainLink).toHaveAttribute('href', '/quote/upload-boundary')
+    const cookie = setupResponse.headers['set-cookie']?.[0]?.split(';')[0]
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: routePath,
+      headers: cookie ? { cookie } : {}
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 })

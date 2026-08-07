@@ -5,22 +5,13 @@
 
 {% block head %}
   {{ super() }}
-  {% if refreshInterval %}
   <meta http-equiv="refresh" content="{{ refreshInterval }}">
-  {% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column">
-        {% if isProcessing %}
-          {{ appLoadingSpinner({ caption: pageHeading}) }}
-        {% else %}
-          <p class="govuk-body">
-            <a href="/quote/upload-boundary" class="govuk-link">Try uploading another file</a>
-          </p>
-        {% endif %}
-
+        {{ appLoadingSpinner({ caption: pageHeading}) }}
     </div>
 </div>
 {% endblock %}
