@@ -272,6 +272,7 @@ describe('Boundary map page', () => {
 
       const { getByTestId } = within(document.documentElement)
       const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain("event: 'rlb_boundary_validation'")
       expect(script.textContent).toContain('rlb_status: "fail"')
       expect(script.textContent).toContain(
         'rlb_failure_reason: "self_intersecting_geometry"'
@@ -309,8 +310,9 @@ describe('Boundary map page', () => {
 
       const { getByTestId } = within(document.documentElement)
       const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain("event: 'rlb_boundary_validation'")
       expect(script.textContent).toContain('rlb_status: "success"')
-      expect(script.textContent).not.toContain('rlb_failure_reason')
+      expect(script.textContent).toContain('rlb_failure_reason: undefined')
     })
 
     it('does not push when analytics/GTM is disabled', async () => {
