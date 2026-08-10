@@ -3,16 +3,13 @@ import { BOUNDARY_UPLOAD_FORMATS_TEXT } from './boundary-upload-hint.js'
 
 const { UPLOAD, GEOMETRY, SERVICE } = BOUNDARY_ERRORS
 
-const MISSING_REQUIRED_ZIP_FILES =
-  'The zipped file is missing one or more required files.'
-
 // User-facing copy for each boundary-check failure code.
 export const BOUNDARY_ERROR_MESSAGES = {
   [UPLOAD.FILE_SIZE_TOO_LARGE]: `The selected file must be smaller than ${MAX_BOUNDARY_FILE_SIZE_MB}MB.`,
   [UPLOAD.ZIP_ENTRY_TOO_LARGE]:
-    'A file inside the uploaded zip is too large. Please reduce the file size and try again.',
+    'A file in the ZIP file is larger than the 20 MB limit. Reduce the file size, then upload it again.',
   [UPLOAD.ZIP_TOTAL_TOO_LARGE]:
-    'The uploaded zip is too large once extracted. Please reduce the file size and try again.',
+    'The contents of the ZIP file are too large when extracted. Reduce the file size, then upload it again.',
   [UPLOAD.UPLOAD_NOT_READY]:
     'The file upload has not finished processing. Please try again.',
   [UPLOAD.UPLOAD_FILE_MISSING]: 'Select a red line boundary file',
@@ -21,23 +18,26 @@ export const BOUNDARY_ERROR_MESSAGES = {
   [UPLOAD.S3_DOWNLOAD_FAILED]:
     'Unable to retrieve the uploaded file. Please try again.',
   [UPLOAD.UNSAFE_FILENAME]:
-    'The boundary filename contains unsupported characters. Use letters, numbers, spaces, dots, underscores, hyphens or parentheses, and rename the file before uploading it again.',
+    'A file name contains characters that are not allowed. Use only letters, numbers, spaces, full stops, underscores (_), hyphens (-) and brackets (), then upload the ZIP file again.',
   [UPLOAD.INVALID_ZIP]:
-    'The uploaded file is not a valid zip archive. Please check the file and try again.',
+    'The uploaded file could not be opened as a ZIP file. Check the file and upload it again.',
   [UPLOAD.ZIP_TOO_MANY_FILES]:
-    'The uploaded zip contains too many files. Please remove any unnecessary files and try again.',
+    'The ZIP file contains too many files. Remove any files you do not need, then upload it again.',
   [UPLOAD.ZIP_NESTED_ZIP]:
-    'The uploaded zip contains a nested zip file. Nested zips are not allowed.',
+    'The ZIP file contains another ZIP file. Remove the ZIP file inside it, then upload it again.',
   [UPLOAD.ZIP_UNSAFE_PATH]:
-    'The uploaded zip contains an entry with an unsafe path. Please check the file and try again.',
-  [UPLOAD.ZIP_MISSING_SHAPEFILE]: MISSING_REQUIRED_ZIP_FILES,
-  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]: MISSING_REQUIRED_ZIP_FILES,
-  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]: MISSING_REQUIRED_ZIP_FILES,
+    'The ZIP file contains an invalid file or folder path. Check the ZIP file and upload it again.',
+  [UPLOAD.ZIP_MISSING_SHAPEFILE]:
+    'The ZIP file does not contain a shapefile (.shp). Upload a ZIP file containing a shapefile.',
+  [UPLOAD.ZIP_MISSING_SHAPEFILE_PARTS]:
+    'The shapefile is incomplete. Make sure the ZIP file contains all the required files, then upload it again.',
+  [UPLOAD.BOUNDARY_FILE_NOT_FOUND_IN_ZIP]:
+    'The required file could not be found in the ZIP file. Check the ZIP file and upload it again.',
   [UPLOAD.ZIP_AMBIGUOUS_FILENAME]:
-    'The selected boundary filename appears more than once in the uploaded zip.',
+    'The ZIP file contains more than one file with the same name. Rename one of the files, then upload the ZIP file again.',
   [UPLOAD.UNSUPPORTED_FILE_TYPE]: `The selected file must be ${BOUNDARY_UPLOAD_FORMATS_TEXT}`,
   [UPLOAD.UNREADABLE_GEOMETRY_FILE]:
-    'The uploaded file could not be read. Please check the file and try again.',
+    'The file could not be read. Check the file and upload it again.',
   [UPLOAD.FILE_CONTAINS_VIRUS]: 'The selected file contains a virus',
   [UPLOAD.FILE_REJECTED_BY_UPLOADER]:
     'The uploaded file was rejected. Please check the file and try again.',
@@ -46,18 +46,19 @@ export const BOUNDARY_ERROR_MESSAGES = {
   [UPLOAD.MISSING_CRS]:
     'The uploaded boundary file is using co-ordinates that are not recognised.',
   [GEOMETRY.INVALID_GEOMETRY]:
-    'The uploaded boundary geometry could not be processed. It contains incomplete or malformed coordinates.',
+    'The file contains a red line boundary with no shape.',
   [GEOMETRY.UNSUPPORTED_GEOMETRY_TYPE]:
-    'Only Polygon geometry is supported. Please ensure the boundary forms a complete closed polygon shape.',
+    'The file must contain an area, not a point or a line.',
   [GEOMETRY.SELF_INTERSECTING]: 'The red line boundary is overlapping itself.',
   [GEOMETRY.HAS_HOLES]:
-    'The red line boundary contains a hole. Please provide a boundary without gaps.',
+    'The red line boundary contains a hole. Upload a boundary with no holes.',
   [GEOMETRY.DUPLICATE_VERTICES]:
-    'The uploaded boundary contains duplicated or overlapping geometry (duplicate consecutive vertices). Please clean up the boundary and try again.',
-  [GEOMETRY.UNCLOSED_RING]: 'The red line boundary is not closed.',
+    'The red line boundary contains the same point more than once. Remove the duplicate point.',
+  [GEOMETRY.UNCLOSED_RING]:
+    'The red line boundary is not closed. Make sure the boundary joins back to its starting point.',
   [GEOMETRY.NO_POLYGON_FOUND]: 'The red line boundary is missing.',
   [GEOMETRY.COORDINATES_OUT_OF_RANGE]:
-    'The red line boundary uses co-ordinates that are outside the supported area.',
+    'The red line boundary contains coordinates outside the supported area.',
   [SERVICE.IMPACT_ASSESSOR_UNREACHABLE]:
     'Unable to check the boundary right now. Please try again.',
   [SERVICE.IMPACT_ASSESSOR_BAD_RESPONSE]:

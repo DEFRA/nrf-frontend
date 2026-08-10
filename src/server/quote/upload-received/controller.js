@@ -108,21 +108,23 @@ export async function handler(request, h) {
     uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
 
   if (!isProcessing) {
-    // Terminal, non-ready status (error/failed/unknown) — clear the pending
-    // upload so a retry via upload-boundary mints a fresh CDP Uploader
-    // session instead of reusing this dead one.
-    request.yar.clear('pendingUploadId')
-    request.yar.clear('pendingUploadUrl')
+    // Terminal, non-ready status (error/failed/unknown) — send the user
+    // back to upload-boundary to retry, since there is nothing to show on
+    // this page. redirectToUploadWithError clears the pending upload so a
+    // retry mints a fresh CDP Uploader session instead of reusing this
+    // dead one.
+    return redirectToUploadWithError({
+      failureReason: BOUNDARY_ERRORS.UPLOAD.UPLOAD_STATUS_CHECK_FAILED,
+      request,
+      h
+    })
   }
 
-  const heading = 'Boundary file upload status'
+  const heading = 'Checking your file…'
   const viewModel = {
     pageTitle: getPageTitle(heading),
     pageHeading: heading,
-    status: uploadStatus,
-    isProcessing,
-    refreshInterval: isProcessing ? REFRESH_INTERVAL_SECONDS : null,
-    errorMessage: response.error
+    refreshInterval: REFRESH_INTERVAL_SECONDS
   }
 
   return h.view('quote/upload-received/index', viewModel)
