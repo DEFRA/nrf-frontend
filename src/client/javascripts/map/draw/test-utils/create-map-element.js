@@ -1,11 +1,13 @@
 const MAP_ELEMENT_ID = 'draw-boundary-map'
 
 /**
- * @param {{ csrfToken?: string, backLinkPath?: string, existingBoundaryGeojson?: object, existingBoundaryMetadata?: object }} [params]
+ * @param {{ csrfToken?: string, backLinkPath?: string, boundaryValidationUrl?: string, saveAndContinueUrl?: string, existingBoundaryGeojson?: object, existingBoundaryMetadata?: object }} [params]
  */
 export function createMapElement({
   csrfToken = 'csrf-token',
   backLinkPath = '/quote/boundary-type',
+  boundaryValidationUrl = '/quote/draw-boundary/check',
+  saveAndContinueUrl = '/quote/draw-boundary/save',
   existingBoundaryGeojson,
   existingBoundaryMetadata
 } = {}) {
@@ -13,6 +15,8 @@ export function createMapElement({
   el.id = MAP_ELEMENT_ID
   el.dataset.csrfToken = csrfToken
   el.dataset.backLinkPath = backLinkPath
+  el.dataset.boundaryValidationUrl = boundaryValidationUrl
+  el.dataset.saveAndContinueUrl = saveAndContinueUrl
   if (existingBoundaryGeojson !== undefined) {
     el.dataset.existingBoundaryGeojson = JSON.stringify(existingBoundaryGeojson)
   }

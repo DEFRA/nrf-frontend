@@ -1,4 +1,5 @@
+import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+
 export default function getNextPage() {
-  // return the next page to redirect to
-  return '/quote/check-your-answers'
+  return checkYourAnswersPath
 }

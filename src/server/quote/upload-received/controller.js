@@ -7,6 +7,8 @@ import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validat
 import { saveValidationFlashToCache } from '../helpers/form-validation-session/index.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
+import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.js'
 
 const logger = createLogger()
 const REFRESH_INTERVAL_SECONDS = 5
@@ -47,9 +49,7 @@ function redirectToUploadWithError({ failureReason, request, h }) {
   request.yar.set('uploadRejectionReason', failureReason)
   request.yar.clear('pendingUploadId')
   request.yar.clear('pendingUploadUrl')
-  return h
-    .redirect('/quote/upload-boundary')
-    .code(statusCodes.redirectAfterPost)
+  return h.redirect(uploadBoundaryPath).code(statusCodes.redirectAfterPost)
 }
 
 async function processBoundaryCheck(uploadId, request, h) {
@@ -76,7 +76,7 @@ async function processBoundaryCheck(uploadId, request, h) {
     request.yar.set('boundaryFailureReason', result.failureReason)
     request.yar.clear('pendingUploadId')
     request.yar.clear('pendingUploadUrl')
-    return h.redirect('/quote/upload-preview-map')
+    return h.redirect(uploadPreviewMapPath)
   }
 
   request.yar.set('boundaryGeojson', result.geojson)
@@ -84,14 +84,14 @@ async function processBoundaryCheck(uploadId, request, h) {
   request.yar.clear('pendingUploadUrl')
   request.yar.clear('boundaryFailureReason')
 
-  return h.redirect('/quote/upload-preview-map')
+  return h.redirect(uploadPreviewMapPath)
 }
 
 export async function handler(request, h) {
   const uploadId = request.yar.get('pendingUploadId')
   logger.info(`upload-received - pendingUploadId: ${uploadId}`)
   if (!uploadId) {
-    return h.redirect('/quote/upload-boundary')
+    return h.redirect(uploadBoundaryPath)
   }
 
   const response = await getUploadStatus(uploadId)
