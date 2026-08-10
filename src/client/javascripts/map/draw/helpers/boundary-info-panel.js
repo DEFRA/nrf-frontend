@@ -10,8 +10,7 @@ const EDP_HEADING = 'Environmental Delivery Plan (EDP)'
 
 export function buildPanelHtml() {
   return `
-    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel govuk-!-padding-top-3">
-      <h2 class="govuk-heading-s govuk-!-margin-bottom-0" data-boundary-info-heading>Boundary information</h2>
+    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel">
       <p class="govuk-body-s app-boundary-info-panel__summary" data-boundary-info-summary>Draw a boundary to check it.</p>
       <p class="govuk-body-s app-boundary-info-panel__error" data-boundary-info-error hidden></p>
       <dl class="app-boundary-info-panel__stats" data-boundary-info-results hidden>
@@ -134,6 +133,14 @@ function getPanelRoot() {
   return document.getElementById(PANEL_ROOT_ID)
 }
 
+// The panel's own heading is rendered by interactive-map (outside this
+// module's markup) as a sibling of our content, inside the same landmark
+// element it labels via aria-labelledby — so it's reached via the nearest
+// ancestor with a role, not as a descendant of PANEL_ROOT_ID.
+function getPanelHeading(panelRoot) {
+  return panelRoot.closest('[role]')?.querySelector('h2') ?? null
+}
+
 export function setSaveButtonDisabled(disabled) {
   const panelRoot = getPanelRoot()
   const saveButton = panelRoot?.querySelector(
@@ -144,50 +151,28 @@ export function setSaveButtonDisabled(disabled) {
   }
 }
 
-/**
- * @param {{ summary?: string, error?: string, results?: object }} params
- */
-export function renderPanel({ summary, error, results }) {
-  const panelRoot = getPanelRoot()
-  if (!panelRoot) {
-    return
+function getPanelElements(panelRoot) {
+  return {
+    headingEl: getPanelHeading(panelRoot),
+    summaryEl: panelRoot.querySelector('[data-boundary-info-summary]'),
+    errorEl: panelRoot.querySelector('[data-boundary-info-error]'),
+    resultsEl: panelRoot.querySelector('[data-boundary-info-results]'),
+    areaEl: panelRoot.querySelector('[data-boundary-info-area]'),
+    perimeterEl: panelRoot.querySelector('[data-boundary-info-perimeter]'),
+    edpsEl: panelRoot.querySelector('[data-boundary-info-edps]'),
+    intersectionsEl: panelRoot.querySelector(
+      '[data-boundary-info-intersections]'
+    ),
+    editButton: panelRoot.querySelector(
+      `[data-boundary-action="${EDIT_ACTION}"]`
+    ),
+    saveButton: panelRoot.querySelector(
+      `[data-boundary-action="${SAVE_ACTION}"]`
+    )
   }
+}
 
-  const headingEl = panelRoot.querySelector('[data-boundary-info-heading]')
-  const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
-  const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
-  const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
-  const areaEl = panelRoot.querySelector('[data-boundary-info-area]')
-  const perimeterEl = panelRoot.querySelector('[data-boundary-info-perimeter]')
-  const edpsEl = panelRoot.querySelector('[data-boundary-info-edps]')
-  const intersectionsEl = panelRoot.querySelector(
-    '[data-boundary-info-intersections]'
-  )
-  const editButton = panelRoot.querySelector(
-    `[data-boundary-action="${EDIT_ACTION}"]`
-  )
-  const saveButton = panelRoot.querySelector(
-    `[data-boundary-action="${SAVE_ACTION}"]`
-  )
-
-  summaryEl.textContent = summary || ''
-  summaryEl.hidden = !summary
-
-  errorEl.textContent = error || ''
-  errorEl.hidden = !error
-
-  headingEl.classList.toggle('govuk-visually-hidden', Boolean(error))
-
-  resultsEl.hidden = !results
-  edpsEl.hidden = !results
-  editButton.hidden = !results && !error
-  saveButton.hidden = !results
-  saveButton.disabled = false
-
-  if (!results) {
-    return
-  }
-
+function renderResults(results, { areaEl, perimeterEl, intersectionsEl }) {
   areaEl.textContent = formatArea(results.boundaryMetadata?.area)
   perimeterEl.textContent = formatPerimeter(results.boundaryMetadata?.perimeter)
 
@@ -199,4 +184,56 @@ export function renderPanel({ summary, error, results }) {
     ? edps.map(buildEdpListItem)
     : [buildUnsupportedAreaListItem()]
   items.forEach((item) => intersectionsEl.appendChild(item))
+}
+
+/**
+ * @param {{ summary?: string, error?: string, results?: object }} params
+ */
+export function renderPanel({ summary, error, results }) {
+  const panelRoot = getPanelRoot()
+  if (!panelRoot) {
+    return
+  }
+
+  const elements = getPanelElements(panelRoot)
+  const {
+    headingEl,
+    summaryEl,
+    errorEl,
+    resultsEl,
+    edpsEl,
+    editButton,
+    saveButton
+  } = elements
+
+  summaryEl.textContent = summary || ''
+  summaryEl.hidden = !summary
+
+  errorEl.textContent = error || ''
+  errorEl.hidden = !error
+
+  headingEl?.classList.toggle('govuk-visually-hidden', Boolean(error))
+
+  resultsEl.hidden = !results
+  edpsEl.hidden = !results
+  editButton.hidden = !results && !error
+  saveButton.hidden = !results
+  saveButton.disabled = false
+
+  // A completed check (success or failure) updates the panel without any
+  // user interaction that would naturally move focus there, so screen
+  // reader users get no indication anything changed unless we move focus
+  // to the heading ourselves. tabindex is set here rather than in
+  // buildPanelHtml/statically, since the heading isn't ours - it's
+  // interactive-map's own <h2>, only reachable once the panel has mounted.
+  if ((results || error) && headingEl) {
+    headingEl.setAttribute('tabindex', '-1')
+    headingEl.focus()
+  }
+
+  if (!results) {
+    return
+  }
+
+  renderResults(results, elements)
 }
