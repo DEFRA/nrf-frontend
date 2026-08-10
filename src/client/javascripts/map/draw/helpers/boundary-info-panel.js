@@ -151,6 +151,41 @@ export function setSaveButtonDisabled(disabled) {
   }
 }
 
+function getPanelElements(panelRoot) {
+  return {
+    headingEl: getPanelHeading(panelRoot),
+    summaryEl: panelRoot.querySelector('[data-boundary-info-summary]'),
+    errorEl: panelRoot.querySelector('[data-boundary-info-error]'),
+    resultsEl: panelRoot.querySelector('[data-boundary-info-results]'),
+    areaEl: panelRoot.querySelector('[data-boundary-info-area]'),
+    perimeterEl: panelRoot.querySelector('[data-boundary-info-perimeter]'),
+    edpsEl: panelRoot.querySelector('[data-boundary-info-edps]'),
+    intersectionsEl: panelRoot.querySelector(
+      '[data-boundary-info-intersections]'
+    ),
+    editButton: panelRoot.querySelector(
+      `[data-boundary-action="${EDIT_ACTION}"]`
+    ),
+    saveButton: panelRoot.querySelector(
+      `[data-boundary-action="${SAVE_ACTION}"]`
+    )
+  }
+}
+
+function renderResults(results, { areaEl, perimeterEl, intersectionsEl }) {
+  areaEl.textContent = formatArea(results.boundaryMetadata?.area)
+  perimeterEl.textContent = formatPerimeter(results.boundaryMetadata?.perimeter)
+
+  intersectionsEl.textContent = ''
+  const edps = Array.isArray(results.intersectingEdps)
+    ? results.intersectingEdps
+    : []
+  const items = edps.length
+    ? edps.map(buildEdpListItem)
+    : [buildUnsupportedAreaListItem()]
+  items.forEach((item) => intersectionsEl.appendChild(item))
+}
+
 /**
  * @param {{ summary?: string, error?: string, results?: object }} params
  */
@@ -160,22 +195,16 @@ export function renderPanel({ summary, error, results }) {
     return
   }
 
-  const headingEl = getPanelHeading(panelRoot)
-  const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
-  const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
-  const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
-  const areaEl = panelRoot.querySelector('[data-boundary-info-area]')
-  const perimeterEl = panelRoot.querySelector('[data-boundary-info-perimeter]')
-  const edpsEl = panelRoot.querySelector('[data-boundary-info-edps]')
-  const intersectionsEl = panelRoot.querySelector(
-    '[data-boundary-info-intersections]'
-  )
-  const editButton = panelRoot.querySelector(
-    `[data-boundary-action="${EDIT_ACTION}"]`
-  )
-  const saveButton = panelRoot.querySelector(
-    `[data-boundary-action="${SAVE_ACTION}"]`
-  )
+  const elements = getPanelElements(panelRoot)
+  const {
+    headingEl,
+    summaryEl,
+    errorEl,
+    resultsEl,
+    edpsEl,
+    editButton,
+    saveButton
+  } = elements
 
   summaryEl.textContent = summary || ''
   summaryEl.hidden = !summary
@@ -206,15 +235,5 @@ export function renderPanel({ summary, error, results }) {
     return
   }
 
-  areaEl.textContent = formatArea(results.boundaryMetadata?.area)
-  perimeterEl.textContent = formatPerimeter(results.boundaryMetadata?.perimeter)
-
-  intersectionsEl.textContent = ''
-  const edps = Array.isArray(results.intersectingEdps)
-    ? results.intersectingEdps
-    : []
-  const items = edps.length
-    ? edps.map(buildEdpListItem)
-    : [buildUnsupportedAreaListItem()]
-  items.forEach((item) => intersectionsEl.appendChild(item))
+  renderResults(results, elements)
 }
