@@ -1,14 +1,16 @@
 {% if analyticsEnabled and gtmId and uploadStatus %}
-{# Pushed before super() (which triggers the GTM init snippet's own
-   event:'gtm.js' push) so rlb_status/rlb_failure_reason are already in
-   GTM's data model when the Page View trigger evaluates.
-   rlb_failure_reason is only included when there's an actual failure. #}
+{# Pushed as its own rlb_boundary_validation custom event (matching the
+   client-side draw flow in boundary-info.js) so GTM tags scoped to that
+   event pick up rlb_status/rlb_failure_reason once, rather than these
+   properties latching onto the data model and riding along with later,
+   unrelated events like user_engagement. #}
 <script nonce="{{ nonce }}" data-testid="gtm-upload-result">
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
+    event: 'rlb_boundary_validation',
     rlb_option: 'upload',
-    rlb_status: {{ uploadStatus | dump | safe }}{% if failureReason %},
-    rlb_failure_reason: {{ failureReason | dump | safe }}{% endif %}
+    rlb_status: {{ uploadStatus | dump | safe }},
+    rlb_failure_reason: {{ failureReason | dump | safe if failureReason else 'undefined' }}
   });
 </script>
 {% endif %}

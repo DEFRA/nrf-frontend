@@ -119,6 +119,7 @@ describe('Upload rejected before geometry parsing', () => {
 
       const { getByTestId } = within(document.documentElement)
       const script = getByTestId('gtm-upload-result')
+      expect(script.textContent).toContain("event: 'rlb_boundary_validation'")
       expect(script.textContent).toContain('rlb_status: "fail"')
       expect(script.textContent).toContain(
         'rlb_failure_reason: "file_size_too_large"'
