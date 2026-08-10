@@ -18,6 +18,13 @@ function panelHidden(selector) {
   return document.getElementById(PANEL_ROOT_ID).querySelector(selector).hidden
 }
 
+function panelHeading() {
+  return document
+    .getElementById(PANEL_ROOT_ID)
+    .closest('[role]')
+    .querySelector('h2')
+}
+
 describe('buildPanelHtml', () => {
   it('renders a panel with the default summary message', () => {
     mountBoundaryInfoPanel()
@@ -55,6 +62,36 @@ describe('renderPanel', () => {
 
     expect(panelText('[data-boundary-info-error]')).toBe('Invalid geometry')
     expect(panelHidden('[data-boundary-info-error]')).toBe(false)
+  })
+
+  it('hides the heading on error and moves focus to it', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({ error: 'Invalid geometry' })
+
+    expect(panelHeading().classList.contains('govuk-visually-hidden')).toBe(
+      true
+    )
+    expect(document.activeElement).toBe(panelHeading())
+  })
+
+  it('keeps the heading visible on success and moves focus to it', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({ results: { intersectingEdps: [] } })
+
+    expect(panelHeading().classList.contains('govuk-visually-hidden')).toBe(
+      false
+    )
+    expect(document.activeElement).toBe(panelHeading())
+  })
+
+  it('does not move focus while a check is in progress', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({ summary: 'Checking boundary...' })
+
+    expect(document.activeElement).not.toBe(panelHeading())
   })
 
   it('shows the edit button but not the save button on an error, so an invalid boundary (e.g. self-overlapping) can be corrected', () => {

@@ -10,8 +10,7 @@ const EDP_HEADING = 'Environmental Delivery Plan (EDP)'
 
 export function buildPanelHtml() {
   return `
-    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel govuk-!-padding-top-3">
-      <h2 class="govuk-heading-s govuk-!-margin-bottom-0" data-boundary-info-heading>Boundary information</h2>
+    <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel">
       <p class="govuk-body-s app-boundary-info-panel__summary" data-boundary-info-summary>Draw a boundary to check it.</p>
       <p class="govuk-body-s app-boundary-info-panel__error" data-boundary-info-error hidden></p>
       <dl class="app-boundary-info-panel__stats" data-boundary-info-results hidden>
@@ -134,6 +133,14 @@ function getPanelRoot() {
   return document.getElementById(PANEL_ROOT_ID)
 }
 
+// The panel's own heading is rendered by interactive-map (outside this
+// module's markup) as a sibling of our content, inside the same landmark
+// element it labels via aria-labelledby — so it's reached via the nearest
+// ancestor with a role, not as a descendant of PANEL_ROOT_ID.
+function getPanelHeading(panelRoot) {
+  return panelRoot.closest('[role]')?.querySelector('h2') ?? null
+}
+
 export function setSaveButtonDisabled(disabled) {
   const panelRoot = getPanelRoot()
   const saveButton = panelRoot?.querySelector(
@@ -153,7 +160,7 @@ export function renderPanel({ summary, error, results }) {
     return
   }
 
-  const headingEl = panelRoot.querySelector('[data-boundary-info-heading]')
+  const headingEl = getPanelHeading(panelRoot)
   const summaryEl = panelRoot.querySelector('[data-boundary-info-summary]')
   const errorEl = panelRoot.querySelector('[data-boundary-info-error]')
   const resultsEl = panelRoot.querySelector('[data-boundary-info-results]')
@@ -176,13 +183,24 @@ export function renderPanel({ summary, error, results }) {
   errorEl.textContent = error || ''
   errorEl.hidden = !error
 
-  headingEl.classList.toggle('govuk-visually-hidden', Boolean(error))
+  headingEl?.classList.toggle('govuk-visually-hidden', Boolean(error))
 
   resultsEl.hidden = !results
   edpsEl.hidden = !results
   editButton.hidden = !results && !error
   saveButton.hidden = !results
   saveButton.disabled = false
+
+  // A completed check (success or failure) updates the panel without any
+  // user interaction that would naturally move focus there, so screen
+  // reader users get no indication anything changed unless we move focus
+  // to the heading ourselves. tabindex is set here rather than in
+  // buildPanelHtml/statically, since the heading isn't ours - it's
+  // interactive-map's own <h2>, only reachable once the panel has mounted.
+  if ((results || error) && headingEl) {
+    headingEl.setAttribute('tabindex', '-1')
+    headingEl.focus()
+  }
 
   if (!results) {
     return
