@@ -103,8 +103,8 @@ function wireDrawBoundaryMap(
   )
 
   const boundaryInfoPanel = wireBoundaryInfoPanel(interactiveMap, {
-    checkUrl: toAbsoluteUrl('/quote/draw-boundary/check'),
-    saveAndContinueUrl: toAbsoluteUrl('/quote/draw-boundary/save'),
+    checkUrl: toAbsoluteUrl(mapElement.dataset.boundaryValidationUrl),
+    saveAndContinueUrl: toAbsoluteUrl(mapElement.dataset.saveAndContinueUrl),
     csrfToken: mapElement.dataset.csrfToken
   })
 
