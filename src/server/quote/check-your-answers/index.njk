@@ -20,7 +20,7 @@
             {
               key: { text: "Planning application type" },
               value: { text: planningTypeLabel },
-              actions: { items: [{ href: "/quote/planning-type?change=true", text: "Change", visuallyHiddenText: "planning application type" }] }
+              actions: { items: [{ href: quoteRoutes.planningType + "?change=true", text: "Change", visuallyHiddenText: "planning application type" }] }
             } if formSubmitData.planningType,
             {
               key: { text: "Housing" },
@@ -29,26 +29,26 @@
             {
               key: { text: "Number of units" },
               value: { text: formSubmitData.housingUnits },
-              actions: { items: [{ href: "/quote/units?change=true", text: "Change", visuallyHiddenText: "number of units" }] }
+              actions: { items: [{ href: quoteRoutes.units + "?change=true", text: "Change", visuallyHiddenText: "number of units" }] }
             } if formSubmitData.housingUnits,
             {
               key: { text: "Red line boundary" },
               value: {
                 text: "Added"
               },
-              actions: { items: [{ href: "/quote/draw-boundary?change=true", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
+              actions: { items: [{ href: quoteRoutes.drawBoundary + "?change=true", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
             } if formSubmitData.boundaryEntryType === 'draw',
             {
               key: { text: "Red line boundary" },
               value: {
                 text: formSubmitData.boundaryFilename if formSubmitData.boundaryFilename else 'Uploaded'
               },
-              actions: { items: [{ href: "/quote/upload-preview-map?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
+              actions: { items: [{ href: quoteRoutes.uploadPreviewMap + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
             } if formSubmitData.boundaryEntryType === 'upload',
             {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },
-              actions: { items: [{ href: "/quote/email?change=true", text: "Change", visuallyHiddenText: "email address" }] }
+              actions: { items: [{ href: quoteRoutes.email + "?change=true", text: "Change", visuallyHiddenText: "email address" }] }
             } if formSubmitData.email
           ]
         }) }}
@@ -61,7 +61,7 @@
             {{ govukButton({
               text: "Confirm and submit"
             }) }}
-            <a class="govuk-link" href="/quote/delete-quote">Delete</a>
+            <a class="govuk-link" href="{{ quoteRoutes.deleteQuote }}">Delete</a>
           </div>
 
         </form>

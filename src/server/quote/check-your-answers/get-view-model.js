@@ -1,5 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { planningTypeOptions } from '../planning-type/options.js'
+import { routePath as emailPath } from '../email/routes.js'
 
 export const title = 'Check your answers'
 
@@ -11,7 +12,7 @@ export default function getViewModel({ planningType } = {}) {
   return {
     pageTitle: getPageTitle(title),
     pageHeading: title,
-    backLinkPath: '/quote/email',
+    backLinkPath: emailPath,
     planningTypeLabel
   }
 }
