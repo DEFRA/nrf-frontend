@@ -98,7 +98,7 @@ describe('Auth Controllers', () => {
 
       loginController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })
 
@@ -357,7 +357,7 @@ describe('Auth Controllers', () => {
 
       await signOutController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
     it('should redirect to home when credentials are missing', async () => {
@@ -373,7 +373,7 @@ describe('Auth Controllers', () => {
 
       await signOutController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
     it('should clear session and redirect to home', async () => {
@@ -410,7 +410,7 @@ describe('Auth Controllers', () => {
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
 
       // Verify redirect to home
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })
 
@@ -435,7 +435,7 @@ describe('Auth Controllers', () => {
 
       await signOutOidcController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
     it('should handle sign-out callback with invalid state', async () => {
@@ -454,7 +454,7 @@ describe('Auth Controllers', () => {
 
       await signOutOidcController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
     it('should handle sign-out callback without state', async () => {
@@ -471,7 +471,7 @@ describe('Auth Controllers', () => {
 
       await signOutOidcController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
     it('should clear remaining session if present', async () => {
@@ -504,7 +504,7 @@ describe('Auth Controllers', () => {
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
 
       // Verify redirect to home
-      expect(h.redirect).toHaveBeenCalledWith('/')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })
 })

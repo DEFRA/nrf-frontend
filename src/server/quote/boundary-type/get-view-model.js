@@ -1,5 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { routePath as housingUnitsPath } from '../units/routes.js'
+import { routePath as housingUnitsPath } from '../unit-number/routes.js'
 import { BOUNDARY_UPLOAD_HINT_TEXT } from '../../common/constants/boundary-upload-hint.js'
 
 export const title =

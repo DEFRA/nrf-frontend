@@ -1,5 +1,5 @@
 import { loadPage } from './load-page.js'
-import { routePath as uploadReceivedPath } from '../server/quote/upload-received/routes.js'
+import { routePath as checkingFilePath } from '../server/quote/checking-file/routes.js'
 import { routePath as uploadBoundaryPath } from '../server/quote/upload-boundary/routes.js'
 
 /**
@@ -13,7 +13,7 @@ import { routePath as uploadBoundaryPath } from '../server/quote/upload-boundary
 export async function followUploadRejection({ server, cookie }) {
   await server.inject({
     method: 'GET',
-    url: uploadReceivedPath,
+    url: checkingFilePath,
     headers: { cookie }
   })
   return loadPage({ requestUrl: uploadBoundaryPath, server, cookie })

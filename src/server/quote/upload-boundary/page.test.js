@@ -60,7 +60,7 @@ describe('Upload boundary page', () => {
       server: getServer()
     })
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received'
+      redirect: '/quote/checking-file'
     })
   })
 

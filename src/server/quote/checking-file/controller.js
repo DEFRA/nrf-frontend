@@ -11,7 +11,7 @@ import { saveValidationFlashToCache } from '../helpers/form-validation-session/i
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.js'
+import { routePath as filePreviewPath } from '../file-preview/routes.js'
 
 const logger = createLogger()
 const REFRESH_INTERVAL_SECONDS = 5
@@ -77,7 +77,7 @@ async function processBoundaryCheck(uploadId, request, h) {
     request.yar.set('boundaryFailureReason', result.failureReason)
     request.yar.clear('pendingUploadId')
     request.yar.clear('pendingUploadUrl')
-    return h.redirect(uploadPreviewMapPath)
+    return h.redirect(filePreviewPath)
   }
 
   request.yar.set('boundaryGeojson', result.geojson)
@@ -85,7 +85,7 @@ async function processBoundaryCheck(uploadId, request, h) {
   request.yar.clear('pendingUploadUrl')
   request.yar.clear('boundaryFailureReason')
 
-  return h.redirect(uploadPreviewMapPath)
+  return h.redirect(filePreviewPath)
 }
 
 export async function handler(request, h) {
@@ -129,7 +129,7 @@ export async function handler(request, h) {
     refreshInterval: REFRESH_INTERVAL_SECONDS
   }
 
-  return h.view('quote/upload-received/index', viewModel)
+  return h.view('quote/checking-file/index', viewModel)
 }
 
 export async function checkBoundaryHandler(request, h) {

@@ -1,11 +1,13 @@
+import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
+
 export function buildNavigation(request) {
   const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
 
   const baseNav = [
     {
       text: 'Home',
-      href: '/',
-      current: request?.path === '/'
+      href: startPagePath,
+      current: request?.path === startPagePath
     },
     {
       text: 'About',

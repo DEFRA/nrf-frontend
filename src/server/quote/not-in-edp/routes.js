@@ -1,12 +1,12 @@
 import { quoteController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
 
-const routeId = 'no-edp'
-export const routePath = '/quote/no-edp'
+const routeId = 'not-in-edp'
+export const routePath = '/quote/not-in-edp'
 
 /**
  * @openapi
- * /quote/no-edp:
+ * /quote/not-in-edp:
  *   get:
  *     tags:
  *       - Quote

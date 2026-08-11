@@ -49,7 +49,7 @@ describe('upload-received controller', () => {
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
     expect(h.view).not.toHaveBeenCalled()
   })
 
@@ -71,7 +71,7 @@ describe('upload-received controller', () => {
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
     expect(h.view).not.toHaveBeenCalled()
   })
 
@@ -82,7 +82,7 @@ describe('upload-received controller', () => {
 
     await handler(request, h)
 
-    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
+    expect(h.view).toHaveBeenCalledWith('quote/checking-file/index', {
       pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
       pageHeading: 'Checking your file…',
       refreshInterval: 5
@@ -96,7 +96,7 @@ describe('upload-received controller', () => {
 
     await handler(request, h)
 
-    expect(h.view).toHaveBeenCalledWith('quote/upload-received/index', {
+    expect(h.view).toHaveBeenCalledWith('quote/checking-file/index', {
       pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
       pageHeading: 'Checking your file…',
       refreshInterval: 5
@@ -169,7 +169,7 @@ describe('checkBoundaryHandler', () => {
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
   })
 
   it('should store failureReason and geojson and redirect to map when boundary check fails with geojson', async () => {
@@ -193,7 +193,7 @@ describe('checkBoundaryHandler', () => {
       'self_intersecting_geometry'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-preview-map')
+    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
   })
 
   it('should redirect to the upload page for a service failure without geojson', async () => {

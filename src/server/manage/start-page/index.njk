@@ -19,7 +19,7 @@
         If you choose not to use the nature restoration levy, you will still need to <a href="#" class="govuk-link">meet your environmental obligations in other ways</a>.
       </p>
 
-      <form method="post" action="/">
+      <form method="post" action="{{ manageRoutes.start }}">
         {% include "partials/csrf-token.njk" %}
         {{ govukButton({
           text: "Start now",

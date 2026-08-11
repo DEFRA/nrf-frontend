@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { checkBoundary } from '../../common/services/boundary.js'
 import { routePath } from './routes.js'
-import { checkBoundaryPath } from '../upload-received/routes.js'
+import { checkBoundaryPath } from '../checking-file/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'

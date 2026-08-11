@@ -3,6 +3,7 @@ import { routePath } from './routes.js'
 import { title } from './get-view-model.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { routePath as startPath } from '../../manage/start-page/routes.js'
 
 describe('Delete quote confirmation page', () => {
   const getServer = setupTestServer()
@@ -18,6 +19,6 @@ describe('Delete quote confirmation page', () => {
     )
     expect(
       getByRole(document, 'link', { name: 'Get another quote' })
-    ).toHaveAttribute('href', '/')
+    ).toHaveAttribute('href', startPath)
   })
 })

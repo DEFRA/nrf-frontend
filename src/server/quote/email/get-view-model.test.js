@@ -39,7 +39,7 @@ describe('email getViewModel', () => {
   it('should link back to the upload preview map page when the boundary was uploaded', () => {
     const viewModel = getViewModel({ boundaryEntryType: 'upload' })
 
-    expect(viewModel.backLinkPath).toBe('/quote/upload-preview-map')
+    expect(viewModel.backLinkPath).toBe('/quote/file-preview')
   })
 
   it('should log an error and keep the placeholder back link when the boundary entry type is not recognised', () => {

@@ -108,7 +108,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
+        'quote/file-preview/index',
         expect.objectContaining({
           pageHeading: 'Your uploaded red line boundary file',
           boundaryGeojson: JSON.stringify(mockGeometry),
@@ -129,7 +129,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
+        'quote/file-preview/index',
         expect.objectContaining({
           boundaryFilename: 'site-boundary.shp'
         })
@@ -144,7 +144,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
+        'quote/file-preview/index',
         expect.objectContaining({
           pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
@@ -161,7 +161,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
+        'quote/file-preview/index',
         expect.objectContaining({
           pageHeading: 'Your red line boundary file contains an error',
           boundaryError: 'Unable to check the boundary. Please try again.',
@@ -178,7 +178,7 @@ describe('map controller', () => {
       handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(
-        'quote/upload-preview-map/index',
+        'quote/file-preview/index',
         expect.objectContaining({
           boundaryError: 'The selected file must be smaller than 2MB.'
         })

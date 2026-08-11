@@ -1,3 +1,3 @@
 import { createPageController } from '../common/controllers/page-controller.js'
 
-export const quoteController = createPageController({ viewsDir: 'quote' })
+export const manageController = createPageController({ viewsDir: 'manage' })

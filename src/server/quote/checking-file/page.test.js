@@ -101,7 +101,7 @@ describe('Upload received page', () => {
     })
 
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/upload-preview-map')
+    expect(response.headers.location).toBe('/quote/file-preview')
   })
 
   it('should redirect to upload-boundary when upload error occurs', async () => {

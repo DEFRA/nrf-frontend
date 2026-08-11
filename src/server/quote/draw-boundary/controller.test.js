@@ -3,7 +3,7 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
-import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
 import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import {
   boundaryGeojsonWithEdp,
@@ -305,7 +305,7 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryFilename: null
     })
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(noEdpPath)
+    expect(response.headers.location).toBe(notInEdpPath)
   })
 
   it('rejects a request with no boundaryGeojson', async () => {

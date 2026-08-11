@@ -34,12 +34,12 @@ describe('uploader service', () => {
       })
 
       const result = await initiateUpload({
-        redirect: '/quote/upload-received'
+        redirect: '/quote/checking-file'
       })
 
       expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/upload/initiate`, {
         payload: JSON.stringify({
-          redirect: '/quote/upload-received'
+          redirect: '/quote/checking-file'
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ describe('uploader service', () => {
       })
 
       await initiateUpload({
-        redirect: '/quote/upload-received'
+        redirect: '/quote/checking-file'
       })
 
       expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
@@ -74,7 +74,7 @@ describe('uploader service', () => {
       })
 
       await initiateUpload({
-        redirect: '/quote/upload-received'
+        redirect: '/quote/checking-file'
       })
 
       const callArgs = vi.mocked(Wreck.post).mock.calls[0][1]
@@ -92,7 +92,7 @@ describe('uploader service', () => {
 
       try {
         await initiateUpload({
-          redirect: '/quote/upload-received'
+          redirect: '/quote/checking-file'
         })
       } finally {
         config.set('backend.apiKey', '')
@@ -113,7 +113,7 @@ describe('uploader service', () => {
       })
 
       const result = await initiateUpload({
-        redirect: '/quote/upload-received'
+        redirect: '/quote/checking-file'
       })
 
       expect(result).toEqual({
@@ -136,7 +136,7 @@ describe('uploader service', () => {
       })
 
       const result = await initiateUpload({
-        redirect: '/quote/upload-received'
+        redirect: '/quote/checking-file'
       })
 
       expect(result).toEqual({
@@ -152,7 +152,7 @@ describe('uploader service', () => {
       vi.mocked(Wreck.post).mockRejectedValue(new Error('Network error'))
 
       const result = await initiateUpload({
-        redirect: 'http://localhost:3000/quote/upload-received'
+        redirect: 'http://localhost:3000/quote/checking-file'
       })
 
       expect(result).toEqual({
@@ -168,7 +168,7 @@ describe('uploader service', () => {
       vi.mocked(Wreck.post).mockRejectedValue(boomError)
 
       await initiateUpload({
-        redirect: 'http://localhost:3000/quote/upload-received'
+        redirect: 'http://localhost:3000/quote/checking-file'
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -185,7 +185,7 @@ describe('uploader service', () => {
       vi.mocked(Wreck.post).mockRejectedValue(new Error('ECONNREFUSED'))
 
       await initiateUpload({
-        redirect: 'http://localhost:3000/quote/upload-received'
+        redirect: 'http://localhost:3000/quote/checking-file'
       })
 
       expect(mockLogger.error).toHaveBeenCalledWith(

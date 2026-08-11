@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 
 const mockReadFileSync = vi.fn()
 const mockLoggerError = vi.fn()
@@ -26,7 +27,7 @@ describe('context and cache', () => {
   })
 
   describe('#context', () => {
-    const mockRequest = { path: '/' }
+    const mockRequest = { path: startPagePath }
 
     describe('When webpack manifest file read succeeds', () => {
       let contextImport
@@ -59,7 +60,7 @@ describe('context and cache', () => {
             {
               current: true,
               text: 'Home',
-              href: '/'
+              href: startPagePath
             },
             {
               current: false,
@@ -74,7 +75,7 @@ describe('context and cache', () => {
           ],
           serviceName: 'Nature restoration levy',
           serviceVersion: 'abc123',
-          serviceUrl: '/',
+          serviceUrl: startPagePath,
           phaseBanner: {
             feedbackUrl:
               'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
@@ -125,7 +126,7 @@ describe('context and cache', () => {
   })
 
   describe('#context cache', () => {
-    const mockRequest = { path: '/' }
+    const mockRequest = { path: startPagePath }
     let contextResult
 
     describe('Webpack manifest file cache', () => {
@@ -173,7 +174,7 @@ describe('context and cache', () => {
             {
               current: true,
               text: 'Home',
-              href: '/'
+              href: startPagePath
             },
             {
               current: false,
@@ -188,7 +189,7 @@ describe('context and cache', () => {
           ],
           serviceName: 'Nature restoration levy',
           serviceVersion: 'abc123',
-          serviceUrl: '/',
+          serviceUrl: startPagePath,
           phaseBanner: {
             feedbackUrl:
               'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'

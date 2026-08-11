@@ -1,11 +1,11 @@
 import { handler, checkBoundaryHandler } from './controller.js'
 
-export const routePath = '/quote/upload-received'
+export const routePath = '/quote/checking-file'
 export const checkBoundaryPath = '/quote/check-boundary/{id}'
 
 /**
  * @openapi
- * /quote/upload-received:
+ * /quote/checking-file:
  *   get:
  *     tags:
  *       - Quote

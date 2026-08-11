@@ -8,7 +8,7 @@ import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../helpers/form-validation-session/index.js'
-import { routePath as uploadReceivedPath } from '../upload-received/routes.js'
+import { routePath as checkingFilePath } from '../checking-file/routes.js'
 const routeId = 'upload-boundary'
 
 async function getUploadSession(request) {
@@ -37,7 +37,7 @@ async function getUploadSession(request) {
     }
   }
 
-  return initiateUpload({ redirect: uploadReceivedPath })
+  return initiateUpload({ redirect: checkingFilePath })
 }
 
 export async function handler(request, h) {

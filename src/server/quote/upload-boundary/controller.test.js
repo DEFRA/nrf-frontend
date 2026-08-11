@@ -69,7 +69,7 @@ describe('upload-boundary controller', () => {
     await handler(request, h)
 
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received'
+      redirect: '/quote/checking-file'
     })
     expect(request.yar.set).toHaveBeenCalledWith(
       'pendingUploadId',
@@ -131,7 +131,7 @@ describe('upload-boundary controller', () => {
 
     expect(getUploadStatus).toHaveBeenCalledWith('existing-upload-id')
     expect(initiateUpload).toHaveBeenCalledWith({
-      redirect: '/quote/upload-received'
+      redirect: '/quote/checking-file'
     })
     expect(request.yar.set).toHaveBeenCalledWith(
       'pendingUploadId',

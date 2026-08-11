@@ -17,7 +17,8 @@ const options = {
     'src/server/auth/index.js',
     'src/server/profile/index.js',
     'src/server/quote/index.js',
-    'src/server/quote/*/routes.js'
+    'src/server/quote/*/routes.js',
+    'src/server/manage/*/routes.js'
   ]
 }
 

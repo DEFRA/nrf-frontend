@@ -2,7 +2,7 @@ import getNextPage from './get-next-page.js'
 
 describe('getNextPage', () => {
   it('returns the units route when isHousing is "yes"', () => {
-    expect(getNextPage({ isHousing: 'yes' })).toBe('/quote/units')
+    expect(getNextPage({ isHousing: 'yes' })).toBe('/quote/unit-number')
   })
 
   it('returns the not-housing route when isHousing is "no"', () => {

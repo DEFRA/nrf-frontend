@@ -6,6 +6,7 @@ import { getSafeRedirect } from './get-safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
+import { routePath as startPath } from '../manage/start-page/routes.js'
 
 const logger = createLogger()
 
@@ -16,7 +17,7 @@ export const loginController = {
   handler(request, h) {
     // Redirect authenticated users to home
     if (request.auth?.isAuthenticated) {
-      return h.redirect('/')
+      return h.redirect(startPath)
     }
 
     const authEnabled = request.server.app.authEnabled || false
@@ -168,7 +169,7 @@ export const signInOidcController = {
       )
 
       // Redirect to original path or home
-      const redirect = request.yar.get('redirectTo') || '/'
+      const redirect = request.yar.get('redirectTo') || startPath
       request.yar.clear('redirectTo')
 
       return h.redirect(getSafeRedirect(redirect))
@@ -193,7 +194,7 @@ export const signInOidcController = {
 export const signOutController = {
   async handler(request, h) {
     if (!request.auth.isAuthenticated || !request.auth.credentials) {
-      return h.redirect('/')
+      return h.redirect(startPath)
     }
 
     const { sessionId } = request.auth.credentials
@@ -208,7 +209,7 @@ export const signOutController = {
     logger.info(`User session ${sessionId} signed out`)
 
     // Just redirect to home - no need to navigate to DEFRA Identity
-    return h.redirect('/')
+    return h.redirect(startPath)
   },
   options: {
     auth: 'defra-session' // Requires active session
@@ -241,7 +242,7 @@ export const signOutOidcController = {
     }
 
     logger.info('Sign-out callback completed')
-    return h.redirect('/')
+    return h.redirect(startPath)
   },
   options: {
     auth: false // No authentication required for logout callback

@@ -1,18 +1,18 @@
-import { quoteController } from '../controller-get.js'
+import { manageController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
-import { initQuoteSession } from '../helpers/quote-session-cache/index.js'
-import { routePath as planningTypePath } from '../planning-type/routes.js'
+import { initQuoteSession } from '../../quote/helpers/quote-session-cache/index.js'
+import { routePath as planningTypePath } from '../../quote/planning-type/routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 
-const routeId = 'start'
-export const routePath = '/'
+const routeId = 'start-page'
+export const routePath = '/manage/start-page'
 
 /**
  * @openapi
- * /:
+ * /manage/start-page:
  *   get:
  *     tags:
- *       - Quote
+ *       - Manage
  *     summary: Start page
  *     description: Renders the quote flow start page
  *     responses:
@@ -24,7 +24,7 @@ export const routePath = '/'
  *               type: string
  *   post:
  *     tags:
- *       - Quote
+ *       - Manage
  *     summary: Initialise quote session
  *     description: Creates an empty quote session and redirects to the first step
  *     responses:
@@ -35,7 +35,7 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...quoteController({ routeId, getViewModel })
+    ...manageController({ routeId, getViewModel })
   },
   {
     method: 'POST',

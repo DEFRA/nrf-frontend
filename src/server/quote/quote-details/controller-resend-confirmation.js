@@ -1,6 +1,7 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { takeResendConfirmationFromCache } from './helpers/resend-confirmation-session.js'
+import { routePath as startPath } from '../../manage/start-page/routes.js'
 
 const routeId = 'quote-details'
 
@@ -18,7 +19,7 @@ export const resendConfirmationController = ({ heading }) => ({
     const confirmation = takeResendConfirmationFromCache(request)
 
     if (!confirmation) {
-      return h.redirect('/').code(statusCodes.redirectAfterPost)
+      return h.redirect(startPath).code(statusCodes.redirectAfterPost)
     }
 
     return h.view(`quote/${routeId}/resend-confirmation`, {
