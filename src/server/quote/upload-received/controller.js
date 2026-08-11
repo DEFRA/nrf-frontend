@@ -1,5 +1,8 @@
 import { BOUNDARY_ERRORS } from '@defra/nrf-library'
-import { getUploadStatus } from '../../common/services/uploader.js'
+import {
+  getUploadStatus,
+  UPLOAD_STATUS
+} from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
@@ -12,8 +15,6 @@ import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.
 
 const logger = createLogger()
 const REFRESH_INTERVAL_SECONDS = 5
-const STATUS_PENDING = 'pending'
-const STATUS_READY = 'ready'
 
 // Every UPLOAD-group failure (size/zip/filename/CRS/uploader/infrastructure)
 // and every SERVICE-group failure (impact-assessor unreachable/bad response,
@@ -100,12 +101,13 @@ export async function handler(request, h) {
     `upload-received - uploadId: ${uploadId}, uploadStatus: ${uploadStatus}`
   )
 
-  if (uploadStatus === STATUS_READY) {
+  if (uploadStatus === UPLOAD_STATUS.READY) {
     return processBoundaryCheck(uploadId, request, h)
   }
 
   const isProcessing =
-    uploadStatus === STATUS_PENDING || uploadStatus === 'initiated'
+    uploadStatus === UPLOAD_STATUS.PENDING ||
+    uploadStatus === UPLOAD_STATUS.INITIATED
 
   if (!isProcessing) {
     // Terminal, non-ready status (error/failed/unknown) — send the user

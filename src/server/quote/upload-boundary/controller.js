@@ -1,4 +1,8 @@
-import { initiateUpload } from '../../common/services/uploader.js'
+import {
+  initiateUpload,
+  getUploadStatus,
+  UPLOAD_STATUS
+} from '../../common/services/uploader.js'
 import getViewModel from './get-view-model.js'
 import {
   getValidationFlashFromCache,
@@ -19,8 +23,18 @@ async function getUploadSession(request) {
   // last would "win", orphaning the session the user's form actually posts
   // to and leaving it permanently stuck (CDP Uploader's own status endpoint
   // errors on an upload that's initiated but never received a file).
+  //
+  // Only safe to reuse while CDP Uploader is still "initiated" (no file
+  // received yet). If the user already posted a file for this session and
+  // then navigated back here (e.g. browser back from upload-received before
+  // it resolved), the session has moved to "pending"/"ready" and CDP
+  // Uploader will reject a second file with "already been used to upload
+  // files" — so fall through and mint a fresh session instead.
   if (existingUploadId && existingUploadUrl) {
-    return { uploadId: existingUploadId, uploadUrl: existingUploadUrl }
+    const { uploadStatus } = await getUploadStatus(existingUploadId)
+    if (uploadStatus === UPLOAD_STATUS.INITIATED) {
+      return { uploadId: existingUploadId, uploadUrl: existingUploadUrl }
+    }
   }
 
   return initiateUpload({ redirect: uploadReceivedPath })

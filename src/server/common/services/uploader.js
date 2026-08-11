@@ -5,6 +5,13 @@ import { backendHeaders } from './nrf-backend.js'
 
 const logger = createLogger()
 
+// CDP Uploader status values (see /upload/{uploadId}/status)
+export const UPLOAD_STATUS = {
+  INITIATED: 'initiated',
+  PENDING: 'pending',
+  READY: 'ready'
+}
+
 /**
  * Prepend the CDP uploader base URL for local development.
  * In CDP cloud, the platform proxy handles routing so the path is used as-is.

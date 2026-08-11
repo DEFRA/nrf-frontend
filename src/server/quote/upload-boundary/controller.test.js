@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler } from './controller.js'
-import { initiateUpload } from '../../common/services/uploader.js'
+import {
+  initiateUpload,
+  getUploadStatus
+} from '../../common/services/uploader.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
@@ -84,15 +87,17 @@ describe('upload-boundary controller', () => {
     )
   })
 
-  it('should reuse an existing pending upload session instead of initiating a new one', async () => {
+  it('should reuse an existing pending upload session that has not received a file yet', async () => {
     const h = createMockH()
     const request = createMockRequest({
       pendingUploadId: 'existing-upload-id',
       pendingUploadUrl: '/upload-and-scan/existing-upload-id'
     })
+    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'initiated' })
 
     await handler(request, h)
 
+    expect(getUploadStatus).toHaveBeenCalledWith('existing-upload-id')
     expect(initiateUpload).not.toHaveBeenCalled()
     expect(request.yar.set).toHaveBeenCalledWith(
       'pendingUploadId',
@@ -106,6 +111,36 @@ describe('upload-boundary controller', () => {
       'quote/upload-boundary/index',
       expect.objectContaining({
         uploadUrl: '/upload-and-scan/existing-upload-id'
+      })
+    )
+  })
+
+  it('should mint a fresh upload session when the existing one has already received a file', async () => {
+    const h = createMockH()
+    const request = createMockRequest({
+      pendingUploadId: 'existing-upload-id',
+      pendingUploadUrl: '/upload-and-scan/existing-upload-id'
+    })
+    vi.mocked(getUploadStatus).mockResolvedValue({ uploadStatus: 'pending' })
+    vi.mocked(initiateUpload).mockResolvedValue({
+      uploadId: 'new-upload-id',
+      uploadUrl: '/upload-and-scan/new-upload-id'
+    })
+
+    await handler(request, h)
+
+    expect(getUploadStatus).toHaveBeenCalledWith('existing-upload-id')
+    expect(initiateUpload).toHaveBeenCalledWith({
+      redirect: '/quote/upload-received'
+    })
+    expect(request.yar.set).toHaveBeenCalledWith(
+      'pendingUploadId',
+      'new-upload-id'
+    )
+    expect(h.view).toHaveBeenCalledWith(
+      'quote/upload-boundary/index',
+      expect.objectContaining({
+        uploadUrl: '/upload-and-scan/new-upload-id'
       })
     )
   })
