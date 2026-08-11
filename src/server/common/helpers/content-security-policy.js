@@ -31,8 +31,9 @@ const contentSecurityPolicy = {
     mediaSrc: ['self'],
     styleSrc: [
       'self',
-      'unsafe-inline',
-      ...(gtmId ? [gtmOrigin, 'https://fonts.googleapis.com'] : [])
+      ...(gtmId
+        ? ['unsafe-inline', gtmOrigin, 'https://fonts.googleapis.com']
+        : [])
     ],
     scriptSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     imgSrc: [
