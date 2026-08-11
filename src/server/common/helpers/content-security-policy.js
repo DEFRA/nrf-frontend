@@ -21,7 +21,7 @@ const contentSecurityPolicy = {
   options: {
     defaultSrc: ['self'],
     baseUri: ['self'],
-    fontSrc: ['self'],
+    fontSrc: ['self', ...(gtmId ? ['https://fonts.gstatic.com'] : [])],
     connectSrc: [
       'self',
       'wss',
@@ -29,13 +29,20 @@ const contentSecurityPolicy = {
       ...(gtmId ? [gtmOrigin, gaOrigin, gaRegion1Origin] : [])
     ],
     mediaSrc: ['self'],
-    styleSrc: ['self', 'unsafe-inline'],
+    styleSrc: [
+      'self',
+      ...(gtmId
+        ? ['unsafe-inline', gtmOrigin, 'https://fonts.googleapis.com']
+        : [])
+    ],
     scriptSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     imgSrc: [
       'self',
       'data:',
       ...mapExternalOrigins,
-      ...(gtmId ? [gtmOrigin, gaOrigin, gaRegion1Origin] : [])
+      ...(gtmId
+        ? [gtmOrigin, gaOrigin, gaRegion1Origin, 'https://fonts.gstatic.com']
+        : [])
     ],
     frameSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     objectSrc: ['none'],
