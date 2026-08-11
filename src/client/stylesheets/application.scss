@@ -1,6 +1,7 @@
-@use "govuk-frontend";
+@use 'govuk-frontend';
 
-@use "variables";
-@use "helpers";
-@use "map";
-@forward "../../server/common/components/loading-spinner/loading-spinner";
+@use 'variables';
+@use 'helpers';
+@use 'map';
+@forward '../../server/common/components/loading-spinner/loading-spinner';
+@forward '../../server/common/templates/partials/partials';

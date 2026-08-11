@@ -11,7 +11,7 @@ function applySecurityHeaders(request, h) {
   headers['Permissions-Policy'] =
     'camera=(), microphone=(), geolocation=(), payment=()'
   headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-  headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+  headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
   headers['Cross-Origin-Resource-Policy'] = 'same-origin'
   headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
 

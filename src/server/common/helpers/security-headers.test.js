@@ -4,7 +4,7 @@ import { applySecurityHeaders } from './security-headers.js'
 const expectedHeaders = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
   'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Embedder-Policy': 'credentialless',
   'Cross-Origin-Resource-Policy': 'same-origin',
   'Referrer-Policy': 'strict-origin-when-cross-origin'
 }
@@ -50,7 +50,9 @@ describe('#securityHeaders', () => {
     })
 
     it('should set Cross-Origin-Embedder-Policy', () => {
-      expect(resp.headers['cross-origin-embedder-policy']).toBe('require-corp')
+      expect(resp.headers['cross-origin-embedder-policy']).toBe(
+        'credentialless'
+      )
     })
 
     it('should set Cross-Origin-Resource-Policy', () => {
@@ -85,7 +87,9 @@ describe('#securityHeaders', () => {
     })
 
     it('should set Cross-Origin-Embedder-Policy', () => {
-      expect(resp.headers['cross-origin-embedder-policy']).toBe('require-corp')
+      expect(resp.headers['cross-origin-embedder-policy']).toBe(
+        'credentialless'
+      )
     })
 
     it('should set Cross-Origin-Resource-Policy', () => {
