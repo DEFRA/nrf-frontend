@@ -12,7 +12,7 @@ export function buildPanelHtml() {
   return `
     <div id="${PANEL_ROOT_ID}" class="app-boundary-info-panel">
       <p class="govuk-body-s app-boundary-info-panel__summary" data-boundary-info-summary>Draw a boundary to check it.</p>
-      <p class="govuk-body-s app-boundary-info-panel__error" data-boundary-info-error hidden></p>
+      <p class="govuk-body-s app-boundary-info-panel__error govuk-!-margin-top-3" data-boundary-info-error hidden></p>
       <dl class="app-boundary-info-panel__stats" data-boundary-info-results hidden>
         <div class="app-boundary-info-panel__stats-row">
           <dt class="govuk-body-s app-boundary-info-panel__stats-key">Area</dt>
