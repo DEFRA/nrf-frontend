@@ -4,7 +4,8 @@ import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
-const title = 'Nature restoration levy is not available in this area'
+const pageHeading = 'Nature restoration levy is not available in this area'
+const pageTitle = 'Not in EDP'
 const logger = createLogger()
 
 export default function getViewModel(quoteData = {}) {
@@ -24,8 +25,8 @@ export default function getViewModel(quoteData = {}) {
   }
 
   return {
-    pageTitle: getPageTitle(title),
-    pageHeading: title,
+    pageTitle: getPageTitle(pageTitle),
+    pageHeading,
     backLinkPath
   }
 }

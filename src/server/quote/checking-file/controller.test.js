@@ -83,7 +83,7 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/checking-file/index', {
-      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageTitle: 'Checking file - Nature restoration levy - GOV.UK',
       pageHeading: 'Checking your file…',
       refreshInterval: 5
     })
@@ -97,7 +97,7 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).toHaveBeenCalledWith('quote/checking-file/index', {
-      pageTitle: 'Checking your file… - Nature restoration levy - GOV.UK',
+      pageTitle: 'Checking file - Nature restoration levy - GOV.UK',
       pageHeading: 'Checking your file…',
       refreshInterval: 5
     })

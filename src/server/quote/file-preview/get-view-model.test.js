@@ -102,9 +102,7 @@ describe('getViewModel', () => {
     expect(result.pageHeading).toBe(
       'Your red line boundary file contains an error'
     )
-    expect(result.pageTitle).toContain(
-      'Your red line boundary file contains an error'
-    )
+    expect(result.pageTitle).toContain('File preview')
   })
 
   it('should use the success page heading when there is no failureReason', () => {
