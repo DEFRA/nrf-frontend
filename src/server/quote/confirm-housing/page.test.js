@@ -24,7 +24,7 @@ describe('Confirm housing page', () => {
       'Are you developing housing units?'
     )
     expect(document.title).toBe(
-      'Are you developing housing units? - Nature restoration levy - GOV.UK'
+      'Confirm housing - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

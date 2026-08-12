@@ -15,6 +15,7 @@ import { routePath as filePreviewPath } from '../file-preview/routes.js'
 
 const logger = createLogger()
 const REFRESH_INTERVAL_SECONDS = 5
+const pageTitle = 'Checking file'
 
 // Every UPLOAD-group failure (size/zip/filename/CRS/uploader/infrastructure)
 // and every SERVICE-group failure (impact-assessor unreachable/bad response,
@@ -124,7 +125,7 @@ export async function handler(request, h) {
 
   const heading = 'Checking your file…'
   const viewModel = {
-    pageTitle: getPageTitle(heading),
+    pageTitle: getPageTitle(pageTitle),
     pageHeading: heading,
     refreshInterval: REFRESH_INTERVAL_SECONDS
   }

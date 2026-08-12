@@ -5,7 +5,8 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
-export const title = 'Enter your email address'
+const pageHeading = 'Enter your email address'
+const pageTitle = 'Email address'
 const logger = createLogger()
 
 export default function getViewModel(quoteData = {}, query = {}) {
@@ -31,8 +32,8 @@ export default function getViewModel(quoteData = {}, query = {}) {
   }
 
   return {
-    pageTitle: getPageTitle(title),
-    pageHeading: title,
+    pageTitle: getPageTitle(pageTitle),
+    pageHeading,
     backLinkPath
   }
 }

@@ -23,7 +23,7 @@ describe('Not housing page', () => {
       'Nature restoration levy is only available for housing units'
     )
     expect(document.title).toBe(
-      'Nature restoration levy is only available for housing units - Nature restoration levy - GOV.UK'
+      'Not housing - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

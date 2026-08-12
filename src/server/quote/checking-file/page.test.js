@@ -73,7 +73,7 @@ describe('Upload received page', () => {
       'Checking your file…'
     )
     expect(document.title).toBe(
-      'Checking your file… - Nature restoration levy - GOV.UK'
+      'Checking file - Nature restoration levy - GOV.UK'
     )
   })
 

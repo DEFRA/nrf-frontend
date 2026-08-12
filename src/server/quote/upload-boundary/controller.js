@@ -16,20 +16,15 @@ async function getUploadSession(request) {
   const existingUploadUrl = request.yar.get('pendingUploadUrl')
 
   // Reuse an in-flight upload session rather than minting a new one on every
-  // GET. Browsers can fire this route more than once per navigation (e.g.
-  // link preload/prefetch on hover), and CDP Uploader's redirect back to
-  // /quote/upload-received carries no identifying info — so if each GET
-  // created its own session, whichever one wrote pendingUploadId to session
-  // last would "win", orphaning the session the user's form actually posts
-  // to and leaving it permanently stuck (CDP Uploader's own status endpoint
-  // errors on an upload that's initiated but never received a file).
+  // GET (browsers can fire this route more than once per navigation, e.g.
+  // link preload/prefetch on hover), which would otherwise orphan whichever
+  // session the user's form doesn't end up posting to.
   //
-  // Only safe to reuse while CDP Uploader is still "initiated" (no file
-  // received yet). If the user already posted a file for this session and
-  // then navigated back here (e.g. browser back from upload-received before
-  // it resolved), the session has moved to "pending"/"ready" and CDP
-  // Uploader will reject a second file with "already been used to upload
-  // files" — so fall through and mint a fresh session instead.
+  // Only safe to reuse while still "initiated" (no file received yet) —
+  // otherwise fall through and mint a fresh session, since CDP Uploader
+  // rejects a second file for a "pending"/"ready" session, and an "error"
+  // status (getUploadStatus itself failed) leaves the session's true state
+  // unknown.
   if (existingUploadId && existingUploadUrl) {
     const { uploadStatus } = await getUploadStatus(existingUploadId)
     if (uploadStatus === UPLOAD_STATUS.INITIATED) {

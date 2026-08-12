@@ -4,7 +4,8 @@ import { checkPath, savePath } from './routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 
-export const title = 'Draw your boundary on a map'
+const pageHeading = 'Draw your boundary on a map'
+const pageTitle = 'Draw boundary'
 
 export default function getViewModel(quoteData = {}, query = {}) {
   const existingBoundaryGeojson =
@@ -18,8 +19,8 @@ export default function getViewModel(quoteData = {}, query = {}) {
     query.change === 'true' ? checkYourAnswersPath : boundaryTypePath
 
   return {
-    pageTitle: getPageTitle(title),
-    pageHeading: title,
+    pageTitle: getPageTitle(pageTitle),
+    pageHeading,
     mapStyleUrl: config.get('map.defaultStyleUrl'),
     impactAssessorLayers: config.get('map.impactAssessorLayers'),
     boundaryValidationUrl: checkPath,
