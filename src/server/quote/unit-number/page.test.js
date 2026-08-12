@@ -26,7 +26,7 @@ describe('Residential page', () => {
       inputLabel
     )
     expect(document.title).toBe(
-      'Enter the maximum number of units you are developing - Nature restoration levy - GOV.UK'
+      'Number of units - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

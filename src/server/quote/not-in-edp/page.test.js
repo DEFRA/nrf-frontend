@@ -21,8 +21,6 @@ describe('No EDP page', () => {
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Nature restoration levy is not available in this area'
     )
-    expect(document.title).toBe(
-      'Nature restoration levy is not available in this area - Nature restoration levy - GOV.UK'
-    )
+    expect(document.title).toBe('Not in EDP - Nature restoration levy - GOV.UK')
   })
 })

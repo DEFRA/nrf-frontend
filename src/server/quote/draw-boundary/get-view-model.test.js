@@ -1,5 +1,5 @@
 import { config } from '../../../config/config.js'
-import getViewModel, { title } from './get-view-model.js'
+import getViewModel, { pageHeading } from './get-view-model.js'
 
 describe('draw-boundary getViewModel', () => {
   test('returns configured default map style URL', () => {
@@ -11,7 +11,7 @@ describe('draw-boundary getViewModel', () => {
 
     expect(viewModel).toEqual(
       expect.objectContaining({
-        pageHeading: title,
+        pageHeading,
         mapStyleUrl: '/public/data/vts/test-style.json',
         impactAssessorLayers: expect.any(String),
         saveAndContinueUrl: '/quote/draw-boundary/save',

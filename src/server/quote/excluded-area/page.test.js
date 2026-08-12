@@ -22,7 +22,7 @@ describe('Excluded area page', () => {
       'Development is within the excluded area of this Environmental Delivery Plan (EDP)'
     )
     expect(document.title).toBe(
-      'Development is within the excluded area of this Environmental Delivery Plan (EDP) - Nature restoration levy - GOV.UK'
+      'Excluded area - Nature restoration levy - GOV.UK'
     )
   })
 })

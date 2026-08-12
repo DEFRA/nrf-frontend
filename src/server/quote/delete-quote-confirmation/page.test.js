@@ -1,6 +1,6 @@
 import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
-import { title } from './get-view-model.js'
+import { pageHeading } from './get-view-model.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { routePath as startPath } from '../../manage/start-page/routes.js'
@@ -13,9 +13,11 @@ describe('Delete quote confirmation page', () => {
       requestUrl: routePath,
       server: getServer()
     })
-    expect(document.title).toBe(`${title} - Nature restoration levy - GOV.UK`)
+    expect(document.title).toBe(
+      'Delete quote confirmation - Nature restoration levy - GOV.UK'
+    )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      title
+      pageHeading
     )
     expect(
       getByRole(document, 'link', { name: 'Get another quote' })

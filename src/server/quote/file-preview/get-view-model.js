@@ -4,8 +4,9 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
-export const title = 'Your uploaded red line boundary file'
+export const pageHeading = 'Your uploaded red line boundary file'
 export const errorTitle = 'Your red line boundary file contains an error'
+const pageTitle = 'File preview'
 
 /**
  * @param {object} params
@@ -25,7 +26,7 @@ export default function getViewModel({
   const intersectingEdps = boundaryGeojson?.intersectingEdps ?? []
   const intersectsEdp = intersectingEdps.length > 0
 
-  const pageTitleText = boundaryFailureReason ? errorTitle : title
+  const pageTitleText = boundaryFailureReason ? errorTitle : pageHeading
 
   // Only render the map when there is geometry to draw. Errors like an
   // unsupported/missing CRS or a rejected upload parse no geometry, so the
@@ -39,7 +40,7 @@ export default function getViewModel({
     query.change === 'true' ? checkYourAnswersPath : uploadBoundaryPath
 
   return {
-    pageTitle: getPageTitle(pageTitleText),
+    pageTitle: getPageTitle(pageTitle),
     pageHeading: pageTitleText,
     boundaryGeojson: JSON.stringify(geometry),
     existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata),
