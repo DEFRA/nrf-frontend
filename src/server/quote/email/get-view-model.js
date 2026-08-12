@@ -5,7 +5,7 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
-export const pageHeading = 'Enter your email address'
+const pageHeading = 'Enter your email address'
 const pageTitle = 'Email address'
 const logger = createLogger()
 

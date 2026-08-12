@@ -4,7 +4,7 @@ import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
-export const pageHeading = 'Your uploaded red line boundary file'
+const pageHeading = 'Your uploaded red line boundary file'
 export const errorTitle = 'Your red line boundary file contains an error'
 const pageTitle = 'File preview'
 

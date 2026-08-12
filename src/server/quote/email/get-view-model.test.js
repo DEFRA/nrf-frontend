@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import getViewModel, { pageHeading } from './get-view-model.js'
+import getViewModel from './get-view-model.js'
 
 const mockLogger = vi.hoisted(() => ({
   error: vi.fn(),
@@ -12,16 +12,12 @@ vi.mock('../../common/helpers/logging/logger.js', () => ({
 }))
 
 describe('email getViewModel', () => {
-  it('should export the correct pageHeading', () => {
-    expect(pageHeading).toBe('Enter your email address')
-  })
-
   it('should return the correct pageTitle and pageHeading', () => {
     const viewModel = getViewModel()
     expect(viewModel.pageTitle).toBe(
       'Email address - Nature restoration levy - GOV.UK'
     )
-    expect(viewModel.pageHeading).toBe(pageHeading)
+    expect(viewModel.pageHeading).toBe('Enter your email address')
   })
 
   it('should link back to boundary-type when the boundary entry type is not set', () => {
