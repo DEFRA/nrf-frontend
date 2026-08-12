@@ -1,16 +1,15 @@
-import routesStart from './start/routes.js'
 import routesConfirmHousing from './confirm-housing/routes.js'
 import routesApplicationTypeNotAvailable from './application-type-not-available/routes.js'
 import routesPlanningType from './planning-type/routes.js'
 import routesBoundaryType from './boundary-type/routes.js'
-import routesUnits from './units/routes.js'
-import routesNoEdp from './no-edp/routes.js'
+import routesUnitNumber from './unit-number/routes.js'
+import routesNotInEdp from './not-in-edp/routes.js'
 import routesNotHousing from './not-housing/routes.js'
 import routesEmail from './email/routes.js'
 import routesUploadBoundary from './upload-boundary/routes.js'
 import routesDrawBoundary from './draw-boundary/routes.js'
-import routesUploadReceived from './upload-received/routes.js'
-import routesUploadPreviewMap from './upload-preview-map/routes.js'
+import routesCheckingFile from './checking-file/routes.js'
+import routesFilePreview from './file-preview/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
@@ -47,19 +46,18 @@ export const quote = {
       server.ext('onPreHandler', checkForValidQuoteSession)
 
       server.route([
-        ...routesStart,
         ...routesConfirmHousing,
         ...routesApplicationTypeNotAvailable,
         ...routesPlanningType,
         ...routesBoundaryType,
-        ...routesUnits,
-        ...routesNoEdp,
+        ...routesUnitNumber,
+        ...routesNotInEdp,
         ...routesNotHousing,
         ...routesEmail,
         ...routesUploadBoundary,
         ...routesDrawBoundary,
-        ...routesUploadReceived,
-        ...routesUploadPreviewMap,
+        ...routesCheckingFile,
+        ...routesFilePreview,
         ...routesCheckYourAnswers,
         ...routesConfirmation,
         ...routesDeleteQuote,

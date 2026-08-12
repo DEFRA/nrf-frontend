@@ -2,7 +2,7 @@ import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
 import { routePath as emailPath } from '../email/routes.js'
 import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
@@ -85,5 +85,5 @@ export function saveBoundaryHandler(request, h) {
     return h.redirect(emailPath)
   }
 
-  return h.redirect(noEdpPath)
+  return h.redirect(notInEdpPath)
 }

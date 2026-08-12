@@ -9,7 +9,7 @@ import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-sess
 import { loadPage } from '../../../test-utils/load-page.js'
 import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
-import { checkBoundaryPath } from '../upload-received/routes.js'
+import { checkBoundaryPath } from '../checking-file/routes.js'
 import {
   boundaryGeojson,
   boundaryGeojsonWithEdp
@@ -37,7 +37,7 @@ describe('Boundary map page', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.found)
-      expect(response.headers.location).toBe('/quote/no-edp')
+      expect(response.headers.location).toBe('/quote/not-in-edp')
     })
 
     it('redirects the form post to the no-edp page', async () => {
@@ -50,7 +50,7 @@ describe('Boundary map page', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-      expect(response.headers.location).toBe('/quote/no-edp')
+      expect(response.headers.location).toBe('/quote/not-in-edp')
     })
   })
 

@@ -1,5 +1,5 @@
 import { submitForm } from './submit-form.js'
-import { routePath as startPath } from '../server/quote/start/routes.js'
+import { routePath as startPath } from '../server/manage/start-page/routes.js'
 
 export const withValidQuoteSession = async (server, requestUrl = null) => {
   const { cookie } = await submitForm({

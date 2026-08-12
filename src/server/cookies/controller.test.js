@@ -9,6 +9,7 @@ import {
   getValidationFlashFromCache,
   saveValidationFlashToCache
 } from '../quote/helpers/form-validation-session/index.js'
+import { routePath as startPagePath } from '../manage/start-page/routes.js'
 
 vi.mock('./helpers/cookie-preferences.js')
 vi.mock('./helpers/cookie-service.js')
@@ -62,7 +63,7 @@ describe('cookiesController (GET)', () => {
       pageTitle: 'Cookies on Nature restoration levy',
       payload: { analytics: undefined },
       showSuccessBanner: false,
-      backUrl: '/',
+      backUrl: startPagePath,
       redirectUrl: '',
       validationErrors: undefined
     })
@@ -130,7 +131,7 @@ describe('cookiesController (GET)', () => {
 
     expect(mockH.view).toHaveBeenCalledWith(
       'cookies/index',
-      expect.objectContaining({ backUrl: '/', redirectUrl: '' })
+      expect.objectContaining({ backUrl: startPagePath, redirectUrl: '' })
     )
   })
 
@@ -141,7 +142,7 @@ describe('cookiesController (GET)', () => {
 
     expect(mockH.view).toHaveBeenCalledWith(
       'cookies/index',
-      expect.objectContaining({ backUrl: '/', redirectUrl: '' })
+      expect.objectContaining({ backUrl: startPagePath, redirectUrl: '' })
     )
   })
 
@@ -240,7 +241,7 @@ describe('cookiesSubmitController (POST)', () => {
       )
     })
 
-    test('falls back to "/" when banner submit has no safe redirectUrl', () => {
+    test('falls back to the start page when banner submit has no safe redirectUrl', () => {
       mockRequest.payload = {
         analytics: 'no',
         source: 'banner',
@@ -249,7 +250,9 @@ describe('cookiesSubmitController (POST)', () => {
 
       cookiesSubmitController.handler(mockRequest, mockH)
 
-      expect(mockH.redirect).toHaveBeenCalledWith('/?cookies_updated=1')
+      expect(mockH.redirect).toHaveBeenCalledWith(
+        `${startPagePath}?cookies_updated=1`
+      )
     })
 
     test('wraps thrown errors as Boom internal and logs them', () => {

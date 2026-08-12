@@ -29,7 +29,7 @@
             {
               key: { text: "Number of units" },
               value: { text: formSubmitData.housingUnits },
-              actions: { items: [{ href: quoteRoutes.units + "?change=true", text: "Change", visuallyHiddenText: "number of units" }] }
+              actions: { items: [{ href: quoteRoutes.unitNumber + "?change=true", text: "Change", visuallyHiddenText: "number of units" }] }
             } if formSubmitData.housingUnits,
             {
               key: { text: "Red line boundary" },
@@ -43,7 +43,7 @@
               value: {
                 text: formSubmitData.boundaryFilename if formSubmitData.boundaryFilename else 'Uploaded'
               },
-              actions: { items: [{ href: quoteRoutes.uploadPreviewMap + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
+              actions: { items: [{ href: quoteRoutes.filePreview + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
             } if formSubmitData.boundaryEntryType === 'upload',
             {
               key: { text: "Email address" },

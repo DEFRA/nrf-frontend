@@ -1,6 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
-import { routePath as uploadPreviewMapPath } from '../upload-preview-map/routes.js'
+import { routePath as filePreviewPath } from '../file-preview/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
@@ -17,7 +17,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
   if (quoteData.boundaryEntryType === 'draw') {
     backLinkPath = drawBoundaryPath
   } else if (quoteData.boundaryEntryType === 'upload') {
-    backLinkPath = uploadPreviewMapPath
+    backLinkPath = filePreviewPath
   } else {
     logger.error(
       { boundaryEntryType: quoteData.boundaryEntryType },

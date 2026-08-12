@@ -1,4 +1,5 @@
 import { buildNavigation } from './build-navigation.js'
+import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 
 function mockRequest(options) {
   return { ...options }
@@ -12,7 +13,7 @@ describe('#buildNavigation', () => {
       {
         current: false,
         text: 'Home',
-        href: '/'
+        href: startPagePath
       },
       {
         current: false,
@@ -28,11 +29,11 @@ describe('#buildNavigation', () => {
   })
 
   test('Should provide expected highlighted navigation details', () => {
-    expect(buildNavigation(mockRequest({ path: '/' }))).toEqual([
+    expect(buildNavigation(mockRequest({ path: startPagePath }))).toEqual([
       {
         current: true,
         text: 'Home',
-        href: '/'
+        href: startPagePath
       },
       {
         current: false,

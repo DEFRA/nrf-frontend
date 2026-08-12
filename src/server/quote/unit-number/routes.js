@@ -4,12 +4,12 @@ import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
 
-const routeId = 'units'
-export const routePath = '/quote/units'
+const routeId = 'unit-number'
+export const routePath = '/quote/unit-number'
 
 /**
  * @openapi
- * /quote/units:
+ * /quote/unit-number:
  *   get:
  *     tags:
  *       - Quote

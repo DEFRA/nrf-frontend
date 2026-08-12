@@ -1,5 +1,5 @@
-import { routePath as uploadReceivedPath } from '../upload-received/routes.js'
+import { routePath as checkingFilePath } from '../checking-file/routes.js'
 
 export default function getNextPage() {
-  return uploadReceivedPath
+  return checkingFilePath
 }

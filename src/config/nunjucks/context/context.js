@@ -10,6 +10,7 @@ import {
   isAnalyticsDisabled
 } from '../../../server/cookies/helpers/cookie-service.js'
 import { ANALYTICS_INTERNAL_ROUTE } from '../../../server/cookies/helpers/constants.js'
+import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -45,7 +46,7 @@ export function context(request) {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
     serviceVersion: gitHash,
-    serviceUrl: '/',
+    serviceUrl: startPagePath,
     phaseBanner: {
       feedbackUrl: config.get('phaseBanner.feedbackUrl')
     },

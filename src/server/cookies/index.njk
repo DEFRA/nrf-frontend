@@ -12,7 +12,7 @@
       {% if showSuccessBanner %}
         {% set successHtml %}
           <p class="govuk-notification-banner__heading">
-            Your cookie preferences were saved. <a class="govuk-notification-banner__link" href="{{ backUrl or '/' }}">Go back to the previous page</a>
+            Your cookie preferences were saved. <a class="govuk-notification-banner__link" href="{{ backUrl or manageRoutes.start }}">Go back to the previous page</a>
           </p>
         {% endset %}
 

@@ -1,7 +1,7 @@
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
 import { routePath as planningTypePath } from '../../planning-type/routes.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
-import { routePath as startPath } from '../../start/routes.js'
+import { routePath as startPath } from '../../../manage/start-page/routes.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
 import { routePath as notHousingPath } from '../../not-housing/routes.js'

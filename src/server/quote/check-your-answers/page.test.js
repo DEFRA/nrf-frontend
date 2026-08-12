@@ -4,7 +4,7 @@ import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as residentialPath } from '../units/routes.js'
+import { routePath as residentialPath } from '../unit-number/routes.js'
 import { routePath as emailRoutePath } from '../email/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -109,10 +109,10 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changeuploaded red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/upload-preview-map?change=true')
+    ).toHaveAttribute('href', '/quote/file-preview?change=true')
     expect(
       getByRole(document, 'link', { name: 'Changenumber of units' })
-    ).toHaveAttribute('href', '/quote/units?change=true')
+    ).toHaveAttribute('href', '/quote/unit-number?change=true')
     expect(
       getByRole(document, 'link', { name: 'Changeemail address' })
     ).toHaveAttribute('href', '/quote/email?change=true')
@@ -230,7 +230,7 @@ describe('Check your answers page', () => {
 
     const previewResponse = await getServer().inject({
       method: 'POST',
-      url: '/quote/upload-preview-map',
+      url: '/quote/file-preview',
       headers: { cookie }
     })
     cookie = previewResponse.headers['set-cookie']

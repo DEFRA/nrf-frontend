@@ -4,6 +4,7 @@ import { config } from '../../config/config.js'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { loadPage } from '../../test-utils/load-page.js'
 import { submitForm } from '../../test-utils/submit-form.js'
+import { routePath as startPath } from '../manage/start-page/routes.js'
 
 describe('Analytics internal page', () => {
   const getServer = setupTestServer()
@@ -103,7 +104,7 @@ describe('Analytics internal page', () => {
     })
 
     const document = await loadPage({
-      requestUrl: '/',
+      requestUrl: startPath,
       server: getServer(),
       cookie
     })
@@ -114,7 +115,7 @@ describe('Analytics internal page', () => {
 
   it('does not show the analytics disabled banner when disable cookie is absent', async () => {
     const document = await loadPage({
-      requestUrl: '/',
+      requestUrl: startPath,
       server: getServer()
     })
 
@@ -143,7 +144,7 @@ describe('GTM suppression via disable_analytics_audit cookie', () => {
     })
 
     const document = await loadPage({
-      requestUrl: '/',
+      requestUrl: startPath,
       server: getServer(),
       cookie
     })
@@ -161,7 +162,7 @@ describe('GTM suppression via disable_analytics_audit cookie', () => {
     })
 
     const document = await loadPage({
-      requestUrl: '/',
+      requestUrl: startPath,
       server: getServer(),
       cookie
     })

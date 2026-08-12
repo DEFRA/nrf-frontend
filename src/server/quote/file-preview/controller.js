@@ -4,7 +4,7 @@ import {
   getQuoteDataFromCache
 } from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as noEdpPath } from '../no-edp/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
 import { routePath as emailPath } from '../email/routes.js'
 import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -50,7 +50,7 @@ export function handler(request, h) {
       { intersectsEdp },
       'map - boundary does not intersect EDP, redirecting to no-edp'
     )
-    return h.redirect(noEdpPath)
+    return h.redirect(notInEdpPath)
   }
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
@@ -61,7 +61,7 @@ export function handler(request, h) {
     query: request.query
   })
 
-  return h.view('quote/upload-preview-map/index', {
+  return h.view('quote/file-preview/index', {
     ...viewModel
   })
 }
@@ -96,7 +96,7 @@ export function postHandler(request, h) {
     return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
   }
   if (!intersectsEdp) {
-    return h.redirect(noEdpPath).code(statusCodes.redirectAfterPost)
+    return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
   }
 
   return h.redirect(emailPath).code(statusCodes.redirectAfterPost)

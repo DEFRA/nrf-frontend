@@ -12,6 +12,7 @@ import {
   saveValidationFlashToCache
 } from '../quote/helpers/form-validation-session/index.js'
 import { statusCodes } from '../common/constants/status-codes.js'
+import { routePath as startPagePath } from '../manage/start-page/routes.js'
 
 const COOKIES_VIEW_ROUTE = 'cookies/index'
 
@@ -37,7 +38,7 @@ export const cookiesController = {
     const redirectUrl = isSafeRelativePath(request.query.redirectUrl)
       ? request.query.redirectUrl
       : ''
-    const backUrl = redirectUrl || '/'
+    const backUrl = redirectUrl || startPagePath
 
     return h.view(COOKIES_VIEW_ROUTE, {
       ...cookiesPageSettings,
@@ -92,7 +93,7 @@ export const cookiesSubmitController = {
     try {
       const safeRedirect = isSafeRelativePath(payload.redirectUrl)
         ? payload.redirectUrl
-        : '/'
+        : startPagePath
       const successRedirect = isSafeRelativePath(payload.redirectUrl)
         ? `${COOKIE_ROUTE}?success=true&redirectUrl=${encodeURIComponent(payload.redirectUrl)}`
         : `${COOKIE_ROUTE}?success=true`

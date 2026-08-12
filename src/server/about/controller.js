@@ -1,3 +1,5 @@
+import { routePath as startPath } from '../manage/start-page/routes.js'
+
 /**
  * A GDS styled example about page controller.
  * Provided as an example, remove or modify as required.
@@ -10,7 +12,7 @@ export const aboutController = {
       breadcrumbs: [
         {
           text: 'Home',
-          href: '/'
+          href: startPath
         },
         {
           text: 'About'

@@ -4,6 +4,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { routePath as startPath } from '../../manage/start-page/routes.js'
 import {
   mockGetQuoteStatus,
   mockResendKnown,
@@ -214,7 +215,7 @@ describe('Quote resend flows', () => {
       })
 
       expect(confirmation.statusCode).toBe(303)
-      expect(confirmation.headers.location).toBe('/')
+      expect(confirmation.headers.location).toBe(startPath)
     })
   })
 
