@@ -27,10 +27,6 @@ describe('#config', () => {
       ])
     })
 
-    test('session.cache.engine is redis', () => {
-      expect(prodConfig.get('session.cache.engine')).toBe('redis')
-    })
-
     test('session.cookie.secure is true', () => {
       expect(prodConfig.get('session.cookie.secure')).toBe(true)
     })
@@ -63,10 +59,6 @@ describe('#config', () => {
 
     test('isMetricsEnabled is false', () => {
       expect(config.get('isMetricsEnabled')).toBe(false)
-    })
-
-    test('session.cache.engine is redis', () => {
-      expect(config.get('session.cache.engine')).toBe('redis')
     })
 
     test('session.cache.name is session', () => {

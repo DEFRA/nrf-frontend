@@ -168,12 +168,6 @@ export const config = convict({
   },
   session: {
     cache: {
-      engine: {
-        doc: 'backend cache is written to',
-        format: ['redis', 'memory'],
-        default: 'redis',
-        env: 'SESSION_CACHE_ENGINE'
-      },
       name: {
         doc: 'server side session cache name',
         format: String,
