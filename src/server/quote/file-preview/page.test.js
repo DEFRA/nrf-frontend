@@ -10,6 +10,7 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { checkBoundaryPath } from '../checking-file/routes.js'
+import { COOKIE_ROUTE } from '../../cookies/helpers/constants.js'
 import {
   boundaryGeojson,
   boundaryGeojsonWithEdp
@@ -283,7 +284,16 @@ describe('Boundary map page', () => {
       mockCheckBoundary({
         failureReason: 'self_intersecting_geometry'
       })
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const sessionCookie = await withValidQuoteSession(
+        getServer(),
+        boundaryCheckPath
+      )
+      const { cookie } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'page' },
+        cookie: sessionCookie
+      })
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
