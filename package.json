@@ -46,7 +46,7 @@
     "@defra/cdp-auditing": "^0.6.1",
     "@defra/hapi-secure-context": "^0.4.0",
     "@defra/hapi-tracing": "^1.30.0",
-    "@defra/interactive-map": "^0.0.35-alpha",
+    "@defra/interactive-map": "^0.0.40-alpha",
     "@defra/nrf-library": "github:DEFRA/nrf-library#v1.10.0",
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/bell": "^13.1.0",
@@ -78,14 +78,14 @@
     "rate-limiter-flexible": "^11.2.0",
     "semver": "^7.8.5",
     "swagger-jsdoc": "^6.3.0",
-    "swagger-ui-dist": "^5.32.11",
-    "undici": "^8.9.0"
+    "swagger-ui-dist": "^5.32.13",
+    "undici": "^8.10.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^8.0.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/user-event": "^14.6.4",
     "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.5.4",
     "babel-loader": "^10.1.1",
@@ -93,8 +93,8 @@
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^14.0.0",
     "cross-env": "^10.1.0",
-    "cssnano": "^8.0.2",
-    "cssnano-preset-default": "^8.0.2",
+    "cssnano": "^8.0.5",
+    "cssnano-preset-default": "^8.0.5",
     "eslint": "^9.39.5",
     "eslint-plugin-no-secrets": "^2.3.3",
     "husky": "^9.1.7",
@@ -107,7 +107,7 @@
     "postcss-loader": "^8.2.1",
     "prettier": "^3.9.6",
     "sass": "^1.102.0",
-    "sass-embedded": "^1.100.0",
+    "sass-embedded": "^1.102.0",
     "sass-loader": "^17.0.0",
     "source-map-loader": "^5.0.0",
     "stylelint": "^17.14.1",
@@ -115,9 +115,9 @@
     "terser-webpack-plugin": "^5.6.1",
     "vitest": "^4.1.10",
     "vitest-axe": "^0.1.0",
-    "webpack": "^5.109.0",
+    "webpack": "^5.109.2",
     "webpack-assets-manifest": "^6.5.2",
-    "webpack-cli": "^7.2.1",
+    "webpack-cli": "^7.2.2",
     "yaml": "^2.9.0"
   }
 }
