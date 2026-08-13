@@ -1,5 +1,8 @@
 import { within } from '@testing-library/dom'
-import { ANALYTICS_INTERNAL_ROUTE } from '../cookies/helpers/constants.js'
+import {
+  ANALYTICS_INTERNAL_ROUTE,
+  COOKIE_ROUTE
+} from '../cookies/helpers/constants.js'
 import { config } from '../../config/config.js'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { loadPage } from '../../test-utils/load-page.js'
@@ -155,10 +158,16 @@ describe('GTM suppression via disable_analytics_audit cookie', () => {
   })
 
   it('renders GTM scripts when disable cookie is absent', async () => {
+    const { cookie: analyticsPermissionCookie } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: { analytics: 'yes', source: 'page' }
+    })
     const { cookie } = await submitForm({
       requestUrl: ANALYTICS_INTERNAL_ROUTE,
       server: getServer(),
-      formData: { analyticsEnabled: 'yes' }
+      formData: { analyticsEnabled: 'yes' },
+      cookie: analyticsPermissionCookie
     })
 
     const document = await loadPage({
