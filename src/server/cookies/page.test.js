@@ -118,60 +118,6 @@ describe('GA cookie clearing script', () => {
   })
 })
 
-describe('Google consent mode', () => {
-  const getServer = setupTestServer()
-  const TEST_GTM_ID = 'GTM-TEST123'
-
-  beforeEach(() => {
-    config.set('gtmId', TEST_GTM_ID)
-  })
-
-  afterEach(() => {
-    config.set('gtmId', null)
-  })
-
-  it('sets analytics_storage to denied when no cookie preference is set', async () => {
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer()
-    })
-    const body = document.documentElement.innerHTML
-    expect(body).toContain("'analytics_storage': 'denied'")
-    expect(body).not.toContain("'analytics_storage': 'granted'")
-  })
-
-  it('sets analytics_storage to denied when analytics rejected', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      formData: { analytics: 'no', source: 'page' }
-    })
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      cookie
-    })
-    const body = document.documentElement.innerHTML
-    expect(body).toContain("'analytics_storage': 'denied'")
-    expect(body).not.toContain("'analytics_storage': 'granted'")
-  })
-
-  it('sets analytics_storage to granted when analytics accepted', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      formData: { analytics: 'yes', source: 'page' }
-    })
-    const document = await loadPage({
-      requestUrl: COOKIE_ROUTE,
-      server: getServer(),
-      cookie
-    })
-    const body = document.documentElement.innerHTML
-    expect(body).toContain("'analytics_storage': 'granted'")
-  })
-})
-
 describe('GTM script rendering', () => {
   const getServer = setupTestServer()
   const TEST_GTM_ID = 'GTM-TEST123'
@@ -203,7 +149,7 @@ describe('GTM script rendering', () => {
     expect(getByTestId('gtm-body')).toBeTruthy()
   })
 
-  it('renders GTM scripts with analytics_storage denied when analytics rejected', async () => {
+  it('does not render GTM scripts when analytics is rejected', async () => {
     const { cookie } = await submitForm({
       requestUrl: COOKIE_ROUTE,
       server: getServer(),
@@ -214,27 +160,21 @@ describe('GTM script rendering', () => {
       server: getServer(),
       cookie
     })
-    const { getByTestId, queryByTestId } = within(document.documentElement)
+    const { queryByTestId } = within(document.documentElement)
 
-    expect(getByTestId('gtm-head')).toBeTruthy()
+    expect(queryByTestId('gtm-head')).toBeNull()
     expect(queryByTestId('gtm-body')).toBeNull()
-    expect(document.documentElement.innerHTML).not.toContain(
-      "'analytics_storage': 'granted'"
-    )
   })
 
-  it('renders GTM scripts with analytics_storage denied when no cookie preference is set', async () => {
+  it('does not render GTM scripts when no cookie preference is set', async () => {
     const document = await loadPage({
       requestUrl: COOKIE_ROUTE,
       server: getServer()
     })
-    const { getByTestId, queryByTestId } = within(document.documentElement)
+    const { queryByTestId } = within(document.documentElement)
 
-    expect(getByTestId('gtm-head')).toBeTruthy()
+    expect(queryByTestId('gtm-head')).toBeNull()
     expect(queryByTestId('gtm-body')).toBeNull()
-    expect(document.documentElement.innerHTML).not.toContain(
-      "'analytics_storage': 'granted'"
-    )
   })
 
   it('does not render GTM scripts when gtmId is not set', async () => {
