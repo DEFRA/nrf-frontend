@@ -40,19 +40,6 @@ describe('map controller', () => {
     intersectingEdps: [
       {
         label: 'EDP 1',
-        n2k_site_name: 'Site 1',
-        intersection_geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [-1.5, 52.0],
-              [-1.4, 52.0],
-              [-1.4, 52.1],
-              [-1.5, 52.1],
-              [-1.5, 52.0]
-            ]
-          ]
-        },
         overlap_area_ha: 0.5,
         overlap_area_sqm: 5000.0,
         overlap_percentage: 25.0

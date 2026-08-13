@@ -57,30 +57,22 @@ function formatPerimeter(perimeter) {
 
 /**
  * The boundary check API's EDP attributes are sourced from a shapefile and
- * can be missing per-feature (e.g. label is null where the source data has
- * no "Label" attribute), so several fallbacks are tried before giving up —
- * returning null rather than the raw object so callers can omit the name
- * line entirely instead of dumping unreadable JSON.
+ * label can be missing per-feature (the source data has no "Label"
+ * attribute), so null is returned rather than the raw object, letting
+ * callers omit the name line entirely instead of dumping unreadable JSON.
  *
- * @param {string|{ label?: string, n2k_site_name?: string, name?: string, code?: string, id?: string }} edp
+ * @param {string|{ label?: string }} edp
  * @returns {string|null}
  */
 function formatEdp(edp) {
   if (typeof edp === 'string') {
     return edp
   }
-  return (
-    edp?.label ||
-    edp?.n2k_site_name ||
-    edp?.name ||
-    edp?.code ||
-    edp?.id ||
-    null
-  )
+  return edp?.label || null
 }
 
 /**
- * @param {string|{ label?: string, n2k_site_name?: string, name?: string, code?: string, id?: string }} edp
+ * @param {string|{ label?: string }} edp
  */
 function buildEdpListItem(edp) {
   const item = document.createElement('li')

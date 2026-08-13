@@ -80,10 +80,7 @@ describe('wireBoundaryInfoPanel', () => {
             area: { hectares: 12, acres: 30 },
             perimeter: { kilometres: 4, miles: 2.5 }
           },
-          intersectingEdps: [
-            { name: 'Yare Broads', code: 'EDP1' },
-            'Bure Broads'
-          ]
+          intersectingEdps: [{ label: 'Yare Broads' }, 'Bure Broads']
         })
       })
     )
