@@ -22,6 +22,8 @@ export function applyCacheControlHeaders(request, h) {
     response.output.headers['cache-control'] = CACHE_CONTROL_HEADER
   } else if (!response.headers?.['cache-control']?.includes('public')) {
     response.header('Cache-Control', CACHE_CONTROL_HEADER)
+  } else {
+    // Public caching opted-in explicitly; leave the header untouched.
   }
 
   return h.continue
