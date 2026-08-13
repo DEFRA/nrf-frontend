@@ -56,10 +56,10 @@ function formatPerimeter(perimeter) {
 }
 
 /**
- * The boundary check API's EDP attributes are sourced from a shapefile and
- * label can be missing per-feature (the source data has no "Label"
- * attribute), so null is returned rather than the raw object, letting
- * callers omit the name line entirely instead of dumping unreadable JSON.
+ * Every EDP in the boundary check payload carries a label, so this normally
+ * just reads it. The string form and the null fallback are defensive: a
+ * malformed entry omits the name line instead of dumping raw JSON into the
+ * panel.
  *
  * @param {string|{ label?: string }} edp
  * @returns {string|null}

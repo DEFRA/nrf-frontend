@@ -319,10 +319,10 @@ describe('POST /quote/draw-boundary/save', () => {
     expect(saveQuoteDataToCache).not.toHaveBeenCalled()
   })
 
-  it('accepts an EDP with a null label and no overlap figures', async () => {
+  it('accepts an EDP with a label and no overlap figures', async () => {
     const boundaryGeojson = {
       ...validBoundaryGeojson,
-      intersectingEdps: [{ label: null }]
+      intersectingEdps: [{ label: 'EDP 1' }]
     }
 
     const response = await getServer().inject({
@@ -338,6 +338,7 @@ describe('POST /quote/draw-boundary/save', () => {
   it.each([
     ['no label', { overlap_area_ha: 0.5 }],
     ['a non-string label', { label: 42 }],
+    ['a null label', { label: null }],
     ['a non-numeric overlap figure', { label: 'EDP 1', overlap_area_ha: 'a' }]
   ])('rejects an EDP with %s', async (_description, edp) => {
     const response = await getServer().inject({
