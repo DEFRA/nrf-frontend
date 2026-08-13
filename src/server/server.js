@@ -124,12 +124,17 @@ export async function createServer() {
 
   server.ext('onPreResponse', (request, h) => {
     const { response } = request
+    // no-store: Tells browsers and intermediate proxies never to save any part of the request or response to local disk storage.
+    // no-cache: Forces the browser to revalidate with the origin server before serving a cached copy, even if that copy is still technically fresh.
+    // must-revalidate: Reinforces that intermediate proxies must strictly respect the expiration rules and cannot serve stale content under any network conditions.
+    // max-age=0: Explicitly sets the resource's lifespan to zero seconds, forcing immediate expiration across older or stricter caching systems.
+    const cacheControlHeader = 'no-store, must-revalidate'
     if (response.isBoom) {
-      response.output.headers['cache-control'] = 'no-store, must-revalidate'
+      response.output.headers['cache-control'] = cacheControlHeader
     } else if (response.headers?.['cache-control']?.includes('public')) {
       // Route opted into public caching (e.g. cached map tiles); leave it as-is.
     } else {
-      response.header('Cache-Control', 'no-store, must-revalidate')
+      response.header('Cache-Control', cacheControlHeader)
     }
     return h.continue
   })
