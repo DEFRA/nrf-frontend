@@ -246,6 +246,17 @@ describe('Check your answers page', () => {
     expect(summaryList).toHaveTextContent('site-boundary.geojson')
   })
 
+  it('should set a no-store Cache-Control header so the page cannot be shown from cache', async () => {
+    const response = await getServer().inject({
+      method: 'GET',
+      url: routePath,
+      headers: { cookie: sessionCookie }
+    })
+    expect(response.headers['cache-control']).toBe(
+      'no-store, no-cache, must-revalidate, max-age=0'
+    )
+  })
+
   it('should redirect to the confirmation page if Submit is clicked', async () => {
     const { cookie: updatedCookie } = await submitForm({
       requestUrl: emailRoutePath,
