@@ -147,6 +147,12 @@ describe('GTM script rendering', () => {
     expect(gtmHead).toBeTruthy()
     expect(gtmHead.getAttribute('nonce')).toBeTruthy()
     expect(getByTestId('gtm-body')).toBeTruthy()
+
+    expect(gtmHead.textContent).toContain("gtag('consent', 'default'")
+    expect(gtmHead.textContent).toContain("'ad_storage': 'denied'")
+    expect(gtmHead.textContent).toContain("'ad_user_data': 'denied'")
+    expect(gtmHead.textContent).toContain("'ad_personalization': 'denied'")
+    expect(gtmHead.textContent).toContain("'analytics_storage': 'granted'")
   })
 
   it('does not render GTM scripts when analytics is rejected', async () => {
