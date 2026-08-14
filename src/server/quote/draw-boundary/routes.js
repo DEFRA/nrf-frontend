@@ -56,7 +56,24 @@ export default [
         payload: joi.object({
           boundaryGeojson: joi
             .object({
-              intersectingEdps: joi.array().items(joi.object()).required(),
+              // Kept .unknown(true), and the overlap figures optional, so an
+              // additive change to the boundary check API's EDP attributes
+              // doesn't 400 users mid-journey — the view already renders each
+              // overlap figure conditionally. label is required: the boundary
+              // check API always sends one on an intersecting EDP.
+              intersectingEdps: joi
+                .array()
+                .items(
+                  joi
+                    .object({
+                      label: joi.string().required(),
+                      overlap_area_ha: joi.number(),
+                      overlap_area_sqm: joi.number(),
+                      overlap_percentage: joi.number()
+                    })
+                    .unknown(true)
+                )
+                .required(),
               intersectingExcludedAreas: joi
                 .array()
                 .items(joi.string())

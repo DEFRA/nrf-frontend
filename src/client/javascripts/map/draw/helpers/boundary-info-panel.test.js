@@ -112,7 +112,7 @@ describe('renderPanel', () => {
           area: { hectares: 12, acres: 30 },
           perimeter: { kilometres: 4, miles: 2.5 }
         },
-        intersectingEdps: [{ name: 'Yare Broads', code: 'EDP1' }, 'Bure Broads']
+        intersectingEdps: [{ label: 'Yare Broads' }, 'Bure Broads']
       }
     })
 
@@ -136,30 +136,12 @@ describe('renderPanel', () => {
     ).toBe('Bure Broads')
   })
 
-  it('falls back to n2k_site_name when the EDP has no label', () => {
+  it('omits the name line when the EDP has no label', () => {
     mountBoundaryInfoPanel()
 
     renderPanel({
       results: {
-        intersectingEdps: [{ label: null, n2k_site_name: 'River Wensum SAC' }]
-      }
-    })
-
-    const items = document
-      .getElementById(PANEL_ROOT_ID)
-      .querySelectorAll('[data-boundary-info-intersections] li')
-    expect(
-      items[0].querySelector('.app-boundary-info-panel__edp-description')
-        .textContent
-    ).toBe('River Wensum SAC')
-  })
-
-  it('omits the name line when the EDP has no identifiable name', () => {
-    mountBoundaryInfoPanel()
-
-    renderPanel({
-      results: {
-        intersectingEdps: [{ label: null, n2k_site_name: null }]
+        intersectingEdps: [{ label: null, overlap_area_ha: 0.5 }]
       }
     })
 

@@ -66,8 +66,8 @@ export const boundaryGeojsonWithEdp = {
   intersectingEdps: [
     {
       label: 'Kent Downs EDP',
-      n2k_site_name: 'North Downs Woodlands',
       overlap_area_ha: 0.5,
+      overlap_area_sqm: 5000.0,
       overlap_percentage: 25.0
     }
   ],

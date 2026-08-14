@@ -319,6 +319,40 @@ describe('POST /quote/draw-boundary/save', () => {
     expect(saveQuoteDataToCache).not.toHaveBeenCalled()
   })
 
+  it('accepts an EDP with a label and no overlap figures', async () => {
+    const boundaryGeojson = {
+      ...validBoundaryGeojson,
+      intersectingEdps: [{ label: 'EDP 1' }]
+    }
+
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: { boundaryGeojson }
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/quote/email')
+  })
+
+  it.each([
+    ['no label', { overlap_area_ha: 0.5 }],
+    ['a non-string label', { label: 42 }],
+    ['a null label', { label: null }],
+    ['a non-numeric overlap figure', { label: 'EDP 1', overlap_area_ha: 'a' }]
+  ])('rejects an EDP with %s', async (_description, edp) => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: savePath,
+      payload: {
+        boundaryGeojson: { ...validBoundaryGeojson, intersectingEdps: [edp] }
+      }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.badRequest)
+    expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+  })
+
   it.each([
     'intersectingEdps',
     'intersectingExcludedAreas',
