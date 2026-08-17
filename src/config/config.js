@@ -311,7 +311,7 @@ export const config = convict({
       format: String,
       default:
         'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
-      env: 'DEFRA_ID_OIDC_CONFIGURATION_URL'
+      env: 'DEFRA_ID_WELL_KNOWN_URL'
     },
     clientId: {
       doc: 'OAuth client ID',
