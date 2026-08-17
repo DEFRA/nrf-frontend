@@ -1,5 +1,8 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
+import { createLogger } from '../common/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 /**
  * Fetches OpenID Connect configuration from the well-known endpoint
@@ -13,10 +16,13 @@ export async function getOidcConfig() {
       'DEFRA_ID_WELL_KNOWN_URL not configured. Please set this environment variable.'
     )
   }
-
-  const { payload } = await Wreck.get(wellKnownUrl, {
-    json: true
-  })
-
-  return payload
+  try {
+    const { payload } = await Wreck.get(wellKnownUrl, {
+      json: true
+    })
+    return payload
+  } catch (err) {
+    logger.error(err, `Error fetching defraId.wellKnownUrl ${wellKnownUrl}`)
+    throw err
+  }
 }
