@@ -1,4 +1,3 @@
-import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
 
 /**
@@ -14,10 +13,8 @@ export async function getOidcConfig(logger) {
     )
   }
   try {
-    const { payload } = await Wreck.get(wellKnownUrl, {
-      json: true
-    })
-    return payload
+    const res = await fetch(wellKnownUrl)
+    return await res.json()
   } catch (err) {
     logger.error(err, `Error fetching defraId.wellKnownUrl ${wellKnownUrl}`)
     throw err

@@ -1,17 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { getOidcConfig } from './get-oidc-config.js'
 
-vi.mock('@hapi/wreck')
 vi.mock('../../config/config.js')
 
-describe('getOidcConfig', () => {
-  beforeEach(() => {
-    vi.resetModules()
-  })
+const server = setupMswServer()
 
+const wellKnownUrl = 'https://example.com/.well-known'
+
+describe('getOidcConfig', () => {
   it('should fetch and return OIDC configuration', async () => {
     const { config } = await import('../../config/config.js')
-    const Wreck = await import('@hapi/wreck')
 
     const mockConfig = {
       authorization_endpoint: 'https://example.com/auth',
@@ -19,18 +19,20 @@ describe('getOidcConfig', () => {
       end_session_endpoint: 'https://example.com/logout'
     }
 
-    config.get = vi.fn().mockReturnValue('https://example.com/.well-known')
-    Wreck.default.get = vi.fn().mockResolvedValue({
-      payload: mockConfig
-    })
+    config.get = vi.fn().mockReturnValue(wellKnownUrl)
+
+    let requestedUrl
+    server.use(
+      http.get(wellKnownUrl, ({ request }) => {
+        requestedUrl = request.url
+        return HttpResponse.json(mockConfig)
+      })
+    )
 
     const result = await getOidcConfig()
 
     expect(result).toEqual(mockConfig)
-    expect(Wreck.default.get).toHaveBeenCalledWith(
-      'https://example.com/.well-known',
-      { json: true }
-    )
+    expect(requestedUrl).toBe(wellKnownUrl)
   })
 
   it('should throw error when DEFRA_ID_WELL_KNOWN_URL is not configured', async () => {
