@@ -1,14 +1,11 @@
 import Wreck from '@hapi/wreck'
 import { config } from '../../config/config.js'
-import { createLogger } from '../common/helpers/logging/logger.js'
-
-const logger = createLogger()
 
 /**
  * Fetches OpenID Connect configuration from the well-known endpoint
  * @returns {Promise<Object>} OIDC configuration including authorization_endpoint, token_endpoint, jwks_uri, end_session_endpoint
  */
-export async function getOidcConfig() {
+export async function getOidcConfig(logger) {
   const wellKnownUrl = config.get('defraId.wellKnownUrl')
 
   if (!wellKnownUrl) {

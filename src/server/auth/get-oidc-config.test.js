@@ -38,7 +38,7 @@ describe('getOidcConfig', () => {
 
     config.get = vi.fn().mockReturnValue(undefined)
 
-    await expect(getOidcConfig()).rejects.toThrow(
+    await expect(getOidcConfig({ error: vi.fn() })).rejects.toThrow(
       'DEFRA_ID_WELL_KNOWN_URL not configured'
     )
   })

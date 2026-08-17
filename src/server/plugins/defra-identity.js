@@ -21,7 +21,7 @@ export const defraIdentity = {
       logger.info('Registering DEFRA Identity authentication plugin')
 
       // Fetch OIDC configuration
-      const oidcConfig = await getOidcConfig()
+      const oidcConfig = await getOidcConfig(logger)
       logger.info(
         `OIDC configuration loaded from ${config.get('defraId.wellKnownUrl')}`
       )
