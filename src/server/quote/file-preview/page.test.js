@@ -249,7 +249,7 @@ describe('Boundary map page', () => {
     })
   })
 
-  describe('GTM upload_result event', () => {
+  describe('GTM boundary upload result event', () => {
     const TEST_GTM_ID = 'GTM-TEST123'
 
     beforeEach(() => {
@@ -280,7 +280,7 @@ describe('Boundary map page', () => {
       )
     })
 
-    it('pushes upload_result before the GTM init snippet, so it is in the data model before the Page View event fires', async () => {
+    it('pushes boundary custom event after the GTM init snippet, so it is in the data model before the Page View event fires', async () => {
       mockCheckBoundary({
         failureReason: 'self_intersecting_geometry'
       })
@@ -304,7 +304,7 @@ describe('Boundary map page', () => {
         document.querySelectorAll('script[data-testid]')
       ).map((script) => script.getAttribute('data-testid'))
 
-      expect(scriptTestIds.indexOf('gtm-upload-result')).toBeLessThan(
+      expect(scriptTestIds.indexOf('gtm-upload-result')).toBeGreaterThan(
         scriptTestIds.indexOf('gtm-head')
       )
     })

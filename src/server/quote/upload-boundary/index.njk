@@ -3,8 +3,11 @@
 {% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block head %}
-  {% include "partials/gtm-upload-result.njk" %}
+  {# Include after super() so the dataLayer push happens after GTM's consent
+     defaults (from google-tag-manager-head.njk) are queued — gtm.js processes
+     the queue in insertion order, so consent applies to this event. #}
   {{ super() }}
+  {% include "partials/gtm-upload-result.njk" %}
 {% endblock %}
 
 {% block beforeContent %}

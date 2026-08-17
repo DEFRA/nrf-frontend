@@ -3,8 +3,11 @@
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
 {% block head %}
-  {% include "partials/gtm-upload-result.njk" %}
+  {# Include after super() so the dataLayer push happens after GTM's consent
+     defaults (from google-tag-manager-head.njk) are queued — gtm.js processes
+     the queue in insertion order, so consent applies to this event. #}
   {{ super() }}
+  {% include "partials/gtm-upload-result.njk" %}
   <script src="{{ getAssetPath('upload-preview-map.js') }}" defer nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/datasets/index.css') }}" rel="stylesheet">
