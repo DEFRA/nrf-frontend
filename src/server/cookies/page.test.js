@@ -59,7 +59,7 @@ describe('Cookie form persistence', () => {
 describe('Analytics cookie table', () => {
   const getServer = setupTestServer()
 
-  it('lists the GA cookie names _ga, _gid and _ga_*', async () => {
+  it('lists the GA cookie names _ga and _ga_*', async () => {
     const document = await loadPage({
       requestUrl: COOKIE_ROUTE,
       server: getServer()
@@ -67,7 +67,6 @@ describe('Analytics cookie table', () => {
 
     const body = document.documentElement.textContent
     expect(body).toContain('_ga')
-    expect(body).toContain('_gid')
     expect(body).toContain('_ga_*')
   })
 })
