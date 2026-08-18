@@ -66,39 +66,15 @@ function yarSessionScheme(sessionCache) {
           return h.unauthenticated()
         }
 
-        // Verify token expiration
-        try {
-          const decoded = Jwt.token.decode(userSession.token)
-          Jwt.token.verifyTime(decoded, { timeSkewSec: 60 })
-        } catch (error) {
-          logger.debug(
-            `Token expired for session ${sessionId}, attempting refresh`
-          )
+        // Refresh the stored token if it is invalid or expired
+        if (!isTokenValid(userSession.token)) {
+          const refreshed = await refreshUserSession({
+            sessionId,
+            userSession,
+            sessionCache
+          })
 
-          // Attempt token refresh if enabled
-          if (!config.get('defraId.refreshTokens')) {
-            logger.debug('Token refresh disabled, invalidating session')
-            await sessionCache.drop(sessionId)
-            request.yar.clear('sessionId')
-            return h.unauthenticated()
-          }
-
-          try {
-            const { access_token: token, refresh_token: newRefreshToken } =
-              await refreshTokens(userSession.refreshToken)
-
-            userSession.token = token
-            userSession.refreshToken = newRefreshToken
-
-            await sessionCache.set(sessionId, userSession)
-            logger.debug(
-              `Token refreshed successfully for session ${sessionId}`
-            )
-          } catch (refreshError) {
-            logger.error(
-              refreshError,
-              `Token refresh failed for session ${sessionId}`
-            )
+          if (!refreshed) {
             await sessionCache.drop(sessionId)
             request.yar.clear('sessionId')
             return h.unauthenticated()
@@ -112,6 +88,54 @@ function yarSessionScheme(sessionCache) {
         payload: false
       }
     }
+  }
+}
+
+/**
+ * Returns true if the token decodes and is within its time validity window
+ * (60 second skew).
+ * @param {string} token - JWT to check
+ * @returns {boolean}
+ */
+function isTokenValid(token) {
+  try {
+    const decoded = Jwt.token.decode(token)
+    Jwt.token.verifyTime(decoded, { timeSkewSec: 60 })
+    return true
+  } catch (error) {
+    logger.debug(`Stored token invalid or expired: ${error.message}`)
+    return false
+  }
+}
+
+/**
+ * Refreshes a session's expired access token and persists the new tokens.
+ * Mutates userSession in place on success.
+ * @param {Object} params - Refresh parameters
+ * @param {string} params.sessionId - Session identifier, used in log messages
+ * @param {Object} params.userSession - User session object with token and refreshToken properties
+ * @param {Object} params.sessionCache - Session cache instance used to persist the updated session
+ * @returns {Promise<boolean>} True if the tokens were refreshed, false if refresh is disabled or failed
+ */
+async function refreshUserSession({ sessionId, userSession, sessionCache }) {
+  if (!config.get('defraId.refreshTokens')) {
+    logger.debug(`Token refresh disabled for session ${sessionId}`)
+    return false
+  }
+
+  try {
+    const { access_token: token, refresh_token: newRefreshToken } =
+      await refreshTokens(userSession.refreshToken)
+
+    userSession.token = token
+    userSession.refreshToken = newRefreshToken
+
+    await sessionCache.set(sessionId, userSession)
+    logger.debug(`Token refreshed successfully for session ${sessionId}`)
+    return true
+  } catch (refreshError) {
+    logger.error(refreshError, `Token refresh failed for session ${sessionId}`)
+    return false
   }
 }
 
