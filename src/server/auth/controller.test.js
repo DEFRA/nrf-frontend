@@ -5,20 +5,19 @@ import {
   signOutController,
   signOutOidcController
 } from './controller.js'
-import Wreck from '@hapi/wreck'
 import Jwt from '@hapi/jwt'
+import { http, HttpResponse } from 'msw'
 import { getOidcConfig } from './get-oidc-config.js'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setupMswServer } from '../../test-utils/setup-msw-server.js'
+import { describe, it, expect, vi } from 'vitest'
 
-vi.mock('@hapi/wreck', () => ({
-  default: {
-    post: vi.fn()
-  }
+const { tokenEndpoint } = vi.hoisted(() => ({
+  tokenEndpoint: 'https://auth.example.com/token'
 }))
 
 vi.mock('./get-oidc-config.js', () => ({
   getOidcConfig: vi.fn(() => ({
-    token_endpoint: 'https://auth.example.com/token'
+    token_endpoint: tokenEndpoint
   }))
 }))
 
@@ -57,8 +56,8 @@ vi.mock('../../config/config.js', () => ({
   }
 }))
 
-const mockWreck = vi.mocked(Wreck)
 const mockGetOidcConfig = vi.mocked(getOidcConfig)
+const mswServer = setupMswServer()
 
 describe('Auth Controllers', () => {
   describe('loginController', () => {
@@ -277,7 +276,7 @@ describe('Auth Controllers', () => {
       request.query.state = 'matching-state'
       request.yar.get.mockReturnValue('matching-state')
 
-      mockWreck.post.mockRejectedValue(new Error('Token exchange failed'))
+      mswServer.use(http.post(tokenEndpoint, () => HttpResponse.error()))
 
       await signInOidcController.handler(request, h)
 
@@ -310,14 +309,16 @@ describe('Auth Controllers', () => {
       }
       const idToken = Jwt.token.generate(userPayload, { key: 'test-secret' })
 
-      mockWreck.post.mockResolvedValue({
-        payload: {
-          access_token: 'access-token',
-          refresh_token: 'refresh-token',
-          id_token: idToken,
-          expires_in: 3600
-        }
-      })
+      mswServer.use(
+        http.post(tokenEndpoint, () =>
+          HttpResponse.json({
+            access_token: 'access-token',
+            refresh_token: 'refresh-token',
+            id_token: idToken,
+            expires_in: 3600
+          })
+        )
+      )
 
       await signInOidcController.handler(request, h)
 

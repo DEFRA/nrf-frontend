@@ -1,6 +1,8 @@
-import Wreck from '@hapi/wreck'
 import { getOidcConfig } from './get-oidc-config.js'
 import { config } from '../../config/config.js'
+import { createLogger } from '../common/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 /**
  * Refreshes access and refresh tokens using OAuth 2.0 refresh token grant
@@ -8,7 +10,7 @@ import { config } from '../../config/config.js'
  * @returns {Promise<Object>} New tokens: { access_token, refresh_token, ... }
  */
 export async function refreshTokens(refreshToken) {
-  const { token_endpoint: url } = await getOidcConfig()
+  const { token_endpoint: url } = await getOidcConfig(logger)
 
   const params = new URLSearchParams()
   params.set('client_id', config.get('defraId.clientId'))
@@ -18,15 +20,17 @@ export async function refreshTokens(refreshToken) {
   params.set('refresh_token', refreshToken)
   params.set('redirect_uri', config.get('defraId.redirectUrl'))
 
-  const query = params.toString()
-
-  const { payload } = await Wreck.post(url, {
+  const res = await fetch(url, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
-    payload: query,
-    json: true
+    body: params.toString()
   })
 
-  return payload
+  if (!res.ok) {
+    throw new Error(`Token endpoint returned ${res.status} ${res.statusText}`)
+  }
+
+  return res.json()
 }

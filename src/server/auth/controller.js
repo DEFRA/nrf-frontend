@@ -1,5 +1,4 @@
 import crypto from 'node:crypto'
-import Wreck from '@hapi/wreck'
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { getSafeRedirect } from './get-safe-redirect.js'
@@ -39,7 +38,7 @@ export const loginController = {
 export const signInController = {
   async handler(request, h) {
     // Build the OAuth authorization URL manually to include serviceId and policy
-    const oidcConfig = await getOidcConfig()
+    const oidcConfig = await getOidcConfig(logger)
 
     const authUrl = new URL(oidcConfig.authorization_endpoint)
     const scope = config.get('defraId.scopes').join(' ')
@@ -104,7 +103,7 @@ export const signInOidcController = {
 
     try {
       // Exchange authorization code for tokens
-      const oidcConfig = await getOidcConfig()
+      const oidcConfig = await getOidcConfig(logger)
 
       const scope = config.get('defraId.scopes').join(' ')
       const urlParams = {
@@ -115,16 +114,21 @@ export const signInOidcController = {
         redirect_uri: config.get('defraId.redirectUrl'),
         scope
       }
-      const { payload: tokenResponse } = await Wreck.post(
-        oidcConfig.token_endpoint,
-        {
-          payload: new URLSearchParams(urlParams).toString(),
-          headers: {
-            'content-type': 'application/x-www-form-urlencoded'
-          },
-          json: true
-        }
-      )
+      const tokenRes = await fetch(oidcConfig.token_endpoint, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(urlParams).toString()
+      })
+
+      if (!tokenRes.ok) {
+        throw new Error(
+          `Token endpoint returned ${tokenRes.status} ${tokenRes.statusText}`
+        )
+      }
+
+      const tokenResponse = await tokenRes.json()
 
       // Decode and extract user profile from ID token
       const decoded = Jwt.token.decode(tokenResponse.id_token)
