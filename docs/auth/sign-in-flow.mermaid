@@ -1,45 +1,38 @@
 sequenceDiagram
-    participant User
     participant Browser
-    participant Server as Hapi Server<br/>(server.js)
-    participant LoginCtrl as Login Controller<br/>(auth/controller.js)
-    participant YarSession as Yar Session<br/>(session-cache.js)
-    participant DefraAuth as Defra Identity Plugin<br/>(plugins/defra-identity.js)
-    participant Cache as Redis/Memory Cache<br/>(session-cache.js)
+    participant Ctrl as Auth Controller<br/>(auth/controller.js)
+    participant Yar as Yar Session Cookie<br/>(session-cache.js)
+    participant Cache as Session Cache<br/>(server.app.sessionCache)
+    participant OIDC as OIDC Discovery<br/>(get-oidc-config.js)
     participant DefraID as Defra ID Provider<br/>(External OIDC)
 
-    %% Initial Login
-    User->>Browser: Navigate to /login
-    Browser->>LoginCtrl: GET /login
-    LoginCtrl->>Browser: Render login page<br/>(views/auth/login.html)
+    %% Login page
+    Browser->>Ctrl: GET /login
+    Ctrl-->>Browser: Render auth/login.njk
 
-    %% Start OAuth Flow
-    User->>Browser: Click "Sign in"
-    Browser->>LoginCtrl: GET /auth/sign-in
-    LoginCtrl->>YarSession: Generate & store CSRF state
-    YarSession-->>LoginCtrl: State stored
-    LoginCtrl->>DefraAuth: Build authorization URL
-    DefraAuth-->>LoginCtrl: Authorization URL with:<br/>- client_id<br/>- redirect_uri<br/>- scope (openid offline_access)<br/>- state<br/>- serviceId<br/>- policy
-    LoginCtrl->>Browser: 302 Redirect
+    %% Start OAuth (manual, bypasses Bell redirect)
+    Browser->>Ctrl: GET /auth/sign-in
+    Ctrl->>OIDC: Fetch discovery doc (wellKnownUrl)
+    OIDC-->>Ctrl: authorization_endpoint, token_endpoint
+    Ctrl->>Ctrl: Generate CSRF state (crypto)
+    Ctrl->>Yar: set oauth_state
+    Ctrl-->>Browser: 302 to authorization_endpoint<br/>?client_id&response_type=code&redirect_uri<br/>&scope(openid offline_access)&serviceId&state
     Browser->>DefraID: GET authorization_endpoint
 
-    %% External Authentication
-    DefraID->>User: Show login form
-    User->>DefraID: Enter credentials
-    DefraID->>DefraID: Authenticate user
-    DefraID->>Browser: 302 Redirect with code & state
+    %% External authentication
+    DefraID->>Browser: Show login form
+    Browser->>DefraID: Enter credentials
+    DefraID-->>Browser: 302 to redirect_uri?code=xxx&state=yyy
 
-    %% OAuth Callback
-    Browser->>LoginCtrl: GET /login/return?code=xxx&state=yyy
-    LoginCtrl->>YarSession: Validate state (CSRF check)
-    YarSession-->>LoginCtrl: State valid
-    LoginCtrl->>DefraID: POST token_endpoint<br/>(exchange code for tokens)<br/>grant_type=authorization_code
-    DefraID-->>LoginCtrl: { access_token, refresh_token,<br/>id_token, expires_in }
-    LoginCtrl->>LoginCtrl: Decode id_token<br/>(extract user profile)
-    LoginCtrl->>DefraAuth: createUserSession(credentials)
-    DefraAuth-->>LoginCtrl: Session object:<br/>{ sessionId, token,<br/>refreshToken, profile,<br/>isAuthenticated: true }
-    LoginCtrl->>Cache: Store session by sessionId<br/>(TTL: 4 hours)
-    Cache-->>LoginCtrl: Session stored
-    LoginCtrl->>YarSession: Store sessionId in cookie
-    YarSession-->>LoginCtrl: Cookie set
-    LoginCtrl->>Browser: 302 Redirect to home/requested URL
+    %% Callback
+    Browser->>Ctrl: GET /login/return?code&state
+    Ctrl->>Yar: get oauth_state
+    Ctrl->>Ctrl: Verify state matches (CSRF), then clear oauth_state
+    Ctrl->>DefraID: POST token_endpoint<br/>grant_type=authorization_code<br/>(code, client_id, client_secret, redirect_uri)
+    DefraID-->>Ctrl: { access_token, refresh_token, id_token, expires_in }
+    Ctrl->>Ctrl: Decode id_token (@hapi/jwt) -> profile
+    Ctrl->>Ctrl: createUserSession() -> { sessionId (uuid),<br/>profile, token, refreshToken, isAuthenticated }
+    Ctrl->>Cache: set(sessionId, userSession)
+    Ctrl->>Yar: set sessionId
+    Ctrl->>Yar: get + clear redirectTo
+    Ctrl-->>Browser: 302 to getSafeRedirect(redirectTo or start page)

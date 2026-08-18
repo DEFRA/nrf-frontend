@@ -1,65 +1,100 @@
-# Authentication
+# Authentication (DEFRA Identity)
 
-### Authentication (DEFRA Identity)
+> **AI agents / developers:** read this before changing anything under `src/server/auth/`,
+> `src/server/plugins/defra-identity.js`, or session handling. It reflects the real code.
 
-Defra ID authentication implements OAuth 2.0 / OpenID Connect with:
+Defra ID auth is OAuth 2.0 / OpenID Connect (Authorization Code flow) built **manually** on
+top of `@hapi/bell` and `@hapi/yar`. Bell is registered as a strategy but the sign-in redirect
+and code-for-token exchange are hand-rolled in the controller (to inject `serviceId` and avoid
+Bell's automatic redirect). Sessions are server-side; the browser only holds an opaque session id.
 
-- Authorization Code Flow
-- Refresh tokens for automatic token renewal
-- Server-side session storage (Redis in production, in-memory locally)
-- CSRF protection via state parameter
+## Key files
 
-When a new user signs in for the first time they'll be offered to enroll on the service (or the org they're an employee of).
+| File                                       | Responsibility                                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `src/server/auth/controller.js`            | All 5 route handlers: login page, sign-in redirect, callback, sign-out, sign-out-oidc                                    |
+| `src/server/auth/index.js`                 | Registers auth routes (only if `server.app.authEnabled`)                                                                 |
+| `src/server/plugins/defra-identity.js`     | Registers `defra-id` (Bell) + `defra-session` (custom yar scheme); token validity + refresh logic; `createUserSession()` |
+| `src/server/auth/refresh-tokens.js`        | OAuth `refresh_token` grant call                                                                                         |
+| `src/server/auth/get-oidc-config.js`       | Fetches OIDC discovery doc from `defraId.wellKnownUrl`                                                                   |
+| `src/server/auth/get-safe-redirect.js`     | Prevents open-redirect on post-login return                                                                              |
+| `src/server/common/helpers/session-cache/` | Yar server-side cache (Redis prod / memory local)                                                                        |
+| `src/config/config.js`                     | `defraId.*` and `session.*` config                                                                                       |
 
-## Defra ID
+## Auth strategies & route protection
 
-To use, copy .env.template to .env and populate the env var values as follows:
+Registered in `defra-identity.js`:
 
-For:
+- **`defra-id`** — Bell OAuth strategy (registered, but the flow is driven manually).
+- **`defra-session`** — custom `yar-session` scheme: reads `sessionId` from Yar, loads the
+  session from cache, refreshes the token if expired, else returns `unauthenticated`.
 
-```
-DEFRA_ID_CLIENT_ID
-DEFRA_ID_SERVICE_ID
-DEFRA_ID_SCOPES
-```
+There is **no server-wide default strategy**. Each route opts in explicitly:
+`auth: 'defra-session'` (protected) or `auth: false` (public). If Bell/OIDC registration fails
+at boot, `server.app.authEnabled` stays `false`, only `/login` is registered, and routes fall
+back to `auth: false` (see `profile/index.js`).
 
-copy the values from [cdp-app-config](https://github.com/DEFRA/cdp-app-config/blob/main/services/nrf-frontend/test/nrf-frontend.env)
+## Routes
 
-For `DEFRA_ID_CLIENT_SECRET`, get the value from another dev team member (or, application secrets for nrf-frontend in test env can be retrieved using [CDP terminal](https://portal.cdp-int.defra.cloud/documentation/how-to/terminal.md#are-my-service-secrets-available-from-the-terminal-))
+| Route                     | Auth            | Purpose                                                                    |
+| ------------------------- | --------------- | -------------------------------------------------------------------------- |
+| `GET /login`              | `false`         | Render sign-in page (`auth/login.njk`)                                     |
+| `GET /auth/sign-in`       | `false`         | Build authorization URL, store CSRF `state` in Yar, 302 to Defra ID        |
+| `GET /login/return`       | `false`         | OAuth callback: verify `state`, exchange `code` for tokens, create session |
+| `GET /auth/sign-out`      | `defra-session` | Drop session from cache, clear Yar, 302 home                               |
+| `GET /auth/sign-out-oidc` | `false`         | Defra ID logout callback; failsafe session clear                           |
 
-### Auth flows
+## Sessions, tokens & cookies
 
-Mermaid diagrams:
+- **Session store:** `server.app.sessionCache` (Catbox, segment `sessions`, 24h TTL). Holds the
+  full `userSession`: `{ sessionId (uuid), isAuthenticated, profile, token, refreshToken, role, scope }`.
+- **Yar cookie:** server-side backed (`maxCookieSize: 0`), `httpOnly`, `SameSite=Lax`. Stores only
+  `sessionId`, plus transient `oauth_state` and `redirectTo`. Default 4h TTL (`session.*` config).
+- **Bell cookie:** `bell-defra-id`, temporary OAuth transaction cookie.
+- **Token refresh:** on every `defra-session` request the access token is decoded and time-checked
+  (60s skew). If expired and `defraId.refreshTokens` is on, a `refresh_token` grant is made and the
+  new tokens are persisted transparently. If refresh is off or fails, the session is dropped and the
+  user is unauthenticated. See [token-refresh-flow.mermaid](./token-refresh-flow.mermaid).
+
+## Flow diagrams
 
 - [Sign in flow](./sign-in-flow.mermaid)
+- [Token refresh flow](./token-refresh-flow.mermaid)
 - [Sign out flow](./sign-out-flow.mermaid)
 
-Auth strategies: `defra-id` (Bell OAuth flow), `defra-session` (session validation). Default server auth mode is `'try'` — routes that need auth use `auth: 'defra-session'`, routes that don't use `auth: false`.
+## Config (`defraId.*`)
 
-### Signing out
+`enabled`, `wellKnownUrl`, `clientId`, `clientSecret`, `redirectUrl`, `serviceId`,
+`refreshTokens`, `scopes` (default `openid offline_access`). See `src/config/config.js`.
 
-You can sign out from the profile page - http://localhost:3000/profile
+---
 
-## Defra ID stub
+## Local setup — real Defra ID
 
-To use the stub:
+Copy `.env.template` to `.env` and populate:
 
-1. use the default values in config.js, don't override with the values in .env
-2. run `docker compose up --build -d` to run the defra ID stub plus all dependencies.
-3. run `npm run dev` to start the frontend.
+- `DEFRA_ID_CLIENT_ID`, `DEFRA_ID_SERVICE_ID`, `DEFRA_ID_SCOPES` — copy from
+  [cdp-app-config](https://github.com/DEFRA/cdp-app-config/blob/main/services/nrf-frontend/test/nrf-frontend.env).
+- `DEFRA_ID_CLIENT_SECRET` — get from another dev, or retrieve nrf-frontend test secrets via the
+  [CDP terminal](https://portal.cdp-int.defra.cloud/documentation/how-to/terminal.md#are-my-service-secrets-available-from-the-terminal-).
 
-### When running the stub for the first time:
+Sign out from the profile page: http://localhost:3000/profile
 
-On the 'DEFRA ID Stub User Set Up' page:
+## Local setup — Defra ID stub
 
-1. Enter email, first name, last name
-2. For Enrolments, enter 1
-3. For Enrolment requests, enter 1
+1. Use the default values in `config.js` (don't override with `.env`).
+2. `docker compose up --build -d` — runs the stub plus dependencies.
+3. `npm run dev` — start the frontend.
 
-On the New User Relationships page:
+First run, on **DEFRA ID Stub User Set Up**:
 
-1. Enter any value for Relationsip ID, Organisation ID and Organisation Name
-2. Choose user type eg Citizen then click Add relationship
-3. Scroll to the bottom of the next page and click Finish
-4. Now instead of clicking Login on the next page, set the browser address to http://localhost:3000
-5. Click Log in
+1. Enter email, first name, last name.
+2. Enrolments: `1`. Enrolment requests: `1`.
+
+On **New User Relationships**:
+
+1. Enter any Relationship ID, Organisation ID, Organisation Name.
+2. Choose a user type (e.g. Citizen), click **Add relationship**.
+3. Scroll to the bottom, click **Finish**.
+4. Instead of clicking Login, set the browser address to http://localhost:3000.
+5. Click **Log in**.

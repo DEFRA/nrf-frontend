@@ -1,25 +1,27 @@
 sequenceDiagram
-    participant User
     participant Browser
-    participant LoginCtrl as Login Controller<br/>(auth/controller.js)
-    participant YarSession as Yar Session<br/>(session-cache.js)
-    participant Cache as Redis/Memory Cache<br/>(session-cache.js)
+    participant Ctrl as Auth Controller<br/>(auth/controller.js)
+    participant Yar as Yar Session Cookie
+    participant Cache as Session Cache<br/>(server.app.sessionCache)
 
-    %% User-Initiated Sign Out
-    User->>Browser: Click "Sign out"
-    Browser->>LoginCtrl: GET /auth/sign-out
-    LoginCtrl->>YarSession: Get sessionId
-    YarSession-->>LoginCtrl: sessionId
-    LoginCtrl->>Cache: Delete session by sessionId
-    Cache-->>LoginCtrl: Session removed
-    LoginCtrl->>YarSession: Clear sessionId cookie
-    YarSession-->>LoginCtrl: Cookie cleared
-    LoginCtrl->>Browser: 302 Redirect to home
+    %% User-initiated sign out (requires active session)
+    Browser->>Ctrl: GET /auth/sign-out  (auth: defra-session)
+    alt not authenticated
+        Ctrl-->>Browser: 302 to start page
+    else authenticated
+        Ctrl->>Cache: drop(sessionId)
+        Ctrl->>Yar: clear sessionId
+        Ctrl-->>Browser: 302 to start page
+    end
 
-    Note over User,Cache: Alternative: OIDC Sign Out Callback
+    Note over Browser,Cache: Alternative: Defra ID logout callback (auth: false)
 
-    %% OIDC Sign Out Callback (when user signs out from Defra ID)
-    Browser->>LoginCtrl: GET /auth/sign-out-oidc<br/>(optional callback from Defra ID)
-    LoginCtrl->>YarSession: Validate state & clear session
-    YarSession-->>LoginCtrl: Session cleared
-    LoginCtrl->>Browser: 302 Redirect to home
+    %% OIDC sign-out callback
+    Browser->>Ctrl: GET /auth/sign-out-oidc?state
+    Ctrl->>Ctrl: Parse + log base64 state (best-effort)
+    Ctrl->>Yar: get sessionId (failsafe)
+    opt sessionId present
+        Ctrl->>Cache: drop(sessionId)
+        Ctrl->>Yar: clear sessionId
+    end
+    Ctrl-->>Browser: 302 to start page
