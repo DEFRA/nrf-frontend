@@ -82,8 +82,6 @@ The boundary check result page uses [@defra/interactive-map](https://github.com/
 
 ## Other docs
 
-- [Context for AI tools](./docs/ai-context.md)
 - [Docker for local development](./docs/docker.md)
 - [Application caching](./docs/app-caching.md)
-- [Authentication](./docs/auth/index.md)
 - [Licence](./docs/licence.md)
