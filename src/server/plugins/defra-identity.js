@@ -1,10 +1,7 @@
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
-import { getOidcConfig } from '../auth/get-oidc-config.js'
 import { refreshTokens } from '../auth/refresh-tokens.js'
 import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
-import { RETURN_PATH } from '../auth/auth-urls.js'
-import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { config } from '../../config/config.js'
 import { randomUUID } from 'node:crypto'
 
@@ -12,35 +9,28 @@ const logger = createLogger()
 
 /**
  * DEFRA Identity authentication plugin
- * Implements OAuth 2.0/OIDC authentication using Bell and Yar for session management
+ * Provides server-side session management via a custom Yar-based auth scheme.
+ * The OAuth 2.0/OIDC sign-in handshake itself is hand-rolled in auth/controller.js,
+ * which fetches the OIDC discovery document on demand (memoised).
  * Based on the reference implementation: https://github.com/DEFRA/fcp-defra-id-example
  */
 export const defraIdentity = {
   plugin: {
     name: 'defra-identity',
-    async register(server, options) {
+    register(server, options) {
       const { sessionCache } = options
 
       logger.info('Registering DEFRA Identity authentication plugin')
 
-      // Fetch OIDC configuration
-      const oidcConfig = await getOidcConfig(logger)
-      logger.info(
-        `OIDC configuration loaded from ${config.get('defraId.baseUrl')}`
-      )
-
       // Register custom session auth scheme that uses Yar
       server.auth.scheme('yar-session', yarSessionScheme(sessionCache))
-
-      // Configure Bell strategy for DEFRA Identity OAuth
-      server.auth.strategy('defra-id', 'bell', getBellOptions(oidcConfig))
 
       // Configure session strategy using our custom Yar-based scheme
       server.auth.strategy('defra-session', 'yar-session')
 
       server.ext('onPreHandler', redirectToSignIn)
 
-      logger.info('DEFRA Identity authentication strategies registered')
+      logger.info('DEFRA Identity authentication strategy registered')
     }
   }
 }
@@ -145,36 +135,8 @@ async function refreshUserSession({ sessionId, userSession, sessionCache }) {
 }
 
 /**
- * Creates Bell (OAuth 2.0) configuration
- * @param {Object} oidcConfig - OIDC discovery document
- * @returns {Object} Bell strategy options
- */
-function getBellOptions(oidcConfig) {
-  return {
-    cookie: 'bell-defra-id', // Explicitly name Bell's temporary OAuth cookie
-    provider: {
-      name: 'defra-id',
-      protocol: 'oauth2',
-      useParamsAuth: true,
-      auth: oidcConfig.authorization_endpoint,
-      token: oidcConfig.token_endpoint,
-      scope: ['openid', 'offline_access']
-    },
-    clientId: config.get('defraId.clientId'),
-    clientSecret: config.get('defraId.clientSecret'),
-    password: config.get('cookie.password'),
-    isSecure: config.get('cookie.isSecure'),
-    location: config.get('frontendBaseUrl'), // Browser-facing base URL
-    config: {
-      // Explicitly set the callback path to override Bell's default behavior
-      redirectUri: buildFrontendUrl(RETURN_PATH)
-    }
-  }
-}
-
-/**
- * Creates a new user session from OAuth credentials
- * @param {Object} credentials - OAuth credentials from Bell
+ * Creates a new user session from the OAuth token exchange credentials
+ * @param {Object} credentials - Credentials built in auth/controller.js
  * @returns {Object} User session object
  */
 export function createUserSession(credentials) {

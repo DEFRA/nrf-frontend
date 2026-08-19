@@ -14,10 +14,6 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('../auth/get-oidc-config.js', () => ({
-  getOidcConfig: vi.fn()
-}))
-
 vi.mock('../auth/refresh-tokens.js', () => ({
   refreshTokens: vi.fn()
 }))
@@ -29,26 +25,13 @@ vi.mock('../../config/config.js', () => ({
 }))
 
 const { defraIdentity, createUserSession } = await import('./defra-identity.js')
-const { getOidcConfig } = await import('../auth/get-oidc-config.js')
 const { refreshTokens } = await import('../auth/refresh-tokens.js')
 const { config } = await import('../../config/config.js')
 
-const mockGetOidcConfig = vi.mocked(getOidcConfig)
 const mockRefreshTokens = vi.mocked(refreshTokens)
 
-const oidcConfig = {
-  authorization_endpoint: 'https://auth.example.com/authorize',
-  token_endpoint: 'https://auth.example.com/token'
-}
-
 const defaultConfigValues = {
-  'defraId.baseUrl': 'https://auth.example.com',
-  'defraId.refreshTokens': true,
-  'defraId.clientId': 'mock-client-id',
-  'defraId.clientSecret': 'mock-client-secret',
-  'cookie.password': 'mock-cookie-password',
-  'cookie.isSecure': false,
-  frontendBaseUrl: 'http://localhost:3000'
+  'defraId.refreshTokens': true
 }
 
 const generateToken = (expiresInSec) => {
@@ -80,7 +63,6 @@ describe('defra-identity plugin', () => {
 
   beforeEach(() => {
     config.get.mockImplementation((key) => defaultConfigValues[key])
-    mockGetOidcConfig.mockResolvedValue(oidcConfig)
 
     sessionCache = {
       get: vi.fn(),
@@ -112,18 +94,7 @@ describe('defra-identity plugin', () => {
   })
 
   describe('plugin registration', () => {
-    it('fetches the OIDC configuration with a logger argument', async () => {
-      await registerPlugin()
-
-      expect(mockGetOidcConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          info: expect.any(Function),
-          debug: expect.any(Function)
-        })
-      )
-    })
-
-    it('registers the yar-session scheme and both auth strategies', async () => {
+    it('registers the yar-session scheme and the defra-session strategy', async () => {
       await registerPlugin()
 
       expect(server.auth.scheme).toHaveBeenCalledWith(
@@ -131,28 +102,27 @@ describe('defra-identity plugin', () => {
         expect.any(Function)
       )
       expect(server.auth.strategy).toHaveBeenCalledWith(
-        'defra-id',
-        'bell',
-        expect.any(Object)
-      )
-      expect(server.auth.strategy).toHaveBeenCalledWith(
         'defra-session',
         'yar-session'
       )
     })
 
-    it('configures the bell strategy from the OIDC configuration', async () => {
+    it('does not register a Bell (defra-id) strategy or fetch OIDC config at boot', async () => {
       await registerPlugin()
 
-      const defraIdStrategy = server.auth.strategy.mock.calls.find(
-        ([name]) => name === 'defra-id'
+      const registeredStrategies = server.auth.strategy.mock.calls.map(
+        ([name]) => name
       )
-      const bellOptions = defraIdStrategy[2]
+      expect(registeredStrategies).not.toContain('defra-id')
+    })
 
-      expect(bellOptions.provider.auth).toBe(oidcConfig.authorization_endpoint)
-      expect(bellOptions.provider.token).toBe(oidcConfig.token_endpoint)
-      expect(bellOptions.clientId).toBe('mock-client-id')
-      expect(bellOptions.provider.scope).toEqual(['openid', 'offline_access'])
+    it('registers the redirect-to-sign-in pre-handler extension', async () => {
+      await registerPlugin()
+
+      expect(server.ext).toHaveBeenCalledWith(
+        'onPreHandler',
+        expect.any(Function)
+      )
     })
   })
 
