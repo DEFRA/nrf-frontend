@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
-import { getOidcConfig } from './get-oidc-config.js'
+import { getOidcConfig, resetOidcConfigCache } from './get-oidc-config.js'
 
 vi.mock('../../config/config.js')
 
@@ -10,6 +10,10 @@ const server = setupMswServer()
 const wellKnownUrl = 'https://example.com/.well-known'
 
 describe('getOidcConfig', () => {
+  beforeEach(() => {
+    resetOidcConfigCache()
+  })
+
   it('should fetch and return OIDC configuration', async () => {
     const { config } = await import('../../config/config.js')
 
@@ -33,6 +37,26 @@ describe('getOidcConfig', () => {
 
     expect(result).toEqual(mockConfig)
     expect(requestedUrl).toBe(wellKnownUrl)
+  })
+
+  it('should memoise the configuration and not re-fetch on subsequent calls', async () => {
+    const { config } = await import('../../config/config.js')
+
+    const mockConfig = { token_endpoint: 'https://example.com/token' }
+    config.get = vi.fn().mockReturnValue(wellKnownUrl)
+
+    let fetchCount = 0
+    server.use(
+      http.get(wellKnownUrl, () => {
+        fetchCount += 1
+        return HttpResponse.json(mockConfig)
+      })
+    )
+
+    await getOidcConfig()
+    await getOidcConfig()
+
+    expect(fetchCount).toBe(1)
   })
 
   it('should throw error when DEFRA_ID_WELL_KNOWN_URL is not configured', async () => {
