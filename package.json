@@ -64,7 +64,6 @@
     "convict": "^6.2.5",
     "convict-format-with-validator": "^6.2.0",
     "date-fns": "^4.4.0",
-    "dotenv": "^17.4.2",
     "govuk-frontend": "^6.4.0",
     "hapi-pino": "^13.0.0",
     "hapi-pulse": "^4.0.0",
