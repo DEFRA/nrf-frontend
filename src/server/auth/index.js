@@ -75,7 +75,7 @@ import {
  *     responses:
  *       303:
  *         description: Redirect to home page
- * /auth/sign-out-oidc:
+ * /login/signed-out:
  *   get:
  *     tags:
  *       - Auth
@@ -127,7 +127,7 @@ export const auth = {
           },
           {
             method: 'GET',
-            path: '/auth/sign-out-oidc',
+            path: '/login/signed-out',
             ...signOutOidcController
           }
         ])

@@ -17,7 +17,8 @@ const { tokenEndpoint } = vi.hoisted(() => ({
 
 vi.mock('./get-oidc-config.js', () => ({
   getOidcConfig: vi.fn(() => ({
-    token_endpoint: tokenEndpoint
+    token_endpoint: tokenEndpoint,
+    end_session_endpoint: 'https://auth.example.com/signout'
   }))
 }))
 
@@ -48,7 +49,7 @@ vi.mock('../../config/config.js', () => ({
         'defraId.scopes': ['openid', 'profile', 'email'],
         'defraId.clientId': 'mock-client-id',
         'defraId.clientSecret': 'mock-client-secret',
-        'defraId.redirectUrl': 'http://localhost:3000/signin-oidc',
+        frontendBaseUrl: 'http://localhost:3000',
         'defraId.serviceId': 'mock-service-id'
       }
       return config[key]
@@ -131,7 +132,7 @@ describe('Auth Controllers', () => {
       expect(url.searchParams.get('client_id')).toBe('mock-client-id')
       expect(url.searchParams.get('response_type')).toBe('code')
       expect(url.searchParams.get('redirect_uri')).toBe(
-        'http://localhost:3000/signin-oidc'
+        'http://localhost:3000/login/return'
       )
       expect(url.searchParams.get('scope')).toBe('openid profile email')
       expect(url.searchParams.get('serviceId')).toBe('mock-service-id')
@@ -377,7 +378,7 @@ describe('Auth Controllers', () => {
       expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
-    it('should clear session and redirect to home', async () => {
+    it('should clear session and redirect to the end_session_endpoint', async () => {
       const mockSessionCache = {
         drop: vi.fn()
       }
@@ -386,10 +387,12 @@ describe('Auth Controllers', () => {
         auth: {
           isAuthenticated: true,
           credentials: {
-            sessionId: 'test-session-id'
+            sessionId: 'test-session-id',
+            idToken: 'test-id-token'
           }
         },
         yar: {
+          set: vi.fn(),
           clear: vi.fn()
         },
         server: {
@@ -404,31 +407,55 @@ describe('Auth Controllers', () => {
 
       await signOutController.handler(request, h)
 
-      // Verify session is dropped from cache
+      // Local session is cleared before handing off to Defra ID
       expect(mockSessionCache.drop).toHaveBeenCalledWith('test-session-id')
-
-      // Verify sessionId is cleared from Yar
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
 
-      // Verify redirect to home
-      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
+      // A CSRF state is stored for the callback to verify
+      const [[stateKey, stateValue]] = request.yar.set.mock.calls
+      expect(stateKey).toBe('signout_state')
+
+      // The browser is redirected to the end_session_endpoint with the hint,
+      // callback URL and state in the query string
+      const redirectUrl = new URL(h.redirect.mock.calls[0][0])
+      expect(redirectUrl.origin + redirectUrl.pathname).toBe(
+        'https://auth.example.com/signout'
+      )
+      expect(redirectUrl.searchParams.get('id_token_hint')).toBe(
+        'test-id-token'
+      )
+      expect(redirectUrl.searchParams.get('post_logout_redirect_uri')).toBe(
+        'http://localhost:3000/login/signed-out'
+      )
+      expect(redirectUrl.searchParams.get('state')).toBe(stateValue)
     })
   })
 
   describe('signOutOidcController', () => {
-    it('should handle sign-out callback with valid state', async () => {
-      const state = Buffer.from(JSON.stringify({ foo: 'bar' })).toString(
-        'base64'
-      )
+    const createYar = (values) => ({
+      get: vi.fn((key) => values[key]),
+      clear: vi.fn()
+    })
 
+    it('should clear the sign-out state and redirect home on a valid callback', async () => {
       const request = {
-        query: {
-          state
-        },
-        yar: {
-          get: vi.fn().mockReturnValue(null),
-          clear: vi.fn()
-        }
+        query: { state: 'good-state' },
+        yar: createYar({ signout_state: 'good-state' })
+      }
+      const h = {
+        redirect: vi.fn((url) => ({ redirect: url }))
+      }
+
+      await signOutOidcController.handler(request, h)
+
+      expect(request.yar.clear).toHaveBeenCalledWith('signout_state')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
+    })
+
+    it('should redirect home even when the state does not match', async () => {
+      const request = {
+        query: { state: 'forged-state' },
+        yar: createYar({ signout_state: 'good-state' })
       }
       const h = {
         redirect: vi.fn((url) => ({ redirect: url }))
@@ -439,32 +466,10 @@ describe('Auth Controllers', () => {
       expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
 
-    it('should handle sign-out callback with invalid state', async () => {
-      const request = {
-        query: {
-          state: 'invalid-base64'
-        },
-        yar: {
-          get: vi.fn().mockReturnValue(null),
-          clear: vi.fn()
-        }
-      }
-      const h = {
-        redirect: vi.fn((url) => ({ redirect: url }))
-      }
-
-      await signOutOidcController.handler(request, h)
-
-      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
-    })
-
-    it('should handle sign-out callback without state', async () => {
+    it('should redirect home when there is no state', async () => {
       const request = {
         query: {},
-        yar: {
-          get: vi.fn().mockReturnValue(null),
-          clear: vi.fn()
-        }
+        yar: createYar({})
       }
       const h = {
         redirect: vi.fn((url) => ({ redirect: url }))
@@ -482,10 +487,7 @@ describe('Auth Controllers', () => {
 
       const request = {
         query: {},
-        yar: {
-          get: vi.fn().mockReturnValue('remaining-session-id'),
-          clear: vi.fn()
-        },
+        yar: createYar({ sessionId: 'remaining-session-id' }),
         server: {
           app: {
             sessionCache: mockSessionCache
@@ -498,13 +500,8 @@ describe('Auth Controllers', () => {
 
       await signOutOidcController.handler(request, h)
 
-      // Verify remaining session is dropped
       expect(mockSessionCache.drop).toHaveBeenCalledWith('remaining-session-id')
-
-      // Verify sessionId is cleared
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
-
-      // Verify redirect to home
       expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })

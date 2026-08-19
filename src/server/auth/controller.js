@@ -5,6 +5,8 @@ import { getSafeRedirect } from './get-safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
+import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
+import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/routes.js'
 
 const logger = createLogger()
@@ -44,7 +46,7 @@ export const signInController = {
     const scope = config.get('defraId.scopes').join(' ')
     authUrl.searchParams.set('client_id', config.get('defraId.clientId'))
     authUrl.searchParams.set('response_type', 'code')
-    authUrl.searchParams.set('redirect_uri', config.get('defraId.redirectUrl'))
+    authUrl.searchParams.set('redirect_uri', buildFrontendUrl(RETURN_PATH))
     authUrl.searchParams.set('scope', scope)
     authUrl.searchParams.set('serviceId', config.get('defraId.serviceId'))
 
@@ -111,7 +113,7 @@ export const signInOidcController = {
         client_id: config.get('defraId.clientId'),
         client_secret: config.get('defraId.clientSecret'),
         code: request.query.code,
-        redirect_uri: config.get('defraId.redirectUrl'),
+        redirect_uri: buildFrontendUrl(RETURN_PATH),
         scope
       }
       const tokenRes = await fetch(oidcConfig.token_endpoint, {
@@ -138,6 +140,7 @@ export const signInOidcController = {
         provider: 'defra-id',
         token: tokenResponse.access_token,
         refreshToken: tokenResponse.refresh_token,
+        idToken: tokenResponse.id_token,
         expiresIn: tokenResponse.expires_in,
         query: request.query,
         profile: {
@@ -193,7 +196,15 @@ export const signInOidcController = {
 }
 
 /**
- * Sign out handler - clears local session and redirects to home
+ * Sign out handler - clears the local session then redirects the browser to the
+ * Defra ID end_session_endpoint to sign out of B2C and any upstream IdPs.
+ *
+ * This is a top-level GET redirect rather than a form POST: B2C's sign-out
+ * bounces through several origins (b2clogin.com, external IdPs) before returning
+ * to post_logout_redirect_uri, and the CSP `form-action` directive is enforced
+ * on every hop of a form submission — which would block that chain. A redirect
+ * is not a form submission, so `form-action` does not apply. The id_token_hint
+ * therefore rides in the query string (B2C supports GET sign-out).
  */
 export const signOutController = {
   async handler(request, h) {
@@ -201,19 +212,28 @@ export const signOutController = {
       return h.redirect(startPath)
     }
 
-    const { sessionId } = request.auth.credentials
+    const { sessionId, idToken } = request.auth.credentials
 
-    // Clear session from cache
+    // Clear the local session before handing off to Defra ID
     const sessionCache = request.server.app.sessionCache
     await sessionCache.drop(sessionId)
-
-    // Clear session ID from Yar
     request.yar.clear('sessionId')
+
+    const oidcConfig = await getOidcConfig(logger)
+    const endSessionUrl = new URL(oidcConfig.end_session_endpoint)
+    const postLogoutRedirectUri = buildFrontendUrl(SIGNED_OUT_PATH)
+    const state = crypto.randomBytes(16).toString('base64url')
+    request.yar.set('signout_state', state)
+    endSessionUrl.searchParams.set('id_token_hint', idToken)
+    endSessionUrl.searchParams.set(
+      'post_logout_redirect_uri',
+      postLogoutRedirectUri
+    )
+    endSessionUrl.searchParams.set('state', state)
 
     logger.info(`User session ${sessionId} signed out`)
 
-    // Just redirect to home - no need to navigate to DEFRA Identity
-    return h.redirect(startPath)
+    return h.redirect(endSessionUrl.toString())
   },
   options: {
     auth: 'defra-session' // Requires active session
@@ -221,20 +241,16 @@ export const signOutController = {
 }
 
 /**
- * DEFRA Identity logout callback
+ * DEFRA Identity logout callback - the post_logout_redirect_uri that B2C returns
+ * to once sign-out completes. Verifies the state echoed through the provider
+ * (a mismatch is logged but never blocks), then clears any residual session.
  */
 export const signOutOidcController = {
   async handler(request, h) {
-    // Validate state parameter (CSRF protection)
-    if (request.query.state) {
-      try {
-        const state = JSON.parse(
-          Buffer.from(request.query.state, 'base64').toString()
-        )
-        logger.debug('Sign-out callback state validated:', state)
-      } catch (error) {
-        logger.warn(error, 'Invalid sign-out callback state')
-      }
+    const expectedState = request.yar.get('signout_state')
+    request.yar.clear('signout_state')
+    if (expectedState && request.query.state !== expectedState) {
+      logger.warn('Sign-out state mismatch')
     }
 
     // Failsafe: clear any remaining session

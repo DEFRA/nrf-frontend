@@ -3,6 +3,8 @@ import { createLogger } from '../common/helpers/logging/logger.js'
 import { getOidcConfig } from '../auth/get-oidc-config.js'
 import { refreshTokens } from '../auth/refresh-tokens.js'
 import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
+import { RETURN_PATH } from '../auth/auth-urls.js'
+import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { config } from '../../config/config.js'
 import { randomUUID } from 'node:crypto'
 
@@ -24,7 +26,7 @@ export const defraIdentity = {
       // Fetch OIDC configuration
       const oidcConfig = await getOidcConfig(logger)
       logger.info(
-        `OIDC configuration loaded from ${config.get('defraId.wellKnownUrl')}`
+        `OIDC configuration loaded from ${config.get('defraId.baseUrl')}`
       )
 
       // Register custom session auth scheme that uses Yar
@@ -162,10 +164,10 @@ function getBellOptions(oidcConfig) {
     clientSecret: config.get('defraId.clientSecret'),
     password: config.get('cookie.password'),
     isSecure: config.get('cookie.isSecure'),
-    location: new URL(config.get('defraId.redirectUrl')).origin, // Base URL derived from redirect URL
+    location: config.get('frontendBaseUrl'), // Browser-facing base URL
     config: {
       // Explicitly set the callback path to override Bell's default behavior
-      redirectUri: config.get('defraId.redirectUrl')
+      redirectUri: buildFrontendUrl(RETURN_PATH)
     }
   }
 }
@@ -182,6 +184,7 @@ export function createUserSession(credentials) {
     profile: credentials.profile,
     token: credentials.token,
     refreshToken: credentials.refreshToken,
+    idToken: credentials.idToken,
     role: 'user',
     scope: []
   }

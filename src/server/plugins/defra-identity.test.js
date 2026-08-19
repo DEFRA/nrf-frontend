@@ -42,13 +42,13 @@ const oidcConfig = {
 }
 
 const defaultConfigValues = {
-  'defraId.wellKnownUrl': 'https://auth.example.com/.well-known',
+  'defraId.baseUrl': 'https://auth.example.com',
   'defraId.refreshTokens': true,
   'defraId.clientId': 'mock-client-id',
   'defraId.clientSecret': 'mock-client-secret',
   'cookie.password': 'mock-cookie-password',
   'cookie.isSecure': false,
-  'defraId.redirectUrl': 'http://localhost:3000/signin-oidc'
+  frontendBaseUrl: 'http://localhost:3000'
 }
 
 const generateToken = (expiresInSec) => {
