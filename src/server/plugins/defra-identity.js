@@ -2,6 +2,7 @@ import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { getOidcConfig } from '../auth/get-oidc-config.js'
 import { refreshTokens } from '../auth/refresh-tokens.js'
+import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
 import { config } from '../../config/config.js'
 import { randomUUID } from 'node:crypto'
 
@@ -34,6 +35,8 @@ export const defraIdentity = {
 
       // Configure session strategy using our custom Yar-based scheme
       server.auth.strategy('defra-session', 'yar-session')
+
+      server.ext('onPreHandler', redirectToSignIn)
 
       logger.info('DEFRA Identity authentication strategies registered')
     }

@@ -1,10 +1,19 @@
 import { config } from '../../config/config.js'
 
+let cachedConfig
+
 /**
- * Fetches OpenID Connect configuration from the well-known endpoint
+ * Fetches the OpenID Connect discovery document from the well-known endpoint,
+ * memoising it in memory. The discovery document is static for a provider, so it
+ * is fetched once per process (refreshed on each deploy) rather than on every
+ * sign-in. A failed fetch is not cached, so a later call retries.
  * @returns {Promise<Object>} OIDC configuration including authorization_endpoint, token_endpoint, jwks_uri, end_session_endpoint
  */
 export async function getOidcConfig(logger) {
+  if (cachedConfig) {
+    return cachedConfig
+  }
+
   const wellKnownUrl = config.get('defraId.wellKnownUrl')
 
   if (!wellKnownUrl) {
@@ -14,9 +23,18 @@ export async function getOidcConfig(logger) {
   }
   try {
     const res = await fetch(wellKnownUrl)
-    return await res.json()
+    cachedConfig = await res.json()
+    return cachedConfig
   } catch (err) {
     logger.error(err, `Error fetching defraId.wellKnownUrl ${wellKnownUrl}`)
     throw err
   }
+}
+
+/**
+ * Clears the memoised discovery document. Intended for tests that need each case
+ * to fetch afresh.
+ */
+export function resetOidcConfigCache() {
+  cachedConfig = undefined
 }

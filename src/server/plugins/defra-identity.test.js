@@ -63,7 +63,8 @@ const createMockServer = () => ({
   auth: {
     scheme: vi.fn(),
     strategy: vi.fn()
-  }
+  },
+  ext: vi.fn()
 })
 
 const createMockH = () => ({
