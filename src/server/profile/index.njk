@@ -36,14 +36,9 @@
         {% endif %}
       </dl>
 
-      {% if authEnabled %}
       <p class="govuk-body govuk-!-margin-top-6">
+        <a href="{{ defraAccountUrl }}" class="govuk-link govuk-!-margin-right-4">Defra account</a>
         <a href="/auth/sign-out" class="govuk-link">Sign out</a>
-      </p>
-      {% endif %}
-
-      <p class="govuk-body">
-        <a href="{{ manageRoutes.start }}" class="govuk-link">Return to homepage</a>
       </p>
     </div>
   </div>

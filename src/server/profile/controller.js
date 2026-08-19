@@ -1,3 +1,6 @@
+import { config } from '../../config/config.js'
+import { DEFRA_ID_ACCOUNT_PATH } from '../auth/auth-urls.js'
+
 /**
  * User profile controller
  */
@@ -12,6 +15,11 @@ export const profileController = {
 
     const { profile } = auth.credentials
 
+    const defraAccountUrl = new URL(
+      DEFRA_ID_ACCOUNT_PATH,
+      config.get('defraId.baseUrl')
+    ).toString()
+
     return h.view('profile/index', {
       pageTitle: 'My Profile',
       user: {
@@ -22,7 +30,7 @@ export const profileController = {
         currentRelationshipId: profile.currentRelationshipId
       },
       fullProfile: profile,
-      authEnabled: true
+      defraAccountUrl
     })
   }
 }
