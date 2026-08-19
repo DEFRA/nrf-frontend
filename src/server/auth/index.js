@@ -5,6 +5,7 @@ import {
   signOutController,
   signOutOidcController
 } from './controller.js'
+import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
 
 /**
  * @openapi
@@ -71,10 +72,10 @@ import {
  *     tags:
  *       - Auth
  *     summary: Sign out
- *     description: Clears session and redirects to home page
+ *     description: Clears the local session and redirects to the Defra ID end_session_endpoint
  *     responses:
  *       303:
- *         description: Redirect to home page
+ *         description: Redirect to Defra ID sign-out, or home if the OIDC config is unavailable
  * /login/signed-out:
  *   get:
  *     tags:
@@ -86,7 +87,7 @@ import {
  *         name: state
  *         schema:
  *           type: string
- *         description: Base64-encoded state parameter
+ *         description: Base64url-encoded state parameter
  *     responses:
  *       303:
  *         description: Redirect to home page
@@ -117,7 +118,7 @@ export const auth = {
           },
           {
             method: 'GET',
-            path: '/login/return',
+            path: RETURN_PATH,
             ...signInOidcController
           },
           {
@@ -127,7 +128,7 @@ export const auth = {
           },
           {
             method: 'GET',
-            path: '/login/signed-out',
+            path: SIGNED_OUT_PATH,
             ...signOutOidcController
           }
         ])

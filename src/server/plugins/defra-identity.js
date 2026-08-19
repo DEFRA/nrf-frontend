@@ -119,11 +119,17 @@ async function refreshUserSession({ sessionId, userSession, sessionCache }) {
   }
 
   try {
-    const { access_token: token, refresh_token: newRefreshToken } =
-      await refreshTokens(userSession.refreshToken)
+    const {
+      access_token: token,
+      refresh_token: newRefreshToken,
+      id_token: newIdToken
+    } = await refreshTokens(userSession.refreshToken)
 
     userSession.token = token
     userSession.refreshToken = newRefreshToken
+    if (newIdToken) {
+      userSession.idToken = newIdToken
+    }
 
     await sessionCache.set(sessionId, userSession)
     logger.debug(`Token refreshed successfully for session ${sessionId}`)

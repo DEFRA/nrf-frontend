@@ -429,6 +429,43 @@ describe('Auth Controllers', () => {
       )
       expect(redirectUrl.searchParams.get('state')).toBe(stateValue)
     })
+
+    it('should fall back to the start page when the OIDC config cannot be fetched', async () => {
+      mockGetOidcConfig.mockRejectedValueOnce(
+        new Error('discovery fetch failed')
+      )
+      const mockSessionCache = {
+        drop: vi.fn()
+      }
+
+      const request = {
+        auth: {
+          isAuthenticated: true,
+          credentials: {
+            sessionId: 'test-session-id',
+            idToken: 'test-id-token'
+          }
+        },
+        yar: {
+          set: vi.fn(),
+          clear: vi.fn()
+        },
+        server: {
+          app: {
+            sessionCache: mockSessionCache
+          }
+        }
+      }
+      const h = {
+        redirect: vi.fn((url) => ({ redirect: url }))
+      }
+
+      await signOutController.handler(request, h)
+
+      // Local sign-out still completes
+      expect(mockSessionCache.drop).toHaveBeenCalledWith('test-session-id')
+      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
+    })
   })
 
   describe('signOutOidcController', () => {

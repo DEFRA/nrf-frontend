@@ -199,12 +199,11 @@ export const signInOidcController = {
  * Sign out handler - clears the local session then redirects the browser to the
  * Defra ID end_session_endpoint to sign out of B2C and any upstream IdPs.
  *
- * This is a top-level GET redirect rather than a form POST: B2C's sign-out
- * bounces through several origins (b2clogin.com, external IdPs) before returning
- * to post_logout_redirect_uri, and the CSP `form-action` directive is enforced
- * on every hop of a form submission — which would block that chain. A redirect
- * is not a form submission, so `form-action` does not apply. The id_token_hint
- * therefore rides in the query string (B2C supports GET sign-out).
+ * This is a top-level GET redirect rather than a form POST: the app's CSP
+ * `form-action` directive does not allow the B2C origin, so a form submission
+ * from this page to the end_session_endpoint would be blocked by the browser.
+ * A redirect is not a form submission, so `form-action` does not apply. The
+ * id_token_hint therefore rides in the query string (B2C supports GET sign-out).
  */
 export const signOutController = {
   async handler(request, h) {
@@ -219,21 +218,30 @@ export const signOutController = {
     await sessionCache.drop(sessionId)
     request.yar.clear('sessionId')
 
-    const oidcConfig = await getOidcConfig(logger)
-    const endSessionUrl = new URL(oidcConfig.end_session_endpoint)
-    const postLogoutRedirectUri = buildFrontendUrl(SIGNED_OUT_PATH)
-    const state = crypto.randomBytes(16).toString('base64url')
-    request.yar.set('signout_state', state)
-    endSessionUrl.searchParams.set('id_token_hint', idToken)
-    endSessionUrl.searchParams.set(
-      'post_logout_redirect_uri',
-      postLogoutRedirectUri
-    )
-    endSessionUrl.searchParams.set('state', state)
-
     logger.info(`User session ${sessionId} signed out`)
 
-    return h.redirect(endSessionUrl.toString())
+    try {
+      const oidcConfig = await getOidcConfig(logger)
+      const endSessionUrl = new URL(oidcConfig.end_session_endpoint)
+      const postLogoutRedirectUri = buildFrontendUrl(SIGNED_OUT_PATH)
+      const state = crypto.randomBytes(16).toString('base64url')
+      request.yar.set('signout_state', state)
+      endSessionUrl.searchParams.set('id_token_hint', idToken)
+      endSessionUrl.searchParams.set(
+        'post_logout_redirect_uri',
+        postLogoutRedirectUri
+      )
+      endSessionUrl.searchParams.set('state', state)
+
+      return h.redirect(endSessionUrl.toString())
+    } catch (error) {
+      // The local session is already cleared; fall back to home rather than 500
+      logger.error(
+        error,
+        'Failed to build Defra ID sign-out URL; signed out locally only'
+      )
+      return h.redirect(startPath)
+    }
   },
   options: {
     auth: 'defra-session' // Requires active session
@@ -250,7 +258,10 @@ export const signOutOidcController = {
     const expectedState = request.yar.get('signout_state')
     request.yar.clear('signout_state')
     if (expectedState && request.query.state !== expectedState) {
-      logger.warn('Sign-out state mismatch')
+      logger.warn(
+        { expected: expectedState, received: request.query.state },
+        'Sign-out state mismatch'
+      )
     }
 
     // Failsafe: clear any remaining session

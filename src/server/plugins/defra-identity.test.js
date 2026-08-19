@@ -174,7 +174,8 @@ describe('defra-identity plugin', () => {
       })
       mockRefreshTokens.mockResolvedValue({
         access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token'
+        refresh_token: 'new-refresh-token',
+        id_token: 'new-id-token'
       })
       const request = createMockRequest('expired-session')
       const h = createMockH()
@@ -186,7 +187,8 @@ describe('defra-identity plugin', () => {
         'expired-session',
         expect.objectContaining({
           token: 'new-access-token',
-          refreshToken: 'new-refresh-token'
+          refreshToken: 'new-refresh-token',
+          idToken: 'new-id-token'
         })
       )
       expect(sessionCache.drop).not.toHaveBeenCalled()
@@ -258,7 +260,8 @@ describe('defra-identity plugin', () => {
       const session = createUserSession({
         profile,
         token: 't',
-        refreshToken: 'r'
+        refreshToken: 'r',
+        idToken: 'id'
       })
 
       expect(session).toEqual(
@@ -268,6 +271,7 @@ describe('defra-identity plugin', () => {
           profile,
           token: 't',
           refreshToken: 'r',
+          idToken: 'id',
           role: 'user',
           scope: []
         })
