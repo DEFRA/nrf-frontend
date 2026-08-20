@@ -42,7 +42,9 @@ describe('Profile Controller', () => {
       expect(result.context.user.name).toBe('Test User')
       expect(result.context.user.crn).toBe('12345')
       expect(result.context.user.organisationId).toBe('org-123')
-      expect(result.context.authEnabled).toBe(true)
+      expect(result.context.defraAccountUrl).toBe(
+        'https://your-account.cpdev.cui.defra.gov.uk/management/account-management/me'
+      )
     })
   })
 })

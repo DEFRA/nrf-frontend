@@ -1,5 +1,7 @@
 import { getOidcConfig } from './get-oidc-config.js'
 import { config } from '../../config/config.js'
+import { RETURN_PATH } from './auth-urls.js'
+import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -18,7 +20,7 @@ export async function refreshTokens(refreshToken) {
   params.set('grant_type', 'refresh_token')
   params.set('scope', `openid offline_access ${config.get('defraId.clientId')}`)
   params.set('refresh_token', refreshToken)
-  params.set('redirect_uri', config.get('defraId.redirectUrl'))
+  params.set('redirect_uri', buildFrontendUrl(RETURN_PATH))
 
   const res = await fetch(url, {
     method: 'POST',
