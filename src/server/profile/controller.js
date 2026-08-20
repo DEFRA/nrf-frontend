@@ -23,11 +23,12 @@ export const profileController = {
     return h.view('profile/index', {
       pageTitle: 'My Profile',
       user: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
         email: profile.email,
         name: profile.name,
         crn: profile.crn || profile.contactId,
-        organisationId: profile.organisationId,
-        currentRelationshipId: profile.currentRelationshipId
+        organisation: profile.organisation
       },
       fullProfile: profile,
       defraAccountUrl
