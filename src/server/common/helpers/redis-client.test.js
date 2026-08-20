@@ -1,9 +1,10 @@
 import { vi } from 'vitest'
+import { EventEmitter } from 'node:events'
 
 import { Cluster, Redis } from 'ioredis'
 
 import { config } from '../../../config/config.js'
-import { buildRedisClient } from './redis-client.js'
+import { buildRedisClient, waitForRedisClientReady } from './redis-client.js'
 
 vi.mock('ioredis', () => ({
   ...vi.importActual('ioredis'),
@@ -58,5 +59,36 @@ describe('#buildRedisClient', () => {
         }
       )
     })
+  })
+})
+
+describe('#waitForRedisClientReady', () => {
+  const createClient = (status) => Object.assign(new EventEmitter(), { status })
+
+  test('resolves immediately when the client is already ready', async () => {
+    await expect(
+      waitForRedisClientReady(createClient('ready'))
+    ).resolves.toBeUndefined()
+  })
+
+  test('resolves once the client emits ready', async () => {
+    const client = createClient('connecting')
+    const promise = waitForRedisClientReady(client)
+    client.emit('ready')
+    await expect(promise).resolves.toBeUndefined()
+  })
+
+  test('rejects when the client is not ready within the timeout', async () => {
+    vi.useFakeTimers()
+    try {
+      const client = createClient('connecting')
+      const assertion = expect(
+        waitForRedisClientReady(client, 5000)
+      ).rejects.toThrow('Redis client not ready within 5000ms')
+      await vi.advanceTimersByTimeAsync(5000)
+      await assertion
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

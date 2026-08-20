@@ -8,6 +8,7 @@ import { getOidcConfig } from './get-oidc-config.js'
 import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/routes.js'
+import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
 
 const logger = createLogger()
 
@@ -134,6 +135,16 @@ export const signInOidcController = {
 
       // Decode and extract user profile from ID token
       const decoded = Jwt.token.decode(tokenResponse.id_token)
+      const { payload } = decoded.decoded
+
+      const {
+        organisationId,
+        organisationName,
+        userRelationshipType,
+        hasMultipleOrgPickerEntries,
+        shouldShowOrgOrUserName,
+        shouldShowCitizenName
+      } = getOrganisationFromToken(payload)
 
       // Create Bell-compatible credentials structure
       const credentials = {
@@ -144,20 +155,25 @@ export const signInOidcController = {
         expiresIn: tokenResponse.expires_in,
         query: request.query,
         profile: {
-          id: decoded.decoded.payload.sub,
-          email: decoded.decoded.payload.email,
-          firstName: decoded.decoded.payload.given_name,
-          lastName: decoded.decoded.payload.family_name,
-          name: decoded.decoded.payload.name,
-          crn:
-            decoded.decoded.payload.contactId ||
-            decoded.decoded.payload.uniqueReference,
-          contactId: decoded.decoded.payload.contactId,
-          uniqueReference: decoded.decoded.payload.uniqueReference,
-          organisationId: decoded.decoded.payload.currentRelationshipId,
-          currentRelationshipId: decoded.decoded.payload.currentRelationshipId,
-          roles: decoded.decoded.payload.roles,
-          serviceRoles: decoded.decoded.payload.serviceRoles
+          id: payload.sub,
+          email: payload.email,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          name: payload.name,
+          crn: payload.contactId || payload.uniqueReference,
+          contactId: payload.contactId,
+          uniqueReference: payload.uniqueReference,
+          organisation: {
+            organisationId,
+            organisationName,
+            userRelationshipType,
+            hasMultipleOrgPickerEntries,
+            shouldShowOrgOrUserName,
+            shouldShowCitizenName
+          },
+          currentRelationshipId: payload.currentRelationshipId,
+          roles: payload.roles,
+          serviceRoles: payload.serviceRoles
         }
       }
 
