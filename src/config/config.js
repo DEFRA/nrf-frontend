@@ -83,6 +83,12 @@ export const config = convict({
     default: '/public',
     env: 'ASSET_PATH'
   },
+  frontendBaseUrl: {
+    doc: 'Browser-facing base URL (origin) of this frontend. Used to build the OAuth return URL and the post sign-out redirect URL.',
+    format: String,
+    default: 'http://localhost:3000',
+    env: 'FRONTEND_BASE_URL'
+  },
   isProduction: {
     doc: 'If this application running in the production environment',
     format: Boolean,
@@ -306,12 +312,18 @@ export const config = convict({
       default: true,
       env: 'ENABLE_DEFRA_ID'
     },
-    wellKnownUrl: {
-      doc: 'OIDC well-known configuration URL',
+    baseUrl: {
+      doc: 'Base URL (origin) of the DEFRA Customer Identity B2C tenant. Used to build the well-known URL.',
+      format: String,
+      default: 'https://your-account.cpdev.cui.defra.gov.uk',
+      env: 'DEFRA_ID_BASE_URL'
+    },
+    wellKnownPath: {
+      doc: 'Path of the OIDC well-known configuration document, appended to defraId.baseUrl. Changes per environment/policy.',
       format: String,
       default:
-        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
-      env: 'DEFRA_ID_WELL_KNOWN_URL'
+        '/idphub/b2c/b2c_1a_cui_cpdev_signupsignin/.well-known/openid-configuration',
+      env: 'DEFRA_ID_WELL_KNOWN_PATH'
     },
     clientId: {
       doc: 'OAuth client ID',
@@ -325,12 +337,6 @@ export const config = convict({
       default: 'test_value',
       sensitive: true,
       env: 'DEFRA_ID_CLIENT_SECRET'
-    },
-    redirectUrl: {
-      doc: 'OAuth callback URL',
-      format: String,
-      default: 'http://localhost:3000/login/return',
-      env: 'DEFRA_ID_REDIRECT_URL'
     },
     serviceId: {
       doc: 'Service ID for DEFRA Identity',

@@ -14,19 +14,23 @@ export async function getOidcConfig(logger) {
     return cachedConfig
   }
 
-  const wellKnownUrl = config.get('defraId.wellKnownUrl')
+  const baseUrl = config.get('defraId.baseUrl')
+  const wellKnownPath = config.get('defraId.wellKnownPath')
 
-  if (!wellKnownUrl) {
+  if (!baseUrl || !wellKnownPath) {
     throw new Error(
-      'DEFRA_ID_WELL_KNOWN_URL not configured. Please set this environment variable.'
+      'DEFRA_ID_BASE_URL and DEFRA_ID_WELL_KNOWN_PATH must be configured. Please set these environment variables.'
     )
   }
+
+  const wellKnownUrl = new URL(wellKnownPath, baseUrl).toString()
+
   try {
     const res = await fetch(wellKnownUrl)
     cachedConfig = await res.json()
     return cachedConfig
   } catch (err) {
-    logger.error(err, `Error fetching defraId.wellKnownUrl ${wellKnownUrl}`)
+    logger.error(err, `Error fetching OIDC discovery document ${wellKnownUrl}`)
     throw err
   }
 }

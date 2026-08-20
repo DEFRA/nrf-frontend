@@ -20,7 +20,6 @@ import { defraIdentity } from './plugins/defra-identity.js'
 import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { createLogger } from './common/helpers/logging/logger.js'
-import Bell from '@hapi/bell'
 import { csrf } from './common/helpers/csrf.js'
 import { swagger } from './plugins/swagger.js'
 
@@ -93,10 +92,6 @@ export async function createServer() {
   server.app.authEnabled = false
   if (config.get('defraId.enabled')) {
     try {
-      // Register Bell for OAuth authentication
-      // Note: Yar is already registered via sessionCache plugin above
-      await server.register(Bell)
-
       // Register DEFRA Identity plugin to configure auth strategies
       await server.register({
         plugin: defraIdentity,
