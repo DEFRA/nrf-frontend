@@ -33,6 +33,7 @@ export const router = {
         cookies,
         profile,
         quote,
+        // TODO - remove request to use
         requestToUse,
         manage,
         osBaseMap,

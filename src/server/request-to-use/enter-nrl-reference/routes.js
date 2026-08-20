@@ -1,4 +1,4 @@
-import { quoteController } from '../controller-get.js'
+import { requestToUseController } from '../controller-get.js'
 import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
@@ -10,7 +10,7 @@ export default [
   {
     method: 'GET',
     path: routeEnterNrlReference,
-    ...quoteController({ routeId, getViewModel })
+    ...requestToUseController({ routeId, getViewModel })
   },
   {
     method: 'POST',
