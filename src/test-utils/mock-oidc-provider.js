@@ -14,6 +14,9 @@ const SIGNING_SECRET = 'test-signing-secret-not-for-production'
  * for any authorization code presented to its token endpoint.
  */
 export async function startMockOidcProvider() {
+  // Claims the /token endpoint issues; overridable per test via setTokenClaims
+  let tokenClaims = { ...mockUser }
+
   const server = http.createServer((req, res) => {
     if (req.method === 'GET' && req.url === WELL_KNOWN_PATH) {
       const base = `http://${req.headers.host}`
@@ -31,7 +34,7 @@ export async function startMockOidcProvider() {
     if (req.method === 'POST' && req.url === TOKEN_PATH) {
       const exp = Math.floor(Date.now() / 1000) + 3600
       const token = Jwt.token.generate(
-        { ...mockUser, exp },
+        { ...tokenClaims, exp },
         { key: SIGNING_SECRET }
       )
       req.resume()
@@ -58,7 +61,11 @@ export async function startMockOidcProvider() {
 
   return {
     baseUrl: `http://127.0.0.1:${port}`,
-    wellKnownUrl: `http://127.0.0.1:${port}${WELL_KNOWN_PATH}`,
+    wellKnownPath: WELL_KNOWN_PATH,
+    // Override the token claims (merged over mockUser); pass {} to reset
+    setTokenClaims: (claims) => {
+      tokenClaims = { ...mockUser, ...claims }
+    },
     stop: () => new Promise((resolve) => server.close(resolve))
   }
 }
