@@ -1,5 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
-import { quotePostController } from '../controller-post.js'
+import { requestToUsePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
 
@@ -15,7 +15,7 @@ export default [
   {
     method: 'POST',
     path: routeNrlReference,
-    ...quotePostController({
+    ...requestToUsePostController({
       routeId,
       getViewModel,
       getNextPage
