@@ -1,0 +1,49 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+            <p class="govuk-body">We ask for this in case we need to call you directly with any queries about your registration.</p>
+
+            {{ govukInput({
+                name: "telephoneNumber",
+                label: {
+                    text: pageHeading,
+                    classes: "govuk-visually-hidden"
+                },
+                hint: {
+                    text: "For international numbers include the country code."
+                },
+                classes: "govuk-!-width-two-thirds",
+                autocomplete: "tel",
+                inputmode: "tel",
+                errorMessage: validationErrors.messagesByFormField.telephoneNumber,
+                value: formSubmitData.telephoneNumber
+            }) }}
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

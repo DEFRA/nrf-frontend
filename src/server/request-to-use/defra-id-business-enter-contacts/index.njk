@@ -1,0 +1,59 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+                    <h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>
+                </legend>
+
+                {{ govukInput({
+                    name: "companyTelephoneNumber",
+                    label: {
+                        text: "UK Telephone number"
+                    },
+                    autocomplete: "tel",
+                    errorMessage: validationErrors.messagesByFormField.companyTelephoneNumber,
+                    value: formSubmitData.companyTelephoneNumber
+                }) }}
+
+                {{ govukInput({
+                    name: "companyEmailAddress",
+                    label: {
+                        text: "Email address"
+                    },
+                    hint: {
+                        text: "For example: name@example.com"
+                    },
+                    autocomplete: "email",
+                    errorMessage: validationErrors.messagesByFormField.companyEmailAddress,
+                    value: formSubmitData.companyEmailAddress
+                }) }}
+
+                {{ govukButton({
+                    text: "Continue"
+                }) }}
+            </fieldset>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
