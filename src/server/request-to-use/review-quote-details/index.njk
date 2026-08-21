@@ -1,0 +1,56 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {{ govukInsetText({
+            text: "Update the details of your development to match your planning application. Changes may result in a recalculation of available capacity and the levy amount."
+        }) }}
+
+        {{ govukSummaryList({
+            rows: [
+                {
+                    key: { text: "Planning permission type" },
+                    value: { text: "Full planning permission" },
+                    actions: { items: [{ href: "/request-to-use/planning-application-type", text: "Change", visuallyHiddenText: "planning permission type" }] }
+                },
+                {
+                    key: { text: "Housing" },
+                    value: { text: "Yes" }
+                },
+                {
+                    key: { text: "Number of housing units" },
+                    value: { text: "100" },
+                    actions: { items: [{ href: "/request-to-use/housing-units-number", text: "Change", visuallyHiddenText: "number of housing units" }] }
+                },
+                {
+                    key: { text: "Red line boundary" },
+                    value: { text: "Added" },
+                    actions: { items: [{ href: "/request-to-use/boundary-method", text: "Change", visuallyHiddenText: "red line boundary" }] }
+                },
+                {
+                    key: { text: "Email address" },
+                    value: { text: "info@info.co.uk" },
+                    actions: { items: [{ href: "/request-to-use/quote-email-address", text: "Change", visuallyHiddenText: "email address" }] }
+                }
+            ]
+        }) }}
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+        </form>
+    </div>
+</div>
+{% endblock %}

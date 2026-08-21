@@ -1,0 +1,29 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        <p class="govuk-body">You can use the details you previously gave us for your quote to fill in the information needed to request to use Nature Restoration Fund levy.</p>
+
+        <p class="govuk-body"><a href="/request-to-use/review-quote-details" class="govuk-link">Retrieve the quote details</a></p>
+
+        <h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
+        <p class="govuk-body">If you need help with the nature restoration levy, contact XXXX.</p>
+        <p class="govuk-body">
+            Email: <a href="mailto:xxxxx@defra.gov.uk" class="govuk-link">xxxxx@defra.gov.uk</a><br>
+            Telephone: 00000000000<br>
+            Monday to Friday, 8:30am to 5pm, except bank holidays
+        </p>
+        <p class="govuk-body"><a href="https://www.gov.uk/call-charges" class="govuk-link">Find out about call charges</a></p>
+    </div>
+</div>
+{% endblock %}

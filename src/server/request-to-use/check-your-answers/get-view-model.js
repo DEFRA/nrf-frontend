@@ -1,13 +1,13 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { planningTypeOptions } from '../../quote/planning-type/options.js'
 
 const pageHeading = 'Check your answers'
 const pageTitle = 'Check your answers'
 
-export default function getViewModel({ planningType }) {
-  const planningTypeLabel = planningTypeOptions.find(
+export default function getViewModel() {
+  const planningTypeLabel = 'Full planning permission'
+  /*const planningTypeLabel = planningTypeOptions.find(
     (o) => o.value === planningType
-  )?.text
+  )?.text*/
 
   return {
     pageTitle: getPageTitle(pageTitle),

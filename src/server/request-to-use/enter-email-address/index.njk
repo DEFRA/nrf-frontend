@@ -15,25 +15,24 @@
             {% if validationErrors %}
             {{ govukErrorSummary({
                 titleText: "There is a problem",
-                errorList: validationErrors.summary
+                errorList:  validationErrors.summary
             }) }}
             {% endif %}
 
             {{ govukInput({
+                id: "enter-your-email-address",
+                name: "enterYourEmailAddress",
                 label: {
                     text: pageHeading,
                     classes: "govuk-label--l",
                     isPageHeading: true
                 },
                 hint: {
-                    text: "Enter this reference to retrieve the details entered during the quote."
+                    text: "We will send you a link so you can retrieve the details from your quote."
                 },
-                id: "enterYourNrlReference",
-                name: "enterYourNrlReference",
-                value: formSubmitData.enterYourNrlReference,
-                errorMessage: validationErrors.messagesByFormField.enterYourNrlReference
+                value: formSubmitData.enterYourEmailAddress,
+                errorMessage: validationErrors.messagesByFormField.enterYourEmailAddress
             }) }}
-
             {{ govukButton({
                 text: "Continue"
             }) }}

@@ -1,5 +1,5 @@
-import { routePathCheckYourAnswers } from '../check-your-answers/routes.js'
+import { routeRetrieveQuoteDetails } from '../retrieve-quote-details/routes.js'
 
 export default function getNextPage({ enterYourNrlReference }) {
-  return routePathCheckYourAnswers
+  return routeRetrieveQuoteDetails
 }

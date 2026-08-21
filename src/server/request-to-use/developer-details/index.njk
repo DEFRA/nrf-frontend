@@ -1,0 +1,93 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+            <p class="govuk-body">If you are an agent working on behalf of the developer, enter their full name and address.</p>
+
+            {{ govukInput({
+                id: "full-name",
+                name: "fullName",
+                label: {
+                    text: "Full name"
+                },
+                value: formSubmitData.fullName,
+                errorMessage: validationErrors.messagesByFormField.fullName
+            }) }}
+
+            {{ govukInput({
+                id: "address-line-1",
+                name: "addressLine1",
+                label: {
+                    text: "Address line 1"
+                },
+                value: formSubmitData.addressLine1,
+                errorMessage: validationErrors.messagesByFormField.addressLine1
+            }) }}
+
+            {{ govukInput({
+                id: "address-line-2-optional",
+                name: "addressLine2Optional",
+                label: {
+                    text: "Address line 2 (optional)"
+                },
+                value: formSubmitData.addressLine2Optional,
+                errorMessage: validationErrors.messagesByFormField.addressLine2Optional
+            }) }}
+
+            {{ govukInput({
+                id: "town-or-city",
+                name: "townOrCity",
+                label: {
+                    text: "Town or city"
+                },
+                value: formSubmitData.townOrCity,
+                errorMessage: validationErrors.messagesByFormField.townOrCity
+            }) }}
+
+            {{ govukInput({
+                id: "county-optional",
+                name: "countyOptional",
+                label: {
+                    text: "County (optional)"
+                },
+                value: formSubmitData.countyOptional,
+                errorMessage: validationErrors.messagesByFormField.countyOptional
+            }) }}
+
+            {{ govukInput({
+                id: "postcode",
+                name: "postcode",
+                label: {
+                    text: "Postcode"
+                },
+                value: formSubmitData.postcode,
+                errorMessage: validationErrors.messagesByFormField.postcode
+            }) }}
+
+            {{ govukButton({
+                text: "Confirm"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

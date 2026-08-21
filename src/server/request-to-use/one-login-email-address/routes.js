@@ -3,18 +3,19 @@ import { requestToUsePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
 
-const routeId = 'sign-in-how'
-export const routeSignInHow = `/request-to-use/${routeId}`
+const routeId = 'one-login-email-address'
+export const routeOneLoginEmailAddress =
+  '/request-to-use/one-login-email-address'
 
 export default [
   {
     method: 'GET',
-    path: routeSignInHow,
+    path: routeOneLoginEmailAddress,
     ...requestToUseController({ routeId, getViewModel })
   },
   {
     method: 'POST',
-    path: routeSignInHow,
+    path: routeOneLoginEmailAddress,
     ...requestToUsePostController({
       routeId,
       getViewModel,
