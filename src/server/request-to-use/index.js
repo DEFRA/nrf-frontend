@@ -78,8 +78,7 @@ export const requestToUse = {
         ...routesOneLoginEmailAddress,
         ...routesOneLoginPassword,
         ...routesReviewDeveloperDetails,
-        ...routesCommitmentEmail
-        ...routesSignInHow,
+        ...routesCommitmentEmail,
         ...routesDefraIdRegister,
         ...routesDefraIdTerms,
         ...routesDefraIdWhatWeNeed,
