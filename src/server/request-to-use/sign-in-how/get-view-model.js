@@ -1,9 +1,9 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 
-const pageHeading = 'Nature restoration levy – commitment certificate'
+const pageHeading = 'How do you want to sign in?'
 const pageTitle = pageHeading
 
-export default function getViewModel() {
+export default function () {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,

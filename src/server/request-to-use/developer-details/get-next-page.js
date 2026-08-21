@@ -1,3 +1,3 @@
 export default function getNextPage() {
-  return '#'
+  return '/request-to-use/review-developer-details'
 }

@@ -1,23 +1,22 @@
 import { requestToUseController } from '../controller-get.js'
-import { quotePostController } from '../controller-post.js'
+import { requestToUsePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
 
-const routeId = 'how-do-you-want-to-sign-in'
-export const routeHowDoYouWantToSignIn =
-  '/request-to-use/how-do-you-want-to-sign-in'
+const routeId = 'review-quote-details'
+export const routeReviewQuoteDetails = '/request-to-use/review-quote-details'
 
 /**
  * @openapi
- * /request-to-use/how-do-you-want-to-sign-in:
+ * /request-to-use/review-quote-details:
  *   get:
  *     tags:
  *       - Request to use
- *     summary: Sign-in method page
- *     description: Renders the page asking how the user wants to sign in
+ *     summary: Review quote details page
+ *     description: Renders the page for reviewing and amending quote details before requesting to use the levy
  *     responses:
  *       200:
- *         description: HTML form page
+ *         description: HTML information page
  *         content:
  *           text/html:
  *             schema:
@@ -26,13 +25,13 @@ export const routeHowDoYouWantToSignIn =
 export default [
   {
     method: 'GET',
-    path: routeHowDoYouWantToSignIn,
+    path: routeReviewQuoteDetails,
     ...requestToUseController({ routeId, getViewModel })
   },
   {
     method: 'POST',
-    path: routeHowDoYouWantToSignIn,
-    ...quotePostController({
+    path: routeReviewQuoteDetails,
+    ...requestToUsePostController({
       routeId,
       getViewModel,
       getNextPage

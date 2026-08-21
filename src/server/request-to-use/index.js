@@ -8,9 +8,14 @@ import routesQuoteEmail from './quote-email/routes.js'
 import routesRetrieveQuoteDetails from './retrieve-quote-details/routes.js'
 import routesLevyAmountIncreased from './levy-amount-increased/routes.js'
 import routesEnterEmailAddress from './enter-email-address/routes.js'
-import routesHowDoYouWantToSignIn from './how-do-you-want-to-sign-in/routes.js'
 import routesIsThisAVariation from './is-this-a-variation/routes.js'
 import routesDeveloperDetails from './developer-details/routes.js'
+import routesSignInHow from './sign-in-how/routes.js'
+import routesReviewQuoteDetails from './review-quote-details/routes.js'
+import routesOneLoginEmailAddress from './one-login-email-address/routes.js'
+import routesOneLoginPassword from './one-login-password/routes.js'
+import routesReviewDeveloperDetails from './review-developer-details/routes.js'
+import routesCommitmentEmail from './commitment-email/routes.js'
 import { registerRequestToUseSessionCookie } from './session-cookie.js'
 
 /**
@@ -47,9 +52,14 @@ export const requestToUse = {
         ...routesRetrieveQuoteDetails,
         ...routesLevyAmountIncreased,
         ...routesEnterEmailAddress,
-        ...routesHowDoYouWantToSignIn,
         ...routesIsThisAVariation,
-        ...routesDeveloperDetails
+        ...routesDeveloperDetails,
+        ...routesSignInHow,
+        ...routesReviewQuoteDetails,
+        ...routesOneLoginEmailAddress,
+        ...routesOneLoginPassword,
+        ...routesReviewDeveloperDetails,
+        ...routesCommitmentEmail
       ])
     }
   }

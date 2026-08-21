@@ -8,55 +8,71 @@
 
 {% block content %}
 <div class="govuk-grid-row">
-  <div class="govuk-grid-column-two-thirds-from-desktop">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
 
-    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
-    {{ govukSummaryList({
-      rows: [
-        { key: { text: "Full name" }, value: { text: "A Developer" } },
-        { key: { text: "Address" }, value: { text: "Development Road, Development, DV1 6RP" } },
-        { key: { text: "NRL Ref" }, value: { text: "0001991" } },
-        { key: { text: "Date of issue" }, value: { text: "31 January 2026" } },
-        { key: { text: "Expiry date" }, value: { text: "31 July 2026" } }
-      ]
-    }) }}
+        {{ govukSummaryList({
+            rows: [
+                { key: { text: "Full name" }, value: { text: "A Developer" } },
+                { key: { text: "Address" }, value: { text: "Development Road, Development, DV1 6RP" } },
+                { key: { text: "NRL Ref" }, value: { text: "0001991" } },
+                { key: { text: "Date of issue" }, value: { text: "31 January 2026" } },
+                { key: { text: "Expiry date" }, value: { text: "31 July 2026" } }
+            ]
+        }) }}
 
-    <h2 class="govuk-heading-m">Details of the relevant development</h2>
-    <p class="govuk-body">The relevant development is planned to have:</p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>full planning permission</li>
-      <li>housing with a total of 100 unit(s)</li>
-    </ul>
+        <h2 class="govuk-heading-m">Details of the relevant development</h2>
+        <p class="govuk-body">The relevant development is planned to have:</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>full planning permission</li>
+            <li>housing with a total of 100 unit(s)</li>
+        </ul>
 
-    <p class="govuk-body">Red line boundary</p>
+        <h3 class="govuk-heading-s">Red line boundary</h3>
 
-    <h2 class="govuk-heading-m">Environmental Delivery Plan (EDP)</h2>
-    <p class="govuk-body">Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)</p>
+        <h2 class="govuk-heading-m">Environmental Delivery Plan (EDP)</h2>
+        <p class="govuk-body">Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)</p>
 
-    <p class="govuk-body">Nature restoration levy amount The relevant development is planned in Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036) Provisional nature restoration levy amount £X,XXX (excluding VAT) The provisional amount is calculated from the charging schedule in the relevant EDP(s). Inflation-adjusted nature restoration levy amount £X,XXX (excluding VAT) The inflation-adjusted amount shows the indicative levy amount for the year this commitment was issued. Commitment details This commitment will disapply the relevant environmental obligations through the planning application process. This commitment certificate will be accepted as part of any planning and decision-making processes. What this commitment enables For the purposes of section 72 of the Planning and Infrastructure Act 2025, this certificate provides you with a commitment to pay the Nature Restoration Levy. This commitment will disapply the environmental obligations in respect of the specific environmental impact set out in the EDP for your development. A Local Planning Authority will accept this commitment certificate as part of any planning and decision-making processes, provided the details that were given to inform this commitment cover the relevant development for which a planning application is made. Your commitment will expire after 6 months from the date of issue stated above, unless an application for planning permission is made. This commitment disapplies the following environmental obligations from consideration under the Habitats Regulations 2017: Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036). Other environmental obligations not covered above will continue to apply. Planning conditions required to meet this commitment There are planning condition requirements to meet this commitment; a statutory precommencement condition requiring payment prior to commencement, and additional conditions to impose as conservation measures.</p>
+        <h2 class="govuk-heading-m">Nature restoration levy amount</h2>
+        <p class="govuk-body">The relevant development is planned in Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)</p>
+        <p class="govuk-body"><strong>Provisional nature restoration levy amount</strong><br>£X,XXX (excluding VAT)</p>
+        <p class="govuk-body">The provisional amount is calculated from the charging schedule in the relevant EDP(s).</p>
+        <p class="govuk-body"><strong>Inflation-adjusted nature restoration levy amount</strong><br>£X,XXX (excluding VAT)</p>
+        <p class="govuk-body">The inflation-adjusted amount shows the indicative levy amount for the year this commitment was issued.</p>
 
-    <h2 class="govuk-heading-m">Part B – Planning condition requirements</h2>
-    <p class="govuk-body">In accordance with the requirements of Regulation 5 of the Nature Restoration Levy Regulations (“Levy Regulations”) 2026, the Local Planning Authority must impose the statutory pre-commencement planning condition, requiring payment of the levy in full or the first instalment prior to commencement. This applies to any grant of permission relying on a commitment to pay the Nature Restoration Levy. In accordance with the requirements of the Environmental Delivery Plan(s) the LPA may need to impose additional conditions as conservation measures where they are applicable to the relevant development, to meet the requirements under this commitment.</p>
+        <h2 class="govuk-heading-m">Commitment details</h2>
+        <p class="govuk-body">This commitment will disapply the relevant environmental obligations through the planning application process.</p>
+        <p class="govuk-body">This commitment certificate will be accepted as part of any planning and decision-making processes.</p>
 
-    <p class="govuk-body">Planning condition</p>
-    <p class="govuk-body">Statutory Nature Restoration Levy Condition</p>
-    <p class="govuk-body">Non-mains drainage</p>
-    <p class="govuk-body">Condition to be imposed*</p>
-    <p class="govuk-body">The development hereby approved shall be designed and built to meet a water efficiency stand of: (a) the Building Regulations Option Technical Standards, or (b) 100 litres/person/day - whichever is lower**. The water efficiency standard shall be maintained thereafter for the lifetime of the development.</p>
-    <p class="govuk-body">The development shall not be occupied unless a package treatment plant is installed on the site and operational to manage foul water, with operating efficiency rates achieving at least a minimum discharge concentration of 5 mg/l for Total Phosphorus and 27mg/l for Total Nitrogen and a maintenance plan is in place.</p>
-    <p class="govuk-body">*Planning decision-makers may make limited and reasonable amendments to planning conditions (with the exception of the statutory pre-commencement condition), to ensure conditions are operable for specific developments providing the intended outcome is maintained.</p>
-    <p class="govuk-body">**Natural England recognises that Local Plans may set lower water efficiency targets and encourage any condition to be in line with the relevant Local Plan where this is the case.</p>
-    <p class="govuk-body">Water efficiency</p>
+        <h2 class="govuk-heading-m">What this commitment enables</h2>
+        <p class="govuk-body">For the purposes of section 72 of the Planning and Infrastructure Act 2025, this certificate provides you with a commitment to pay the Nature Restoration Levy. This commitment will disapply the environmental obligations in respect of the specific environmental impact set out in the EDP for your development.</p>
+        <p class="govuk-body">A Local Planning Authority will accept this commitment certificate as part of any planning and decision-making processes, provided the details that were given to inform this commitment cover the relevant development for which a planning application is made.</p>
+        <p class="govuk-body">Your commitment will expire after 6 months from the date of issue stated above, unless an application for planning permission is made.</p>
+        <p class="govuk-body">This commitment disapplies the following environmental obligations from consideration under the Habitats Regulations 2017: Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036). Other environmental obligations not covered above will continue to apply.</p>
 
-    <p class="govuk-body">Development must not begin before either -</p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>liability to pay the levy is discharged, or</li>
-      <li>if the levy is to be paid by instalments, liability to pay the first instalment is discharged</li>
-    </ul>
+        <h2 class="govuk-heading-m">Planning conditions required to meet this commitment</h2>
+        <p class="govuk-body">There are planning condition requirements to meet this commitment; a statutory precommencement condition requiring payment prior to commencement, and additional conditions to impose as conservation measures.</p>
 
-    <p class="govuk-body">See Guidance for Local Planning Authorities for more information on imposing conditions</p>
+        <h2 class="govuk-heading-m">Part B – Planning condition requirements</h2>
+        <p class="govuk-body">In accordance with the requirements of Regulation 5 of the Nature Restoration Levy Regulations (“Levy Regulations”) 2026, the Local Planning Authority must impose the statutory pre-commencement planning condition, requiring payment of the levy in full or the first instalment prior to commencement. This applies to any grant of permission relying on a commitment to pay the Nature Restoration Levy.</p>
+        <p class="govuk-body">In accordance with the requirements of the Environmental Delivery Plan(s) the LPA may need to impose additional conditions as conservation measures where they are applicable to the relevant development, to meet the requirements under this commitment.</p>
 
-  </div>
+        {{ govukTable({
+            firstCellIsHeader: true,
+            head: [{ text: "Planning condition" }, { text: "Condition to be imposed*" }],
+            rows: [
+                [{ text: "Statutory Nature Restoration Levy Condition" }, { text: "Development must not begin before either - liability to pay the levy is discharged, or if the levy is to be paid by instalments, liability to pay the first instalment is discharged." }],
+                [{ text: "Water efficiency" }, { text: "The development hereby approved shall be designed and built to meet a water efficiency stand of: (a) the Building Regulations Option Technical Standards, or (b) 100 litres/person/day - whichever is lower**. The water efficiency standard shall be maintained thereafter for the lifetime of the development." }],
+                [{ text: "Non-mains drainage" }, { text: "The development shall not be occupied unless a package treatment plant is installed on the site and operational to manage foul water, with operating efficiency rates achieving at least a minimum discharge concentration of 5 mg/l for Total Phosphorus and 27mg/l for Total Nitrogen and a maintenance plan is in place." }]
+            ]
+        }) }}
+
+        <p class="govuk-body">*Planning decision-makers may make limited and reasonable amendments to planning conditions (with the exception of the statutory pre-commencement condition), to ensure conditions are operable for specific developments providing the intended outcome is maintained.</p>
+        <p class="govuk-body">**Natural England recognises that Local Plans may set lower water efficiency targets and encourage any condition to be in line with the relevant Local Plan where this is the case.</p>
+
+        <p class="govuk-body"><a href="#" class="govuk-link">See Guidance for Local Planning Authorities for more information on imposing conditions</a></p>
+
+    </div>
 </div>
 {% endblock %}
