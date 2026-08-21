@@ -16,6 +16,25 @@ import routesOneLoginEmailAddress from './one-login-email-address/routes.js'
 import routesOneLoginPassword from './one-login-password/routes.js'
 import routesReviewDeveloperDetails from './review-developer-details/routes.js'
 import routesCommitmentEmail from './commitment-email/routes.js'
+import routesDefraIdRegister from './defra-id-register/routes.js'
+import routesDefraIdTerms from './defra-id-terms/routes.js'
+import routesDefraIdWhatWeNeed from './defra-id-what-we-need/routes.js'
+import routesDefraIdAccountType from './defra-id-account-type/routes.js'
+import routesDefraIdIndividualName from './defra-id-individual-name/routes.js'
+import routesDefraIdIndividualPhone from './defra-id-individual-phone/routes.js'
+import routesDefraIdWhatAddress from './defra-id-what-address/routes.js'
+import routesDefraIdSelectAddress from './defra-id-select-address/routes.js'
+import routesDefraIdMemorableWord from './defra-id-memorable-word/routes.js'
+import routesDefraIdCheckDetailsIndividual from './defra-id-check-details-individual/routes.js'
+import routesDefraIdBusinessRegistered from './defra-id-business-registered/routes.js'
+import routesDefraIdBusinessCompanyNumber from './defra-id-business-company-number/routes.js'
+import routesDefraIdEnterCompanyNumber from './defra-id-enter-company-number/routes.js'
+import routesDefraIdBusinessConfirmName from './defra-id-business-confirm-name/routes.js'
+import routesDefraIdBusinessEnterContacts from './defra-id-business-enter-contacts/routes.js'
+import routesDefraIdBusinessYourName from './defra-id-business-your-name/routes.js'
+import routesDefraIdBusinessYourPhone from './defra-id-business-your-phone/routes.js'
+import routesDefraIdBusinessMemorableWord from './defra-id-business-memorable-word/routes.js'
+import routesDefraIdBusinessCheckDetails from './defra-id-business-check-details/routes.js'
 import { registerRequestToUseSessionCookie } from './session-cookie.js'
 
 /**
@@ -60,6 +79,26 @@ export const requestToUse = {
         ...routesOneLoginPassword,
         ...routesReviewDeveloperDetails,
         ...routesCommitmentEmail
+        ...routesSignInHow,
+        ...routesDefraIdRegister,
+        ...routesDefraIdTerms,
+        ...routesDefraIdWhatWeNeed,
+        ...routesDefraIdAccountType,
+        ...routesDefraIdIndividualName,
+        ...routesDefraIdIndividualPhone,
+        ...routesDefraIdWhatAddress,
+        ...routesDefraIdSelectAddress,
+        ...routesDefraIdMemorableWord,
+        ...routesDefraIdCheckDetailsIndividual,
+        ...routesDefraIdBusinessRegistered,
+        ...routesDefraIdBusinessCompanyNumber,
+        ...routesDefraIdEnterCompanyNumber,
+        ...routesDefraIdBusinessConfirmName,
+        ...routesDefraIdBusinessEnterContacts,
+        ...routesDefraIdBusinessYourName,
+        ...routesDefraIdBusinessYourPhone,
+        ...routesDefraIdBusinessMemorableWord,
+        ...routesDefraIdBusinessCheckDetails
       ])
     }
   }

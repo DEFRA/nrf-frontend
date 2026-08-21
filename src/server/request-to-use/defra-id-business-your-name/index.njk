@@ -1,0 +1,56 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+                    <h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>
+                </legend>
+
+                {{ govukInput({
+                    name: "firstName",
+                    label: {
+                        text: "First name"
+                    },
+                    autocomplete: "given-name",
+                    errorMessage: validationErrors.messagesByFormField.firstName,
+                    value: formSubmitData.firstName
+                }) }}
+
+                {{ govukInput({
+                    name: "lastName",
+                    label: {
+                        text: "Last name"
+                    },
+                    autocomplete: "family-name",
+                    errorMessage: validationErrors.messagesByFormField.lastName,
+                    value: formSubmitData.lastName
+                }) }}
+            </fieldset>
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
