@@ -2,12 +2,16 @@
 
 {% block content %}
   {{ appHeading({
-    text: heading
+    text: heading,
+    caption: 'Error ' ~ statusCode
   }) }}
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <p>{{ message }}</p>
+      <p class="govuk-body" data-testid="error-page-body">
+        Something went wrong with your request. Try again in a few minutes. You can
+        <a class="govuk-link" href="{{ serviceUrl }}">return to the start of the service</a>.
+      </p>
     </div>
   </div>
 {% endblock %}
