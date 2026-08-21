@@ -35,6 +35,9 @@ import routesDefraIdBusinessYourName from './defra-id-business-your-name/routes.
 import routesDefraIdBusinessYourPhone from './defra-id-business-your-phone/routes.js'
 import routesDefraIdBusinessMemorableWord from './defra-id-business-memorable-word/routes.js'
 import routesDefraIdBusinessCheckDetails from './defra-id-business-check-details/routes.js'
+import routesSignInGovGateway from './sign-in-gov-gateway/routes.js'
+import routesWhatIsAddressIndividualBusiness from './what-is-address-individual-business/routes.js'
+import routesReviewIndividualBusinessDetails from './review-individual-business-details/routes.js'
 import { registerRequestToUseSessionCookie } from './session-cookie.js'
 
 /**
@@ -97,7 +100,10 @@ export const requestToUse = {
         ...routesDefraIdBusinessYourName,
         ...routesDefraIdBusinessYourPhone,
         ...routesDefraIdBusinessMemorableWord,
-        ...routesDefraIdBusinessCheckDetails
+        ...routesDefraIdBusinessCheckDetails,
+        ...routesSignInGovGateway,
+        ...routesWhatIsAddressIndividualBusiness,
+        ...routesReviewIndividualBusinessDetails
       ])
     }
   }

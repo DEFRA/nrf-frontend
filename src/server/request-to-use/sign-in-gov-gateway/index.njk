@@ -1,0 +1,78 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Keeping your information secure</h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-body">Do not share your Government Gateway user ID and password with anyone else.</p>
+            </div>
+        </div>
+
+        <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {{ govukInput({
+                name: "userId",
+                label: {
+                    text: "Government Gateway user ID"
+                },
+                hint: {
+                    text: "This could be up to 12 characters."
+                },
+                value: formSubmitData.userId,
+                errorMessage: validationErrors.messagesByFormField.userId
+            }) }}
+
+            {{ govukInput({
+                name: "password",
+                type: "password",
+                autocomplete: "current-password",
+                label: {
+                    text: "Password"
+                },
+                value: formSubmitData.password,
+                errorMessage: validationErrors.messagesByFormField.password
+            }) }}
+
+            {{ govukButton({
+                text: "Sign in"
+            }) }}
+
+        </form>
+
+        <h2 class="govuk-heading-m">New users of Government Gateway</h2>
+        <div class="govuk-body">
+            <a class="govuk-link" id="no-account" href="#">Create sign in details</a>
+        </div>
+
+        <h2 class="govuk-heading-m">Problems signing in</h2>
+        <ul class="govuk-list">
+            <li><a class="govuk-link" href="#" id="forgotten-password">I have forgotten my password</a></li>
+            <li><a class="govuk-link" href="#" id="forgotten-user-id">I have forgotten my Government Gateway user ID</a></li>
+            <li><a class="govuk-link" href="#" id="forgotten-user-id-password">I have forgotten my Government Gateway user ID and password</a></li>
+        </ul>
+    </div>
+</div>
+<div class="govuk-body govuk-!-margin-top-6">
+    <a class="govuk-link" href="#" id="getHelp">Get help with this page</a>
+</div>
+{% endblock %}
