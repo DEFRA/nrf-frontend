@@ -1,0 +1,43 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        <h2 class="govuk-heading-m">Developer details</h2>
+
+        {{ govukSummaryList({
+            rows: [
+                {
+                    key: { text: "Full name" },
+                    value: { text: "Name Name" },
+                    actions: { items: [{ href: changePath, text: "Change", visuallyHiddenText: "full name" }] }
+                },
+                {
+                    key: { text: "Business name" },
+                    value: { text: businessName },
+                    actions: { items: [{ href: changePath, text: "Change", visuallyHiddenText: "business name" }] }
+                },
+                {
+                    key: { text: "Address" },
+                    value: { text: "53 Business Lane, Business, LP1 7RF" },
+                    actions: { items: [{ href: changePath, text: "Change", visuallyHiddenText: "address" }] }
+                }
+            ]
+        }) }}
+
+        {{ govukButton({
+            text: "Confirm",
+            href: confirmPath
+        }) }}
+    </div>
+</div>
+{% endblock %}
