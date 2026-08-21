@@ -18,40 +18,9 @@ nvm use
 
 ## Local Development
 
-### Setup
+The frontend runs locally as part of the [nrf-solution](https://github.com/DEFRA/nrf-solution) meta-repo: `tilt up` from the nrf-solution root brings up the full stack — this service, its Docker Compose dependencies (LocalStack, Redis, MongoDB) — with hot reload.
 
-Install application dependencies:
-
-```bash
-npm ci
-```
-
-### Docker Compose (LocalStack)
-
-To run the application with local AWS services (S3, SQS), Redis and MongoDB:
-
-```bash
-docker compose up --build -d
-```
-
-The `compose/01-start-localstack.sh` script runs automatically on container startup to create the S3 buckets and SQS queues required by the CDP uploader.
-
-### Development
-
-To run the application in `development` mode run:
-
-```bash
-npm run dev
-```
-
-### Production
-
-For most cases, using development mode as above is easiest.
-To mimic the application running in `production` mode locally run:
-
-```bash
-npm start
-```
+See the [nrf-solution README](https://github.com/DEFRA/nrf-solution/blob/main/README.md) for setup, ports and troubleshooting.
 
 ### API documentation
 
@@ -82,6 +51,5 @@ The boundary check result page uses [@defra/interactive-map](https://github.com/
 
 ## Other docs
 
-- [Docker for local development](./docs/docker.md)
 - [Application caching](./docs/app-caching.md)
 - [Licence](./docs/licence.md)
