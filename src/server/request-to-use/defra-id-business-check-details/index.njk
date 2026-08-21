@@ -1,0 +1,119 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+            {{ govukSummaryList({
+                classes: "govuk-!-margin-bottom-7",
+                card: {
+                    title: {
+                        text: "Defra account"
+                    }
+                },
+                rows: [
+                    {
+                        key: { text: "Account type" },
+                        value: { text: formSubmitData.accountType },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "account type" }] }
+                    }
+                ]
+            }) }}
+
+            {{ govukSummaryList({
+                classes: "govuk-!-margin-bottom-7",
+                card: {
+                    title: {
+                        text: "Business details"
+                    }
+                },
+                rows: [
+                    {
+                        key: { text: "Type" },
+                        value: { text: "Limited company" }
+                    },
+                    {
+                        key: { text: "Name" },
+                        value: { text: formSubmitData.businessName }
+                    },
+                    {
+                        key: { text: "Company number" },
+                        value: { text: formSubmitData.companyNumber },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "company number" }] }
+                    },
+                    {
+                        key: { text: "Registered address" },
+                        value: { text: formSubmitData.registeredAddress }
+                    },
+                    {
+                        key: { text: "Telephone number" },
+                        value: { text: formSubmitData.companyTelephoneNumber },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "telephone number" }] }
+                    },
+                    {
+                        key: { text: "Email address" },
+                        value: { text: formSubmitData.companyEmailAddress },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "email address" }] }
+                    }
+                ]
+            }) }}
+
+            {{ govukSummaryList({
+                classes: "govuk-!-margin-bottom-7",
+                card: {
+                    title: {
+                        text: "Your details"
+                    }
+                },
+                rows: [
+                    {
+                        key: { text: "Name" },
+                        value: { text: formSubmitData.firstName + " " + formSubmitData.lastName },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "name" }] }
+                    },
+                    {
+                        key: { text: "Telephone number" },
+                        value: { text: formSubmitData.telephoneNumber },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "telephone number" }] }
+                    },
+                    {
+                        key: { text: "Memorable word" },
+                        value: { text: formSubmitData.securityWord },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "memorable word" }] }
+                    },
+                    {
+                        key: { text: "Hint question" },
+                        value: { text: formSubmitData.securityHint },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "hint question" }] }
+                    }
+                ]
+            }) }}
+
+            <div class="govuk-button-group">
+                {{ govukButton({
+                    text: "Confirm and complete registration"
+                }) }}
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
