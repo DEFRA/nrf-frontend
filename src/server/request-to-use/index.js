@@ -3,6 +3,14 @@ import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesCommitmentCertificate from './commitment-certificate/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
+import routesCreatingDefraAccount from './creating-defra-account/routes.js'
+import routesQuoteEmail from './quote-email/routes.js'
+import routesRetrieveQuoteDetails from './retrieve-quote-details/routes.js'
+import routesLevyAmountIncreased from './levy-amount-increased/routes.js'
+import routesEnterEmailAddress from './enter-email-address/routes.js'
+import routesHowDoYouWantToSignIn from './how-do-you-want-to-sign-in/routes.js'
+import routesIsThisAVariation from './is-this-a-variation/routes.js'
+import routesDeveloperDetails from './developer-details/routes.js'
 import { registerRequestToUseSessionCookie } from './session-cookie.js'
 
 /**
@@ -33,7 +41,15 @@ export const requestToUse = {
         ...routesEnterNrlReference,
         ...routesCommitmentCertificate,
         ...routesCheckYourAnswers,
-        ...routesConfirmation
+        ...routesConfirmation,
+        ...routesCreatingDefraAccount,
+        ...routesQuoteEmail,
+        ...routesRetrieveQuoteDetails,
+        ...routesLevyAmountIncreased,
+        ...routesEnterEmailAddress,
+        ...routesHowDoYouWantToSignIn,
+        ...routesIsThisAVariation,
+        ...routesDeveloperDetails
       ])
     }
   }

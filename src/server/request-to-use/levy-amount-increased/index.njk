@@ -1,0 +1,55 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+            {{ govukRadios({
+                name: "yourLevyAmountHasIncreasedSinceYourQuote",
+                fieldset: {
+                    legend: {
+                        html: legendHtml,
+                        classes: "govuk-fieldset__legend--l"
+                    }
+                },
+                hint: {
+                    text: "The quoted amount has increased in line with inflation, it is now £00000."
+                },
+                errorMessage: validationErrors.messagesByFormField.yourLevyAmountHasIncreasedSinceYourQuote,
+                value: formSubmitData.yourLevyAmountHasIncreasedSinceYourQuote,
+                items: [
+                    {
+                        value: "yes",
+                        text: "Yes, accept the new amount"
+                    },
+                    {
+                        value: "no",
+                        text: "No, delete my quote details"
+                    }
+                ]
+            }) }}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

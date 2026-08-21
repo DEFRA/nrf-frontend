@@ -1,0 +1,55 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+            {{ govukRadios({
+                name: "howDoYouWantToSignIn",
+                fieldset: {
+                    legend: {
+                        html: legendHtml,
+                        classes: "govuk-fieldset__legend--l"
+                    }
+                },
+                hint: {
+                    text: "Use your email address and password. If you don’t have a GOV.UK One Login, you can create one."
+                },
+                errorMessage: validationErrors.messagesByFormField.howDoYouWantToSignIn,
+                value: formSubmitData.howDoYouWantToSignIn,
+                items: [
+                    {
+                        value: "one-login",
+                        text: "Sign in with GOV.UK One Login"
+                    },
+                    {
+                        value: "government-gateway",
+                        text: "Sign in with Government Gateway"
+                    }
+                ]
+            }) }}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
