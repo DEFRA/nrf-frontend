@@ -1,7 +1,10 @@
 import { statusCodes } from '../common/constants/status-codes.js'
 import { saveToSessionCache } from './session-cache.js'
 
-export const quotePostController = ({ getNextPage, payloadOptions }) => ({
+export const requestToUsePostController = ({
+  getNextPage,
+  payloadOptions
+}) => ({
   options: {
     ...(payloadOptions && { payload: payloadOptions })
   },

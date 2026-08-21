@@ -3,6 +3,7 @@ import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesCommitmentCertificate from './commitment-certificate/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesConfirmation from './confirmation/routes.js'
+import routesSignInHow from './sign-in-how/routes.js'
 import { registerRequestToUseSessionCookie } from './session-cookie.js'
 
 /**
@@ -33,7 +34,8 @@ export const requestToUse = {
         ...routesEnterNrlReference,
         ...routesCommitmentCertificate,
         ...routesCheckYourAnswers,
-        ...routesConfirmation
+        ...routesConfirmation,
+        ...routesSignInHow
       ])
     }
   }
