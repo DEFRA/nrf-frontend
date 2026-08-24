@@ -34,7 +34,7 @@ describe('Confirmation page', () => {
       server: getServer()
     })
     expect(getByRole(document, 'main')).toHaveTextContent(
-      'NRF reference: NRF-123456'
+      'NRL reference: NRF-123456'
     )
   })
 })
