@@ -18,7 +18,7 @@
             rows: [
                 {
                     key: { text: "Full name" },
-                    value: { text: "Name Name" },
+                    value: { text: requestToUse.fullName },
                     actions: { items: [{ href: changePath, text: "Change", visuallyHiddenText: "full name" }] }
                 },
                 {
@@ -28,7 +28,7 @@
                 },
                 {
                     key: { text: "Address" },
-                    value: { text: "53 Business Lane, Business, LP1 7RF" },
+                    value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity},
                     actions: { items: [{ href: changePath, text: "Change", visuallyHiddenText: "address" }] }
                 }
             ]

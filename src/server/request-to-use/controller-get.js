@@ -7,7 +7,7 @@ export const requestToUseController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {
     const requestToUseData = getFromSessionCache(request)
 
-    const reference = requestToUseData.nrlReference
+    const reference = requestToUseData?.nrlReference
 
     const { payload } = await getRequestFromBackend({
       endpointPath: `/quotes/${reference}?requestToUse=true`

@@ -1,4 +1,4 @@
-import { requestToUseController } from '../controller-get.js'
+import { nrlReferenceGetController } from './controller-get.js'
 import { requestToUsePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
@@ -10,7 +10,7 @@ export default [
   {
     method: 'GET',
     path: routeNrlReference,
-    ...requestToUseController({ routeId, getViewModel })
+    ...nrlReferenceGetController({ routeId, getViewModel })
   },
   {
     method: 'POST',
