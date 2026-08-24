@@ -48,7 +48,7 @@
                 },
                 classes: "govuk-!-width-one-third",
                 errorMessage: validationErrors.messagesByFormField.securityWord,
-                value: formSubmitData.securityWord
+                value: requestToUse.securityWord
             }) }}
 
             {{ govukCharacterCount({
@@ -62,7 +62,7 @@
                 },
                 classes: "govuk-!-width-two-thirds",
                 errorMessage: validationErrors.messagesByFormField.securityHint,
-                value: formSubmitData.securityHint
+                value: requestToUse.securityHint
             }) }}
 
             {{ govukButton({
