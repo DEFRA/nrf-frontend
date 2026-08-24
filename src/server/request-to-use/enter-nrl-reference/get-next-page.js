@@ -1,5 +1,5 @@
-import { routeRetrieveQuoteDetails } from '../retrieve-quote-details/routes.js'
+import { routeEnterEmailAddress } from '../enter-email-address/routes.js'
 
 export default function getNextPage({ nrlReference }) {
-  return routeRetrieveQuoteDetails
+  return routeEnterEmailAddress
 }

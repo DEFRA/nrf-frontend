@@ -1,4 +1,4 @@
-import { requestToUseController } from '../controller-get.js'
+import { creatingDefraAccountGetController } from './controller-get.js'
 import getViewModel from './get-view-model.js'
 
 const routeId = 'creating-defra-account'
@@ -24,6 +24,6 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...requestToUseController({ routeId, getViewModel })
+    ...creatingDefraAccountGetController({ routeId, getViewModel })
   }
 ]

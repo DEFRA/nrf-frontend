@@ -26,7 +26,7 @@
           },
           {
             key: { text: "Address" },
-            value: { text: requestToUse.address },
+            value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity},
             actions: { items: [{ href: '#', text: "Change" }] }
           },
           {
@@ -94,7 +94,7 @@
             text: "Confirm and submit",
             href: '/request-to-use/confirmation'
           }) }}
-          <a class="govuk-link" href="{{ quoteRoutes.deleteQuote }}">Delete</a>
+          <a class="govuk-link" href="#">Delete</a>
         </div>
     </div>
   </div>
