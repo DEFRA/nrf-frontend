@@ -26,7 +26,7 @@
                 html: '<p class="govuk-body">We must use the address that is registered with Companies House.</p><p class="govuk-body">If your registered address has changed then you must <a class="govuk-link" rel="noreferrer noopener" href="#" target="_blank">tell Companies House (opens in new tab)</a>.</p><p class="govuk-body">Once Companies House have updated your details you can return and continue your registration providing it is within 3 days of your last login.</p>'
             }) }}
 
-            <input type="hidden" name="companyNumber" value="{{ formSubmitData.companyNumber }}">
+            <input type="hidden" name="companyNumber" value="{{ requestToUse.companyNumber }}">
             <input type="hidden" name="businessName" value="{{ businessName }}">
             <input type="hidden" name="registeredAddress" value="{{ registeredAddress }}">
             <input type="hidden" name="confirmation" value="1">

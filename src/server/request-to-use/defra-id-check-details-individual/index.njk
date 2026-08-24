@@ -32,7 +32,7 @@
                 rows: [
                     {
                         key: { text: "Account type" },
-                        value: { text: formSubmitData.accountType },
+                        value: { text: requestToUse.accountType },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "account type" }] }
                     }
                 ]
@@ -48,27 +48,27 @@
                 rows: [
                     {
                         key: { text: "Name" },
-                        value: { text: formSubmitData.firstName + " " + formSubmitData.lastName },
+                        value: { text: requestToUse.firstName + " " + requestToUse.lastName },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "name" }] }
                     },
                     {
                         key: { text: "Telephone number" },
-                        value: { text: formSubmitData.telephoneNumber },
+                        value: { text: requestToUse.telephoneNumber },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "telephone number" }] }
                     },
                     {
                         key: { text: "Address" },
-                        value: { text: formSubmitData.address },
+                        value: { text: requestToUse.address },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
                     },
                     {
                         key: { text: "Memorable word" },
-                        value: { text: formSubmitData.securityWord },
+                        value: { text: requestToUse.securityWord },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "memorable word" }] }
                     },
                     {
                         key: { text: "Hint question" },
-                        value: { text: formSubmitData.securityHint },
+                        value: { text: requestToUse.securityHint },
                         actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "hint question" }] }
                     }
                 ]
