@@ -32,7 +32,7 @@
                     },
                     autocomplete: "tel",
                     errorMessage: validationErrors.messagesByFormField.companyTelephoneNumber,
-                    value: formSubmitData.companyTelephoneNumber
+                    value: requestToUse.companyTelephoneNumber
                 }) }}
 
                 {{ govukInput({
@@ -45,7 +45,7 @@
                     },
                     autocomplete: "email",
                     errorMessage: validationErrors.messagesByFormField.companyEmailAddress,
-                    value: formSubmitData.companyEmailAddress
+                    value: requestToUse.companyEmailAddress
                 }) }}
 
                 {{ govukButton({
