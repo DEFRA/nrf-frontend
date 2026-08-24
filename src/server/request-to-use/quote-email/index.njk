@@ -1,9 +1,9 @@
-{% extends "layouts/page.njk" %}
+{% extends "layouts/email.njk" %}
 
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
 {% block content %}
-<div class="govuk-grid-row">
+<div class="govuk-grid-row no-service-header">
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
         {{ govukInsetText({
@@ -14,7 +14,7 @@
 
         <p class="govuk-body">Find out how to create a Defra account so you can view your quote and request to use the nature restoration levy.</p>
 
-        <h2 class="govuk-heading-m">NRL reference: NRL-673419</h2>
+        <h2 class="govuk-heading-m">NRL reference: {{ reference }}</h2>
 
         <p class="govuk-body">Thank you for submitting details of the relevant development on <a href="#" class="govuk-link">Get a quote for the nature restoration levy</a>.</p>
 
