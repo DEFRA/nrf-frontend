@@ -69,7 +69,7 @@ describe('quoteDetailsGetController', () => {
     ['invalid', 'The link is invalid'],
     [
       'not_found',
-      'The NRF reference you have supplied does not match an existing quote'
+      'The NRL reference you have supplied does not match an existing quote'
     ],
     ['expired', 'This link is no longer active']
   ])(

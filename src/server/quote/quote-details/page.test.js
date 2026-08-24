@@ -28,7 +28,7 @@ const humanClick = {
 describe('Quote details page', () => {
   const getServer = setupTestServer()
 
-  it('should render the page heading and title with the NRF reference', async () => {
+  it('should render the page heading and title with the NRL reference', async () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
       requestUrl,
@@ -52,7 +52,7 @@ describe('Quote details page', () => {
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toBeInTheDocument()
-    expect(summaryList).toHaveTextContent('NRF reference')
+    expect(summaryList).toHaveTextContent('NRL reference')
     expect(summaryList).toHaveTextContent(reference)
     expect(summaryList).toHaveTextContent('Red line boundary')
     expect(summaryList).toHaveTextContent('site-plan.geojson')
@@ -188,7 +188,7 @@ describe('Quote details page', () => {
       ['invalid', 'The link is invalid'],
       [
         'not_found',
-        'The NRF reference you have supplied does not match an existing quote'
+        'The NRL reference you have supplied does not match an existing quote'
       ],
       ['expired', 'This link is no longer active']
     ])(
@@ -240,7 +240,7 @@ describe('Quote details page', () => {
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'The NRF reference you have supplied does not match an existing quote'
+        'The NRL reference you have supplied does not match an existing quote'
       )
       expect(
         document.querySelector('form[action$="/resend-unknown"]')

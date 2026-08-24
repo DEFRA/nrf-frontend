@@ -87,7 +87,7 @@ describe('Quote resend flows', () => {
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'The NRF reference you have supplied does not match an existing quote'
+        'The NRL reference you have supplied does not match an existing quote'
       )
       expect(
         queryByLabelText(
