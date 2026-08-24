@@ -48,7 +48,7 @@
           {
             key: { text: "Planning application type" },
             value: { text: quote.planningTypeLabel },
-            actions: { items: [{ href: quoteRoutes.planningType + "?change=true", text: "Change", visuallyHiddenText: "planning application type" }] }
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "planning application type" }] }
           } if quote.planningType,
           {
             key: { text: "Housing" },
@@ -57,26 +57,26 @@
           {
             key: { text: "Number of units" },
             value: { text: quote.housingUnits },
-            actions: { items: [{ href: quoteRoutes.unitNumber + "?change=true", text: "Change", visuallyHiddenText: "number of units" }] }
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "number of units" }] }
           } if quote.housingUnits,
           {
             key: { text: "Red line boundary" },
             value: {
             text: "Added"
           },
-            actions: { items: [{ href: quoteRoutes.drawBoundary + "?change=true", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
           } if quote.boundaryEntryType === 'draw',
           {
             key: { text: "Red line boundary" },
             value: {
             text: quote.boundaryFilename if quote.boundaryFilename else 'Uploaded'
           },
-            actions: { items: [{ href: quoteRoutes.filePreview + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
           } if quote.boundaryEntryType === 'upload',
           {
             key: { text: "Email address" },
             value: { text: quote.email.address },
-            actions: { items: [{ href: quoteRoutes.email + "?change=true", text: "Change", visuallyHiddenText: "email address" }] }
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "email address" }] }
           } if quote.email
         ]
       }) }}
