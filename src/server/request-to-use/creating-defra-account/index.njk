@@ -1,12 +1,12 @@
-{% extends "layouts/page.njk" %}
+{% extends "layouts/email.njk" %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
       <div class="govuk-inset-text">
-        <p class="govuk-body"><strong>To:</strong> email@email.com</p>
-        <p class="govuk-body"><strong>Subject:</strong> Nature restoration levy - quote</p>
+        <p class="govuk-body">To: email@email.com</p>
+        <p class="govuk-body">Subject: Nature restoration levy - quote</p>
       </div>
 
       <h1 class="govuk-heading-l">Creating a Defra account</h1>
@@ -21,15 +21,15 @@
       <p class="govuk-body">You can create an account to view your quote and request to use the nature restoration levy.</p>
       <p class="govuk-body">A Defra account lets you register with a range of online services from Defra and related organisations.</p>
 
-      <b>TOFIX: govukWarningText>
-If you do not set up your Defra account correctly your commitment certificate for the nature restoration levy will not be valid. This is because it will not be registered to the person or organisation the commitment is for.
-      </TOFIX></b>
+      {{ govukWarningText({
+        text: "If you do not set up your Defra account correctly your commitment certificate for the nature restoration levy will not be valid. This is because it will not be registered to the person or organisation the commitment is for."
+      }) }}
 
       <h2 class="govuk-heading-m">Who can create a Defra account</h2>
 
       <p class="govuk-body">You can create a Defra account as an individual, registered company or organisation, charity or sole trader.</p>
 
-      <h3 class="govuk-heading-s">Creating a Defra account as an individual</h3>
+      <h3 class="govuk-heading-m">Creating a Defra account as an individual</h3>
 
       <p class="govuk-body">
         You should only create a Defra account as an individual if the account is for your personal
@@ -37,7 +37,7 @@ If you do not set up your Defra account correctly your commitment certificate fo
         create an organisation account.
       </p>
 
-      <h3 class="govuk-heading-s">Creating a Defra account as an employee, volunteer or contractor of a business or organisation</h3>
+      <h3 class="govuk-heading-m">Creating a Defra account as an employee, volunteer or contractor of a business or organisation</h3>
 
       <p class="govuk-body">
         If you’re creating a Defra account for the organisation you work for you need to create
@@ -45,7 +45,7 @@ If you do not set up your Defra account correctly your commitment certificate fo
         incorrectly as it will be registered to you personally, not the organisation you work for.
       </p>
 
-      <h3 class="govuk-heading-s">Creating a Defra account as an agent or third party working on behalf of a client</h3>
+      <h3 class="govuk-heading-m">Creating a Defra account as an agent or third party working on behalf of a client</h3>
 
       <p class="govuk-body">
         You cannot create a Defra account as an agent or third party working on behalf of someone
@@ -54,50 +54,46 @@ If you do not set up your Defra account correctly your commitment certificate fo
       </p>
 
       <p class="govuk-body">
-        To create an account, first they need to sign in to, or create a Defra account.
+        To create an account, first they need to <a href="#" class="govuk-link">sign in to, or create a Defra account</a>.
         They’ll use GOV.UK One Login or Government Gateway to do this.
       </p>
 
       <p class="govuk-body">
         Once they have created the Defra account, they can invite you to it as an intermediary in the
-        ‘Manage account users’ section. Then they can give you access to Get Permission
-        for Marine Work.
+        ‘Manage account users’ section. Then they can give you access to <a href="#" class="govuk-link">Get Permission
+        for Marine Work</a>.
       </p>
 
       <h2 class="govuk-heading-m">Inviting other people to a Defra account</h2>
 
-      <h3 class="govuk-heading-s">How to invite other people to join a Defra account</h3>
-
-      <p class="govuk-body">
+      {% call govukDetails({
+        summaryText: "How to invite other people to join a Defra account"
+      }) %}
         The first person to register for a Defra account will be the account admin. They can invite
         and remove other team members or third parties and manage the account. They can also give
         admin rights to other team members. We recommend there are at least 2 account admins to
         prevent issues accessing and managing the account.
-      </p>
+      {% endcall %}
 
-      <h3 class="govuk-heading-s">If your organisation already has a Defra account</h3>
+      <h3 class="govuk-heading-m">If your organisation already has a Defra account</h3>
 
-      <h3 class="govuk-heading-s">How to request to join the existing account</h3>
-
-      <p class="govuk-body">
+      {% call govukDetails({
+        summaryText: "How to request to join the existing account"
+      }) %}
         If your organisation has already registered for a Defra account you cannot create a new one.
         You need to contact the account admin and request to join the account. If you do not know who
         the account admin is we can forward them your request.
-      </p>
-/request-to-use/creating-defra-account
-      <h3 class="govuk-heading-s">Before you start</h3>
+      {% endcall %}
+
+      <h3 class="govuk-heading-m">Before you start</h3>
 
       <p class="govuk-body">To create a Defra account you need to provide:</p>
 
       <ul class="govuk-list govuk-list--bullet">
         <li>email address, phone number and postal address</li>
-        <li>One Login or Government Gateway user ID and password.</li>
+        <li>One Login or Government Gateway user ID and password.If you do not have a One Login or Government Gateway account, you can create one in the next
+        step.</li>
       </ul>
-
-      <p class="govuk-body">
-        If you do not have a One Login or Government Gateway account, you can create one in the next
-        step.
-      </p>
 
       <p class="govuk-body">If you’re registering on behalf of a business or organisation, you also need to provide:</p>
 

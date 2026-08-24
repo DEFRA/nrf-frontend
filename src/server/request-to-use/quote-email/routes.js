@@ -1,4 +1,4 @@
-import { requestToUseController } from '../controller-get.js'
+import { quoteEmailGetController } from './controller-get.js'
 import getViewModel from './get-view-model.js'
 
 const routeId = 'quote-email'
@@ -24,6 +24,6 @@ export default [
   {
     method: 'GET',
     path: routeQuoteEmail,
-    ...requestToUseController({ routeId, getViewModel })
+    ...quoteEmailGetController({ routeId, getViewModel })
   }
 ]
