@@ -11,16 +11,11 @@
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
-
-        {{ govukSummaryList({
-            rows: [
-                { key: { text: "Full name" }, value: { text: "A Developer" } },
-                { key: { text: "Address" }, value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity} },
-                { key: { text: "NRL Ref" }, value: { text: requestToUse.nrlReference } },
-                { key: { text: "Date of issue" }, value: { text: "31 January 2026" } },
-                { key: { text: "Expiry date" }, value: { text: "31 July 2026" } }
-            ]
-        }) }}
+        <p class="govuk-body govuk-!-margin-bottom-1"><b>Full name:</b> {{ requestToUse.fullName }}</p>
+        <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity}}</p>
+        <p class="govuk-body govuk-!-margin-bottom-1"><b>NRL Ref:</b> {{ requestToUse.nrlReference }}</p>
+        <p class="govuk-body govuk-!-margin-bottom-1"><b>Date of issue:</b> 31 January 2026</p>
+        <p class="govuk-body"><b>Expiry date:</b> 31 July 2026</p>
 
         <h2 class="govuk-heading-m">Details of the relevant development</h2>
         <p class="govuk-body">The relevant development is planned to have:</p>
