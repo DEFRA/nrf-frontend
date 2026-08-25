@@ -12,7 +12,13 @@
 
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
         <p class="govuk-body govuk-!-margin-bottom-1"><b>Full name:</b> {{ requestToUse.fullName }}</p>
-        <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity}}</p>
+        {% if requestToUse.addressLine1 %}
+            <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity}}</p>
+        {% endif %}
+        {% if requestToUse.individualsAddressLine1 %}
+            <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.individualsAddressLine1 + " " + requestToUse.individualsAddressLine2Optional + ", "+requestToUse.individualsPostcode+ ", "+ requestToUse.individualsTownOrCity}}</p>
+        {% endif %}
+
         <p class="govuk-body govuk-!-margin-bottom-1"><b>NRL Ref:</b> {{ requestToUse.nrlReference }}</p>
         <p class="govuk-body govuk-!-margin-bottom-1"><b>Date of issue:</b> 31 January 2026</p>
         <p class="govuk-body"><b>Expiry date:</b> 31 July 2026</p>

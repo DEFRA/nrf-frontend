@@ -21,14 +21,24 @@
           },
           {
             key: { text: "Variation" },
-            value: { text: 'Yes' },
+            value: { text: 'No' },
             actions: { items: [{ href: '#', text: "Change" }] }
           },
+          {
+            key: { text: "Full Name" },
+            value: { text: requestToUse.fullName },
+            actions: { items: [{ href: '#', text: "Change" }] }
+          } if requestToUse.fullName,
+          {
+            key: { text: "Address" },
+            value: { text: requestToUse.individualsAddressLine1 + " " + requestToUse.individualsAddressLine2Optional + ", "+requestToUse.individualsPostcode+ ", "+ requestToUse.individualsTownOrCity},
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
+          } if requestToUse.individualsAddressLine1,
           {
             key: { text: "Address" },
             value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity},
             actions: { items: [{ href: '#', text: "Change" }] }
-          },
+          } if requestToUse.addressLine1,
           {
             key: { text: "Details confirmed" },
             value: { text: 'Yes' },
@@ -65,14 +75,7 @@
             text: "Added"
           },
             actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
-          } if quote.boundaryEntryType === 'draw',
-          {
-            key: { text: "Red line boundary" },
-            value: {
-            text: quote.boundaryFilename if quote.boundaryFilename else 'Uploaded'
           },
-            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
-          } if quote.boundaryEntryType === 'upload',
           {
             key: { text: "Email address" },
             value: { text: quote.email.address },
