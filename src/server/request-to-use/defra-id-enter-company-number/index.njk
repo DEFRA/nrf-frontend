@@ -1,0 +1,53 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+                    <h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>
+                </legend>
+
+                <p class="govuk-body"><a class="govuk-link" href="#" target="_blank">Search Companies House for your company registration number (opens in new tab)</a></p>
+
+                {{ govukInput({
+                    name: "companyNumber",
+                    label: {
+                        text: "Enter your company registration number",
+                        classes: "govuk-visually-hidden"
+                    },
+                    hint: {
+                        text: "It is 8 characters. For example, 01234567 or AC012345"
+                    },
+                    classes: "govuk-input--width-10",
+                    autocomplete: "off",
+                    errorMessage: validationErrors.messagesByFormField.companyNumber,
+                    value: requestToUse.companyNumber
+                }) }}
+            </fieldset>
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -13,6 +13,7 @@ import { requestTracing } from './common/helpers/request-tracing.js'
 import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { sessionCache } from './common/helpers/session-cache/session-cache.js'
 import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
+import { waitForRedisClientReady } from './common/helpers/redis-client.js'
 import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 import { applySecurityHeaders } from './common/helpers/security-headers.js'
@@ -20,7 +21,6 @@ import { defraIdentity } from './plugins/defra-identity.js'
 import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { createLogger } from './common/helpers/logging/logger.js'
-import Bell from '@hapi/bell'
 import { csrf } from './common/helpers/csrf.js'
 import { swagger } from './plugins/swagger.js'
 
@@ -28,6 +28,7 @@ const logger = createLogger()
 
 export async function createServer() {
   setupProxy()
+  const { engine: sessionCacheEngine, client: redisClient } = getCacheEngine()
   const server = hapi.server({
     host: config.get('host'),
     port: config.get('port'),
@@ -58,7 +59,7 @@ export async function createServer() {
     cache: [
       {
         name: config.get('session.cache.name'),
-        engine: getCacheEngine()
+        engine: sessionCacheEngine
       }
     ],
     state: {
@@ -93,10 +94,6 @@ export async function createServer() {
   server.app.authEnabled = false
   if (config.get('defraId.enabled')) {
     try {
-      // Register Bell for OAuth authentication
-      // Note: Yar is already registered via sessionCache plugin above
-      await server.register(Bell)
-
       // Register DEFRA Identity plugin to configure auth strategies
       await server.register({
         plugin: defraIdentity,
@@ -122,6 +119,10 @@ export async function createServer() {
   if (config.get('useSwagger')) {
     await server.register(swagger)
   }
+
+  // Sessions are required for core functionality (e.g. persisting quote-journey
+  // answers), so refuse to start unless the session store (Redis) is connected.
+  server.ext('onPreStart', () => waitForRedisClientReady(redisClient))
 
   server.ext('onPreResponse', catchAll)
   server.ext('onPreResponse', applyCacheControlHeaders)

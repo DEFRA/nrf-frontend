@@ -1,0 +1,72 @@
+{% extends "layouts/email.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        <p class="govuk-body"><strong>NRL reference:  {{ requestToUse.nrlReference }}</strong></p>
+
+        <p class="govuk-body">Thank you for submitting details of the relevant development on <a href="{{ nrlReferencePath }}" class="govuk-link">Request to use the nature restoration levy</a>.</p>
+
+        <h2 class="govuk-heading-m">Next steps</h2>
+
+        <p class="govuk-body">The attached commitment certificate will disapply the relevant environmental obligations through the planning application process.</p>
+        <p class="govuk-body">Submit this certificate as part of any planning and decision-making processes.</p>
+        <p class="govuk-body">Other environmental obligations will continue to apply.</p>
+
+        <h2 class="govuk-heading-m">Details of your relevant development</h2>
+
+        <p class="govuk-body">You told us the relevant development is planned to have:</p>
+
+        <ul class="govuk-list govuk-list--bullet">
+            <li>full planning permission</li>
+            <li>housing with a total of 100 unit(s)</li>
+        </ul>
+
+        <h2 class="govuk-heading-m">Nature restoration levy amount</h2>
+
+        <p class="govuk-body">Your relevant development is planned in Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)</p>
+        <p class="govuk-body"><strong>Provisional nature restoration levy amount</strong><br>£X,XXX (excluding VAT)</p>
+        <p class="govuk-body">The provisional amount is calculated from the charging schedule in the relevant EDP(s).</p>
+        <p class="govuk-body"><strong>Inflation-adjusted nature restoration levy amount</strong><br>£X,XXX (excluding VAT)</p>
+        <p class="govuk-body">The inflation-adjusted amount shows the indicative levy amount for the year this commitment was issued.</p>
+
+        <h2 class="govuk-heading-m">How the nature restoration levy was calculated</h2>
+
+        <p class="govuk-body">The levy has been calculated from the details you submitted and the charging schedule for the relevant EDP(s). <a href="#" class="govuk-link">Read about the charging schedule for the EDP.</a></p>
+        <p class="govuk-body">The provisional nature restoration levy amount is calculated from the charging schedule in the relevant EDP(s) forming this commitment. The levy amount is shown excluding VAT, which is charged at 20%.</p>
+        <p class="govuk-body">The inflation-adjusted nature restoration levy amount shows the indicative levy amount for the year this commitment was issued. The amount includes annual inflation in line with the Royal Institute of Chartered Surveyors (RICS) Community Infrastructure Levy (CIL) Index, published 1st November and applied 1st January for the following calendar year.</p>
+
+        <h2 class="govuk-heading-m">What your levy will pay for</h2>
+
+        <p class="govuk-body">Your levy will fund conservation measures delivered under the relevant EDPs, including their long-term management, monitoring and maintenance as well as scheme administration costs. EDPs set out measures needed to address the environmental impacts of development in an area and deliver an overall improvement in the conservation status of the environmental feature(s) set out in the EDP.</p>
+
+        <h2 class="govuk-heading-m">Preparing to pay the levy</h2>
+
+        <p class="govuk-body">Once your planning application is approved and you are ready to start development, you must assume liability to pay the levy. <a href="#" class="govuk-link">Learn about assuming liability.</a></p>
+        <p class="govuk-body">During the assumption of liability process, you will confirm whether you will pay the levy in full or through an available instalment plan. <a href="#" class="govuk-link">Read about paying by instalments.</a></p>
+        <p class="govuk-body">We will adjust your total nature restoration levy (NRL) amount for inflation based on the calendar year in which your levy liability arises. We will also apply annual inflation to each instalment payment.</p>
+        <p class="govuk-body">Your levy liability arises when you assume liability to pay. Natural England will issue a liability notice that sets out your total levy liability and payment terms.</p>
+        <p class="govuk-body">You must pay the levy in full, or make your first instalment payment, before you start development. This discharges your pre-commencement planning condition. <a href="#" class="govuk-link">Read about paying the nature restoration levy.</a></p>
+        <p class="govuk-body">There are possible consequences if the levy is not paid. <a href="#" class="govuk-link">Learn about the nature restoration fund enforcement policy.</a></p>
+
+        <h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
+        <p class="govuk-body">If you need help with the nature restoration levy, contact XXXX.</p>
+        <p class="govuk-body">
+            Email: <a href="mailto:xxxxx@defra.gov.uk" class="govuk-link">xxxxx@defra.gov.uk</a><br>
+            Telephone: 00000000000<br>
+            Monday to Friday, 8:30am to 5pm, except bank holidays
+        </p>
+        <p class="govuk-body"><a href="https://www.gov.uk/call-charges" class="govuk-link">Find out about call charges</a></p>
+        <p class="govuk-body"><a href="/request-to-use/commitment-certificate" class="govuk-link">View the commitment certificate</a></p>
+    </div>
+</div>
+{% endblock %}

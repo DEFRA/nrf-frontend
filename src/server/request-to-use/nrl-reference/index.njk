@@ -1,0 +1,57 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+            {{ govukRadios({
+                name: "doYouHaveANrlReference",
+                fieldset: {
+                    legend: {
+                        html: legendHtml,
+                        classes: "govuk-fieldset__legend--l"
+                    }
+                },
+                hint: {
+                    text: "You can find this reference on your quote email."
+                },
+                errorMessage: validationErrors.messagesByFormField.doYouHaveANrlReference,
+                value: requestToUse.doYouHaveANrlReference,
+                items: [
+                    {
+                        value: "yes",
+                        text: "Yes"
+                    },
+                    {
+                        value: "no",
+                        text: "No"
+                    }
+                ]
+            }) }}
+            <div class="govuk-button-group">
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+            <a class="govuk-link" href="#">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

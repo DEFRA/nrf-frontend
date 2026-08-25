@@ -65,3 +65,31 @@ export function buildRedisClient(redisConfig) {
 
   return redisClient
 }
+
+/**
+ * Resolves once the ioredis client has connected and is ready to serve
+ * commands, or rejects if it is not ready within the timeout. ioredis retries
+ * connections internally, so transient errors are ignored until the deadline.
+ * @param {import('ioredis').Redis | import('ioredis').Cluster} client
+ * @param {number} [timeoutMs]
+ * @returns {Promise<void>}
+ */
+export function waitForRedisClientReady(client, timeoutMs = 10000) {
+  if (client.status === 'ready') {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      client.removeListener('ready', onReady)
+      reject(new Error(`Redis client not ready within ${timeoutMs}ms`))
+    }, timeoutMs)
+
+    const onReady = () => {
+      clearTimeout(timer)
+      resolve()
+    }
+
+    client.once('ready', onReady)
+  })
+}

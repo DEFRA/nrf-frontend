@@ -1,0 +1,55 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+            <p class="govuk-body">This includes if you are a sole trader or registered charity.</p>
+
+            {{ govukRadios({
+                name: "accountType",
+                fieldset: {
+                    legend: {
+                        text: pageHeading,
+                        classes: "govuk-visually-hidden"
+                    }
+                },
+                errorMessage: validationErrors.messagesByFormField.accountType,
+                value: requestToUse.accountType,
+                items: [
+                    {
+                        value: "Business",
+                        text: "Yes, and I have permission to create an account"
+                    },
+                    {
+                        value: "Individual",
+                        text: "No, as an individual for personal use"
+                    }
+                ]
+            }) }}
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

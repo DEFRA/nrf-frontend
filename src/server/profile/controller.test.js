@@ -21,11 +21,12 @@ describe('Profile Controller', () => {
         auth: {
           credentials: {
             profile: {
+              firstName: 'Test',
+              lastName: 'User',
               email: 'test@example.com',
               name: 'Test User',
               crn: '12345',
-              organisationId: 'org-123',
-              currentRelationshipId: 'rel-456'
+              organisation: { organisationName: 'Acme Ltd' }
             }
           }
         }
@@ -38,11 +39,17 @@ describe('Profile Controller', () => {
 
       expect(result.template).toBe('profile/index')
       expect(result.context.pageTitle).toBe('My Profile')
+      expect(result.context.user.firstName).toBe('Test')
+      expect(result.context.user.lastName).toBe('User')
       expect(result.context.user.email).toBe('test@example.com')
       expect(result.context.user.name).toBe('Test User')
       expect(result.context.user.crn).toBe('12345')
-      expect(result.context.user.organisationId).toBe('org-123')
-      expect(result.context.authEnabled).toBe(true)
+      expect(result.context.user.organisation).toEqual({
+        organisationName: 'Acme Ltd'
+      })
+      expect(result.context.defraAccountUrl).toBe(
+        'https://your-account.cpdev.cui.defra.gov.uk/management/account-management/me'
+      )
     })
   })
 })

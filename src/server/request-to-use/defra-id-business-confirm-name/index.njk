@@ -1,0 +1,44 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+            <div class="govuk-inset-text">
+                <p class="govuk-body">{{ businessName }}<br>{{ registeredAddress }}</p>
+            </div>
+
+            {{ govukDetails({
+                summaryText: "The address is not correct",
+                html: '<p class="govuk-body">We must use the address that is registered with Companies House.</p><p class="govuk-body">If your registered address has changed then you must <a class="govuk-link" rel="noreferrer noopener" href="#" target="_blank">tell Companies House (opens in new tab)</a>.</p><p class="govuk-body">Once Companies House have updated your details you can return and continue your registration providing it is within 3 days of your last login.</p>'
+            }) }}
+
+            <input type="hidden" name="companyNumber" value="{{ requestToUse.companyNumber }}">
+            <input type="hidden" name="businessName" value="{{ businessName }}">
+            <input type="hidden" name="registeredAddress" value="{{ registeredAddress }}">
+            <input type="hidden" name="confirmation" value="1">
+
+            <div class="govuk-button-group">
+                {{ govukButton({
+                    text: "Confirm and continue"
+                }) }}
+                <a class="govuk-link govuk-link--no-visited-state" href="#">This is not the right business</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

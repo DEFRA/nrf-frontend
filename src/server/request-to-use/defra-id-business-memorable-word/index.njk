@@ -1,0 +1,75 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+            <p class="govuk-body">For security purposes, you are required to create a memorable word. This helps us verify your identity if you need to contact us.</p>
+
+            <div class="govuk-inset-text">
+                <p class="govuk-body">This word must:</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>be between 8 and 32 characters long and is not case-sensitive</li>
+                    <li>only contain a combination of letters (A-Z a-z) and numbers (0-9)</li>
+                </ul>
+
+                <p class="govuk-body">This word must not contain:</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>spaces</li>
+                    <li>special characters ( ‘at’ symbol (@), hyphen (-) )</li>
+                    <li>more than 2 repeating characters such as 111 or AAA</li>
+                </ul>
+            </div>
+
+            {{ govukInput({
+                name: "securityWord",
+                label: {
+                    text: "Your security word",
+                    classes: "govuk-visually-hidden"
+                },
+                classes: "govuk-!-width-one-third",
+                errorMessage: validationErrors.messagesByFormField.securityWord,
+                value: requestToUse.securityWord
+            }) }}
+
+            {{ govukCharacterCount({
+                name: "securityHint",
+                maxlength: 100,
+                label: {
+                    text: "Hint question"
+                },
+                hint: {
+                    text: "Write a question that will help you remember your memorable word. For example, 'What is the name of my first school?'"
+                },
+                classes: "govuk-!-width-two-thirds",
+                errorMessage: validationErrors.messagesByFormField.securityHint,
+                value: requestToUse.securityHint
+            }) }}
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

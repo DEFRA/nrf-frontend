@@ -11,3 +11,9 @@
   display: none;
   visibility: hidden;
 }
+
+body:has(.no-service-header) {
+  .govuk-service-navigation {
+    display: none;
+  }
+}

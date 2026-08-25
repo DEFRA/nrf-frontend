@@ -1,0 +1,72 @@
+{% extends "layouts/email.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row no-service-header">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        {{ govukInsetText({
+            html: '<p class="govuk-body"><strong>To:</strong> email@email.com</p><p class="govuk-body"><strong>Subject:</strong> Nature restoration levy - quote</p>'
+        }) }}
+
+        <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        <p class="govuk-body">Find out how to create a Defra account so you can view your quote and request to use the nature restoration levy.</p>
+
+        <h2 class="govuk-heading-m">NRL reference: {{ reference }}</h2>
+
+        <p class="govuk-body">Thank you for submitting details of the relevant development on <a href="#" class="govuk-link">Get a quote for the nature restoration levy</a>.</p>
+
+        <p class="govuk-body">This is an indicative nature restoration levy quote, based on the details you provided. For the purposes of section 72 of the Planning and Infrastructure Act 2025, this quote does not commit you to pay the nature restoration levy and does not disapply any relevant environmental obligations. A Local Planning Authority must not accept this quote as part of any planning and decision-making processes.</p>
+
+        <h2 class="govuk-heading-m">Details of your relevant development</h2>
+
+        <p class="govuk-body">You told us the relevant development is planned to have:</p>
+
+        <ul class="govuk-list govuk-list--bullet">
+            <li>full planning permission</li>
+            <li>housing with a total of 10 unit(s)</li>
+        </ul>
+
+        <h2 class="govuk-heading-m">What you might need to pay</h2>
+
+        <p class="govuk-body">Your relevant development is planned in Yare Broads and Marshes Environmental Delivery Plan (EDP) addressing nutrient pollution.</p>
+
+        <h3 class="govuk-heading-s">Provisional nature restoration levy amount £X.XXX (plus VAT charged at 20%)</h3>
+
+        <p class="govuk-body">The amount is calculated from the charging schedule in the relevant EDP.</p>
+
+        <h3 class="govuk-heading-s">Inflation-adjusted nature restoration levy amount: £X.XXX (plus VAT charged at 20%)</h3>
+
+        <p class="govuk-body">This shows the indicative levy amount for the year the quote was issued. The amount includes annual inflation in line with the Royal Institute of Chartered Surveyors (RICS) Community Infrastructure Levy (CIL) Index, published on 1 November and applied on 1 January for the following calendar year. This quote is indicative and subject to annual inflation. It shows the amount you may need to pay if you request to use the nature restoration levy.</p>
+
+        <h2 class="govuk-heading-m">Next steps</h2>
+
+        <p class="govuk-body">You do not need to pay anything now, this service is designed to help you plan how to meet your environmental obligations. You can <a href="#" class="govuk-link">get another quote</a> at any time.</p>
+
+        <p class="govuk-body">Keep this email for your records.</p>
+
+        <p class="govuk-body">When you are ready to start the planning and development process, you can <a href="#" class="govuk-link">request to use the nature restoration levy</a>. Once your request is accepted, you will receive a commitment certificate. You can submit this alongside your planning application.</p>
+
+        <h2 class="govuk-heading-m">How your nature restoration levy was calculated</h2>
+
+        <p class="govuk-body">Your levy has been calculated from the details you submitted and the charging schedule for the EDP. <a href="#" class="govuk-link">Read about the charging schedule for the EDP</a>.</p>
+
+        <h2 class="govuk-heading-m">What your levy will pay for</h2>
+
+        <p class="govuk-body">Your levy will fund conservation measures delivered under the relevant EDPs, including their long-term management, monitoring and maintenance as well as administration costs. EDPs set out measures needed to address the environmental impacts of development in an area and deliver an overall improvement in the conservation status of the environmental feature set out in the EDP.</p>
+
+        <h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
+        <p class="govuk-body">If you need help with the nature restoration levy, contact XXXX.</p>
+        <p class="govuk-body">
+            Email: <a href="mailto:xxxxx@defra.gov.uk" class="govuk-link">xxxxx@defra.gov.uk</a><br>
+            Telephone: 00000000000<br>
+            Monday to Friday, 8:30am to 5pm, except bank holidays
+        </p>
+        <p class="govuk-body"><a href="https://www.gov.uk/call-charges" class="govuk-link">Find out about call charges</a></p>
+
+        <p class="govuk-body"><a href="/request-to-use/creating-defra-account" class="govuk-link">View the email content</a></p>
+    </div>
+</div>
+{% endblock %}

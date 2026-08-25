@@ -21,7 +21,9 @@ export default defineConfig({
         '.public',
         'coverage',
         'postcss.config.js',
-        'stylelint.config.js'
+        'stylelint.config.js',
+        // TODO - remove request to use
+        'src/server/request-to-use/**'
       ]
     }
   }

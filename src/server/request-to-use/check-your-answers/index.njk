@@ -1,0 +1,104 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-6",
+        rows: [
+          {
+            key: { text: "Accept levy amount" },
+            value: { text: 'Yes' },
+            actions: { items: [{ href: '#', text: "Change" }] }
+          },
+          {
+            key: { text: "Variation" },
+            value: { text: 'No' },
+            actions: { items: [{ href: '#', text: "Change" }] }
+          },
+          {
+            key: { text: "Full Name" },
+            value: { text: requestToUse.fullName },
+            actions: { items: [{ href: '#', text: "Change" }] }
+          } if requestToUse.fullName,
+          {
+            key: { text: "Address" },
+            value: { text: requestToUse.individualsAddressLine1 + " " + requestToUse.individualsAddressLine2Optional + ", "+requestToUse.individualsPostcode+ ", "+ requestToUse.individualsTownOrCity},
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
+          } if requestToUse.individualsAddressLine1,
+          {
+            key: { text: "Address" },
+            value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity},
+            actions: { items: [{ href: '#', text: "Change" }] }
+          } if requestToUse.addressLine1,
+          {
+            key: { text: "Details confirmed" },
+            value: { text: 'Yes' },
+            actions: { items: [{ href: '#', text: "Change" }] }
+          }
+        ]
+      }) }}
+      {# boundaryFilename (below) is user-controlled. Safe here because
+           govukSummaryList escapes value.text (but NOT value.html), and the
+           backend validates it against a strict allowlist. Do NOT switch to html:. #}
+      <h2 class="govuk-heading-m">Development details</h2>
+      <p class="govuk-body">Update the details of your development to match your planning application. Changes may
+        result in a recalculation of available capacity and the levy amount.</p>
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-6",
+        rows: [
+          {
+            key: { text: "Planning application type" },
+            value: { text: quote.planningTypeLabel },
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "planning application type" }] }
+          } if quote.planningType,
+          {
+            key: { text: "Housing" },
+            value: { text: 'Yes' }
+          },
+          {
+            key: { text: "Number of units" },
+            value: { text: quote.housingUnits },
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "number of units" }] }
+          } if quote.housingUnits,
+          {
+            key: { text: "Red line boundary" },
+            value: {
+            text: "Added"
+          },
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
+          },
+          {
+            key: { text: "Email address" },
+            value: { text: quote.email.address },
+            actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "email address" }] }
+          } if quote.email
+        ]
+      }) }}
+
+      <p class="govuk-body">By confirming and submitting these details, you are requesting to use the nature restoration
+        levy.
+        The details you are submitting must be accurate and correct.
+        Once Natural England accepts your request to use this levy, you will be emailed a commitment certificate that
+        you can use in your planning application. The commitment certificate will disapply the relevant environmental
+        obligations through the planning application process.</p>
+      <p class="govuk-body">Levy amount £00000</p>
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Confirm and submit",
+            href: '/request-to-use/confirmation'
+          }) }}
+          <a class="govuk-link" href="#">Delete</a>
+        </div>
+    </div>
+  </div>
+{% endblock %}
