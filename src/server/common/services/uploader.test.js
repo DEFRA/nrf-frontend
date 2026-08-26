@@ -3,7 +3,7 @@ import Wreck from '@hapi/wreck'
 import { getUploadStatus, initiateUpload } from './uploader.js'
 import { config } from '../../../config/config.js'
 
-const backendUrl = 'http://localhost:4001'
+const backendUrl = config.get('backend').apiUrl
 
 vi.mock('@hapi/wreck')
 

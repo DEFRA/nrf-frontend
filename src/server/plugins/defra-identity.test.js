@@ -18,6 +18,10 @@ vi.mock('../auth/refresh-tokens.js', () => ({
   refreshTokens: vi.fn()
 }))
 
+vi.mock('../auth/sync-user-to-backend.js', () => ({
+  syncUserToBackend: vi.fn()
+}))
+
 vi.mock('../../config/config.js', () => ({
   config: {
     get: vi.fn()
@@ -26,9 +30,11 @@ vi.mock('../../config/config.js', () => ({
 
 const { defraIdentity, createUserSession } = await import('./defra-identity.js')
 const { refreshTokens } = await import('../auth/refresh-tokens.js')
+const { syncUserToBackend } = await import('../auth/sync-user-to-backend.js')
 const { config } = await import('../../config/config.js')
 
 const mockRefreshTokens = vi.mocked(refreshTokens)
+const mockSyncUserToBackend = vi.mocked(syncUserToBackend)
 
 const defaultConfigValues = {
   'defraId.refreshTokens': true
@@ -71,6 +77,8 @@ describe('defra-identity plugin', () => {
     }
 
     server = createMockServer()
+
+    mockSyncUserToBackend.mockResolvedValue(undefined)
   })
 
   const registerPlugin = async () => {
@@ -251,6 +259,43 @@ describe('defra-identity plugin', () => {
 
       expect(mockRefreshTokens).toHaveBeenCalledWith('old-refresh-token')
       expect(h.authenticated).toHaveBeenCalledTimes(1)
+    })
+
+    it('syncs the user profile to nrf-backend on an unsaved session', async () => {
+      const authenticate = await getAuthenticate()
+      const userSession = {
+        sessionId: 'valid-session',
+        token: generateToken(3600),
+        refreshToken: 'refresh-token',
+        profile: { id: 'user-123' }
+      }
+      sessionCache.get.mockResolvedValue(userSession)
+      const request = createMockRequest('valid-session')
+      const h = createMockH()
+
+      await authenticate(request, h)
+
+      expect(mockSyncUserToBackend).toHaveBeenCalledWith({
+        userSession,
+        sessionCache
+      })
+    })
+
+    it('does not sync a session that has already been saved', async () => {
+      const authenticate = await getAuthenticate()
+      sessionCache.get.mockResolvedValue({
+        sessionId: 'saved-session',
+        token: generateToken(3600),
+        refreshToken: 'refresh-token',
+        profile: { id: 'user-123' },
+        userSaved: true
+      })
+      const request = createMockRequest('saved-session')
+      const h = createMockH()
+
+      await authenticate(request, h)
+
+      expect(mockSyncUserToBackend).not.toHaveBeenCalled()
     })
   })
 
