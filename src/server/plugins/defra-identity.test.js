@@ -281,6 +281,35 @@ describe('defra-identity plugin', () => {
       })
     })
 
+    it('logs and continues authenticating when the backend sync returns 404', async () => {
+      const authenticate = await getAuthenticate()
+      const userSession = {
+        sessionId: 'valid-session',
+        token: generateToken(3600),
+        refreshToken: 'refresh-token',
+        profile: { id: 'user-123' }
+      }
+      sessionCache.get.mockResolvedValue(userSession)
+      const notFoundError = Object.assign(new Error('Not Found'), {
+        isBoom: true,
+        output: { statusCode: 404 }
+      })
+      mockSyncUserToBackend.mockRejectedValue(notFoundError)
+      const request = createMockRequest('valid-session')
+      const h = createMockH()
+
+      await authenticate(request, h)
+
+      await vi.waitFor(() =>
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          notFoundError,
+          'Failed to sync user profile for session valid-session'
+        )
+      )
+      expect(h.authenticated).toHaveBeenCalledTimes(1)
+      expect(h.unauthenticated).not.toHaveBeenCalled()
+    })
+
     it('does not sync a session that has already been saved', async () => {
       const authenticate = await getAuthenticate()
       sessionCache.get.mockResolvedValue({

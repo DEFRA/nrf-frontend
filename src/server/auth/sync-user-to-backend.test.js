@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
 
 import { config } from '../../config/config.js'
+import { statusCodes } from '../common/constants/status-codes.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { syncUserToBackend } from './sync-user-to-backend.js'
 
@@ -111,22 +112,28 @@ describe('syncUserToBackend', () => {
     }
   )
 
-  it('leaves the session unsaved when the backend call fails so it retries next request', async () => {
-    mswServer.use(
-      http.patch(
-        `${backendUrl}/users/${DEFRA_ID}`,
-        () => new HttpResponse(null, { status: 500 })
+  it.each([
+    ['the user has no matching record yet', statusCodes.notFound],
+    ['the backend has an unexpected error', statusCodes.internalServerError]
+  ])(
+    'leaves the session unsaved so it retries next request when %s (%i)',
+    async (_name, statusCode) => {
+      mswServer.use(
+        http.patch(
+          `${backendUrl}/users/${DEFRA_ID}`,
+          () => new HttpResponse(null, { status: statusCode })
+        )
       )
-    )
 
-    const sessionCache = createSessionCache()
-    const userSession = createSession(citizenProfile)
+      const sessionCache = createSessionCache()
+      const userSession = createSession(citizenProfile)
 
-    await expect(
-      syncUserToBackend({ userSession, sessionCache })
-    ).rejects.toThrow()
+      await expect(
+        syncUserToBackend({ userSession, sessionCache })
+      ).rejects.toThrow()
 
-    expect(userSession.userSaved).toBe(false)
-    expect(sessionCache.set).not.toHaveBeenCalled()
-  })
+      expect(userSession.userSaved).toBe(false)
+      expect(sessionCache.set).not.toHaveBeenCalled()
+    }
+  )
 })
