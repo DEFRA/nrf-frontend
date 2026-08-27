@@ -14,17 +14,36 @@
             {{ user.firstName }} {{ user.lastName }}
           </dd>
         </div>
-        {% if user.organisation.organisationName %}
-          <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-              Organisation name
-            </dt>
-            <dd class="govuk-summary-list__value">
-              {{ user.organisation.organisationName }}
-            </dd>
-          </div>
-        {% endif %}
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Email address
+          </dt>
+          <dd class="govuk-summary-list__value">
+            {{ user.email }}
+          </dd>
+        </div>
       </dl>
+
+      <h2 class="govuk-heading-m">Organisations</h2>
+      {% if organisations.length %}
+        {% set rows = [] %}
+        {% for organisation in organisations %}
+          {% set _ = rows.push([
+            { text: organisation.name },
+            { text: organisation.relationshipType or 'Unknown' }
+          ]) %}
+        {% endfor %}
+        {{ govukTable({
+          head: [
+            { text: 'Organisation' },
+            { text: 'Relationship type' }
+          ],
+          rows: rows
+        }) }}
+      {% else %}
+        <p class="govuk-body">You are not linked to any organisations.</p>
+      {% endif %}
+
       <p class="govuk-body govuk-!-margin-top-6">
         <a href="{{ defraAccountUrl }}" class="govuk-link govuk-!-margin-right-4">Defra account</a>
         <a href="/auth/sign-out" class="govuk-link">Sign out</a>
