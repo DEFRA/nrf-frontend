@@ -4,6 +4,7 @@ import { config } from '../../../config/config.js'
 import {
   getRequestFromBackend,
   getQuoteFromBackend,
+  getUserFromBackend,
   postRequestToBackend,
   patchRequestToBackend
 } from './nrf-backend.js'
@@ -171,6 +172,35 @@ describe('nrf-backend service', () => {
         json: true,
         headers: { 'x-api-key': 'secret-key' }
       })
+    })
+  })
+
+  describe('getUserFromBackend', () => {
+    it('should call the users endpoint and return the payload', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        payload: { defraId: 'user-123', email: 'test@example.com' }
+      }
+      vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      const result = await getUserFromBackend({ defraId: 'user-123' })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        `${backendUrl}/users/user-123`,
+        expect.objectContaining({ json: true })
+      )
+      expect(result).toEqual(mockResponse.payload)
+    })
+
+    it('should rethrow when the request fails', async () => {
+      const error = new Error('Not found')
+      vi.mocked(Wreck.get).mockRejectedValue(error)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await expect(getUserFromBackend({ defraId: 'user-123' })).rejects.toThrow(
+        'Not found'
+      )
     })
   })
 
