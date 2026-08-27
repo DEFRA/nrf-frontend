@@ -66,11 +66,8 @@ setupMswServer(
     HttpResponse.json(backendUser)
   ),
   // Records the user sync PATCH so it can be asserted on
-  http.patch(`${backendUrl}/users/:defraId`, async ({ request, params }) => {
-    backendRequests.push({
-      defraId: params.defraId,
-      body: await request.json()
-    })
+  http.patch(`${backendUrl}/users`, async ({ request }) => {
+    backendRequests.push(await request.json())
     return new HttpResponse(null, { status: 204 })
   })
 )
@@ -160,8 +157,8 @@ describe('Profile page', () => {
     })
 
     const [patch] = backendRequests
-    expect(patch.defraId).toBe(mockUser.sub)
-    expect(patch.body).toEqual({
+    expect(patch).toEqual({
+      defraId: mockUser.sub,
       email: mockUser.email,
       firstName: mockUser.firstName,
       lastName: mockUser.lastName

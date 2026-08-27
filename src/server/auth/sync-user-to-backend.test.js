@@ -32,7 +32,7 @@ describe('syncUserToBackend', () => {
   it('PATCHes the user to nrf-backend and marks the session as saved', async () => {
     const bodies = []
     mswServer.use(
-      http.patch(`${backendUrl}/users/${DEFRA_ID}`, async ({ request }) => {
+      http.patch(`${backendUrl}/users`, async ({ request }) => {
         bodies.push(await request.json())
         return new HttpResponse(null, { status: 204 })
       })
@@ -46,7 +46,12 @@ describe('syncUserToBackend', () => {
     })
 
     expect(bodies).toEqual([
-      { email: 'test@example.com', firstName: 'Test', lastName: 'User' }
+      {
+        defraId: DEFRA_ID,
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User'
+      }
     ])
     expect(sessionCache.set).toHaveBeenCalledWith('session-1', {
       sessionId: 'session-1',
@@ -60,7 +65,7 @@ describe('syncUserToBackend', () => {
     async (relationshipType) => {
       const bodies = []
       mswServer.use(
-        http.patch(`${backendUrl}/users/${DEFRA_ID}`, async ({ request }) => {
+        http.patch(`${backendUrl}/users`, async ({ request }) => {
           bodies.push(await request.json())
           return new HttpResponse(null, { status: 204 })
         })
@@ -80,6 +85,7 @@ describe('syncUserToBackend', () => {
 
       expect(bodies).toEqual([
         {
+          defraId: DEFRA_ID,
           email: 'test@example.com',
           firstName: 'Test',
           lastName: 'User',
@@ -120,7 +126,7 @@ describe('syncUserToBackend', () => {
     async (_name, statusCode) => {
       mswServer.use(
         http.patch(
-          `${backendUrl}/users/${DEFRA_ID}`,
+          `${backendUrl}/users`,
           () => new HttpResponse(null, { status: statusCode })
         )
       )

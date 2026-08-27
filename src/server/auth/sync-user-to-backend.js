@@ -1,17 +1,19 @@
 import { patchRequestToBackend } from '../common/services/nrf-backend.js'
 
 /**
- * Builds the PATCH /users/{defraId} payload from a session profile. Organisation fields are
- * only included when the user signed in as an organisation (Employee/Agent) — a Citizen has
- * no organisation to link.
+ * Builds the PATCH /users payload from a session profile. defraId and email both stay in the
+ * body (not the URL) so neither appears in access logs. Organisation fields are only included
+ * when the user signed in as an organisation (Employee/Agent) — a Citizen has no organisation
+ * to link.
  * Assumes the Defra ID token always carries firstName/lastName claims — if that turns out not
  * to be true for some account types, the backend schema and this payload will need to allow
  * for their absence.
  * @param {object} profile - session profile built from the Defra ID token in auth/controller.js
- * @returns {object} payload for PATCH /users/{defraId}
+ * @returns {object} payload for PATCH /users
  */
 const buildSyncPayload = (profile) => {
   const payload = {
+    defraId: profile.id,
     email: profile.email,
     firstName: profile.firstName,
     lastName: profile.lastName
@@ -32,10 +34,10 @@ const buildSyncPayload = (profile) => {
 }
 
 /**
- * Syncs the signed-in user's profile to nrf-backend (PATCH /users/{defraId}), then marks the
- * session as saved so it only happens once per session. Fired fire-and-forget from the
- * defra-session strategy; when it fails the flag stays unset so the next authenticated
- * request for this session retries.
+ * Syncs the signed-in user's profile to nrf-backend (PATCH /users), then marks the session as
+ * saved so it only happens once per session. Fired fire-and-forget from the defra-session
+ * strategy; when it fails the flag stays unset so the next authenticated request for this
+ * session retries.
  * @param {Object} params
  * @param {{ sessionId: string, profile?: object }} params.userSession - session from the cache
  * @param {object} params.sessionCache - server-side session cache (server.app.sessionCache)
@@ -45,7 +47,7 @@ export const syncUserToBackend = async ({ userSession, sessionCache }) => {
 
   if (profile.id && profile.email) {
     await patchRequestToBackend({
-      endpointPath: `/users/${profile.id}`,
+      endpointPath: '/users',
       payload: buildSyncPayload(profile)
     })
   }
