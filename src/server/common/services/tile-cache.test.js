@@ -52,6 +52,7 @@ vi.mock('../helpers/logging/logger.js', () => ({
 const {
   clearTileCache,
   getCachedTile,
+  isAerialTilePath,
   isCacheableTilePath,
   resetTileCacheClient,
   setCachedTile
@@ -65,7 +66,9 @@ describe('tile-cache', () => {
   describe('isCacheableTilePath', () => {
     it.each([
       'tiles/edp_boundaries/8/130/85.mvt',
-      'tiles/edp_excluded_areas/8/130/85.mvt'
+      'tiles/edp_excluded_areas/8/130/85.mvt',
+      'aerial_proxy/15/16367/10896',
+      'aerial_proxy/0/0/0'
     ])('accepts tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(true)
     })
@@ -76,9 +79,31 @@ describe('tile-cache', () => {
       'tiles/edp_boundaries/8/130/85.json',
       'tiles/edp_boundaries/8/130.mvt',
       'tiles/edp_excluded_areas/8/130/85.json',
-      'tiles/lpa_boundaries/12/2048/1361.mvt'
+      'tiles/lpa_boundaries/12/2048/1361.mvt',
+      'aerial_proxy/15/16367',
+      'aerial_proxy/a/b/c',
+      'aerial_proxy/15/16367/10896.png',
+      'aerial_proxy/15/16367/10896/extra'
     ])('rejects non-tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(false)
+    })
+  })
+
+  describe('isAerialTilePath', () => {
+    it.each(['aerial_proxy/15/16367/10896', 'aerial_proxy/0/0/0'])(
+      'accepts aerial path %s',
+      (path) => {
+        expect(isAerialTilePath(path)).toBe(true)
+      }
+    )
+
+    it.each([
+      '',
+      'tiles/edp_boundaries/8/130/85.mvt',
+      'aerial_proxy/15/16367',
+      'aerial_proxy/15/16367/10896.png'
+    ])('rejects non-aerial path %s', (path) => {
+      expect(isAerialTilePath(path)).toBe(false)
     })
   })
 
@@ -130,6 +155,19 @@ describe('tile-cache', () => {
       )
     })
 
+    it('writes an aerial tile under the shared tile: prefix', async () => {
+      const buffer = Buffer.from('aerial')
+
+      await setCachedTile('aerial_proxy/15/16367/10896', buffer)
+
+      expect(mockClient.set).toHaveBeenCalledWith(
+        'tile:aerial_proxy/15/16367/10896',
+        buffer,
+        'EX',
+        86400
+      )
+    })
+
     it('swallows and logs redis write errors', async () => {
       const err = new Error('down')
       mockClient.set.mockRejectedValue(err)
@@ -172,6 +210,29 @@ describe('tile-cache', () => {
         'tile:tiles/edp_boundaries/8/129/84.mvt'
       )
       expect(result).toBe(2)
+    })
+
+    it('deletes aerial tiles alongside vector tiles', async () => {
+      mockClient.scanStream.mockReturnValue(
+        makeScanStream([
+          [
+            'nrf-frontend:tile:tiles/edp_boundaries/8/128/84.mvt',
+            'nrf-frontend:tile:aerial_proxy/15/16367/10896',
+            'nrf-frontend:tile:aerial_proxy/15/16368/10896'
+          ]
+        ])
+      )
+      mockClient.del.mockResolvedValue(1)
+
+      const result = await clearTileCache()
+
+      expect(mockClient.del).toHaveBeenCalledWith(
+        'tile:aerial_proxy/15/16367/10896'
+      )
+      expect(mockClient.del).toHaveBeenCalledWith(
+        'tile:aerial_proxy/15/16368/10896'
+      )
+      expect(result).toBe(3)
     })
 
     it('strips the redis key prefix before calling del', async () => {
