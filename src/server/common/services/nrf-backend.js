@@ -72,3 +72,18 @@ export const postRequestToBackend = async ({ endpointPath, payload }) => {
     throw error
   }
 }
+
+export const patchRequestToBackend = async ({ endpointPath, payload }) => {
+  try {
+    const url = `${config.get('backend').apiUrl}${endpointPath}`
+    const response = await Wreck.patch(url, {
+      payload,
+      json: true,
+      headers: backendHeaders()
+    })
+    return response
+  } catch (error) {
+    logger.error(error, 'PATCH request to backend failed')
+    throw error
+  }
+}
