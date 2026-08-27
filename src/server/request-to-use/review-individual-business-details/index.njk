@@ -12,25 +12,30 @@
 
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
 
-        <h2 class="govuk-heading-m">Developer details</h2>
+        <h2 class="govuk-heading-m">Your details</h2>
 
         {{ govukSummaryList({
             rows: [
                 {
                     key: { text: "Full name" },
-                    value: { text: requestToUse.fullName },
+                    value: { text: requestToUse.firstName+ " "+requestToUse.lastName },
                     actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "full name" }] }
-                },
+                } if requestToUse.firstName,
                 {
                     key: { text: "Business name" },
                     value: { text: businessName },
                     actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "business name" }] }
-                },
+                } if requestToUse.companyNumber,
                 {
                     key: { text: "Address" },
                     value: { text: requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity},
                     actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
-                }
+                } if requestToUse.addressLine1,
+                {
+                    key: { text: "Address" },
+                    value: { text: requestToUse.individualsAddressLine1 + " " + requestToUse.individualsAddressLine2Optional + ", "+requestToUse.individualsPostcode+ ", "+ requestToUse.individualsTownOrCity},
+                    actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
+                } if requestToUse.individualsAddressLine1
             ]
         }) }}
 

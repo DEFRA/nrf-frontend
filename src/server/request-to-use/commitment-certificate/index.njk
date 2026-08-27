@@ -12,10 +12,16 @@
 
         <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
         <p class="govuk-body govuk-!-margin-bottom-1"><b>Full name:</b> {{ requestToUse.fullName }}</p>
-        <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity}}</p>
+        {% if requestToUse.addressLine1 %}
+            <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.addressLine1 + " " + requestToUse.addressLine2Optional + ", "+requestToUse.postcode+ ", "+ requestToUse.townOrCity}}</p>
+        {% endif %}
+        {% if requestToUse.individualsAddressLine1 %}
+            <p class="govuk-body govuk-!-margin-bottom-1"><b>Address:</b> {{requestToUse.individualsAddressLine1 + " " + requestToUse.individualsAddressLine2Optional + ", "+requestToUse.individualsPostcode+ ", "+ requestToUse.individualsTownOrCity}}</p>
+        {% endif %}
+
         <p class="govuk-body govuk-!-margin-bottom-1"><b>NRL Ref:</b> {{ requestToUse.nrlReference }}</p>
-        <p class="govuk-body govuk-!-margin-bottom-1"><b>Date of issue:</b> 31 January 2026</p>
-        <p class="govuk-body"><b>Expiry date:</b> 31 July 2026</p>
+        <p class="govuk-body govuk-!-margin-bottom-1"><b>Date of issue:</b> 1 September 2026</p>
+        <p class="govuk-body"><b>Expiry date:</b> 31 July 2027</p>
 
         <h2 class="govuk-heading-m">Details of the relevant development</h2>
         <p class="govuk-body">The relevant development is planned to have:</p>
@@ -42,7 +48,7 @@
 
         <h2 class="govuk-heading-m">What this commitment enables</h2>
         <p class="govuk-body">For the purposes of section 72 of the Planning and Infrastructure Act 2025, this certificate provides you with a commitment to pay the Nature Restoration Levy. This commitment will disapply the environmental obligations in respect of the specific environmental impact set out in the EDP for your development.</p>
-        <p class="govuk-body">A Local Planning Authority will accept this commitment certificate as part of any planning and decision-making processes, provided the details that were given to inform this commitment cover the relevant development for which a planning application is made.</p>
+        <p class="govuk-body">A local planning authority will accept this commitment certificate as part of any planning and decision-making processes, provided the details that were given to inform this commitment cover the relevant development for which a planning application is made.</p>
         <p class="govuk-body">Your commitment will expire after 6 months from the date of issue stated above, unless an application for planning permission is made.</p>
         <p class="govuk-body">This commitment disapplies the following environmental obligations from consideration under the Habitats Regulations 2017: Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036). Other environmental obligations not covered above will continue to apply.</p>
 
@@ -50,7 +56,7 @@
         <p class="govuk-body">There are planning condition requirements to meet this commitment; a statutory precommencement condition requiring payment prior to commencement, and additional conditions to impose as conservation measures.</p>
 
         <h2 class="govuk-heading-m">Part B – Planning condition requirements</h2>
-        <p class="govuk-body">In accordance with the requirements of Regulation 5 of the Nature Restoration Levy Regulations (“Levy Regulations”) 2026, the Local Planning Authority must impose the statutory pre-commencement planning condition, requiring payment of the levy in full or the first instalment prior to commencement. This applies to any grant of permission relying on a commitment to pay the Nature Restoration Levy.</p>
+        <p class="govuk-body">In accordance with the requirements of Regulation 5 of the Nature Restoration Levy Regulations (“Levy Regulations”) 2026, the local planning authority must impose the statutory pre-commencement planning condition, requiring payment of the levy in full or the first instalment prior to commencement. This applies to any grant of permission relying on a commitment to pay the Nature Restoration Levy.</p>
         <p class="govuk-body">In accordance with the requirements of the Environmental Delivery Plan(s) the LPA may need to impose additional conditions as conservation measures where they are applicable to the relevant development, to meet the requirements under this commitment.</p>
 
         {{ govukTable({
