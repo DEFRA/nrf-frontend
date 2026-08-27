@@ -127,6 +127,9 @@ describe('Profile page', () => {
     expect(profile.result).toContain(
       `${mockUser.firstName} ${mockUser.lastName}`
     )
+
+    // The backend user has no linked organisations, so the empty state must be shown
+    expect(profile.result).toContain('You are not linked to any organisations.')
   })
 
   it('sends a user to the home page when they sign in without requesting a protected page first', async () => {

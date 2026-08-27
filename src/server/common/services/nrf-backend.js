@@ -58,6 +58,18 @@ export const getQuoteFromBackend = async ({
   })
 }
 
+/**
+ * Fetches a user's full details (including their linked organisations) from the backend.
+ * @param {{ defraId: string }} params - Defra ID sub claim identifying the user
+ * @returns {Promise<object>} The stored user profile and their linked organisations
+ */
+export const getUserFromBackend = async ({ defraId }) => {
+  const response = await getRequestFromBackend({
+    endpointPath: `/users/${defraId}`
+  })
+  return response.payload
+}
+
 export const postRequestToBackend = async ({ endpointPath, payload }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
