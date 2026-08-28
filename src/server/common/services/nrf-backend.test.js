@@ -4,7 +4,9 @@ import { config } from '../../../config/config.js'
 import {
   getRequestFromBackend,
   getQuoteFromBackend,
-  postRequestToBackend
+  getUserFromBackend,
+  postRequestToBackend,
+  patchRequestToBackend
 } from './nrf-backend.js'
 
 const backendUrl = config.get('backend').apiUrl
@@ -173,6 +175,35 @@ describe('nrf-backend service', () => {
     })
   })
 
+  describe('getUserFromBackend', () => {
+    it('should call the users endpoint and return the payload', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        payload: { defraId: 'user-123', email: 'test@example.com' }
+      }
+      vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      const result = await getUserFromBackend({ defraId: 'user-123' })
+
+      expect(Wreck.get).toHaveBeenCalledWith(
+        `${backendUrl}/users/user-123`,
+        expect.objectContaining({ json: true })
+      )
+      expect(result).toEqual(mockResponse.payload)
+    })
+
+    it('should rethrow when the request fails', async () => {
+      const error = new Error('Not found')
+      vi.mocked(Wreck.get).mockRejectedValue(error)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await expect(getUserFromBackend({ defraId: 'user-123' })).rejects.toThrow(
+        'Not found'
+      )
+    })
+  })
+
   describe('postRequestToBackend', () => {
     it('should call the correct URL with payload and return the response', async () => {
       const mockResponse = { payload: { id: '123', status: 'ok' } }
@@ -235,6 +266,41 @@ describe('nrf-backend service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         error,
         'POST request to backend failed'
+      )
+    })
+  })
+
+  describe('patchRequestToBackend', () => {
+    it('should call the correct URL with payload and return the response', async () => {
+      const mockResponse = { statusCode: 204 }
+      vi.mocked(Wreck.patch).mockResolvedValue(mockResponse)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      const result = await patchRequestToBackend({
+        endpointPath: '/users/user-123',
+        payload: { email: 'test@example.com' }
+      })
+
+      expect(Wreck.patch).toHaveBeenCalledWith(`${backendUrl}/users/user-123`, {
+        payload: { email: 'test@example.com' },
+        json: true,
+        headers: {}
+      })
+      expect(result).toBe(mockResponse)
+    })
+
+    it('should log and rethrow errors when the request fails', async () => {
+      const error = new Error('Network error')
+      vi.mocked(Wreck.patch).mockRejectedValue(error)
+      vi.mocked(withTraceId).mockReturnValue({})
+
+      await expect(
+        patchRequestToBackend({ endpointPath: '/users/user-123', payload: {} })
+      ).rejects.toThrow('Network error')
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        error,
+        'PATCH request to backend failed'
       )
     })
   })
