@@ -6,6 +6,7 @@
       "type": "raster",
       "tiles": ["/impact-assessor-map/aerial_proxy/{z}/{x}/{y}"],
       "tileSize": 256,
+      "maxzoom": 21,
       "attribution": "Aerial imagery © Getmapping plc and Bluesky International Ltd (APGB)"
     }
   },
