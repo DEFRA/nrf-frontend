@@ -33,7 +33,7 @@ function validateApiKey(request) {
  *     tags:
  *       - Admin
  *     summary: Clear the map tile Redis cache
- *     description: Deletes all tile:* keys from Redis. Requires a valid x-api-key header (FRONTEND_API_KEY).
+ *     description: Deletes all tile:* keys from Redis, covering both vector (EDP) and aerial tiles. Requires a valid x-api-key header (FRONTEND_API_KEY).
  *     security:
  *       - apiKey: []
  *     responses:
