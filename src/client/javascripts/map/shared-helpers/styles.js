@@ -4,12 +4,6 @@ function getOrdnanceSurveyAttribution() {
   return `&copy; Crown copyright and database rights ${new Date().getFullYear()} Ordnance Survey`
 }
 
-// APGB imagery is supplied by Getmapping/Bluesky, not Ordnance Survey, so it
-// carries its own credit line rather than the shared OS one.
-function getAerialAttribution() {
-  return '&copy; Getmapping plc and Bluesky International Ltd (APGB)'
-}
-
 export function getMapStyles() {
   return [
     {
@@ -24,7 +18,7 @@ export function getMapStyles() {
       label: 'Aerial',
       url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.svg`,
-      attribution: getAerialAttribution()
+      attribution: '&copy; Getmapping plc and Bluesky International Ltd (APGB)'
     },
     {
       id: 'outdoor-os',

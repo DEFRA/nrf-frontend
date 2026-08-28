@@ -47,9 +47,14 @@ describe('APGB_Aerial.json', () => {
     ])
   })
 
-  it('sets no source maxzoom, matching the other styles', () => {
+  it('caps the source at the upstream tile matrix ceiling of 21', () => {
+    // The APGB WMTS GoogleMapsExtended matrix set stops at zoom 21; asking the
+    // proxy for z22 makes upstream reply 400 and the proxy serve its grey "No
+    // imagery available" placeholder, tiling that text across the map. The
+    // draw map sets no maxZoom, so MapLibre would otherwise request z22. With
+    // a source maxzoom it over-zooms the z21 tiles instead.
     const [source] = Object.values(aerialStyle.sources)
 
-    expect(source.maxzoom).toBeUndefined()
+    expect(source.maxzoom).toBe(21)
   })
 })
