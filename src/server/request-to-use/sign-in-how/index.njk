@@ -1,0 +1,51 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+      <form method="post" novalidate>
+        {% include "partials/csrf-token.njk" %}
+
+        {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+        {{ govukRadios({
+          name: "signInHow",
+          fieldset: {
+            legend: {
+              html: legendHtml,
+              classes: "govuk-fieldset__legend--l"
+            }
+          },
+          value: requestToUse.doYouHaveANrlReference,
+          items: [
+            {
+              value: "gov-uk-one",
+              text: "Sign in with GOV UK One Login",
+              hint: {
+                text: "Use your email address and password. If you don’t have a GOV.UK One Login, you can create one."
+              }
+            },
+            {
+              value: "gov-gateway",
+              text: "Sign in with Government Gateway",
+              hint: {
+                text: "Use your Government Gateway user ID which can be up to 12 characters. You may have a Government Gateway user ID if you have used other GOV.UK services."
+              }
+            }
+          ]
+        }) }}
+        {{ govukButton({
+          text: "Continue"
+        }) }}
+
+      </form>
+    </div>
+  </div>
+{% endblock %}

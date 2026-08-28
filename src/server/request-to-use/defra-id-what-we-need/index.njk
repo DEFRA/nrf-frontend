@@ -1,0 +1,44 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+            <p class="govuk-body">You must tell us your:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>full name</li>
+                <li>telephone number</li>
+                <li>email address</li>
+            </ul>
+            <p class="govuk-body">If you are registering as a business you may also need to tell us your:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>company registration number</li>
+                <li>registered business address</li>
+                <li>business contact details</li>
+            </ul>
+
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

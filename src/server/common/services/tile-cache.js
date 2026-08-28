@@ -4,8 +4,9 @@ import { buildRedisClient } from '../helpers/redis-client.js'
 
 const logger = createLogger()
 const keyPrefix = 'tile:'
-const tilePathPattern =
+const vectorTilePathPattern =
   /^tiles\/(edp_boundaries|edp_excluded_areas)\/\d+\/\d+\/\d+\.mvt$/
+const aerialTilePathPattern = /^aerial_proxy\/(8|9|1[0-2])\/\d+\/\d+$/
 
 let client = null
 
@@ -20,8 +21,12 @@ export function resetTileCacheClient() {
   client = null
 }
 
+export function isAerialTilePath(path) {
+  return aerialTilePathPattern.test(path)
+}
+
 export function isCacheableTilePath(path) {
-  return tilePathPattern.test(path)
+  return vectorTilePathPattern.test(path) || isAerialTilePath(path)
 }
 
 export async function getCachedTile(path) {

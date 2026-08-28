@@ -123,6 +123,36 @@ describe('context and cache', () => {
         )
       })
     })
+
+    describe('When request path is route-specific', () => {
+      let contextImport
+
+      beforeAll(async () => {
+        contextImport = await import('./context.js')
+      })
+
+      beforeEach(() => {
+        mockReadFileSync.mockReturnValue('{}')
+      })
+
+      test.each([
+        ['/quote', 'Get a quote for the nature restoration levy'],
+        ['/quote/boundary-type', 'Get a quote for the nature restoration levy'],
+        ['/request-to-use', 'Request to use the nature restoration levy'],
+        [
+          '/request-to-use/some-page',
+          'Request to use the nature restoration levy'
+        ],
+        ['/about', 'Nature restoration levy']
+      ])(
+        'Should set serviceName for path %s',
+        (requestPath, expectedServiceName) => {
+          const contextResult = contextImport.context({ path: requestPath })
+
+          expect(contextResult.serviceName).toBe(expectedServiceName)
+        }
+      )
+    })
   })
 
   describe('#context cache', () => {

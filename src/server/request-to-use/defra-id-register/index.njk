@@ -1,0 +1,42 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+            <p class="govuk-body">To access Defra services you need to have a Defra account.</p>
+            <p class="govuk-body">Once you have registered you can access and manage Defra services:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>for yourself as a business or individual</li>
+                <li>on behalf of businesses that you represent</li>
+            </ul>
+            <div class="govuk-inset-text">
+                <p class="govuk-body">You’ll use your Government Gateway details to sign in to Defra services each time you visit.</p>
+            </div>
+
+            <p class="govuk-body">To find out how we use, process and store your personal information, read our <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">Privacy notice (opens in new tab)</a>.</p>
+
+            {{ govukButton({
+                text: "Continue Registering for Defra Account"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

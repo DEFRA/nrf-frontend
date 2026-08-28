@@ -1,0 +1,39 @@
+{% extends "layouts/email.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+            {{ govukPasswordInput({
+                id: "enter-your-one-login-password",
+                name: "enterYourOneLoginPassword",
+                label: {
+                    text: pageHeading,
+                    classes: "govuk-label--l",
+                    isPageHeading: true
+                },
+                value: requestToUse.enterYourOneLoginPassword,
+                errorMessage: validationErrors.messagesByFormField.enterYourOneLoginPassword
+            }) }}
+            {{ govukButton({
+                text: "Continue"
+            }) }}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

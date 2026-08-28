@@ -12,6 +12,25 @@ import {
 import { ANALYTICS_INTERNAL_ROUTE } from '../../../server/cookies/helpers/constants.js'
 import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 
+const SERVICE_NAME_BY_ROUTE_PREFIX = [
+  {
+    prefix: '/quote',
+    serviceName: 'Get a quote for the nature restoration levy'
+  },
+  //TODO - remove request to use
+  {
+    prefix: '/request-to-use',
+    serviceName: 'Request to use the nature restoration levy'
+  }
+]
+
+function getServiceName(request) {
+  const match = SERVICE_NAME_BY_ROUTE_PREFIX.find(({ prefix }) =>
+    request?.path?.startsWith(prefix)
+  )
+  return match?.serviceName ?? config.get('serviceName')
+}
+
 const logger = createLogger()
 const assetPath = config.get('assetPath')
 const manifestPath = path.join(
@@ -44,7 +63,7 @@ export function context(request) {
 
   return {
     assetPath: `${assetPath}/assets`,
-    serviceName: config.get('serviceName'),
+    serviceName: getServiceName(request),
     serviceVersion: gitHash,
     serviceUrl: startPagePath,
     phaseBanner: {

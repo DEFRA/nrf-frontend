@@ -1,0 +1,101 @@
+{% extends "govuk/template.njk" %}
+
+{# Pass the Blankie-generated nonce to GOV.UK Frontend's template so its inline script is allowed by CSP #}
+{% set cspNonce = nonce %}
+
+{# Import GOVUK components globally #}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "back-link/macro.njk" import backLink %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/password-input/macro.njk" import govukPasswordInput %}
+
+{# Import custom components globally #}
+{% from "heading/macro.njk" import appHeading %}
+
+{% set mainClasses = mainClasses or "app-main-wrapper" %}
+{% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
+
+{% block head %}
+  {% if not areAnalyticsCookiesAccepted %}
+    {% include "partials/google-analytics-cookie-clear.njk" %}
+  {% endif %}
+  {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
+    {% include "partials/google-tag-manager-head.njk" %}
+  {% endif %}
+  <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
+{% endblock %}
+
+{% block bodyStart %}
+  {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
+    {% include "partials/google-tag-manager.body.njk" %}
+  {% endif %}
+{% endblock %}
+
+{% block headerStart %}
+  {% if not analyticsEnabled %}
+    {% include "partials/analytics-disabled.njk" %}
+  {% endif %}
+  {% include "partials/cookie-banner.njk" %}
+{% endblock %}
+
+{% block govukHeader %}
+  {{ govukHeader({
+    homepageUrl: "https://www.gov.uk/",
+    classes: "app-header no-service-header",
+    containerClasses: "govuk-width-container"
+  }) }}
+{% endblock %}
+
+
+{% block containerStart %}
+
+{% endblock %}
+
+{% block beforeContent %}
+  {% if breadcrumbs.length > 1 %}
+    {{ govukBreadcrumbs({
+      items: breadcrumbs
+    }) }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% block govukFooter %}
+  {{ govukFooter({
+    meta: {
+      items: [
+        {
+          href: "https://www.gov.uk/help/privacy-notice",
+          text: "Privacy"
+        },
+        {
+          href: "/cookies",
+          text: "Cookies"
+        },
+        {
+          href: "https://www.gov.uk/help/accessibility-statement",
+          text: "Accessibility statement"
+        }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" src="{{ getAssetPath('application.js') }}"></script>
+{% endblock %}

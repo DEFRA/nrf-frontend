@@ -7,6 +7,7 @@ import { auth } from './auth/index.js'
 import { profile } from './profile/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
 import { quote } from './quote/index.js'
+import { requestToUse } from './request-to-use/index.js'
 import { manage } from './manage/index.js'
 import { osBaseMap } from './os-base-map/index.js'
 import { osNamesSearch } from './os-names-search/index.js'
@@ -32,6 +33,8 @@ export const router = {
         cookies,
         profile,
         quote,
+        // TODO - remove request to use
+        requestToUse,
         manage,
         osBaseMap,
         osNamesSearch,

@@ -1,0 +1,86 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        <form method="post" novalidate>
+          {% include "partials/csrf-token.njk" %}
+            {% if validationErrors %}
+            {{ govukErrorSummary({
+                titleText: "There is a problem",
+                errorList:  validationErrors.summary
+            }) }}
+            {% endif %}
+
+            <span class="govuk-caption-xl">Register Defra account</span>
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+            {{ govukSummaryList({
+                classes: "govuk-!-margin-bottom-7",
+                card: {
+                    title: {
+                        text: "Defra account"
+                    }
+                },
+                rows: [
+                    {
+                        key: { text: "Account type" },
+                        value: { text: requestToUse.accountType },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "account type" }] }
+                    }
+                ]
+            }) }}
+
+            {{ govukSummaryList({
+                classes: "govuk-!-margin-bottom-7",
+                card: {
+                    title: {
+                        text: "Your details"
+                    }
+                },
+                rows: [
+                    {
+                        key: { text: "Name" },
+                        value: { text: requestToUse.firstName + " " + requestToUse.lastName },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "name" }] }
+                    },
+                    {
+                        key: { text: "Telephone number" },
+                        value: { text: requestToUse.telephoneNumber },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "telephone number" }] }
+                    },
+                    {
+                        key: { text: "Address" },
+                        value: { text: requestToUse.address },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "address" }] }
+                    },
+                    {
+                        key: { text: "Memorable word" },
+                        value: { text: requestToUse.securityWord },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "memorable word" }] }
+                    },
+                    {
+                        key: { text: "Hint question" },
+                        value: { text: requestToUse.securityHint },
+                        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "hint question" }] }
+                    }
+                ]
+            }) }}
+
+            <div class="govuk-button-group">
+                {{ govukButton({
+                    text: "Confirm and complete registration"
+                }) }}
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
