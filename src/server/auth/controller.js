@@ -137,14 +137,8 @@ export const signInOidcController = {
       const decoded = Jwt.token.decode(tokenResponse.id_token)
       const { payload } = decoded.decoded
 
-      const {
-        organisationId,
-        organisationName,
-        userRelationshipType,
-        hasMultipleOrgPickerEntries,
-        shouldShowOrgOrUserName,
-        shouldShowCitizenName
-      } = getOrganisationFromToken(payload)
+      const { organisationId, organisationName, userRelationshipType } =
+        getOrganisationFromToken(payload)
 
       // Create Bell-compatible credentials structure
       const credentials = {
@@ -166,10 +160,7 @@ export const signInOidcController = {
           organisation: {
             organisationId,
             organisationName,
-            userRelationshipType,
-            hasMultipleOrgPickerEntries,
-            shouldShowOrgOrUserName,
-            shouldShowCitizenName
+            userRelationshipType
           },
           currentRelationshipId: payload.currentRelationshipId,
           roles: payload.roles,

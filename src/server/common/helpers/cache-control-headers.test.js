@@ -24,13 +24,41 @@ describe('#applyCacheControlHeaders', () => {
     expect(result).toBe(h.continue)
   })
 
-  it('should leave a response that opts into public caching untouched', () => {
-    const headers = { 'cache-control': 'public, max-age=3600' }
-    const header = vi.fn()
-    const request = { response: { headers, header } }
+  it.each([
+    'public, max-age=3600',
+    'public, max-age=86400, immutable',
+    // Licensed imagery restricted to the one browser, never a shared cache.
+    'private, max-age=86400',
+    'private, max-age=60'
+  ])(
+    'should leave a response opting into caching with %s untouched',
+    (cacheControl) => {
+      const headers = { 'cache-control': cacheControl }
+      const header = vi.fn()
+      const request = { response: { headers, header } }
+      const result = applyCacheControlHeaders(request, h)
+      expect(header).not.toHaveBeenCalled()
+      expect(headers['cache-control']).toBe(cacheControl)
+      expect(result).toBe(h.continue)
+    }
+  )
+
+  it.each([
+    // Hapi's default on a route with no cache config — not an opt-in.
+    'no-cache',
+    'no-store',
+    'no-store, no-cache, must-revalidate, max-age=0',
+    'max-age=3600',
+    // Substrings of the directives must not be mistaken for the real thing.
+    'no-cache, publicity=1',
+    'privateer'
+  ])('should lock down a response with %s', (cacheControl) => {
+    const headers = { 'cache-control': cacheControl }
+    const request = {
+      response: { headers, header: (name, value) => (headers[name] = value) }
+    }
     const result = applyCacheControlHeaders(request, h)
-    expect(header).not.toHaveBeenCalled()
-    expect(headers['cache-control']).toBe('public, max-age=3600')
+    expect(headers['Cache-Control']).toBe(noStoreHeader)
     expect(result).toBe(h.continue)
   })
 })
