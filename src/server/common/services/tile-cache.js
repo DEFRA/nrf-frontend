@@ -6,7 +6,7 @@ const logger = createLogger()
 const keyPrefix = 'tile:'
 const vectorTilePathPattern =
   /^tiles\/(edp_boundaries|edp_excluded_areas)\/\d+\/\d+\/\d+\.mvt$/
-const aerialTilePathPattern = /^aerial_proxy\/\d+\/\d+\/\d+$/
+const aerialTilePathPattern = /^aerial_proxy\/(8|9|1[0-2])\/\d+\/\d+$/
 
 let client = null
 

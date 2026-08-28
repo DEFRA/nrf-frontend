@@ -34,7 +34,7 @@ vi.mock('../../config/config.js', () => ({
   }
 }))
 
-const isAerial = (path) => /^aerial_proxy\//.test(path)
+const isAerial = (path) => /^aerial_proxy\/(8|9|1[0-2])\//.test(path)
 
 vi.mock('../common/services/tile-cache.js', () => ({
   getCachedTile: vi.fn(),
@@ -52,7 +52,7 @@ const { getCachedTile, setCachedTile } =
 const handler = routes[0].handler
 const tileCacheControl = 'public, max-age=86400, immutable'
 const aerialCacheControl = 'private, max-age=86400'
-const aerialPath = 'aerial_proxy/15/16367/10896'
+const aerialPath = 'aerial_proxy/12/2045/1362'
 const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const jpegBytes = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10])
 
@@ -330,6 +330,33 @@ describe('impact-assessor-map routes', () => {
         )
       }
     )
+
+    it('passes an out-of-range zoom straight through without caching', async () => {
+      const uncachedZoomPath = 'aerial_proxy/13/4091/2724'
+      mswServer.use(
+        http.get(
+          `${impactAssessorBaseUrl}/${uncachedZoomPath}`,
+          () =>
+            new HttpResponse(jpegBytes, {
+              headers: {
+                'content-type': 'image/jpeg',
+                'cache-control': 'private, max-age=60',
+                'x-aerial-proxy-tile': 'hit'
+              }
+            })
+        )
+      )
+
+      const h = createMockH()
+      await handler(createMockRequest({ path: uncachedZoomPath }), h)
+
+      expect(getCachedTile).not.toHaveBeenCalled()
+      expect(setCachedTile).not.toHaveBeenCalled()
+      expect(h._response.header).toHaveBeenCalledWith(
+        'cache-control',
+        'private, max-age=60'
+      )
+    })
 
     it('does not cache a response with no outcome header', async () => {
       vi.mocked(getCachedTile).mockResolvedValue(null)
