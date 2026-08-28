@@ -14,6 +14,13 @@ export function getMapStyles() {
       attribution: getOrdnanceSurveyAttribution()
     },
     {
+      id: 'aerial',
+      label: 'Aerial',
+      url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.svg`,
+      attribution: '&copy; Getmapping plc and Bluesky International Ltd (APGB)'
+    },
+    {
       id: 'outdoor-os',
       label: 'Outdoor OS',
       url: `${VTS_STYLE_BASE_URL}/OS_VTS_3857_Outdoor.json`,
