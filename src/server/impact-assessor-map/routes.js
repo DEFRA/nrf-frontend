@@ -4,6 +4,7 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { getMapTile } from '../common/services/ia-map-tile-server.js'
 import {
   getCachedTile,
+  isAerialTilePath,
   isCacheableTilePath,
   setCachedTile
 } from '../common/services/tile-cache.js'
@@ -12,6 +13,12 @@ const logger = createLogger()
 const defaultCacheControl = 'no-cache'
 const cacheControlHeader = 'cache-control'
 const mvtContentType = 'application/vnd.mapbox-vector-tile'
+const pngContentType = 'image/png'
+const jpegContentType = 'image/jpeg'
+// PNG file signature: \x89 P N G
+const pngMagic = Buffer.from('89504e47', 'hex')
+const aerialOutcomeHeader = 'x-aerial-proxy-tile'
+const aerialHitOutcome = 'hit'
 
 export const routePath = '/impact-assessor-map'
 
@@ -26,6 +33,33 @@ function tileCacheControl() {
   return `public, max-age=${config.get('map.tileCacheControlMaxAge')}, immutable`
 }
 
+// APGB imagery is licensed, so it must not be widened to shared caches.
+function aerialCacheControl() {
+  return `private, max-age=${config.get('map.tileCacheControlMaxAge')}`
+}
+
+// Aerial tiles are image/jpeg or image/png; sniffing the bytes avoids storing
+// a content type alongside every one.
+function imageContentType(payload) {
+  return payload.subarray(0, pngMagic.length).equals(pngMagic)
+    ? pngContentType
+    : jpegContentType
+}
+
+function isAerialHit(response) {
+  return response.headers.get(aerialOutcomeHeader) === aerialHitOutcome
+}
+
+function serveCachedTile(h, payload, aerial) {
+  return h
+    .response(payload)
+    .type(aerial ? imageContentType(payload) : mvtContentType)
+    .header(
+      cacheControlHeader,
+      aerial ? aerialCacheControl() : tileCacheControl()
+    )
+}
+
 const proxyHandler = {
   method: 'GET',
   path: `${routePath}/{path*}`,
@@ -35,16 +69,14 @@ const proxyHandler = {
   async handler(request, h) {
     const path = request.params.path || ''
     const cacheable = isCacheableTilePath(path)
+    const aerial = isAerialTilePath(path)
 
     try {
       if (cacheable) {
         const cached = await getCachedTile(path)
         if (cached) {
           logger.info({ path }, 'Impact assessor tile cache read')
-          return h
-            .response(cached)
-            .type(mvtContentType)
-            .header(cacheControlHeader, tileCacheControl())
+          return serveCachedTile(h, cached, aerial)
         }
       }
 
@@ -57,13 +89,12 @@ const proxyHandler = {
 
       const payload = Buffer.from(await response.arrayBuffer())
 
-      if (cacheable) {
+      // The "no imagery available" placeholder is a 200, so caching it would
+      // pin it over a region for the whole TTL.
+      if (cacheable && (!aerial || isAerialHit(response))) {
         await setCachedTile(path, payload)
         logger.info({ path }, 'Impact assessor tile cache write')
-        return h
-          .response(payload)
-          .type(mvtContentType)
-          .header(cacheControlHeader, tileCacheControl())
+        return serveCachedTile(h, payload, aerial)
       }
 
       const { contentType, cacheControl } = getResponseHeaders(response)
