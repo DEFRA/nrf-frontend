@@ -65,7 +65,8 @@ export const getQuoteFromBackend = async ({
  */
 export const getUserFromBackend = async ({ defraId }) => {
   const response = await getRequestFromBackend({
-    endpointPath: `/users/${defraId}`
+    endpointPath: '/users',
+    headers: { 'x-defra-id': defraId }
   })
   return response.payload
 }

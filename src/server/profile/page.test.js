@@ -30,7 +30,7 @@ const backendUrl = config.get('backend').apiUrl
 let tokenClaims = { ...mockUser }
 const backendRequests = []
 
-// The user record the mocked GET /users/:defraId returns; overridden per test, reset in afterEach
+// The user record the mocked GET /users returns; overridden per test, reset in afterEach
 const defaultBackendUser = {
   defraId: mockUser.sub,
   email: mockUser.email,
@@ -62,9 +62,7 @@ setupMswServer(
     })
   }),
   // The full user record (incl. linked organisations) the profile page fetches
-  http.get(`${backendUrl}/users/:defraId`, () =>
-    HttpResponse.json(backendUser)
-  ),
+  http.get(`${backendUrl}/users`, () => HttpResponse.json(backendUser)),
   // Records the user sync PATCH so it can be asserted on
   http.patch(`${backendUrl}/users`, async ({ request }) => {
     backendRequests.push(await request.json())

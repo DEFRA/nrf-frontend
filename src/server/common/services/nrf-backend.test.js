@@ -187,8 +187,11 @@ describe('nrf-backend service', () => {
       const result = await getUserFromBackend({ defraId: 'user-123' })
 
       expect(Wreck.get).toHaveBeenCalledWith(
-        `${backendUrl}/users/user-123`,
-        expect.objectContaining({ json: true })
+        `${backendUrl}/users`,
+        expect.objectContaining({
+          json: true,
+          headers: expect.objectContaining({ 'x-defra-id': 'user-123' })
+        })
       )
       expect(result).toEqual(mockResponse.payload)
     })
