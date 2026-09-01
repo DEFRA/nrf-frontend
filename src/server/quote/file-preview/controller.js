@@ -42,6 +42,11 @@ export function handler(request, h) {
       { intersectsExcludedArea },
       'map - boundary intersects an excluded area, redirecting to excluded-area'
     )
+    if (boundaryGeojson) {
+      saveQuoteDataToCache(request, { boundaryGeojson })
+      request.yar.clear('boundaryGeojson')
+      request.yar.clear('boundaryFailureReason')
+    }
     return h.redirect(excludedAreaPath)
   }
 
