@@ -31,7 +31,7 @@ describe('profileController', () => {
   const stubBackendUser = (body, status = 200) =>
     server.use(
       http.get(
-        `${backendUrl}/users/user-123`,
+        `${backendUrl}/users`,
         () =>
           new HttpResponse(body === null ? undefined : JSON.stringify(body), {
             status,
