@@ -12,10 +12,25 @@ import getViewModel from './get-view-model.js'
 
 const logger = createLogger()
 
-export function handler(request, h) {
+function readBoundarySession(request) {
   const boundaryGeojson = request.yar.get('boundaryGeojson')
   const boundaryFailureReason = request.yar.get('boundaryFailureReason')
   const quoteCache = getQuoteDataFromCache(request)
+  return { boundaryGeojson, boundaryFailureReason, quoteCache }
+}
+
+function redirectToExcludedArea(boundaryGeojson, request, h) {
+  if (boundaryGeojson) {
+    saveQuoteDataToCache(request, { boundaryGeojson })
+    request.yar.clear('boundaryGeojson')
+    request.yar.clear('boundaryFailureReason')
+  }
+  return h.redirect(excludedAreaPath)
+}
+
+export function handler(request, h) {
+  const { boundaryGeojson, boundaryFailureReason, quoteCache } =
+    readBoundarySession(request)
 
   // Session may be missing if it expired or the user navigated here directly
   if (
@@ -42,12 +57,7 @@ export function handler(request, h) {
       { intersectsExcludedArea },
       'map - boundary intersects an excluded area, redirecting to excluded-area'
     )
-    if (boundaryGeojson) {
-      saveQuoteDataToCache(request, { boundaryGeojson })
-      request.yar.clear('boundaryGeojson')
-      request.yar.clear('boundaryFailureReason')
-    }
-    return h.redirect(excludedAreaPath)
+    return redirectToExcludedArea(boundaryGeojson, request, h)
   }
 
   if (!boundaryFailureReason && !intersectsEdp) {
@@ -59,15 +69,13 @@ export function handler(request, h) {
   }
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
-  const viewModel = getViewModel({
-    boundaryGeojson: resolvedGeojson,
-    boundaryFailureReason,
-    boundaryFilename,
-    query: request.query
-  })
-
   return h.view('quote/file-preview/index', {
-    ...viewModel
+    ...getViewModel({
+      boundaryGeojson: resolvedGeojson,
+      boundaryFailureReason,
+      boundaryFilename,
+      query: request.query
+    })
   })
 }
 
