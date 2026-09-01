@@ -1,5 +1,7 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -10,6 +12,7 @@ import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-sess
 describe('Residential page', () => {
   const getServer = setupTestServer()
   const inputLabel = 'Enter the maximum number of units you are developing'
+  const changeUrl = `${routePath}?change=true`
   let sessionCookie
 
   beforeEach(
@@ -39,13 +42,49 @@ describe('Residential page', () => {
 
   it('should link back to check-your-answers when loaded with change=true', async () => {
     const document = await loadPage({
-      requestUrl: `${routePath}?change=true`,
+      requestUrl: changeUrl,
       server: getServer(),
       cookie: sessionCookie
     })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/quote/check-your-answers'
+      checkYourAnswersPath
+    )
+  })
+
+  it('should redirect back to check-your-answers when a change is submitted', async () => {
+    const { response } = await submitForm({
+      requestUrl: changeUrl,
+      server: getServer(),
+      formData: { housingUnits: '6' },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(checkYourAnswersPath)
+  })
+
+  it('should keep change mode when a change submission fails validation', async () => {
+    const { response, cookie } = await submitForm({
+      requestUrl: changeUrl,
+      server: getServer(),
+      formData: {},
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(changeUrl)
+    const document = await loadPage({
+      requestUrl: changeUrl,
+      server: getServer(),
+      cookie
+    })
+    expectInputError({
+      document,
+      inputLabel,
+      errorMessage: 'Enter the number of housing units'
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      checkYourAnswersPath
     )
   })
 
