@@ -1,4 +1,4 @@
-{% if analyticsEnabled and gtmId and uploadStatus %}
+{% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted and uploadStatus %}
 {# Pushed as its own rlb_boundary_validation custom event (matching the
    client-side draw flow in boundary-info.js) so GTM tags scoped to that
    event pick up rlb_status/rlb_failure_reason once, rather than these

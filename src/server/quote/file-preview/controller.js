@@ -19,11 +19,15 @@ function readBoundarySession(request) {
   return { boundaryGeojson, boundaryFailureReason, quoteCache }
 }
 
+function promoteBoundaryToCache(request, cacheData) {
+  saveQuoteDataToCache(request, cacheData)
+  request.yar.clear('boundaryGeojson')
+  request.yar.clear('boundaryFailureReason')
+}
+
 function redirectToExcludedArea(boundaryGeojson, request, h) {
   if (boundaryGeojson) {
-    saveQuoteDataToCache(request, { boundaryGeojson })
-    request.yar.clear('boundaryGeojson')
-    request.yar.clear('boundaryFailureReason')
+    promoteBoundaryToCache(request, { boundaryGeojson })
   }
   return h.redirect(excludedAreaPath)
 }
@@ -94,9 +98,7 @@ export function postHandler(request, h) {
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
 
   if (boundaryGeojson) {
-    saveQuoteDataToCache(request, { boundaryGeojson, boundaryFilename })
-    request.yar.clear('boundaryGeojson')
-    request.yar.clear('boundaryFailureReason')
+    promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
   }
 
   // The GET handler redirects non-intersecting boundaries away before the

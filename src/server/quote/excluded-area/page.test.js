@@ -5,6 +5,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { followGetRedirect } from '../../../test-utils/follow-get-redirect.js'
 import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
 import { checkBoundaryPath } from '../checking-file/routes.js'
 import { routePath as filePreviewPath } from '../file-preview/routes.js'
@@ -14,33 +15,6 @@ import { boundaryGeojsonWithExcludedArea } from '../../../test-utils/fixtures/bo
 vi.mock('../../common/services/boundary.js')
 
 const boundaryCheckUrl = checkBoundaryPath.replace('{id}', 'test-upload-id')
-
-// Visits the file-preview GET, which promotes boundaryGeojson from yar into
-// the quote session cache (and redirects away), then returns the updated cookie.
-async function cookieAfterFilePreviewVisit(server, cookie) {
-  const response = await server.inject({
-    method: 'GET',
-    url: filePreviewPath,
-    headers: { cookie }
-  })
-  const jar = new Map(
-    (cookie ?? '')
-      .split(';')
-      .map((c) => c.trim())
-      .filter(Boolean)
-      .map((c) => {
-        const [name, ...rest] = c.split('=')
-        return [name, rest.join('=')]
-      })
-  )
-  for (const c of [].concat(response.headers['set-cookie'] ?? [])) {
-    const [name, value] = c.split(';')[0].split('=')
-    jar.set(name, value)
-  }
-  return [...jar.entries()]
-    .map(([name, value]) => `${name}=${value}`)
-    .join('; ')
-}
 
 describe('Excluded area page', () => {
   const getServer = setupTestServer()
@@ -52,7 +26,13 @@ describe('Excluded area page', () => {
       getServer(),
       boundaryCheckUrl
     )
-    sessionCookie = await cookieAfterFilePreviewVisit(getServer(), checkCookie)
+    // GET file-preview to promote boundaryGeojson from yar into the quote
+    // session cache (the handler redirects away before it would render).
+    sessionCookie = await followGetRedirect({
+      server: getServer(),
+      url: filePreviewPath,
+      cookie: checkCookie
+    })
   })
 
   it('should render a page heading and a title', async () => {
@@ -71,9 +51,17 @@ describe('Excluded area page', () => {
 
   describe('GTM intersection areas event', () => {
     const TEST_GTM_ID = 'GTM-TEST123'
+    let cookiePreferences
 
-    beforeEach(() => {
+    beforeEach(async () => {
       config.set('gtmId', TEST_GTM_ID)
+      const { cookie } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'page' },
+        cookie: sessionCookie
+      })
+      cookiePreferences = cookie
     })
 
     afterEach(() => {
@@ -84,7 +72,7 @@ describe('Excluded area page', () => {
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
-        cookie: sessionCookie
+        cookie: cookiePreferences
       })
 
       const { getByTestId } = within(document.documentElement)
@@ -94,16 +82,10 @@ describe('Excluded area page', () => {
     })
 
     it('pushes the event after the GTM init snippet', async () => {
-      const { cookie } = await submitForm({
-        requestUrl: COOKIE_ROUTE,
-        server: getServer(),
-        formData: { analytics: 'yes', source: 'page' },
-        cookie: sessionCookie
-      })
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
-        cookie
+        cookie: cookiePreferences
       })
 
       const scriptTestIds = Array.from(
@@ -120,7 +102,7 @@ describe('Excluded area page', () => {
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
-        cookie: sessionCookie
+        cookie: cookiePreferences
       })
 
       const { queryByTestId } = within(document.documentElement)

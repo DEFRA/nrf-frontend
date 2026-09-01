@@ -7,7 +7,7 @@
      defaults (from google-tag-manager-head.njk) are queued — gtm.js processes
      the queue in insertion order, so consent applies to this event. #}
   {{ super() }}
-  {% if analyticsEnabled and gtmId %}
+  {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
     {# Pushed as its own rlb_intersection_areas custom event #}
     <script nonce="{{ nonce }}" data-testid="gtm-upload-result">
       window.dataLayer = window.dataLayer || [];

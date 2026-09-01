@@ -29,7 +29,7 @@ export default function getViewModel(quoteData = {}) {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
     backLinkPath,
-    rlbExcludedAreas: quoteData.boundaryGeojson.intersectingExcludedAreas,
+    rlbExcludedAreas: quoteData.boundaryGeojson?.intersectingExcludedAreas,
     rlbOption: quoteData.boundaryEntryType
   }
 }
