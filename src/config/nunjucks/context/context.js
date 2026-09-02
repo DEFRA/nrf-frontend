@@ -14,6 +14,10 @@ import { routePath as startPagePath } from '../../../server/manage/start-page/ro
 
 const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
+    prefix: '/manage',
+    serviceName: 'Manage the nature restoration levy'
+  },
+  {
     prefix: '/quote',
     serviceName: 'Get a quote for the nature restoration levy'
   },

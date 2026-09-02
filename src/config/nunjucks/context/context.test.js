@@ -73,7 +73,7 @@ describe('context and cache', () => {
               href: '/login'
             }
           ],
-          serviceName: 'Nature restoration levy',
+          serviceName: 'Manage the nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
@@ -136,6 +136,7 @@ describe('context and cache', () => {
       })
 
       test.each([
+        ['/manage', 'Manage the nature restoration levy'],
         ['/quote', 'Get a quote for the nature restoration levy'],
         ['/quote/boundary-type', 'Get a quote for the nature restoration levy'],
         ['/request-to-use', 'Request to use the nature restoration levy'],
@@ -217,7 +218,7 @@ describe('context and cache', () => {
               href: '/login'
             }
           ],
-          serviceName: 'Nature restoration levy',
+          serviceName: 'Manage the nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
