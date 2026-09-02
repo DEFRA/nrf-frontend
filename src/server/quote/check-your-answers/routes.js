@@ -2,9 +2,11 @@ import { quoteController } from '../controller-get.js'
 import { quoteSubmitController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
 import { quoteSubmitRateLimitPre } from '../helpers/session-rate-limit/index.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'check-your-answers'
-export const routePath = `/quote/${routeId}`
+
+export { routePath }
 
 /**
  * @openapi
