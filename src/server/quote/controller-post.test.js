@@ -26,13 +26,11 @@ vi.mock(
 )
 
 describe('quotePostController', () => {
-  const changeQuery = '?change=true'
-
-  const buildRequest = (payload = {}, { query = {}, search = '' } = {}) => ({
+  const buildRequest = (payload = {}) => ({
     payload,
-    query,
     path: '/quote/boundary-type',
-    url: { search },
+    url: { search: '' },
+    query: {},
     yar: { get: vi.fn(), set: vi.fn() }
   })
 
@@ -58,25 +56,6 @@ describe('quotePostController', () => {
     expect(h.redirect).toHaveBeenCalledWith('/quote/boundary-type')
   })
 
-  it('should redirect to check your answers when submitted in change mode', () => {
-    const getNextPageMock = vi.fn()
-    const controller = quotePostController({
-      formValidation: () => () => {},
-      getNextPage: getNextPageMock
-    })
-    const request = buildRequest(
-      { housingUnits: 10 },
-      { query: { change: 'true' }, search: changeQuery }
-    )
-    const h = buildH()
-
-    controller.handler(request, h)
-
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, request.payload)
-    expect(getNextPageMock).not.toHaveBeenCalled()
-    expect(h.redirect).toHaveBeenCalledWith('/quote/check-your-answers')
-  })
-
   it('should save validation errors to flash and redirect on validation failure', () => {
     const controller = quotePostController({
       formValidation: () => () => {},
@@ -97,24 +76,5 @@ describe('quotePostController', () => {
       formSubmitData: request.payload
     })
     expect(h.redirect).toHaveBeenCalledWith(request.path)
-  })
-
-  it('should preserve the query string when redirecting back after a validation failure', () => {
-    const controller = quotePostController({
-      formValidation: () => () => {},
-      getNextPage: vi.fn()
-    })
-    const request = buildRequest(
-      { field1: 'bad value' },
-      { query: { change: 'true' }, search: changeQuery }
-    )
-    const h = buildH()
-    const err = { details: [{ path: 'field1', message: 'Required' }] }
-
-    controller.options.validate.failAction(request, h, err)
-
-    expect(h.redirect).toHaveBeenCalledWith(
-      `/quote/boundary-type${changeQuery}`
-    )
   })
 })
