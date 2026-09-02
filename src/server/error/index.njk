@@ -7,11 +7,17 @@
   }) }}
 
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <p class="govuk-body" data-testid="error-page-body">
-        Something went wrong with your request. Try again in a few minutes. You can
-        <a class="govuk-link" href="{{ serviceUrl }}">return to the start of the service</a>.
-      </p>
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+        <h1 class="govuk-heading-l">Sorry, there is a problem with the service</h1>
+        <p class="govuk-body">
+          Try again later.
+        </p>
+        <p class="govuk-body">
+          We saved your answers. They will be available on this device for 30 days.
+        </p>
+        <p class="govuk-body">
+          <a href="#" class="govuk-link">Contact Natural England</a> if you need to speak to someone about the nature restoration levy.
+        </p>
     </div>
   </div>
 {% endblock %}
