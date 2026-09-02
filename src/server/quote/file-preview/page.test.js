@@ -264,7 +264,16 @@ describe('Boundary map page', () => {
       mockCheckBoundary({
         failureReason: 'self_intersecting_geometry'
       })
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const sessionCookie = await withValidQuoteSession(
+        getServer(),
+        boundaryCheckPath
+      )
+      const { cookie } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'page' },
+        cookie: sessionCookie
+      })
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
@@ -311,7 +320,16 @@ describe('Boundary map page', () => {
 
     it('pushes rlb_status success without a failure_reason when the boundary check succeeds', async () => {
       mockCheckBoundary({ geojson: boundaryGeojsonWithEdp })
-      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const sessionCookie = await withValidQuoteSession(
+        getServer(),
+        boundaryCheckPath
+      )
+      const { cookie } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'page' },
+        cookie: sessionCookie
+      })
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),

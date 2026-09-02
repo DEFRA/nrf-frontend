@@ -2,6 +2,24 @@
 
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
+{% block head %}
+  {# Include after super() so the dataLayer push happens after GTM's consent
+     defaults (from google-tag-manager-head.njk) are queued — gtm.js processes
+     the queue in insertion order, so consent applies to this event. #}
+  {{ super() }}
+  {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
+    {# Pushed as its own rlb_intersection_areas custom event #}
+    <script nonce="{{ nonce }}" data-testid="gtm-upload-result">
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'rlb_intersection_areas',
+        rlb_option: {{ rlbOption | dump | safe }},
+        rlb_excluded_areas: {{ rlbExcludedAreas | dump | safe }}
+      });
+    </script>
+  {% endif %}
+{% endblock %}
+
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
 {% endblock %}
