@@ -77,13 +77,18 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
-    it('should redirect to excluded-area when the boundary intersects an excluded area', () => {
+    it('should save boundaryGeojson to cache and redirect to excluded-area when the boundary intersects an excluded area', () => {
       const h = createMockH()
       const request = createMockRequest(mockExcludedAreaGeojson)
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 
+      expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+        boundaryGeojson: mockExcludedAreaGeojson
+      })
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
     })
 

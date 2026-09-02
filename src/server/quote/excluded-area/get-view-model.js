@@ -28,6 +28,8 @@ export default function getViewModel(quoteData = {}) {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
-    backLinkPath
+    backLinkPath,
+    rlbExcludedAreas: quoteData.boundaryGeojson?.intersectingExcludedAreas,
+    rlbOption: quoteData.boundaryEntryType
   }
 }

@@ -8,6 +8,8 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { stubUploadFlow } from '../../../test-utils/stub-upload-flow.js'
 import { primeUploadSession } from '../../../test-utils/prime-upload-session.js'
 import { followUploadRejection } from '../../../test-utils/follow-upload-rejection.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
+import { COOKIE_ROUTE } from '../../cookies/helpers/constants.js'
 
 const uploadId = '11111111-1111-1111-1111-111111111111'
 
@@ -111,7 +113,13 @@ describe('Upload rejected before geometry parsing', () => {
 
     it('pushes rlb_status fail and the raw error code on the redirected-to upload page', async () => {
       stubRejection('file_size_too_large')
-      const cookie = await primeUploadSession(getServer())
+      const sessionCookie = await primeUploadSession(getServer())
+      const { cookie } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'page' },
+        cookie: sessionCookie
+      })
       const document = await followUploadRejection({
         server: getServer(),
         cookie
