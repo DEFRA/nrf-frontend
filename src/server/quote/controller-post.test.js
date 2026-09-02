@@ -29,6 +29,8 @@ describe('quotePostController', () => {
   const buildRequest = (payload = {}) => ({
     payload,
     path: '/quote/boundary-type',
+    url: { search: '' },
+    query: {},
     yar: { get: vi.fn(), set: vi.fn() }
   })
 
