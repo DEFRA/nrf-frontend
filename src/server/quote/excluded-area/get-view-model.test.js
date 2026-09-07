@@ -55,10 +55,26 @@ describe('excluded-area getViewModel', () => {
     expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
 
-  it('should expose the intersecting excluded areas as rlbExcludedAreas', () => {
+  it('should expose the first intersecting excluded area as rlbExcludedArea', () => {
     const viewModel = getViewModel(baseQuoteData)
 
-    expect(viewModel.rlbExcludedAreas).toEqual(excludedAreas)
+    expect(viewModel.rlbExcludedArea).toBe(excludedAreas[0])
+  })
+
+  it('should expose the first intersecting EDP label as rlbEdp', () => {
+    const intersectingEdps = [
+      { label: 'Norfolk EDP', catchments: [] },
+      { label: 'Wensum EDP', catchments: [] }
+    ]
+    const viewModel = getViewModel({
+      ...baseQuoteData,
+      boundaryGeojson: {
+        intersectingExcludedAreas: excludedAreas,
+        intersectingEdps
+      }
+    })
+
+    expect(viewModel.rlbEdp).toBe('Norfolk EDP')
   })
 
   it('should expose the boundary entry type as rlbOption', () => {
