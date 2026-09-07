@@ -205,7 +205,7 @@ describe('Quote resend flows', () => {
 
       expect(response.statusCode).toBe(502)
       const { document } = new JSDOM(response.result).window
-      expect(document.body.textContent).toContain('Something went wrong')
+      expect(document.body.textContent).toContain('Sorry, there is a problem with the service')
     })
 
     it('redirects to the start of the service if the confirmation is visited without a fresh resend', async () => {
