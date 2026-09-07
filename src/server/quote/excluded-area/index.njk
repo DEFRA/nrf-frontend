@@ -8,13 +8,15 @@
      the queue in insertion order, so consent applies to this event. #}
   {{ super() }}
   {% if analyticsEnabled and gtmId and areAnalyticsCookiesAccepted %}
-    {# Pushed as its own rlb_intersection_areas custom event #}
-    <script nonce="{{ nonce }}" data-testid="gtm-upload-result">
+    <script nonce="{{ nonce }}" data-testid="gtm-excluded-area">
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: 'rlb_intersection_areas',
         rlb_option: {{ rlbOption | dump | safe }},
-        rlb_excluded_areas: {{ rlbExcludedAreas | dump | safe }}
+        rlb_excluded_area: {{ rlbExcludedArea | dump | safe }},
+        rlb_edp: {{ rlbEdp | dump | safe }},
+        rlb_catchment: {{ rlbCatchment | dump | safe }}
+          {% if rlbCatchment2 %}, rlb_catchment2: {{ rlbCatchment2 | dump | safe }} {% endif %}
       });
     </script>
   {% endif %}

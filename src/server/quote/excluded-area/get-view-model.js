@@ -11,25 +11,30 @@ const logger = createLogger()
 
 export default function getViewModel(quoteData = {}) {
   let backLinkPath = boundaryTypePath
+  const { boundaryEntryType, boundaryGeojson } = quoteData
   /**
    * TODO: store the list of possible boundary entry types in a single location and import it here, rather than hardcoding the values in this function.
    */
-  if (quoteData.boundaryEntryType === 'draw') {
+  if (boundaryEntryType === 'draw') {
     backLinkPath = drawBoundaryPath
-  } else if (quoteData.boundaryEntryType === 'upload') {
+  } else if (boundaryEntryType === 'upload') {
     backLinkPath = uploadBoundaryPath
   } else {
-    logger.error(
-      { boundaryEntryType: quoteData.boundaryEntryType },
-      'boundaryEntryType is not recognised'
-    )
+    logger.error({ boundaryEntryType }, 'boundaryEntryType is not recognised')
   }
 
+  const rlbEdp = boundaryGeojson.intersectingEdps?.[0]
+  const rlbCatchment = rlbEdp?.catchments?.[0]?.label
+  const rlbCatchment2 = rlbEdp?.catchments?.[1]?.label
+  const rlbExcludedArea = boundaryGeojson?.intersectingExcludedAreas?.[0]
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
     backLinkPath,
-    rlbExcludedAreas: quoteData.boundaryGeojson?.intersectingExcludedAreas,
-    rlbOption: quoteData.boundaryEntryType
+    rlbExcludedArea,
+    rlbEdp: rlbEdp?.label,
+    rlbCatchment,
+    ...(rlbCatchment2 ? { rlbCatchment2 } : {}),
+    rlbOption: boundaryEntryType
   }
 }

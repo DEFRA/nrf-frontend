@@ -76,7 +76,7 @@ describe('Excluded area page', () => {
       })
 
       const { getByTestId } = within(document.documentElement)
-      const script = getByTestId('gtm-upload-result')
+      const script = getByTestId('gtm-excluded-area')
       expect(script.textContent).toContain("event: 'rlb_intersection_areas'")
       expect(script.textContent).toContain('"River Wensum Exclusion Zone"')
     })
@@ -92,7 +92,7 @@ describe('Excluded area page', () => {
         document.querySelectorAll('script[data-testid]')
       ).map((script) => script.getAttribute('data-testid'))
 
-      expect(scriptTestIds.indexOf('gtm-upload-result')).toBeGreaterThan(
+      expect(scriptTestIds.indexOf('gtm-excluded-area')).toBeGreaterThan(
         scriptTestIds.indexOf('gtm-head')
       )
     })
@@ -106,7 +106,7 @@ describe('Excluded area page', () => {
       })
 
       const { queryByTestId } = within(document.documentElement)
-      expect(queryByTestId('gtm-upload-result')).toBeNull()
+      expect(queryByTestId('gtm-excluded-area')).toBeNull()
     })
   })
 })
