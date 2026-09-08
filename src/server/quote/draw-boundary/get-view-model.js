@@ -13,10 +13,12 @@ export default function getViewModel(quoteData = {}, query = {}) {
   const existingBoundaryMetadata =
     quoteData.boundaryGeojson?.boundaryMetadata ?? null
 
+  const isChangeRequest = query.change === 'true'
+
   // When editing from check-your-answers, always return there instead of the
-  // boundary type page
-  const backLinkPath =
-    query.change === 'true' ? checkYourAnswersPath : boundaryTypePath
+  // boundary type page, and carry the flag on the save POST so the handler
+  // redirects there too instead of the email page
+  const backLinkPath = isChangeRequest ? checkYourAnswersPath : boundaryTypePath
 
   return {
     pageTitle: getPageTitle(pageTitle),
@@ -24,7 +26,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
     mapStyleUrl: config.get('map.defaultStyleUrl'),
     impactAssessorLayers: config.get('map.impactAssessorLayers'),
     boundaryValidationUrl: checkPath,
-    saveAndContinueUrl: savePath,
+    saveAndContinueUrl: isChangeRequest ? `${savePath}?change=true` : savePath,
     backLinkPath,
     existingBoundaryGeojson: JSON.stringify(existingBoundaryGeojson),
     existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata)

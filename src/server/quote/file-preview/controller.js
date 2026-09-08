@@ -6,6 +6,7 @@ import {
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
 import { routePath as emailPath } from '../email/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import getViewModel from './get-view-model.js'
@@ -114,5 +115,14 @@ export function postHandler(request, h) {
     return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
   }
 
-  return h.redirect(emailPath).code(statusCodes.redirectAfterPost)
+  // When editing from check-your-answers the email is already captured, so
+  // return there instead of asking for it again. The eligibility dead ends
+  // above still take precedence: a boundary outside the EDP (or in an
+  // exclusion zone) can't be quoted either way. The form posts back to the
+  // current URL, so the change=true query param arrives on the POST too.
+  return h
+    .redirect(
+      request.query.change === 'true' ? checkYourAnswersPath : emailPath
+    )
+    .code(statusCodes.redirectAfterPost)
 }
