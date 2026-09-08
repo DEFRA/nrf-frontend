@@ -144,6 +144,7 @@ describe('context and cache', () => {
           '/request-to-use/some-page',
           'Request to use the nature restoration levy'
         ],
+        ['/cookies', 'Get a quote for the nature restoration levy'],
         ['/about', 'Nature restoration levy']
       ])(
         'Should set serviceName for path %s',

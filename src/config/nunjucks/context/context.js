@@ -21,6 +21,10 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
     prefix: '/quote',
     serviceName: 'Get a quote for the nature restoration levy'
   },
+  {
+    prefix: '/cookies',
+    serviceName: 'Get a quote for the nature restoration levy'
+  },
   //TODO - remove request to use
   {
     prefix: '/request-to-use',
