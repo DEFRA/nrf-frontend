@@ -4,6 +4,7 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
 import { routePath as emailPath } from '../email/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
 
@@ -82,7 +83,13 @@ export function saveBoundaryHandler(request, h) {
   }
 
   if (intersectsEdp) {
-    return h.redirect(emailPath)
+    // When editing from check-your-answers the email is already captured, so
+    // return there instead of asking for it again. The eligibility dead ends
+    // above still take precedence: a redrawn boundary outside the EDP (or in
+    // an exclusion zone) can't be quoted either way.
+    return h.redirect(
+      request.query.change === 'true' ? checkYourAnswersPath : emailPath
+    )
   }
 
   return h.redirect(notInEdpPath)

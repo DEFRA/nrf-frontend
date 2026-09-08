@@ -63,7 +63,8 @@ describe('map controller', () => {
       set: vi.fn(),
       clear: vi.fn()
     },
-    payload: {}
+    payload: {},
+    query: {}
   })
 
   describe('handler (GET)', () => {
@@ -244,6 +245,18 @@ describe('map controller', () => {
       expect(saveQuoteDataToCache).not.toHaveBeenCalled()
       expect(request.yar.clear).not.toHaveBeenCalled()
       expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+    })
+
+    it('should redirect to check-your-answers when change=true and not re-save a cache-only boundary', () => {
+      const h = createMockH()
+      const request = createMockRequest(null)
+      request.query = { change: 'true' }
+      getQuoteDataFromCache.mockReturnValue({ boundaryGeojson: mockEdpGeojson })
+
+      postHandler(request, h)
+
+      expect(saveQuoteDataToCache).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith('/quote/check-your-answers')
     })
   })
 })

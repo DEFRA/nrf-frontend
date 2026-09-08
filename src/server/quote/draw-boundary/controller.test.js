@@ -278,6 +278,32 @@ describe('POST /quote/draw-boundary/save', () => {
     expect(response.headers.location).toBe('/quote/email')
   })
 
+  it('saves and redirects to check-your-answers when change=true and there are intersections', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: `${savePath}?change=true`,
+      payload: { boundaryGeojson: boundaryGeojsonWithEdp }
+    })
+
+    expect(saveQuoteDataToCache).toHaveBeenCalledWith(expect.anything(), {
+      boundaryGeojson: boundaryGeojsonWithEdp,
+      boundaryFilename: null
+    })
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/quote/check-your-answers')
+  })
+
+  it('still redirects to excluded-area on change=true when intersectingExcludedAreas is non-empty', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: `${savePath}?change=true`,
+      payload: { boundaryGeojson: boundaryGeojsonWithExcludedArea }
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(excludedAreaPath)
+  })
+
   it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {
     const response = await getServer().inject({
       method: 'POST',

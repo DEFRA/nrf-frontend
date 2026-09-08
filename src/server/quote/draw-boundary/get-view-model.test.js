@@ -79,4 +79,12 @@ describe('draw-boundary getViewModel', () => {
 
     expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
   })
+
+  test('carries change=true on the save URL so the POST redirects back to check-your-answers', () => {
+    const viewModel = getViewModel({}, { change: 'true' })
+
+    expect(viewModel.saveAndContinueUrl).toBe(
+      '/quote/draw-boundary/save?change=true'
+    )
+  })
 })
