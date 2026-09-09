@@ -25,7 +25,8 @@ export const routePath = '/impact-assessor-map'
 function getResponseHeaders(res) {
   return {
     contentType: res.headers.get('content-type') || '',
-    cacheControl: res.headers.get(cacheControlHeader) || defaultCacheControl
+    cacheControl: res.headers.get(cacheControlHeader) || defaultCacheControl,
+    aerialOutcome: res.headers.get(aerialOutcomeHeader)
   }
 }
 
@@ -97,11 +98,18 @@ const proxyHandler = {
         return serveCachedTile(h, payload, aerial)
       }
 
-      const { contentType, cacheControl } = getResponseHeaders(response)
-      return h
+      const { contentType, cacheControl, aerialOutcome } =
+        getResponseHeaders(response)
+      const proxied = h
         .response(payload)
         .type(contentType)
         .header(cacheControlHeader, cacheControl)
+
+      // The IA answers every aerial failure with a 200 placeholder, so without
+      // this header a broken layer is indistinguishable from a working one.
+      return aerialOutcome
+        ? proxied.header(aerialOutcomeHeader, aerialOutcome)
+        : proxied
     } catch (err) {
       logger.error(err, `Impact assessor proxy error for ${path || '/'}`)
       return h

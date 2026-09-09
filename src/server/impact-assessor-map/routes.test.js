@@ -111,6 +111,10 @@ describe('impact-assessor-map routes', () => {
       'cache-control',
       'max-age=600'
     )
+    expect(h._response.header).not.toHaveBeenCalledWith(
+      'x-aerial-proxy-tile',
+      expect.anything()
+    )
   })
 
   it('serves a cached tile without calling upstream', async () => {
@@ -327,6 +331,10 @@ describe('impact-assessor-map routes', () => {
         expect(h._response.header).toHaveBeenCalledWith(
           'cache-control',
           'private, max-age=60'
+        )
+        expect(h._response.header).toHaveBeenCalledWith(
+          'x-aerial-proxy-tile',
+          outcome
         )
       }
     )
