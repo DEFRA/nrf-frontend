@@ -86,7 +86,7 @@ describe('draw boundary map init', () => {
         behaviour: 'inline',
         center: [1.1405503, 52.7089441],
         zoom: 8.5,
-        mapStyle: expect.objectContaining({ id: 'esri-tiles' }),
+        mapStyle: expect.objectContaining({ id: 'aerial' }),
         containerHeight: '100%',
         transformRequest: expect.any(Function),
         plugins: expect.arrayContaining([

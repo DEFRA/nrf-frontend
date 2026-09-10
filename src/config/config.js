@@ -10,6 +10,7 @@ const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
+const oneDaySeconds = 86400
 
 const SESSION_RATE_LIMIT_MAX = 60
 const SESSION_RATE_LIMIT_MAX_TEST = 35
@@ -450,8 +451,14 @@ export const config = convict({
     tileCacheControlMaxAge: {
       doc: 'max-age, in seconds, sent on the Cache-Control header for vector tile responses.',
       format: Number,
-      default: 86400,
+      default: oneDaySeconds,
       env: 'MAP_TILE_CACHE_CONTROL_MAX_AGE'
+    },
+    aerialTileCacheControlMaxAge: {
+      doc: 'max-age, in seconds, sent on the Cache-Control header for aerial imagery responses.',
+      format: Number,
+      default: thirtyDaysSeconds,
+      env: 'MAP_AERIAL_TILE_CACHE_CONTROL_MAX_AGE'
     }
   },
   gtmId: {

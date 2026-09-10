@@ -20,6 +20,9 @@ vi.mock('../../config/config.js', () => ({
       if (key === 'map.tileCacheControlMaxAge') {
         return 86400
       }
+      if (key === 'map.aerialTileCacheControlMaxAge') {
+        return 2592000
+      }
       if (key === 'map.impactAssessorBaseUrl') {
         return impactAssessorBaseUrl
       }
@@ -34,13 +37,16 @@ vi.mock('../../config/config.js', () => ({
   }
 }))
 
-const isAerial = (path) => /^aerial_proxy\/(8|9|1[0-2])\//.test(path)
+const isAerial = (path) => /^aerial_proxy\//.test(path)
+const isCacheableAerial = (path) => /^aerial_proxy\/(8|9|1[0-4])\//.test(path)
 
 vi.mock('../common/services/tile-cache.js', () => ({
   getCachedTile: vi.fn(),
   setCachedTile: vi.fn(),
   isAerialTilePath: vi.fn(isAerial),
-  isCacheableTilePath: vi.fn((path) => /\.mvt$/.test(path) || isAerial(path))
+  isCacheableTilePath: vi.fn(
+    (path) => /\.mvt$/.test(path) || isCacheableAerial(path)
+  )
 }))
 
 const mswServer = setupMswServer()
@@ -51,7 +57,7 @@ const { getCachedTile, setCachedTile } =
 
 const handler = routes[0].handler
 const tileCacheControl = 'public, max-age=86400, immutable'
-const aerialCacheControl = 'private, max-age=86400'
+const aerialCacheControl = 'private, max-age=2592000'
 const aerialPath = 'aerial_proxy/12/2045/1362'
 const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const jpegBytes = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10])
@@ -110,6 +116,10 @@ describe('impact-assessor-map routes', () => {
     expect(h._response.header).toHaveBeenCalledWith(
       'cache-control',
       'max-age=600'
+    )
+    expect(h._response.header).not.toHaveBeenCalledWith(
+      'x-aerial-proxy-tile',
+      expect.anything()
     )
   })
 
@@ -328,11 +338,15 @@ describe('impact-assessor-map routes', () => {
           'cache-control',
           'private, max-age=60'
         )
+        expect(h._response.header).toHaveBeenCalledWith(
+          'x-aerial-proxy-tile',
+          outcome
+        )
       }
     )
 
-    it('passes an out-of-range zoom straight through without caching', async () => {
-      const uncachedZoomPath = 'aerial_proxy/13/4091/2724'
+    it('serves an out-of-range zoom uncached with the aerial max-age', async () => {
+      const uncachedZoomPath = 'aerial_proxy/15/16367/10896'
       mswServer.use(
         http.get(
           `${impactAssessorBaseUrl}/${uncachedZoomPath}`,
@@ -354,7 +368,7 @@ describe('impact-assessor-map routes', () => {
       expect(setCachedTile).not.toHaveBeenCalled()
       expect(h._response.header).toHaveBeenCalledWith(
         'cache-control',
-        'private, max-age=60'
+        aerialCacheControl
       )
     })
 

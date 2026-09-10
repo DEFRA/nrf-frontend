@@ -25,7 +25,8 @@ export const routePath = '/impact-assessor-map'
 function getResponseHeaders(res) {
   return {
     contentType: res.headers.get('content-type') || '',
-    cacheControl: res.headers.get(cacheControlHeader) || defaultCacheControl
+    cacheControl: res.headers.get(cacheControlHeader) || defaultCacheControl,
+    aerialOutcome: res.headers.get(aerialOutcomeHeader)
   }
 }
 
@@ -35,7 +36,7 @@ function tileCacheControl() {
 
 // APGB imagery is licensed, so it must not be widened to shared caches.
 function aerialCacheControl() {
-  return `private, max-age=${config.get('map.tileCacheControlMaxAge')}`
+  return `private, max-age=${config.get('map.aerialTileCacheControlMaxAge')}`
 }
 
 // Aerial tiles are image/jpeg or image/png; sniffing the bytes avoids storing
@@ -60,6 +61,47 @@ function serveCachedTile(h, payload, aerial) {
     )
 }
 
+async function serveFromCache(h, path, aerial) {
+  const cached = await getCachedTile(path)
+  if (!cached) {
+    return null
+  }
+
+  logger.info({ path }, 'Impact assessor tile cache read')
+  return serveCachedTile(h, cached, aerial)
+}
+
+// The "no imagery available" placeholder is a 200, so caching it would pin it
+// over a region for the whole TTL.
+function isStorable(cacheable, aerial, response) {
+  return cacheable && (!aerial || isAerialHit(response))
+}
+
+async function storeAndServe(h, path, payload, aerial) {
+  await setCachedTile(path, payload)
+  logger.info({ path }, 'Impact assessor tile cache write')
+  return serveCachedTile(h, payload, aerial)
+}
+
+function proxyTile(h, payload, response, aerial) {
+  const { contentType, cacheControl, aerialOutcome } =
+    getResponseHeaders(response)
+  // Real imagery is browser-cached for the full aerial max-age even when it is
+  // too deep to keep in Redis. Placeholders keep the impact assessor's short
+  // TTL so a broken region isn't pinned in the browser.
+  const aerialHit = aerial && isAerialHit(response)
+  const proxied = h
+    .response(payload)
+    .type(contentType)
+    .header(cacheControlHeader, aerialHit ? aerialCacheControl() : cacheControl)
+
+  // The IA answers every aerial failure with a 200 placeholder, so without this
+  // header a broken layer is indistinguishable from a working one.
+  return aerialOutcome
+    ? proxied.header(aerialOutcomeHeader, aerialOutcome)
+    : proxied
+}
+
 const proxyHandler = {
   method: 'GET',
   path: `${routePath}/{path*}`,
@@ -73,35 +115,22 @@ const proxyHandler = {
 
     try {
       if (cacheable) {
-        const cached = await getCachedTile(path)
-        if (cached) {
-          logger.info({ path }, 'Impact assessor tile cache read')
-          return serveCachedTile(h, cached, aerial)
+        const cacheHit = await serveFromCache(h, path, aerial)
+        if (cacheHit) {
+          return cacheHit
         }
       }
 
       const response = await getMapTile(path, request)
-
-      if (!response.ok) {
-        const body = Buffer.from(await response.arrayBuffer())
-        return h.response(body).code(response.status)
-      }
-
       const payload = Buffer.from(await response.arrayBuffer())
 
-      // The "no imagery available" placeholder is a 200, so caching it would
-      // pin it over a region for the whole TTL.
-      if (cacheable && (!aerial || isAerialHit(response))) {
-        await setCachedTile(path, payload)
-        logger.info({ path }, 'Impact assessor tile cache write')
-        return serveCachedTile(h, payload, aerial)
+      if (!response.ok) {
+        return h.response(payload).code(response.status)
       }
 
-      const { contentType, cacheControl } = getResponseHeaders(response)
-      return h
-        .response(payload)
-        .type(contentType)
-        .header(cacheControlHeader, cacheControl)
+      return isStorable(cacheable, aerial, response)
+        ? await storeAndServe(h, path, payload, aerial)
+        : proxyTile(h, payload, response, aerial)
     } catch (err) {
       logger.error(err, `Impact assessor proxy error for ${path || '/'}`)
       return h

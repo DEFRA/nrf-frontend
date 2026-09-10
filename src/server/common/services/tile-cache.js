@@ -6,7 +6,8 @@ const logger = createLogger()
 const keyPrefix = 'tile:'
 const vectorTilePathPattern =
   /^tiles\/(edp_boundaries|edp_excluded_areas)\/\d+\/\d+\/\d+\.mvt$/
-const aerialTilePathPattern = /^aerial_proxy\/(8|9|1[0-2])\/\d+\/\d+$/
+const aerialTilePathPattern = /^aerial_proxy\/\d+\/\d+\/\d+$/
+const cacheableAerialZoomPattern = /^aerial_proxy\/(\d|1[0-4])\//
 
 let client = null
 
@@ -26,7 +27,10 @@ export function isAerialTilePath(path) {
 }
 
 export function isCacheableTilePath(path) {
-  return vectorTilePathPattern.test(path) || isAerialTilePath(path)
+  return (
+    vectorTilePathPattern.test(path) ||
+    (isAerialTilePath(path) && cacheableAerialZoomPattern.test(path))
+  )
 }
 
 export async function getCachedTile(path) {
