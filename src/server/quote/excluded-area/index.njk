@@ -17,6 +17,7 @@
         rlb_edp: {{ rlbEdp | dump | safe }},
         rlb_catchment: {{ rlbCatchment | dump | safe }}
           {% if rlbCatchment2 %}, rlb_catchment2: {{ rlbCatchment2 | dump | safe }} {% endif %}
+          {% if rlbCatchment3 %}, rlb_catchment3: {{ rlbCatchment3 | dump | safe }} {% endif %}
       });
     </script>
   {% endif %}

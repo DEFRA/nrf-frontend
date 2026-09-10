@@ -26,6 +26,7 @@ export default function getViewModel(quoteData = {}) {
   const rlbEdp = boundaryGeojson.intersectingEdps?.[0]
   const rlbCatchment = rlbEdp?.catchments?.[0]?.label
   const rlbCatchment2 = rlbEdp?.catchments?.[1]?.label
+  const rlbCatchment3 = rlbEdp?.catchments?.[2]?.label
   const rlbExcludedArea = boundaryGeojson?.intersectingExcludedAreas?.[0]
   return {
     pageTitle: getPageTitle(pageTitle),
@@ -35,6 +36,7 @@ export default function getViewModel(quoteData = {}) {
     rlbEdp: rlbEdp?.label,
     rlbCatchment,
     ...(rlbCatchment2 ? { rlbCatchment2 } : {}),
+    ...(rlbCatchment3 ? { rlbCatchment3 } : {}),
     rlbOption: boundaryEntryType
   }
 }
