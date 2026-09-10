@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import joi from 'joi'
 import { quoteController } from '../controller-get.js'
 import { quoteSubmitController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
@@ -62,6 +63,11 @@ export default [
     method: 'POST',
     path: routePath,
     options: {
+      // The Confirm-and-submit form posts no fields (the crumb plugin strips
+      // csrfToken before validation), so the schema is an empty object.
+      validate: {
+        payload: joi.object()
+      },
       pre: [quoteSubmitRateLimitPre, completeQuotePre]
     },
     ...quoteSubmitController

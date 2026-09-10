@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom'
 import { getByRole } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
@@ -17,11 +18,6 @@ const mswServer = setupMswServer()
 
 describe('Check your answers page', () => {
   const getServer = setupTestServer()
-  let sessionCookie
-
-  beforeEach(
-    async () => (sessionCookie = await withValidQuoteSession(getServer()))
-  )
 
   it('should render a page heading and submit button', async () => {
     const document = await loadPage({
@@ -61,9 +57,9 @@ describe('Check your answers page', () => {
     const response = await getServer().inject({
       method: 'GET',
       url: routePath,
-      headers: { cookie: sessionCookie }
+      headers: { cookie: await withValidQuoteSession(getServer()) }
     })
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(statusCodes.badRequest)
     const { document } = new JSDOM(response.result).window
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Your details are incomplete'
@@ -74,11 +70,11 @@ describe('Check your answers page', () => {
     const response = await getServer().inject({
       method: 'POST',
       url: routePath,
-      headers: { cookie: sessionCookie }
+      headers: { cookie: await withValidQuoteSession(getServer()) }
     })
     // No /quotes handler is registered with MSW (unhandled requests error),
     // so a 400 — not a 500 — proves the backend was never called.
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(statusCodes.badRequest)
   })
 
   it('should show all summary rows when the journey is complete', async () => {
@@ -242,7 +238,7 @@ describe('Check your answers page', () => {
       formData: {},
       cookie: await withCompleteQuoteSession(getServer())
     })
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(
       '/quote/confirmation?reference=NRF-123456'
     )
