@@ -4,6 +4,7 @@ import {
   BOUNDARY_MAP_MAX_ZOOM,
   DEFAULT_MAP_CENTER
 } from '../../shared-helpers/constants.js'
+import { configureMaplibreWorker } from '../../shared-helpers/configure-maplibre-worker.js'
 import { transformRequest } from '../../shared-helpers/transform-request.js'
 
 /**
@@ -14,6 +15,8 @@ export function createInteractiveMap(
   mapElementId,
   { mapStyles, plugins, bounds, center }
 ) {
+  configureMaplibreWorker()
+
   return new InteractiveMap(mapElementId, {
     behaviour: 'inline',
     mapProvider: maplibreProvider(),
