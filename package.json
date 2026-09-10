@@ -36,6 +36,9 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "overrides": {
+    "@defra/interactive-map": {
+      "maplibre-gl": "^6.9.0"
+    },
     "swagger-jsdoc": {
       "yaml": "2.0.0-1"
     },
