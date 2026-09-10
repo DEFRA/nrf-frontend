@@ -10,7 +10,10 @@ import { mockCheckBoundary } from '../../../test-utils/mock-check-boundary.js'
 import { checkBoundaryPath } from '../checking-file/routes.js'
 import { routePath as filePreviewPath } from '../file-preview/routes.js'
 import { COOKIE_ROUTE } from '../../cookies/helpers/constants.js'
-import { boundaryGeojsonWithExcludedArea } from '../../../test-utils/fixtures/boundary-geojson.js'
+import {
+  boundaryGeojsonWithExcludedArea,
+  boundaryGeojsonWithExcludedAreaAndCatchments
+} from '../../../test-utils/fixtures/boundary-geojson.js'
 
 vi.mock('../../common/services/boundary.js')
 
@@ -95,6 +98,45 @@ describe('Excluded area page', () => {
       expect(scriptTestIds.indexOf('gtm-excluded-area')).toBeGreaterThan(
         scriptTestIds.indexOf('gtm-head')
       )
+    })
+
+    describe('when multiple catchments exist', () => {
+      let catchmentsCookiePreferences
+
+      beforeEach(async () => {
+        mockCheckBoundary({
+          geojson: boundaryGeojsonWithExcludedAreaAndCatchments
+        })
+        const checkCookie = await withValidQuoteSession(
+          getServer(),
+          boundaryCheckUrl
+        )
+        const catchmentsSessionCookie = await followGetRedirect({
+          server: getServer(),
+          url: filePreviewPath,
+          cookie: checkCookie
+        })
+        const { cookie } = await submitForm({
+          requestUrl: COOKIE_ROUTE,
+          server: getServer(),
+          formData: { analytics: 'yes', source: 'page' },
+          cookie: catchmentsSessionCookie
+        })
+        catchmentsCookiePreferences = cookie
+      })
+
+      it('pushes rlb_catchment2 and rlb_catchment3 to the dataLayer', async () => {
+        const document = await loadPage({
+          requestUrl: routePath,
+          server: getServer(),
+          cookie: catchmentsCookiePreferences
+        })
+
+        const { getByTestId } = within(document.documentElement)
+        const script = getByTestId('gtm-excluded-area')
+        expect(script.textContent).toContain('rlb_catchment2: "Catchment B"')
+        expect(script.textContent).toContain('rlb_catchment3: "Catchment C"')
+      })
     })
 
     it('does not push when GTM is disabled', async () => {
