@@ -6,6 +6,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 
 const backendUrl = config.get('backend').apiUrl
 const MAX = config.get('sessionRateLimit.maxRequestsPerSession')
@@ -30,7 +31,7 @@ describe('quoteSubmitController', () => {
       requestUrl: routePath,
       server: getServer(),
       formData: {},
-      cookie: sessionCookie
+      cookie: await withCompleteQuoteSession(getServer())
     })
 
     expect(response.statusCode).toBe(303)
