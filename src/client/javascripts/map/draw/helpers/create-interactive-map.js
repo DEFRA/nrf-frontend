@@ -1,6 +1,7 @@
 import { InteractiveMap } from '@defra/interactive-map'
 import maplibreProvider from '@defra/interactive-map/providers/maplibre'
 import { DEFAULT_MAP_CENTER } from '../../shared-helpers/constants.js'
+import { configureMaplibreWorker } from '../../shared-helpers/configure-maplibre-worker.js'
 import { transformRequest } from '../../shared-helpers/transform-request.js'
 
 const DEFAULT_ZOOM = 8.5
@@ -13,6 +14,8 @@ export function createInteractiveMap(
   mapElementId,
   { mapStyles, plugins, bounds, center }
 ) {
+  configureMaplibreWorker()
+
   return new InteractiveMap(mapElementId, {
     behaviour: 'inline',
     mapProvider: maplibreProvider(),
