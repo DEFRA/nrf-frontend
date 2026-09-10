@@ -77,6 +77,83 @@ describe('excluded-area getViewModel', () => {
     expect(viewModel.rlbEdp).toBe('Norfolk EDP')
   })
 
+  it('should expose the second catchment label as rlbCatchment2 when it exists', () => {
+    const intersectingEdps = [
+      {
+        label: 'Norfolk EDP',
+        catchments: [
+          { label: 'Catchment A' },
+          { label: 'Catchment B' },
+          { label: 'Catchment C' }
+        ]
+      }
+    ]
+    const viewModel = getViewModel({
+      ...baseQuoteData,
+      boundaryGeojson: {
+        intersectingExcludedAreas: excludedAreas,
+        intersectingEdps
+      }
+    })
+
+    expect(viewModel.rlbCatchment2).toBe('Catchment B')
+  })
+
+  it('should not include rlbCatchment2 when only one catchment exists', () => {
+    const intersectingEdps = [
+      { label: 'Norfolk EDP', catchments: [{ label: 'Catchment A' }] }
+    ]
+    const viewModel = getViewModel({
+      ...baseQuoteData,
+      boundaryGeojson: {
+        intersectingExcludedAreas: excludedAreas,
+        intersectingEdps
+      }
+    })
+
+    expect(viewModel).not.toHaveProperty('rlbCatchment2')
+  })
+
+  it('should expose the third catchment label as rlbCatchment3 when it exists', () => {
+    const intersectingEdps = [
+      {
+        label: 'Norfolk EDP',
+        catchments: [
+          { label: 'Catchment A' },
+          { label: 'Catchment B' },
+          { label: 'Catchment C' }
+        ]
+      }
+    ]
+    const viewModel = getViewModel({
+      ...baseQuoteData,
+      boundaryGeojson: {
+        intersectingExcludedAreas: excludedAreas,
+        intersectingEdps
+      }
+    })
+
+    expect(viewModel.rlbCatchment3).toBe('Catchment C')
+  })
+
+  it('should not include rlbCatchment3 when only two catchments exist', () => {
+    const intersectingEdps = [
+      {
+        label: 'Norfolk EDP',
+        catchments: [{ label: 'Catchment A' }, { label: 'Catchment B' }]
+      }
+    ]
+    const viewModel = getViewModel({
+      ...baseQuoteData,
+      boundaryGeojson: {
+        intersectingExcludedAreas: excludedAreas,
+        intersectingEdps
+      }
+    })
+
+    expect(viewModel).not.toHaveProperty('rlbCatchment3')
+  })
+
   it('should expose the boundary entry type as rlbOption', () => {
     const viewModel = getViewModel(baseQuoteData)
 
