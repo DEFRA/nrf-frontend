@@ -195,9 +195,15 @@ export default {
           // maplibre-gl v6 is ESM-only and cannot derive its web-worker URL
           // when bundled, so the worker is copied to a known public path and
           // wired up with setWorkerUrl() at runtime (see
-          // map/shared-helpers/configure-maplibre-worker.js)
+          // map/shared-helpers/configure-maplibre-worker.js). The worker is
+          // a module worker that imports its sibling — both files are needed
+          // at the same path or the worker fails to load.
           from: path.join(maplibreGlPath, 'dist/maplibre-gl-worker.mjs'),
           to: 'maplibre/maplibre-gl-worker.mjs'
+        },
+        {
+          from: path.join(maplibreGlPath, 'dist/maplibre-gl-shared.mjs'),
+          to: 'maplibre/maplibre-gl-shared.mjs'
         },
         {
           from: path.join(
