@@ -36,7 +36,7 @@ function tileCacheControl() {
 
 // APGB imagery is licensed, so it must not be widened to shared caches.
 function aerialCacheControl() {
-  return `private, max-age=${config.get('map.tileCacheControlMaxAge')}`
+  return `private, max-age=${config.get('map.aerialTileCacheControlMaxAge')}`
 }
 
 // Aerial tiles are image/jpeg or image/png; sniffing the bytes avoids storing
@@ -100,10 +100,17 @@ const proxyHandler = {
 
       const { contentType, cacheControl, aerialOutcome } =
         getResponseHeaders(response)
+      // Real imagery is browser-cached for the full aerial max-age even when
+      // it is too deep to keep in Redis. Placeholders keep the impact
+      // assessor's short TTL so a broken region isn't pinned in the browser.
+      const aerialHit = aerial && isAerialHit(response)
       const proxied = h
         .response(payload)
         .type(contentType)
-        .header(cacheControlHeader, cacheControl)
+        .header(
+          cacheControlHeader,
+          aerialHit ? aerialCacheControl() : cacheControl
+        )
 
       // The IA answers every aerial failure with a 200 placeholder, so without
       // this header a broken layer is indistinguishable from a working one.

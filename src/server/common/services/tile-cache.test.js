@@ -67,9 +67,12 @@ describe('tile-cache', () => {
     it.each([
       'tiles/edp_boundaries/8/130/85.mvt',
       'tiles/edp_excluded_areas/8/130/85.mvt',
+      'aerial_proxy/0/0/0',
+      'aerial_proxy/7/63/42',
       'aerial_proxy/8/127/85',
       'aerial_proxy/9/255/170',
-      'aerial_proxy/12/2045/1362'
+      'aerial_proxy/12/2045/1362',
+      'aerial_proxy/14/8183/5448'
     ])('accepts tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(true)
     })
@@ -85,19 +88,20 @@ describe('tile-cache', () => {
       'aerial_proxy/a/b/c',
       'aerial_proxy/15/16367/10896.png',
       'aerial_proxy/15/16367/10896/extra',
-      'aerial_proxy/7/63/42',
-      'aerial_proxy/13/4091/2724',
-      'aerial_proxy/0/0/0'
+      'aerial_proxy/15/16367/10896'
     ])('rejects non-tile path %s', (path) => {
       expect(isCacheableTilePath(path)).toBe(false)
     })
   })
 
   describe('isAerialTilePath', () => {
+    // Every zoom counts as aerial — the zoom window only gates Redis caching.
     it.each([
+      'aerial_proxy/7/63/42',
       'aerial_proxy/8/127/85',
-      'aerial_proxy/9/255/170',
-      'aerial_proxy/12/2045/1362'
+      'aerial_proxy/12/2045/1362',
+      'aerial_proxy/14/8183/5448',
+      'aerial_proxy/15/16367/10896'
     ])('accepts aerial path %s', (path) => {
       expect(isAerialTilePath(path)).toBe(true)
     })
@@ -106,9 +110,9 @@ describe('tile-cache', () => {
       '',
       'tiles/edp_boundaries/8/130/85.mvt',
       'aerial_proxy/15/16367',
+      'aerial_proxy/a/b/c',
       'aerial_proxy/15/16367/10896.png',
-      'aerial_proxy/7/63/42',
-      'aerial_proxy/13/4091/2724'
+      'aerial_proxy/15/16367/10896/extra'
     ])('rejects non-aerial path %s', (path) => {
       expect(isAerialTilePath(path)).toBe(false)
     })
