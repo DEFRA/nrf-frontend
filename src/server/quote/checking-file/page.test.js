@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom'
 import { getByRole, getByText } from '@testing-library/dom'
 import { routePath, checkBoundaryPath } from './routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
@@ -100,7 +101,7 @@ describe('Upload received page', () => {
       requestUrl: checkBoundaryPath.replace('{id}', 'test-upload-id')
     })
 
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe('/quote/file-preview')
   })
 
@@ -122,7 +123,7 @@ describe('Upload received page', () => {
       headers: cookie ? { cookie } : {}
     })
 
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 })

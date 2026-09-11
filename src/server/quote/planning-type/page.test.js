@@ -1,7 +1,8 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { routePath as applicationTypeNotAvailablePath } from '../application-type-not-available/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -12,6 +13,7 @@ import { expectFieldsetError } from '../../../test-utils/assertions.js'
 describe('Planning type page', () => {
   const getServer = setupTestServer()
   const changeUrl = `${routePath}?change=true`
+  const dropoutChangeUrl = `${applicationTypeNotAvailablePath}?change=true`
   let sessionCookie
 
   beforeEach(
@@ -94,24 +96,47 @@ describe('Planning type page', () => {
     )
   })
 
-  it('should end up on application-type-not-available when a change selects Other', async () => {
-    const { response, cookie } = await submitForm({
+  it('should redirect straight to application-type-not-available (with change=true) when a change selects Other', async () => {
+    const { response } = await submitForm({
       requestUrl: changeUrl,
       server: getServer(),
       formData: { planningType: 'other' },
       cookie: sessionCookie
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(checkYourAnswersPath)
-    const summaryResponse = await getServer().inject({
-      method: 'GET',
-      url: checkYourAnswersPath,
-      headers: { cookie }
+    expect(response.headers.location).toBe(dropoutChangeUrl)
+  })
+
+  it('should return to check-your-answers when a change selects a valid type after backing out of the dropout page', async () => {
+    const { response } = await submitForm({
+      requestUrl: changeUrl,
+      server: getServer(),
+      formData: { planningType: 'other' },
+      cookie: sessionCookie
     })
-    expect(summaryResponse.statusCode).toBe(statusCodes.found)
-    expect(summaryResponse.headers.location).toBe(
-      '/quote/application-type-not-available'
+    expect(response.headers.location).toBe(dropoutChangeUrl)
+
+    // Follow the dropout page's back link (it carries change=true), then
+    // submit a valid planning type — the journey must return to CYA, not
+    // restart from confirm-housing.
+    const document = await loadPage({
+      requestUrl: dropoutChangeUrl,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      changeUrl
     )
+
+    const { response: retryResponse } = await submitForm({
+      requestUrl: changeUrl,
+      server: getServer(),
+      formData: { planningType: 'full-planning-permission' },
+      cookie: sessionCookie
+    })
+    expect(retryResponse.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(retryResponse.headers.location).toBe(checkYourAnswersPath)
   })
 
   it('should show a validation error after an invalid form submission', async () => {
@@ -121,7 +146,7 @@ describe('Planning type page', () => {
       formData: {},
       cookie: sessionCookie
     })
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(routePath)
     const document = await loadPage({
       requestUrl: routePath,
@@ -141,7 +166,7 @@ describe('Planning type page', () => {
       formData: { planningType: 'full-planning-permission' },
       cookie: sessionCookie
     })
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBeDefined()
   })
 
@@ -152,10 +177,8 @@ describe('Planning type page', () => {
       formData: { planningType: 'other' },
       cookie: sessionCookie
     })
-    expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(
-      '/quote/application-type-not-available'
-    )
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(applicationTypeNotAvailablePath)
   })
 
   it("should remember the user's previous selection", async () => {

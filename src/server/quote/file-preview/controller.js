@@ -4,11 +4,15 @@ import {
   getQuoteDataFromCache
 } from '../helpers/quote-session-cache/index.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as emailPath } from '../email/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
+import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import {
+  appendChangeParam,
+  isChangeMode
+} from '../helpers/change-mode/index.js'
 import getViewModel from './get-view-model.js'
 
 const logger = createLogger()
@@ -30,7 +34,7 @@ function redirectToExcludedArea(boundaryGeojson, request, h) {
   if (boundaryGeojson) {
     promoteBoundaryToCache(request, { boundaryGeojson })
   }
-  return h.redirect(excludedAreaPath)
+  return h.redirect(appendChangeParam(excludedAreaPath, request.query))
 }
 
 export function handler(request, h) {
@@ -70,7 +74,7 @@ export function handler(request, h) {
       { intersectsEdp },
       'map - boundary does not intersect EDP, redirecting to no-edp'
     )
-    return h.redirect(notInEdpPath)
+    return h.redirect(appendChangeParam(notInEdpPath, request.query))
   }
 
   const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
@@ -90,7 +94,9 @@ export function postHandler(request, h) {
 
   // if the user has previously saved from this screen and come back to it, the boundaryGeojson session key will have been cleared by this handler; so also check for the main quote session cache
   if (!boundaryGeojson && !quoteCache.boundaryGeojson) {
-    return h.redirect(uploadBoundaryPath).code(statusCodes.redirectAfterPost)
+    return h
+      .redirect(appendChangeParam(uploadBoundaryPath, request.query))
+      .code(statusCodes.redirectAfterPost)
   }
 
   // Lift the filename out of the geojson blob so it lives at the top of the
@@ -109,10 +115,14 @@ export function postHandler(request, h) {
   const intersectsExcludedArea =
     resolvedGeojson?.intersectingExcludedAreas?.length > 0
   if (intersectsExcludedArea) {
-    return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
+    return h
+      .redirect(appendChangeParam(excludedAreaPath, request.query))
+      .code(statusCodes.redirectAfterPost)
   }
   if (!intersectsEdp) {
-    return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
+    return h
+      .redirect(appendChangeParam(notInEdpPath, request.query))
+      .code(statusCodes.redirectAfterPost)
   }
 
   // When editing from check-your-answers the email is already captured, so
@@ -121,8 +131,6 @@ export function postHandler(request, h) {
   // exclusion zone) can't be quoted either way. The form posts back to the
   // current URL, so the change=true query param arrives on the POST too.
   return h
-    .redirect(
-      request.query.change === 'true' ? checkYourAnswersPath : emailPath
-    )
+    .redirect(isChangeMode(request.query) ? checkYourAnswersPath : emailPath)
     .code(statusCodes.redirectAfterPost)
 }

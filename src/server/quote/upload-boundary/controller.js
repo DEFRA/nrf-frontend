@@ -9,6 +9,7 @@ import {
   clearValidationFlashFromCache
 } from '../helpers/form-validation-session/index.js'
 import { routePath as checkingFilePath } from '../checking-file/routes.js'
+import { appendChangeParam } from '../helpers/change-mode/index.js'
 const routeId = 'upload-boundary'
 
 async function getUploadSession(request) {
@@ -32,11 +33,15 @@ async function getUploadSession(request) {
     }
   }
 
-  return initiateUpload({ redirect: checkingFilePath })
+  // The redirect target is baked into the CDP uploader session, so change
+  // mode must be included here to survive the external uploader hop.
+  return initiateUpload({
+    redirect: appendChangeParam(checkingFilePath, request.query)
+  })
 }
 
 export async function handler(request, h) {
-  const viewModel = getViewModel()
+  const viewModel = getViewModel({}, request.query)
 
   // Clear any stale boundary data from a previous upload attempt
   request.yar.clear('boundaryGeojson')

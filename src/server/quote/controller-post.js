@@ -3,6 +3,11 @@ import { saveValidationFlashToCache } from './helpers/form-validation-session/in
 import { statusCodes } from '../common/constants/status-codes.js'
 import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
 import { routePath as checkYourAnswersPath } from './check-your-answers/route-path.js'
+import {
+  appendChangeParam,
+  isChangeMode,
+  isDropoutPage
+} from './helpers/change-mode/index.js'
 
 /**
  * PRG failAction for quote form POSTs. Saves errors and submitted values to
@@ -26,6 +31,23 @@ export const redirectToFormWithValidationErrors = (request, h, err) => {
     .takeover()
 }
 
+/**
+ * Resolves the redirect target after a quote form POST. Dropout pages win
+ * over the return to check-your-answers: an ineligible answer must still
+ * show its dropout page, carrying change=true so the page's back link keeps
+ * change mode alive.
+ * @param {object} params
+ * @param {string} params.nextPage - journey-derived next page path
+ * @param {object} params.query - the parsed request query
+ * @returns {string} redirect path
+ */
+export const resolveChangeModeRedirect = ({ nextPage, query }) =>
+  isDropoutPage(nextPage)
+    ? appendChangeParam(nextPage, query)
+    : isChangeMode(query)
+      ? checkYourAnswersPath
+      : nextPage
+
 export const quotePostController = ({
   formValidation,
   getNextPage,
@@ -41,8 +63,9 @@ export const quotePostController = ({
   handler(request, h) {
     const { payload, query } = request
     const quoteData = saveQuoteDataToCache(request, payload)
-    const nextPage =
-      query.change === 'true' ? checkYourAnswersPath : getNextPage(quoteData)
-    return h.redirect(nextPage).code(statusCodes.redirectAfterPost)
+    const nextPage = getNextPage(quoteData)
+    return h
+      .redirect(resolveChangeModeRedirect({ nextPage, query }))
+      .code(statusCodes.redirectAfterPost)
   }
 })

@@ -3,9 +3,11 @@ import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'confirm-housing'
-export const routePath = '/quote/confirm-housing'
+
+export { routePath }
 
 /**
  * @openapi

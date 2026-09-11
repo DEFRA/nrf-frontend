@@ -37,7 +37,8 @@ describe('upload-boundary controller', () => {
       info: {
         protocol: 'http'
       }
-    }
+    },
+    query: {}
   })
 
   beforeEach(() => {
@@ -85,6 +86,22 @@ describe('upload-boundary controller', () => {
         uploadUrl: '/upload-and-scan/test-upload-id'
       })
     )
+  })
+
+  it('should bake change=true into the uploader redirect so change mode survives the external upload hop', async () => {
+    const h = createMockH()
+    const request = createMockRequest()
+    request.query = { change: 'true' }
+    vi.mocked(initiateUpload).mockResolvedValue({
+      uploadId: 'test-upload-id',
+      uploadUrl: '/upload-and-scan/test-upload-id'
+    })
+
+    await handler(request, h)
+
+    expect(initiateUpload).toHaveBeenCalledWith({
+      redirect: '/quote/checking-file?change=true'
+    })
   })
 
   it('should reuse an existing pending upload session that has not received a file yet', async () => {

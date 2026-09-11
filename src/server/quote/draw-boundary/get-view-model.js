@@ -2,7 +2,8 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { config } from '../../../config/config.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { isChangeMode } from '../helpers/change-mode/index.js'
 
 const pageHeading = 'Draw your boundary on a map'
 const pageTitle = 'Draw boundary'
@@ -13,7 +14,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
   const existingBoundaryMetadata =
     quoteData.boundaryGeojson?.boundaryMetadata ?? null
 
-  const isChangeRequest = query.change === 'true'
+  const isChangeRequest = isChangeMode(query)
 
   // When editing from check-your-answers, always return there instead of the
   // boundary type page, and carry the flag on the save POST so the handler

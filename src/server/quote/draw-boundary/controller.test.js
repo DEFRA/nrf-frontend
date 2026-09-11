@@ -3,8 +3,10 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
-import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
-import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
+import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
+import { routePath as emailPath } from '../email/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import {
   boundaryGeojsonWithEdp,
   boundaryGeojsonWithExcludedArea
@@ -274,8 +276,8 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryGeojson: boundaryGeojsonWithEdp,
       boundaryFilename: null
     })
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/email')
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(emailPath)
   })
 
   it('saves and redirects to check-your-answers when change=true and there are intersections', async () => {
@@ -289,19 +291,30 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryGeojson: boundaryGeojsonWithEdp,
       boundaryFilename: null
     })
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/check-your-answers')
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(checkYourAnswersPath)
   })
 
-  it('still redirects to excluded-area on change=true when intersectingExcludedAreas is non-empty', async () => {
+  it('still redirects to excluded-area on change=true when intersectingExcludedAreas is non-empty, carrying the param', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
       payload: { boundaryGeojson: boundaryGeojsonWithExcludedArea }
     })
 
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(excludedAreaPath)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(`${excludedAreaPath}?change=true`)
+  })
+
+  it('redirects to not-in-edp with the param on change=true when there are no intersections', async () => {
+    const response = await getServer().inject({
+      method: 'POST',
+      url: `${savePath}?change=true`,
+      payload: { boundaryGeojson: validBoundaryGeojson }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(`${notInEdpPath}?change=true`)
   })
 
   it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {
@@ -315,7 +328,7 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryGeojson: boundaryGeojsonWithExcludedArea,
       boundaryFilename: null
     })
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(excludedAreaPath)
   })
 
@@ -330,7 +343,7 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryGeojson: validBoundaryGeojson,
       boundaryFilename: null
     })
-    expect(response.statusCode).toBe(302)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(notInEdpPath)
   })
 
@@ -357,8 +370,8 @@ describe('POST /quote/draw-boundary/save', () => {
       payload: { boundaryGeojson }
     })
 
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/quote/email')
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(emailPath)
   })
 
   it.each([

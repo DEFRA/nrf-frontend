@@ -1,17 +1,21 @@
 import { describe, expect, it, vi } from 'vitest'
 import { checkForValidQuoteSession } from './index.js'
-import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/routes.js'
-import { routePath as planningTypePath } from '../../planning-type/routes.js'
+import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/route-path.js'
+import { routePath as planningTypePath } from '../../planning-type/route-path.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
 import { routePath as startPath } from '../../../manage/start-page/routes.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
-import { routePath as confirmHousingPath } from '../../confirm-housing/routes.js'
-import { routePath as notHousingPath } from '../../not-housing/routes.js'
+import { routePath as confirmHousingPath } from '../../confirm-housing/route-path.js'
+import { routePath as notHousingPath } from '../../not-housing/route-path.js'
 
 vi.mock('../quote-session-cache/index.js')
 
-const makeRequest = ({ path, method = 'get' } = {}) => ({ path, method })
+const makeRequest = ({ path, method = 'get', query = {} } = {}) => ({
+  path,
+  method,
+  query
+})
 
 const makeH = () => {
   const h = {
@@ -77,6 +81,21 @@ describe('checkForValidQuoteSession', () => {
     expect(h.redirect).toHaveBeenCalledWith(applicationTypeNotAvailablePath)
   })
 
+  it('carries change=true to application-type-not-available when the intercepted request had it', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
+    const request = makeRequest({
+      path: '/quote/check-your-answers',
+      query: { change: 'true' }
+    })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(
+      `${applicationTypeNotAvailablePath}?change=true`
+    )
+  })
+
   it('continues on planning-type when planningType is "other"', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({ planningType: 'other' })
     const request = makeRequest({ path: planningTypePath })
@@ -137,6 +156,19 @@ describe('checkForValidQuoteSession', () => {
     checkForValidQuoteSession(request, h)
 
     expect(h.redirect).toHaveBeenCalledWith(notHousingPath)
+  })
+
+  it('carries change=true to not-housing when the intercepted request had it', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
+    const request = makeRequest({
+      path: '/quote/check-your-answers',
+      query: { change: 'true' }
+    })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(`${notHousingPath}?change=true`)
   })
 
   it('continues on not-housing when isHousing is "no"', () => {

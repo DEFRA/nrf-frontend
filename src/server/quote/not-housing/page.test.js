@@ -30,4 +30,17 @@ describe('Not housing page', () => {
       '/quote/confirm-housing'
     )
   })
+
+  it('should carry change=true on the back link in change mode', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/confirm-housing?change=true'
+    )
+  })
 })

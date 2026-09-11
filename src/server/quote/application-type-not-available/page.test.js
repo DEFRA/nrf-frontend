@@ -29,4 +29,17 @@ describe('Application type not available page', () => {
       backLinkPath
     )
   })
+
+  it('should carry change=true on the back link in change mode', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/planning-type?change=true'
+    )
+  })
 })
