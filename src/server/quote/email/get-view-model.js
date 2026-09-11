@@ -2,7 +2,8 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as filePreviewPath } from '../file-preview/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { isChangeMode } from '../helpers/change-mode/index.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 
 const pageHeading = 'Enter your email address'
@@ -27,7 +28,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
   }
 
   // When editing from check-your-answers, always return there regardless of how the boundary was entered
-  if (query.change && query.change === 'true') {
+  if (isChangeMode(query)) {
     backLinkPath = checkYourAnswersPath
   }
 

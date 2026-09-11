@@ -24,6 +24,20 @@ describe('no-edp getViewModel', () => {
     expect(viewModel.backLinkPath).toBe('/quote/upload-boundary')
   })
 
+  it('should carry change=true on the back link in change mode', () => {
+    const drawn = getViewModel(
+      { boundaryEntryType: 'draw' },
+      { change: 'true' }
+    )
+    const uploaded = getViewModel(
+      { boundaryEntryType: 'upload' },
+      { change: 'true' }
+    )
+
+    expect(drawn.backLinkPath).toBe('/quote/draw-boundary?change=true')
+    expect(uploaded.backLinkPath).toBe('/quote/upload-boundary?change=true')
+  })
+
   it('should use a placeholder back link when the boundary entry type is not set', () => {
     const viewModel = getViewModel()
 

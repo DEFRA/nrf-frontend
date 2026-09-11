@@ -3,13 +3,20 @@ import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
+import { appendChangeParam } from '../helpers/change-mode/index.js'
 
 const pageHeading =
   'Development is within the excluded area of this Environmental Delivery Plan (EDP)'
 const pageTitle = 'Excluded area'
 const logger = createLogger()
 
-export default function getViewModel(quoteData = {}) {
+/**
+ * @param {object} [quoteData] - the cached quote data; read for the boundary
+ * entry type and the intersecting EDP/exclusion labels
+ * @param {object} [query] - the parsed request query
+ * @returns {object} view model for the excluded-area page
+ */
+export default function getViewModel(quoteData = {}, query = {}) {
   let backLinkPath = boundaryTypePath
   const { boundaryEntryType, boundaryGeojson } = quoteData
   /**
@@ -31,7 +38,7 @@ export default function getViewModel(quoteData = {}) {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
-    backLinkPath,
+    backLinkPath: appendChangeParam(backLinkPath, query),
     rlbExcludedArea,
     rlbEdp: rlbEdp?.label,
     rlbCatchment,

@@ -1,7 +1,8 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { isChangeMode } from '../helpers/change-mode/index.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 
 const pageHeading = 'Your uploaded red line boundary file'
@@ -36,8 +37,9 @@ export default function getViewModel({
 
   // When editing from check-your-answers, always return there instead of the
   // upload page
-  const backLinkPath =
-    query.change === 'true' ? checkYourAnswersPath : uploadBoundaryPath
+  const backLinkPath = isChangeMode(query)
+    ? checkYourAnswersPath
+    : uploadBoundaryPath
 
   return {
     pageTitle: getPageTitle(pageTitle),

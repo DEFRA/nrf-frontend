@@ -3,9 +3,11 @@ import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'planning-type'
-export const routePath = '/quote/planning-type'
+
+export { routePath }
 
 /**
  * @openapi

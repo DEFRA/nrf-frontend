@@ -13,4 +13,10 @@ describe('upload-boundary getViewModel', () => {
       boundaryUploadHint: BOUNDARY_UPLOAD_HINT_TEXT
     })
   })
+
+  it('should link back to check-your-answers in change mode', () => {
+    const viewModel = getViewModel({}, { change: 'true' })
+
+    expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
+  })
 })

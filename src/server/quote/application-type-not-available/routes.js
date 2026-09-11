@@ -1,8 +1,10 @@
 import { quoteController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'application-type-not-available'
-export const routePath = '/quote/application-type-not-available'
+
+export { routePath }
 
 /**
  * @openapi

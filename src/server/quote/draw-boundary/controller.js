@@ -2,11 +2,15 @@ import { checkBoundaryGeometry } from '../../common/services/boundary.js'
 import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-messages.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
-import { routePath as notInEdpPath } from '../not-in-edp/routes.js'
+import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as emailPath } from '../email/routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
+import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
+import {
+  appendChangeParam,
+  isChangeMode
+} from '../helpers/change-mode/index.js'
 
 const logger = createLogger()
 
@@ -77,9 +81,12 @@ export function saveBoundaryHandler(request, h) {
   // exclusion zone it is ineligible for the EDP, so the user must use the
   // Habitat Regulations instead. The impact assessor skips the EDP query in
   // this case, so intersectingEdps will be empty — but check this first to
-  // keep the redirect decisive regardless.
+  // keep the redirect decisive regardless. The dead-end redirects carry
+  // change=true so their back links keep change mode alive.
   if (intersectsExcludedArea) {
-    return h.redirect(excludedAreaPath)
+    return h
+      .redirect(appendChangeParam(excludedAreaPath, request.query))
+      .code(statusCodes.redirectAfterPost)
   }
 
   if (intersectsEdp) {
@@ -87,10 +94,12 @@ export function saveBoundaryHandler(request, h) {
     // return there instead of asking for it again. The eligibility dead ends
     // above still take precedence: a redrawn boundary outside the EDP (or in
     // an exclusion zone) can't be quoted either way.
-    return h.redirect(
-      request.query.change === 'true' ? checkYourAnswersPath : emailPath
-    )
+    return h
+      .redirect(isChangeMode(request.query) ? checkYourAnswersPath : emailPath)
+      .code(statusCodes.redirectAfterPost)
   }
 
-  return h.redirect(notInEdpPath)
+  return h
+    .redirect(appendChangeParam(notInEdpPath, request.query))
+    .code(statusCodes.redirectAfterPost)
 }

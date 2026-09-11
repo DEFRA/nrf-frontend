@@ -1,38 +1,31 @@
 import { describe, it, expect } from 'vitest'
-import { quotePostController } from './controller-post.js'
+import {
+  quotePostController,
+  resolveChangeModeRedirect
+} from './controller-post.js'
 import getNextPage from './unit-number/get-next-page.js'
-
-import { saveValidationFlashToCache } from './helpers/form-validation-session/index.js'
-import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
-
-vi.mock('./helpers/quote-session-cache/index.js', async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    saveQuoteDataToCache: vi.fn(),
-    saveValidationFlashToCache: vi.fn()
-  }
-})
-
-vi.mock(
-  './helpers/form-validation-session/index.js',
-  async (importOriginal) => {
-    const actual = await importOriginal()
-    return {
-      ...actual,
-      saveValidationFlashToCache: vi.fn()
-    }
-  }
-)
+import { routePath as checkYourAnswersPath } from './check-your-answers/route-path.js'
+import { routePath as confirmHousingPath } from './confirm-housing/route-path.js'
+import { routePath as applicationTypeNotAvailablePath } from './application-type-not-available/route-path.js'
 
 describe('quotePostController', () => {
-  const buildRequest = (payload = {}) => ({
-    payload,
-    path: '/quote/boundary-type',
-    url: { search: '' },
-    query: {},
-    yar: { get: vi.fn(), set: vi.fn() }
-  })
+  // Minimal stateful session so the real quote cache and validation flash run
+  const buildRequest = (payload = {}) => {
+    const session = {}
+    return {
+      payload,
+      path: '/quote/boundary-type',
+      url: { search: '' },
+      query: {},
+      logger: { error: vi.fn() },
+      yar: {
+        get: (key) => session[key],
+        set: (key, value) => {
+          session[key] = value
+        }
+      }
+    }
+  }
 
   const buildH = () => ({
     redirect: vi.fn().mockReturnValue({
@@ -41,8 +34,6 @@ describe('quotePostController', () => {
   })
 
   it('should save the payload to cache and redirect to the next page on successful submission', () => {
-    const mergedQuoteData = { housingUnits: 10 }
-    vi.mocked(saveQuoteDataToCache).mockReturnValue(mergedQuoteData)
     const controller = quotePostController({
       formValidation: () => () => {},
       getNextPage
@@ -52,7 +43,9 @@ describe('quotePostController', () => {
 
     controller.handler(request, h)
 
-    expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, request.payload)
+    expect(request.yar.get('quote')).toEqual(
+      expect.objectContaining({ housingUnits: 10 })
+    )
     expect(h.redirect).toHaveBeenCalledWith('/quote/boundary-type')
   })
 
@@ -67,7 +60,7 @@ describe('quotePostController', () => {
 
     controller.options.validate.failAction(request, h, err)
 
-    expect(saveValidationFlashToCache).toHaveBeenCalledWith(request, {
+    expect(request.yar.get('quoteFlash')).toEqual({
       validationErrors: expect.objectContaining({
         summary: expect.arrayContaining([
           expect.objectContaining({ href: '#field1' })
@@ -75,6 +68,43 @@ describe('quotePostController', () => {
       }),
       formSubmitData: request.payload
     })
-    expect(h.redirect).toHaveBeenCalledWith(request.path)
+    expect(h.redirect).toHaveBeenCalledWith(
+      `${request.path}${request.url.search}`
+    )
+  })
+})
+
+describe('resolveChangeModeRedirect', () => {
+  it('should return to check-your-answers in change mode on a non-dropout next page', () => {
+    expect(
+      resolveChangeModeRedirect({
+        nextPage: confirmHousingPath,
+        query: { change: 'true' }
+      })
+    ).toBe(checkYourAnswersPath)
+  })
+
+  it('should redirect to the dropout page carrying change=true in change mode', () => {
+    expect(
+      resolveChangeModeRedirect({
+        nextPage: applicationTypeNotAvailablePath,
+        query: { change: 'true' }
+      })
+    ).toBe(`${applicationTypeNotAvailablePath}?change=true`)
+  })
+
+  it('should redirect to the dropout page without the param outside change mode', () => {
+    expect(
+      resolveChangeModeRedirect({
+        nextPage: applicationTypeNotAvailablePath,
+        query: {}
+      })
+    ).toBe(applicationTypeNotAvailablePath)
+  })
+
+  it('should follow the next page outside change mode', () => {
+    expect(
+      resolveChangeModeRedirect({ nextPage: confirmHousingPath, query: {} })
+    ).toBe(confirmHousingPath)
   })
 })

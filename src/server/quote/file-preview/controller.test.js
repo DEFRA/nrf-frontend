@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handler, postHandler } from './controller.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as excludedAreaPath } from '../excluded-area/routes.js'
+import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
+import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
+import { routePath as emailPath } from '../email/routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 
 vi.mock('../helpers/quote-session-cache/index.js', () => ({
   saveQuoteDataToCache: vi.fn(),
@@ -203,7 +206,7 @@ describe('map controller', () => {
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-      expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+      expect(h.redirect).toHaveBeenCalledWith(emailPath)
     })
 
     it('should save the boundary and redirect to excluded-area when it intersects an excluded area', () => {
@@ -220,6 +223,30 @@ describe('map controller', () => {
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
+    })
+
+    it('should redirect to excluded-area with the param in change mode', () => {
+      const h = createMockH()
+      const request = createMockRequest(mockExcludedAreaGeojson)
+      request.query = { change: 'true' }
+      getQuoteDataFromCache.mockReturnValue({})
+
+      postHandler(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(`${excludedAreaPath}?change=true`)
+    })
+
+    it('should redirect to not-in-edp with the param in change mode when there is no EDP intersection', () => {
+      const h = createMockH()
+      const request = createMockRequest(null)
+      request.query = { change: 'true' }
+      getQuoteDataFromCache.mockReturnValue({
+        boundaryGeojson: { intersectingEdps: [] }
+      })
+
+      postHandler(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(`${notInEdpPath}?change=true`)
     })
 
     it('should lift boundaryFilename from boundaryGeojson when saving to cache', () => {
@@ -244,7 +271,7 @@ describe('map controller', () => {
 
       expect(saveQuoteDataToCache).not.toHaveBeenCalled()
       expect(request.yar.clear).not.toHaveBeenCalled()
-      expect(h.redirect).toHaveBeenCalledWith('/quote/email')
+      expect(h.redirect).toHaveBeenCalledWith(emailPath)
     })
 
     it('should redirect to check-your-answers when change=true and not re-save a cache-only boundary', () => {
@@ -256,7 +283,7 @@ describe('map controller', () => {
       postHandler(request, h)
 
       expect(saveQuoteDataToCache).not.toHaveBeenCalled()
-      expect(h.redirect).toHaveBeenCalledWith('/quote/check-your-answers')
+      expect(h.redirect).toHaveBeenCalledWith(checkYourAnswersPath)
     })
   })
 })

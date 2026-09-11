@@ -1,8 +1,10 @@
 import { quoteController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'excluded-area'
-export const routePath = '/quote/excluded-area'
+
+export { routePath }
 
 /**
  * @openapi

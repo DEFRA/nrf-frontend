@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handler, checkBoundaryHandler } from './controller.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
+import { routePath as filePreviewPath } from '../file-preview/routes.js'
 
 vi.mock('../../common/services/uploader.js')
 vi.mock('../../common/services/boundary.js')
@@ -31,7 +33,7 @@ describe('upload-received controller', () => {
 
     await handler(request, h)
 
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+    expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
   })
 
   it('should call checkBoundary and redirect to map when status is ready', async () => {
@@ -49,7 +51,7 @@ describe('upload-received controller', () => {
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
+    expect(h.redirect).toHaveBeenCalledWith(filePreviewPath)
     expect(h.view).not.toHaveBeenCalled()
   })
 
@@ -71,7 +73,7 @@ describe('upload-received controller', () => {
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
+    expect(h.redirect).toHaveBeenCalledWith(filePreviewPath)
     expect(h.view).not.toHaveBeenCalled()
   })
 
@@ -114,7 +116,7 @@ describe('upload-received controller', () => {
     await handler(request, h)
 
     expect(h.view).not.toHaveBeenCalled()
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+    expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     expect(request.yar.set).toHaveBeenCalledWith(
       'uploadRejectionReason',
       'upload_status_check_failed'
@@ -169,7 +171,7 @@ describe('checkBoundaryHandler', () => {
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
     expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
+    expect(h.redirect).toHaveBeenCalledWith(filePreviewPath)
   })
 
   it('should store failureReason and geojson and redirect to map when boundary check fails with geojson', async () => {
@@ -193,7 +195,7 @@ describe('checkBoundaryHandler', () => {
       'self_intersecting_geometry'
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/file-preview')
+    expect(h.redirect).toHaveBeenCalledWith(filePreviewPath)
   })
 
   it('should redirect to the upload page for a service failure without geojson', async () => {
@@ -216,7 +218,7 @@ describe('checkBoundaryHandler', () => {
     )
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadId')
     expect(request.yar.clear).toHaveBeenCalledWith('pendingUploadUrl')
-    expect(h.redirect).toHaveBeenCalledWith('/quote/upload-boundary')
+    expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
   })
 
   it('should store the raw failureReason code in a dedicated session key for an upload rejection', async () => {
