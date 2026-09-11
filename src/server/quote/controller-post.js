@@ -41,12 +41,15 @@ export const redirectToFormWithValidationErrors = (request, h, err) => {
  * @param {object} params.query - the parsed request query
  * @returns {string} redirect path
  */
-export const resolveChangeModeRedirect = ({ nextPage, query }) =>
-  isDropoutPage(nextPage)
-    ? appendChangeParam(nextPage, query)
-    : isChangeMode(query)
-      ? checkYourAnswersPath
-      : nextPage
+export const resolveChangeModeRedirect = ({ nextPage, query }) => {
+  if (isDropoutPage(nextPage)) {
+    return appendChangeParam(nextPage, query)
+  }
+  if (isChangeMode(query)) {
+    return checkYourAnswersPath
+  }
+  return nextPage
+}
 
 export const quotePostController = ({
   formValidation,
