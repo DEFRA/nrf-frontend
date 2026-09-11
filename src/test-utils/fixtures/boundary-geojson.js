@@ -98,3 +98,17 @@ export const boundaryGeojsonWithExcludedArea = {
   intersectingEdps: [],
   intersectingExcludedAreas: ['River Wensum Exclusion Zone']
 }
+
+export const boundaryGeojsonWithExcludedAreaAndCatchments = {
+  ...boundaryGeojsonWithExcludedArea,
+  intersectingEdps: [
+    {
+      label: 'Norfolk EDP',
+      catchments: [
+        { label: 'Catchment A' },
+        { label: 'Catchment B' },
+        { label: 'Catchment C' }
+      ]
+    }
+  ]
+}

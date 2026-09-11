@@ -3,37 +3,42 @@ import { getMapStyles } from './styles.js'
 import aerialStyle from '../../../data/vts/APGB_Aerial.json'
 
 describe('getMapStyles', () => {
-  it('offers the aerial basemap at index 1', () => {
+  it('keeps aerial at index 0, the map default style', () => {
+    // create-interactive-map.js reads mapStyles[0] as the initial style, so
+    // this index is behaviour, not presentation.
     const styles = getMapStyles()
 
-    expect(styles).toHaveLength(5)
-    expect(styles[1]).toEqual(
+    expect(styles).toHaveLength(4)
+    expect(styles[0]).toEqual(
       expect.objectContaining({ id: 'aerial', label: 'Aerial' })
     )
   })
 
-  it('keeps esri-tiles at index 0, the map default style', () => {
-    // create-interactive-map.js reads mapStyles[0] as the initial style, so
-    // this index is behaviour, not presentation.
-    expect(getMapStyles()[0]).toEqual(
-      expect.objectContaining({ id: 'esri-tiles' })
-    )
+  it('no longer offers the esri satellite basemap', () => {
+    expect(getMapStyles().map((style) => style.id)).not.toContain('esri-tiles')
   })
 
-  it('points aerial at its own thumbnail file, not the shared esri one', () => {
-    // The two thumbnails deliberately show the same artwork, but aerial keeps
-    // its own copy so deleting the esri assets does not break it.
-    const [satellite, aerial] = getMapStyles()
+  it('points aerial at its own thumbnail file', () => {
+    const [aerial] = getMapStyles()
 
     expect(aerial.thumbnail).toMatch(/aerial\.svg$/)
-    expect(aerial.thumbnail).not.toBe(satellite.thumbnail)
   })
 
   it('credits aerial imagery to APGB rather than Ordnance Survey', () => {
-    const [satellite, aerial] = getMapStyles()
+    const [aerial, outdoorOs] = getMapStyles()
 
-    expect(aerial.attribution).not.toBe(satellite.attribution)
+    expect(aerial.attribution).not.toBe(outdoorOs.attribution)
     expect(aerial.attribution).not.toMatch(/Ordnance Survey/)
+  })
+
+  it('takes the aerial credit from the style JSON so the two cannot drift', () => {
+    const [source] = Object.values(aerialStyle.sources)
+    const [aerial] = getMapStyles()
+
+    expect(aerial.attribution).toBe(source.attribution)
+    expect(aerial.attribution).toBe(
+      '© Bluesky International Limited and Getmapping Limited 1999-2020<br>© Bluesky International Limited 2021 and onwards'
+    )
   })
 })
 

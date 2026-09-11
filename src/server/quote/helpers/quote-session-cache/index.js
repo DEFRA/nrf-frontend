@@ -48,6 +48,20 @@ export const getCompleteQuoteDataFromCache = (request) => {
   return value
 }
 
+/**
+ * Whether the cached quote data satisfies the complete schema (every required
+ * question answered). Unlike getCompleteQuoteDataFromCache this is routine
+ * flow control — a user deep-linking before finishing the journey is expected
+ * — so it doesn't log.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {boolean}
+ */
+export const isQuoteDataComplete = (request) => {
+  const quoteData = request.yar.get(cacheKey)
+  const { error } = completeQuoteDataSchema.validate(quoteData)
+  return error === undefined
+}
+
 export const initQuoteSession = (request) => request.yar.set(cacheKey, {})
 
 export const clearQuoteDataFromCache = (request) => request.yar.clear(cacheKey)

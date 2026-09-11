@@ -17,6 +17,7 @@
         rlb_edp: {{ rlbEdp | dump | safe }},
         rlb_catchment: {{ rlbCatchment | dump | safe }}
           {% if rlbCatchment2 %}, rlb_catchment2: {{ rlbCatchment2 | dump | safe }} {% endif %}
+          {% if rlbCatchment3 %}, rlb_catchment3: {{ rlbCatchment3 | dump | safe }} {% endif %}
       });
     </script>
   {% endif %}
@@ -34,7 +35,7 @@
 
         <p class="govuk-body">Please use the existing Habitat Regulations to meet your environmental obligations.</p>
         <p class="govuk-body">
-            <a href="#" class="govuk-link" rel="noopener noreferrer" target="_blank">Find out about Habitat Regulations (opens in new tab)</a>
+            <a href="https://www.gov.uk/guidance/habitats-regulations-assessments-protecting-a-european-site" class="govuk-link" rel="noopener noreferrer" target="_blank">Find out about Habitat Regulations (opens in new tab)</a>
         </p>
     </div>
 </div>
