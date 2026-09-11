@@ -7,7 +7,7 @@
       "tiles": ["/impact-assessor-map/aerial_proxy/{z}/{x}/{y}"],
       "tileSize": 256,
       "maxzoom": 21,
-      "attribution": "Aerial imagery © Getmapping plc and Bluesky International Ltd (APGB)"
+      "attribution": "© Bluesky International Limited and Getmapping Limited 1999-2020<br>© Bluesky International Limited 2021 and onwards"
     }
   },
   "layers": [

@@ -34,14 +34,12 @@ describe('#contentSecurityPolicy config variations', () => {
     expect(contentSecurityPolicy.options.connectSrc).toEqual([
       'self',
       'wss',
-      'https://raw.githubusercontent.com',
-      'https://server.arcgisonline.com'
+      'https://raw.githubusercontent.com'
     ])
     expect(contentSecurityPolicy.options.imgSrc).toEqual([
       'self',
       'data:',
-      'https://raw.githubusercontent.com',
-      'https://server.arcgisonline.com'
+      'https://raw.githubusercontent.com'
     ])
     expect(contentSecurityPolicy.options.formAction).toContain(
       'https://uploader.example.com'
@@ -57,14 +55,12 @@ describe('#contentSecurityPolicy config variations', () => {
     expect(contentSecurityPolicy.options.connectSrc).toEqual([
       'self',
       'wss',
-      'https://raw.githubusercontent.com',
-      'https://server.arcgisonline.com'
+      'https://raw.githubusercontent.com'
     ])
     expect(contentSecurityPolicy.options.imgSrc).toEqual([
       'self',
       'data:',
-      'https://raw.githubusercontent.com',
-      'https://server.arcgisonline.com'
+      'https://raw.githubusercontent.com'
     ])
     expect(contentSecurityPolicy.options.formAction).toEqual(['self'])
   })

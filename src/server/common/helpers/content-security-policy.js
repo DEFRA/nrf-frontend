@@ -11,10 +11,8 @@ const gtmOrigin = 'https://*.googletagmanager.com'
 const gaOrigin = 'https://*.google-analytics.com'
 const gaRegion1Origin = 'https://*.google-analytics.com'
 
-const mapExternalOrigins = [
-  'https://raw.githubusercontent.com',
-  'https://server.arcgisonline.com'
-]
+// OS vector tile styles load their sprite sheets from the OS stylesheet repo.
+const mapExternalOrigins = ['https://raw.githubusercontent.com']
 
 const contentSecurityPolicy = {
   plugin: Blankie,

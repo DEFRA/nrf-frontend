@@ -2,10 +2,20 @@ import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache,
   getQuoteDataFromCache,
+  isQuoteDataComplete,
   saveQuoteDataToCache
 } from './index.js'
 
 describe('Save and retrieve quote data from session cache', () => {
+  const validQuoteData = {
+    planningType: 'full-planning-permission',
+    isHousing: 'yes',
+    boundaryEntryType: 'draw',
+    boundaryGeojson: { type: 'Polygon' },
+    housingUnits: 10,
+    email: 'test@example.com'
+  }
+
   describe('Save quote data to session cache', () => {
     it('saves new data if the existing cache is empty', () => {
       const request = {
@@ -173,15 +183,6 @@ describe('Save and retrieve quote data from session cache', () => {
   })
 
   describe('getCompleteQuoteDataFromCache', () => {
-    const validQuoteData = {
-      planningType: 'full-planning-permission',
-      isHousing: 'yes',
-      boundaryEntryType: 'draw',
-      boundaryGeojson: { type: 'Polygon' },
-      housingUnits: 10,
-      email: 'test@example.com'
-    }
-
     it('returns validated quote data when cache contains valid data', () => {
       const request = {
         yar: { get: vi.fn().mockReturnValue(validQuoteData) },
@@ -234,6 +235,30 @@ describe('Save and retrieve quote data from session cache', () => {
         expect.any(Error),
         'getQuoteDataFromCache: invalid quote data'
       )
+    })
+  })
+
+  describe('isQuoteDataComplete', () => {
+    it('returns true when the cache contains complete quote data', () => {
+      const request = {
+        yar: { get: vi.fn().mockReturnValue(validQuoteData) }
+      }
+      expect(isQuoteDataComplete(request)).toBe(true)
+    })
+
+    it.each([
+      ['null', null],
+      ['empty', {}],
+      ['missing a required answer', { ...validQuoteData, email: null }],
+      [
+        'only partially answered',
+        { planningType: 'full-planning-permission', isHousing: 'yes' }
+      ]
+    ])('returns false when the cache is %s', (_case, quoteData) => {
+      const request = {
+        yar: { get: vi.fn().mockReturnValue(quoteData) }
+      }
+      expect(isQuoteDataComplete(request)).toBe(false)
     })
   })
 
