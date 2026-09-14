@@ -20,7 +20,7 @@ describe('Quote details page accessibility checks', () => {
   it('should have no HTML accessibility issues', async () => {
     mockGetQuote(mswServer)
     const document = await loadPage({
-      requestUrl: '/quote/NRF-123456/testtoken123',
+      requestUrl: '/quote/NRL-123456/testtoken123',
       server: getServer(),
       headers: humanClick
     })
@@ -28,9 +28,9 @@ describe('Quote details page accessibility checks', () => {
   })
 
   it('should have no HTML accessibility issues on the unknown-expired resend page', async () => {
-    mockGetQuoteStatus(mswServer, 'NRF-123456', 'invalid')
+    mockGetQuoteStatus(mswServer, 'NRL-123456', 'invalid')
     const document = await loadPage({
-      requestUrl: '/quote/NRF-123456/testtoken123',
+      requestUrl: '/quote/NRL-123456/testtoken123',
       server: getServer(),
       headers: humanClick
     })
@@ -38,9 +38,9 @@ describe('Quote details page accessibility checks', () => {
   })
 
   it('should have no HTML accessibility issues on the known-expired resend page', async () => {
-    mockGetQuoteStatus(mswServer, 'NRF-123456', 'expired')
+    mockGetQuoteStatus(mswServer, 'NRL-123456', 'expired')
     const document = await loadPage({
-      requestUrl: '/quote/NRF-123456/testtoken123',
+      requestUrl: '/quote/NRL-123456/testtoken123',
       server: getServer(),
       headers: humanClick
     })
@@ -48,15 +48,15 @@ describe('Quote details page accessibility checks', () => {
   })
 
   it('should have no HTML accessibility issues on the resend confirmation page', async () => {
-    mockResendKnown(mswServer, 'NRF-123456')
+    mockResendKnown(mswServer, 'NRL-123456')
     const { cookie } = await submitForm({
-      requestUrl: '/quote/NRF-123456/resend-known',
+      requestUrl: '/quote/NRL-123456/resend-known',
       server: getServer(),
       formData: { token: 'testtoken123' }
     })
     const confirmation = await getServer().inject({
       method: 'GET',
-      url: '/quote/NRF-123456/resend-known',
+      url: '/quote/NRL-123456/resend-known',
       headers: { cookie }
     })
     const { document } = new JSDOM(confirmation.result).window

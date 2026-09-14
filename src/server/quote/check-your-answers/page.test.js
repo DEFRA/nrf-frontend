@@ -6,6 +6,7 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -229,7 +230,7 @@ describe('Check your answers page', () => {
   it('should redirect to the confirmation page if Submit is clicked', async () => {
     mswServer.use(
       http.post(`${backendUrl}/quotes`, () =>
-        HttpResponse.json({ reference: 'NRF-123456' })
+        HttpResponse.json({ reference: 'NRL-123456' })
       )
     )
     const { response } = await submitForm({
@@ -240,7 +241,7 @@ describe('Check your answers page', () => {
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(
-      '/quote/confirmation?reference=NRF-123456'
+      `${routePathConfirmation}?reference=NRL-123456`
     )
   })
 })

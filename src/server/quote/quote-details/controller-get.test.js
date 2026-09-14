@@ -28,7 +28,7 @@ describe('quoteDetailsGetController', () => {
     flash
   } = {}) => ({
     params: {
-      reference: reference ?? 'NRF-123456',
+      reference: reference ?? 'NRL-123456',
       token: token ?? 'abctoken123'
     },
     headers: { 'user-agent': userAgent ?? browserUserAgent },
@@ -49,11 +49,11 @@ describe('quoteDetailsGetController', () => {
 
   it('should render the quote details view when the status is valid', async () => {
     const quote = {
-      reference: 'NRF-123456',
+      reference: 'NRL-123456',
       email: { address: 'test@example.com' },
       boundary: { userInputType: 'upload', filename: null }
     }
-    mockBackend('NRF-123456', { accessStatus: 'valid', quote })
+    mockBackend('NRL-123456', { accessStatus: 'valid', quote })
 
     const result = await quoteDetailsGetController.handler(
       buildRequest(),
@@ -75,7 +75,7 @@ describe('quoteDetailsGetController', () => {
   ])(
     'should render the error view with the right message for status %s',
     async (status, message) => {
-      mockBackend('NRF-123456', { accessStatus: status, quote: null })
+      mockBackend('NRL-123456', { accessStatus: status, quote: null })
 
       const result = await quoteDetailsGetController.handler(
         buildRequest(),
@@ -88,7 +88,7 @@ describe('quoteDetailsGetController', () => {
   )
 
   it('threads a validation flash into the error view after a failed resend redirect', async () => {
-    mockBackend('NRF-123456', { accessStatus: 'invalid', quote: null })
+    mockBackend('NRL-123456', { accessStatus: 'invalid', quote: null })
     const flash = {
       validationErrors: { summary: [{ text: 'Enter an email address' }] },
       formSubmitData: { email: 'bad' }
@@ -105,9 +105,9 @@ describe('quoteDetailsGetController', () => {
   })
 
   it('should propagate errors thrown by the backend', async () => {
-    mockBackend('NRF-FAIL', { message: 'Server error' }, 500)
+    mockBackend('NRL-FAIL', { message: 'Server error' }, 500)
 
-    const request = buildRequest({ reference: 'NRF-FAIL', token: 'bad-token' })
+    const request = buildRequest({ reference: 'NRL-FAIL', token: 'bad-token' })
 
     await expect(
       quoteDetailsGetController.handler(request, buildH())
@@ -117,7 +117,7 @@ describe('quoteDetailsGetController', () => {
   it('should render the no-data stub for a prefetch request', async () => {
     let backendCalled = false
     server.use(
-      http.get(`${backendUrl}/quotes/NRF-123456`, () => {
+      http.get(`${backendUrl}/quotes/NRL-123456`, () => {
         backendCalled = true
         return HttpResponse.json({ accessStatus: 'valid', quote: {} })
       })
@@ -132,9 +132,9 @@ describe('quoteDetailsGetController', () => {
   })
 
   it('should set the session cookie on a fresh valid arrival', async () => {
-    mockBackend('NRF-123456', {
+    mockBackend('NRL-123456', {
       accessStatus: 'valid',
-      quote: { reference: 'NRF-123456' }
+      quote: { reference: 'NRL-123456' }
     })
     const h = buildH()
 
@@ -142,19 +142,19 @@ describe('quoteDetailsGetController', () => {
 
     expect(h.state).toHaveBeenCalledWith(
       'quote_details_session',
-      expect.objectContaining({ reference: 'NRF-123456' }),
-      expect.objectContaining({ path: '/quote/NRF-123456' })
+      expect.objectContaining({ reference: 'NRL-123456' }),
+      expect.objectContaining({ path: '/quote/NRL-123456' })
     )
   })
 
   it('should not set the cookie again when one is already present', async () => {
-    mockBackend('NRF-123456', {
+    mockBackend('NRL-123456', {
       accessStatus: 'valid',
-      quote: { reference: 'NRF-123456' }
+      quote: { reference: 'NRL-123456' }
     })
     const h = buildH()
     const request = buildRequest({
-      state: { quote_details_session: { reference: 'NRF-123456' } }
+      state: { quote_details_session: { reference: 'NRL-123456' } }
     })
 
     await quoteDetailsGetController.handler(request, h)

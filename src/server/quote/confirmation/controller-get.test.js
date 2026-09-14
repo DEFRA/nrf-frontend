@@ -18,30 +18,30 @@ describe('confirmationGetController', () => {
 
   it('should render the confirmation view when the quote exists', async () => {
     server.use(
-      http.get(`${backendUrl}/quotes/NRF-123456`, () =>
+      http.get(`${backendUrl}/quotes/NRL-123456`, () =>
         HttpResponse.json({ accessStatus: 'invalid', quote: null })
       )
     )
 
     const controller = confirmationGetController({ routeId, getViewModel })
-    const request = { query: { reference: 'NRF-123456' } }
+    const request = { query: { reference: 'NRL-123456' } }
 
     const result = await controller.handler(request, buildH())
 
     expect(result.template).toBe('quote/confirmation/index')
     expect(result.model).toMatchObject(baseViewModel)
-    expect(result.model.reference).toBe('NRF-123456')
+    expect(result.model.reference).toBe('NRL-123456')
   })
 
   it('should return not found when the quote does not exist', async () => {
     server.use(
-      http.get(`${backendUrl}/quotes/NRF-999999`, () =>
+      http.get(`${backendUrl}/quotes/NRL-999999`, () =>
         HttpResponse.json({ accessStatus: 'not_found', quote: null })
       )
     )
 
     const controller = confirmationGetController({ routeId, getViewModel })
-    const request = { query: { reference: 'NRF-999999' } }
+    const request = { query: { reference: 'NRL-999999' } }
 
     const result = await controller.handler(request, buildH())
 
@@ -51,13 +51,13 @@ describe('confirmationGetController', () => {
 
   it('should propagate errors thrown by the backend', async () => {
     server.use(
-      http.get(`${backendUrl}/quotes/NRF-FAIL`, () =>
+      http.get(`${backendUrl}/quotes/NRL-FAIL`, () =>
         HttpResponse.json({ message: 'Server error' }, { status: 500 })
       )
     )
 
     const controller = confirmationGetController({ routeId, getViewModel })
-    const request = { query: { reference: 'NRF-FAIL' } }
+    const request = { query: { reference: 'NRL-FAIL' } }
 
     await expect(controller.handler(request, buildH())).rejects.toThrow()
   })

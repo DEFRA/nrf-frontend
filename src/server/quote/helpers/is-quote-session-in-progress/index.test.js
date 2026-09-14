@@ -139,7 +139,7 @@ describe('checkForValidQuoteSession', () => {
   })
 
   it('continues without session check for quote details page', () => {
-    const request = makeRequest({ path: '/quote/NRF-123456/abc123token' })
+    const request = makeRequest({ path: '/quote/NRL-123456/abc123token' })
     const h = makeH()
 
     const result = checkForValidQuoteSession(request, h)

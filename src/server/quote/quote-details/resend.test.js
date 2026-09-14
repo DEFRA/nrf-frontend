@@ -11,7 +11,7 @@ import {
   mockResendUnknown
 } from '../../../test-utils/mock-get-quote.js'
 
-const reference = 'NRF-123456'
+const reference = 'NRL-123456'
 const token = 'abcdeftoken123'
 const linkUrl = `/quote/${reference}/${token}`
 const humanClick = { 'sec-fetch-user': '?1' }
