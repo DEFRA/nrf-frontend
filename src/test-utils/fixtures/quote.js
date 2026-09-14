@@ -1,5 +1,5 @@
 export const fullQuote = {
-  reference: 'NRF-123456',
+  reference: 'NRL-123456',
   boundary: {
     userInputType: 'upload',
     filename: 'site-plan.geojson'

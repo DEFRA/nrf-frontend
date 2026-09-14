@@ -115,14 +115,14 @@ describe('nrf-backend service', () => {
   describe('getQuoteFromBackend', () => {
     it('should call getRequestFromBackend with the quote endpoint', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({
-        payload: { reference: 'NRF-123' }
+        payload: { reference: 'NRL-123' }
       })
       vi.mocked(withTraceId).mockReturnValue({})
 
-      await getQuoteFromBackend({ reference: 'NRF-123' })
+      await getQuoteFromBackend({ reference: 'NRL-123' })
 
       expect(Wreck.get).toHaveBeenCalledWith(
-        `${backendUrl}/quotes/NRF-123`,
+        `${backendUrl}/quotes/NRL-123`,
         expect.objectContaining({ json: true })
       )
     })
@@ -132,12 +132,12 @@ describe('nrf-backend service', () => {
       vi.mocked(withTraceId).mockReturnValue({})
 
       await getQuoteFromBackend({
-        reference: 'NRF-123',
+        reference: 'NRL-123',
         bearerToken: 'my-secret-token'
       })
 
       expect(Wreck.get).toHaveBeenCalledWith(
-        `${backendUrl}/quotes/NRF-123`,
+        `${backendUrl}/quotes/NRL-123`,
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer my-secret-token'
@@ -150,7 +150,7 @@ describe('nrf-backend service', () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
       vi.mocked(withTraceId).mockReturnValue({})
 
-      await getQuoteFromBackend({ reference: 'NRF-123' })
+      await getQuoteFromBackend({ reference: 'NRL-123' })
 
       const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
       expect(callArgs.headers).not.toHaveProperty('Authorization')

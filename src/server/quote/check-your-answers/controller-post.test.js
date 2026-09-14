@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import { routePath } from './routes.js'
+import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -21,7 +22,7 @@ describe('quoteSubmitController', () => {
     sessionCookie = await withValidQuoteSession(getServer())
     mswServer.use(
       http.post(`${backendUrl}/quotes`, () =>
-        HttpResponse.json({ reference: 'NRF-123456' })
+        HttpResponse.json({ reference: 'NRL-123456' })
       )
     )
   })
@@ -36,7 +37,7 @@ describe('quoteSubmitController', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(
-      '/quote/confirmation?reference=NRF-123456'
+      `${routePathConfirmation}?reference=NRL-123456`
     )
   })
 

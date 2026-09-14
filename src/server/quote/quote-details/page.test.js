@@ -235,7 +235,7 @@ describe('Quote details page', () => {
 
     it('should show the dead-end no-quote page with no resend form for a malformed reference', async () => {
       const document = await loadPage({
-        requestUrl: `/quote/NRF-12345/${token}`,
+        requestUrl: `/quote/NRL-12345/${token}`,
         server: getServer()
       })
 
