@@ -17,6 +17,13 @@ const CHECK_URL = 'http://localhost:3000/quote/draw-boundary/check'
 const SAVE_URL = 'http://localhost:3000/quote/draw-boundary/save'
 const PANEL_ROOT_ID = 'draw-boundary-boundary-info'
 
+// Shared across the check-endpoint handlers that return a full payload —
+// the tests asserting on it override the fields they care about.
+const BOUNDARY_METADATA = {
+  area: { hectares: 12, acres: 30 },
+  perimeter: { kilometres: 4, miles: 2.5 }
+}
+
 const mswServer = setupMswServer()
 
 // wireBoundaryInfoPanel registers a document-level click listener each time
@@ -76,10 +83,7 @@ describe('wireBoundaryInfoPanel', () => {
           body: await request.json()
         }
         return HttpResponse.json({
-          boundaryMetadata: {
-            area: { hectares: 12, acres: 30 },
-            perimeter: { kilometres: 4, miles: 2.5 }
-          },
+          boundaryMetadata: BOUNDARY_METADATA,
           intersectingEdps: [{ label: 'Yare Broads' }, 'Bure Broads']
         })
       })
@@ -248,6 +252,40 @@ describe('wireBoundaryInfoPanel', () => {
     expect(panelText('[data-boundary-info-area]')).toBe('Not available')
   })
 
+  it('shows the unsupported area message when the check returns an excluded area, even with intersecting EDPs', async () => {
+    mswServer.use(
+      http.post(CHECK_URL, () =>
+        HttpResponse.json({
+          boundaryMetadata: BOUNDARY_METADATA,
+          intersectingEdps: [{ label: 'Yare Broads' }],
+          intersectingExcludedAreas: ['River Wensum Exclusion Zone']
+        })
+      )
+    )
+
+    const interactiveMap = wireAndReady()
+    interactiveMap._emit('draw:created', { geometry: {} })
+
+    await vi.waitFor(() =>
+      expect(
+        document
+          .getElementById(PANEL_ROOT_ID)
+          .querySelectorAll('[data-boundary-info-intersections] li')
+      ).toHaveLength(1)
+    )
+
+    const items = document
+      .getElementById(PANEL_ROOT_ID)
+      .querySelectorAll('[data-boundary-info-intersections] li')
+    expect(items[0].textContent).toBe(
+      'An area not supported by an Environmental Delivery Plan (EDP)'
+    )
+    expect(
+      document.querySelector('.app-boundary-info-panel__edp-description')
+    ).toBeNull()
+    expect(panelText('[data-boundary-info-area]')).toBe('12ha (30 acres)')
+  })
+
   it('renders the backend error message when the check request fails', async () => {
     mswServer.use(
       http.post(CHECK_URL, () =>
@@ -301,10 +339,7 @@ describe('wireBoundaryInfoPanel', () => {
     mswServer.use(
       http.post(CHECK_URL, () =>
         HttpResponse.json({
-          boundaryMetadata: {
-            area: { hectares: 12, acres: 30 },
-            perimeter: { kilometres: 4, miles: 2.5 }
-          },
+          boundaryMetadata: BOUNDARY_METADATA,
           intersectingEdps: []
         })
       )

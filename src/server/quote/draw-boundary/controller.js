@@ -79,10 +79,10 @@ export function saveBoundaryHandler(request, h) {
 
   // Excluded-area takes precedence: when the boundary overlaps an EDP
   // exclusion zone it is ineligible for the EDP, so the user must use the
-  // Habitat Regulations instead. The impact assessor skips the EDP query in
-  // this case, so intersectingEdps will be empty — but check this first to
-  // keep the redirect decisive regardless. The dead-end redirects carry
-  // change=true so their back links keep change mode alive.
+  // Habitat Regulations instead. The impact assessor still populates
+  // intersectingEdps in this case (the exclusion zones sit inside the EDP),
+  // so this check must come first. The dead-end redirects carry change=true
+  // so their back links keep change mode alive.
   if (intersectsExcludedArea) {
     return h
       .redirect(appendChangeParam(excludedAreaPath, request.query))
