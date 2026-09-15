@@ -30,6 +30,10 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
     serviceName: MANAGE_SERVICE_NAME
   },
   {
+    prefix: '/accessibility',
+    serviceName: 'Manage the nature restoration levy'
+  },
+  {
     prefix: '/cookies',
     serviceName: QUOTE_SERVICE_NAME
   },
