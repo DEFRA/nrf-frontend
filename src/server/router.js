@@ -1,6 +1,7 @@
 import inert from '@hapi/inert'
 
 import { about } from './about/index.js'
+import { accessibility } from './accessibility/index.js'
 import { health } from './health/index.js'
 import { version } from './version/index.js'
 import { auth } from './auth/index.js'
@@ -29,6 +30,7 @@ export const router = {
       // Application specific routes, add your own routes here
       await server.register([
         about,
+        accessibility,
         auth,
         cookies,
         profile,
