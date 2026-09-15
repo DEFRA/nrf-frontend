@@ -1,11 +1,11 @@
 import { getByRole } from '@testing-library/dom'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { loadPage } from '../../test-utils/load-page.js'
-import { config } from '../../config/config.js'
 import { routePath } from './route-path.js'
 import { COOKIE_ROUTE } from '../cookies/helpers/constants.js'
 
 const PAGE_HEADING = 'Accessibility statement'
+const SERVICE_NAME = 'Manage the nature restoration levy'
 
 describe('Accessibility statement page', () => {
   const getServer = setupTestServer()
@@ -16,14 +16,12 @@ describe('Accessibility statement page', () => {
       server: getServer()
     })
 
-    expect(document.title).toBe(
-      `Accessibility statement | ${config.get('serviceName')}`
-    )
+    expect(document.title).toBe(`Accessibility statement | ${SERVICE_NAME}`)
     expect(
       getByRole(document, 'heading', { level: 1, name: PAGE_HEADING })
     ).toBeInTheDocument()
     expect(
-      getByRole(document, 'link', { name: config.get('serviceName') })
+      getByRole(document, 'link', { name: SERVICE_NAME })
     ).toBeInTheDocument()
     expect(document.body.textContent).toContain(
       'This accessibility statement applies to the nature restoration levy service.'
