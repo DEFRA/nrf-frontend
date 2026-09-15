@@ -93,9 +93,10 @@ export const boundaryGeojsonWithEdp = {
 
 export const boundaryGeojsonWithExcludedArea = {
   ...boundaryGeojson,
-  // The impact assessor skips the EDP query when an excluded area intersects,
-  // so intersectingEdps is empty here by contract.
-  intersectingEdps: [],
+  // The impact assessor populates intersectingEdps even when an excluded
+  // area intersects (the zones sit inside the EDP) — a non-empty
+  // intersectingExcludedAreas is the sole ineligibility signal.
+  intersectingEdps: [{ label: 'Norfolk EDP' }],
   intersectingExcludedAreas: ['River Wensum Exclusion Zone']
 }
 

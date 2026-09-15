@@ -171,6 +171,26 @@ describe('renderPanel', () => {
     )
     expect(panelText('[data-boundary-info-area]')).toBe('Not available')
   })
+
+  it('shows the unsupported area message when an excluded area intersects, even when EDPs are also returned', () => {
+    mountBoundaryInfoPanel()
+
+    renderPanel({
+      results: {
+        intersectingEdps: [{ label: 'Yare Broads' }],
+        intersectingExcludedAreas: ['River Wensum Exclusion Zone']
+      }
+    })
+
+    const items = document
+      .getElementById(PANEL_ROOT_ID)
+      .querySelectorAll('[data-boundary-info-intersections] li')
+    expect(items).toHaveLength(1)
+    expect(items[0].textContent).toBe(
+      'An area not supported by an Environmental Delivery Plan (EDP)'
+    )
+    expect(panelText('[data-boundary-info-edps]')).not.toContain('Yare Broads')
+  })
 })
 
 describe('setSaveButtonDisabled', () => {
