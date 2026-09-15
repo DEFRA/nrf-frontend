@@ -12,27 +12,31 @@ import {
 import { ANALYTICS_INTERNAL_ROUTE } from '../../../server/cookies/helpers/constants.js'
 import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 
+const MANAGE_SERVICE_NAME = 'Manage the nature restoration levy'
+const QUOTE_SERVICE_NAME = 'Get a quote for the nature restoration levy'
+const REQUEST_TO_USE_SERVICE_NAME = 'Request to use the nature restoration levy'
+
 const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
     prefix: '/manage',
-    serviceName: 'Manage the nature restoration levy'
+    serviceName: MANAGE_SERVICE_NAME
   },
   {
     prefix: '/quote',
-    serviceName: 'Get a quote for the nature restoration levy'
+    serviceName: QUOTE_SERVICE_NAME
   },
   {
     prefix: '/accessibility',
-    serviceName: 'Manage the nature restoration levy'
+    serviceName: MANAGE_SERVICE_NAME
   },
   {
     prefix: '/cookies',
-    serviceName: 'Get a quote for the nature restoration levy'
+    serviceName: QUOTE_SERVICE_NAME
   },
   //TODO - remove request to use
   {
     prefix: '/request-to-use',
-    serviceName: 'Request to use the nature restoration levy'
+    serviceName: REQUEST_TO_USE_SERVICE_NAME
   }
 ]
 
