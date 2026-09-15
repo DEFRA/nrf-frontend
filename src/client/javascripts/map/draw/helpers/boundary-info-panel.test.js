@@ -189,9 +189,7 @@ describe('renderPanel', () => {
     expect(items[0].textContent).toBe(
       'An area not supported by an Environmental Delivery Plan (EDP)'
     )
-    expect(
-      items[0].querySelector('.app-boundary-info-panel__edp-description')
-    ).toBeNull()
+    expect(panelText('[data-boundary-info-edps]')).not.toContain('Yare Broads')
   })
 })
 
