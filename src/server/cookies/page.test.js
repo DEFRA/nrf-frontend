@@ -152,6 +152,8 @@ describe('GTM script rendering', () => {
     expect(gtmHead.textContent).toContain("'ad_user_data': 'denied'")
     expect(gtmHead.textContent).toContain("'ad_personalization': 'denied'")
     expect(gtmHead.textContent).toContain("'analytics_storage': 'granted'")
+    expect(gtmHead.textContent).toContain("gtag('consent', 'update'")
+    expect(gtmHead.textContent).toContain("'analytics_storage': 'granted'")
   })
 
   it('does not render GTM scripts when analytics is rejected', async () => {
