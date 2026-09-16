@@ -1,11 +1,8 @@
+import { referenceParam, tokenParam } from '@defra/nrf-library'
 import joi from 'joi'
 import { quoteDetailsGetController } from './controller-get.js'
 import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './helpers/quote-access-status.js'
-import {
-  referenceParam,
-  tokenParam
-} from '../../common/validation/reference.js'
 
 export const routePath = '/quote/{reference}/{token}'
 

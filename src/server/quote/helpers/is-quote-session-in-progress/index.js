@@ -1,3 +1,4 @@
+import { referencePattern, tokenPattern } from '@defra/nrf-library'
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/route-path.js'
 import { routePath as planningTypePath } from '../../planning-type/route-path.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
@@ -5,10 +6,6 @@ import { routePath as startPath } from '../../../manage/start-page/routes.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/route-path.js'
 import { routePath as notHousingPath } from '../../not-housing/route-path.js'
-import {
-  referencePattern,
-  tokenPattern
-} from '../../../common/validation/reference.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { appendChangeParam } from '../change-mode/index.js'
 

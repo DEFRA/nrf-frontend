@@ -1,3 +1,4 @@
+import { referenceParam, tokenParam } from '@defra/nrf-library'
 import joi from 'joi'
 import { quoteDetailsResendKnownController } from './controller-resend-known.js'
 import { quoteDetailsResendUnknownController } from './controller-resend-unknown.js'
@@ -6,10 +7,6 @@ import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validat
 import { saveValidationFlashToCache } from '../helpers/form-validation-session/index.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { emailField } from '../../common/validation/email.js'
-import {
-  referenceParam,
-  tokenParam
-} from '../../common/validation/reference.js'
 import getErrorViewModel from './get-error-view-model.js'
 import { quoteAccessStatus } from './helpers/quote-access-status.js'
 
