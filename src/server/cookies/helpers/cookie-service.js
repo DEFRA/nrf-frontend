@@ -43,7 +43,7 @@ const cookiePolicySchema = Joi.object({
 }).unknown(true)
 
 export function getCookiePreferences(request) {
-  const cookiesPolicy = request.state?.cookie_preferences
+  const cookiesPolicy = request.state?.cookie_policy
 
   if (!cookiesPolicy) {
     return defaultPreferences()
@@ -68,7 +68,7 @@ export function getCookiePreferences(request) {
 }
 
 export function isCookiePolicyVersionStale(request) {
-  if (!request.state?.cookie_preferences) {
+  if (!request.state?.cookie_policy) {
     return false
   }
 

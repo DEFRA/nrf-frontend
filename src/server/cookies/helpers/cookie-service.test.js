@@ -21,7 +21,7 @@ const createMockResponse = () => ({
 const createMockRequest = (state) => ({ state })
 
 const createMockRequestWithPolicy = (policy) =>
-  createMockRequest({ cookie_preferences: JSON.stringify(policy) })
+  createMockRequest({ cookie_policy: JSON.stringify(policy) })
 
 describe('cookie-service', () => {
   let mockResponse
@@ -127,7 +127,7 @@ describe('cookie-service', () => {
       createdAt: null
     }
 
-    test('returns parsed policy when cookie_preferences cookie exists', () => {
+    test('returns parsed policy when cookie_policy cookie exists', () => {
       const policy = {
         essential: true,
         analytics: true,
@@ -140,7 +140,7 @@ describe('cookie-service', () => {
       )
     })
 
-    test('returns default preferences when cookie_preferences is absent', () => {
+    test('returns default preferences when cookie_policy is absent', () => {
       expect(getCookiePreferences(createMockRequest({}))).toEqual(
         defaultPreferences
       )
@@ -189,23 +189,23 @@ describe('cookie-service', () => {
       )
     })
 
-    test('returns default preferences when cookie_preferences is invalid JSON', () => {
-      const request = createMockRequest({ cookie_preferences: 'not-json{' })
+    test('returns default preferences when cookie_policy is invalid JSON', () => {
+      const request = createMockRequest({ cookie_policy: 'not-json{' })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
     })
 
-    test('returns default preferences when cookie_preferences is a JSON string (not an object)', () => {
+    test('returns default preferences when cookie_policy is a JSON string (not an object)', () => {
       const request = createMockRequest({
-        cookie_preferences: JSON.stringify('a string')
+        cookie_policy: JSON.stringify('a string')
       })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
     })
 
-    test('returns default preferences when cookie_preferences is a JSON array', () => {
+    test('returns default preferences when cookie_policy is a JSON array', () => {
       const request = createMockRequest({
-        cookie_preferences: JSON.stringify([])
+        cookie_policy: JSON.stringify([])
       })
 
       expect(getCookiePreferences(request)).toEqual(defaultPreferences)
@@ -221,7 +221,7 @@ describe('cookie-service', () => {
 
       expect(
         getCookiePreferences(
-          createMockRequest({ cookie_preferences: JSON.stringify(policy) })
+          createMockRequest({ cookie_policy: JSON.stringify(policy) })
         )
       ).toEqual(defaultPreferences)
     })
@@ -240,7 +240,7 @@ describe('cookie-service', () => {
 
         expect(
           getCookiePreferences(
-            createMockRequest({ cookie_preferences: JSON.stringify(policy) })
+            createMockRequest({ cookie_policy: JSON.stringify(policy) })
           )
         ).toEqual(defaultPreferences)
       }
@@ -322,7 +322,7 @@ describe('cookie-service', () => {
       expect(areAnalyticsCookiesAccepted(request)).toBe(false)
     })
 
-    test('returns false when no cookie_preferences cookie exists', () => {
+    test('returns false when no cookie_policy cookie exists', () => {
       expect(areAnalyticsCookiesAccepted(createMockRequest({}))).toBe(false)
     })
 
