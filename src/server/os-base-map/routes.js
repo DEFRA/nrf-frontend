@@ -1,34 +1,30 @@
-import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
+import {
+  getOrdnanceSurveyMapUrl,
+  ordnanceSurveyMapBaseUrl
+} from './ordnance-survey-url.js'
 
 const logger = createLogger()
 
-const ordnanceSurveyMapUrl = 'https://api.os.uk/maps/vector/v1/vts'
 const defaultCacheControl = 'no-cache'
 const cacheControlHeader = 'cache-control'
 
 export const routePath = '/os-base-map'
 
-function getOrdnanceSurveyMapUrl(path, query) {
-  const ordnanceSurveyApiKey = config.get('map.osApiKey')
-  const params = new URLSearchParams(query)
-  params.set('key', ordnanceSurveyApiKey)
-  params.set('srs', '3857')
-  const base = path ? `${ordnanceSurveyMapUrl}/${path}` : ordnanceSurveyMapUrl
-  return `${base}?${params.toString()}`
-}
-
 // Rewrites api.os.uk URLs in JSON responses to route through our proxy, stripping
 // query strings so the API key isn't leaked to the client.
 function rewriteOrdnanceSurveyMapUrls(body, host) {
   const proxyBase = `${host}${routePath}`
-  const basePath = new URL(ordnanceSurveyMapUrl).pathname
+  const basePath = new URL(ordnanceSurveyMapBaseUrl).pathname
 
   try {
     // Walk every value in the JSON using the parse reviver callback
     const json = JSON.parse(body, (_key, value) => {
-      if (typeof value === 'string' && value.startsWith(ordnanceSurveyMapUrl)) {
+      if (
+        typeof value === 'string' &&
+        value.startsWith(ordnanceSurveyMapBaseUrl)
+      ) {
         // Extract the sub-path (e.g. /resources/styles) and discard the query string.
         // decodeURIComponent restores MapLibre template tokens like {z}/{y}/{x}
         // that new URL() percent-encodes.
@@ -96,7 +92,10 @@ async function handleUpstreamError(res, h, path, duration) {
 }
 
 async function fetchUpstream(request, path) {
-  const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl(path, request.query)
+  const ordnanceSurveyUrl = getOrdnanceSurveyMapUrl({
+    path,
+    query: request.query
+  })
   const isBinaryResource = isBinaryPath(path)
   const logLevel = isBinaryResource ? 'debug' : 'info'
 

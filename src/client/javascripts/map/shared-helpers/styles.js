@@ -9,15 +9,18 @@ function getOrdnanceSurveyAttribution() {
  * The map is created with MapLibre's own attribution control switched off, so
  * a style's source credit only reaches the page through the map-styles plugin.
  * Reading it back from the style JSON keeps APGB's licensed imagery credited
- * once, in the style that carries it.
+ * once, in the style that carries it. The aerial style also masks the sea with
+ * Ordnance Survey coastline geometry, so both licences have to appear.
  *
  * @param {{ sources: Record<string, { attribution?: string }> }} style
- * @returns {string | undefined}
+ * @returns {string}
  */
-function getStyleSourceAttribution(style) {
-  const [source] = Object.values(style.sources)
+function getAerialAttribution(style) {
+  const credits = Object.values(style.sources)
+    .map((source) => source.attribution)
+    .filter(Boolean)
 
-  return source?.attribution
+  return [...credits, getOrdnanceSurveyAttribution()].join(' | ')
 }
 
 export function getMapStyles() {
@@ -27,7 +30,7 @@ export function getMapStyles() {
       label: 'Aerial',
       url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.svg`,
-      attribution: getStyleSourceAttribution(apgbAerialStyle)
+      attribution: getAerialAttribution(apgbAerialStyle)
     },
     {
       id: 'outdoor-os',

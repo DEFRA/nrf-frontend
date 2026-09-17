@@ -1,6 +1,7 @@
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import routes, { routePath } from './routes.js'
+import seaMaskRoutes from './sea-mask/routes.js'
 
 const logger = createLogger()
 
@@ -20,7 +21,7 @@ export const osBaseMap = {
         )
       }
 
-      server.route(routes)
+      server.route([...seaMaskRoutes, ...routes])
     }
   }
 }

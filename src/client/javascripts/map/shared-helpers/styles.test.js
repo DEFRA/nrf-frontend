@@ -24,20 +24,18 @@ describe('getMapStyles', () => {
     expect(aerial.thumbnail).toMatch(/aerial\.svg$/)
   })
 
-  it('credits aerial imagery to APGB rather than Ordnance Survey', () => {
-    const [aerial, outdoorOs] = getMapStyles()
-
-    expect(aerial.attribution).not.toBe(outdoorOs.attribution)
-    expect(aerial.attribution).not.toMatch(/Ordnance Survey/)
-  })
-
-  it('takes the aerial credit from the style JSON so the two cannot drift', () => {
-    const [source] = Object.values(aerialStyle.sources)
+  it('credits both APGB for the imagery and Ordnance Survey for the coastline', () => {
     const [aerial] = getMapStyles()
 
-    expect(aerial.attribution).toBe(source.attribution)
-    expect(aerial.attribution).toBe(
-      '© Bluesky International Limited 2021 and onwards | © Bluesky International Limited and Getmapping Limited 1999-2020'
+    expect(aerial.attribution).toMatch(/Bluesky International/)
+    expect(aerial.attribution).toMatch(/Ordnance Survey/)
+  })
+
+  it('takes the aerial imagery credit from the style JSON so the two cannot drift', () => {
+    const [aerial] = getMapStyles()
+
+    expect(aerial.attribution).toContain(
+      aerialStyle.sources['apgb-aerial'].attribution
     )
   })
 })
