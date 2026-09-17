@@ -1,8 +1,8 @@
+import { referenceParam } from '@defra/nrf-library'
 import Boom from '@hapi/boom'
 import joi from 'joi'
 import { confirmationGetController } from './controller-get.js'
 import getViewModel from './get-view-model.js'
-import { referenceParam } from '../../common/validation/reference.js'
 
 const routeId = 'confirmation'
 export const routePath = `/quote/${routeId}`
