@@ -20,7 +20,7 @@ function makeRequest({ yarValue = null, analytics = null, path = '/' } = {}) {
     },
     state: {
       ...(analytics !== null && {
-        cookie_preferences: JSON.stringify({
+        cookie_policy: JSON.stringify({
           essential: true,
           analytics,
           version: 1,
@@ -103,7 +103,7 @@ describe('analyticsCookieMetrics plugin', () => {
     })
   })
 
-  describe('session is "shown", no cookie_preferences yet', () => {
+  describe('session is "shown", no cookie_policy yet', () => {
     it('does nothing', async () => {
       const request = makeRequest({ yarValue: 'shown', analytics: null })
       await handler(request, h)
@@ -111,7 +111,7 @@ describe('analyticsCookieMetrics plugin', () => {
     })
   })
 
-  describe('session is "accepted", cookie_preferences still present', () => {
+  describe('session is "accepted", cookie_policy still present', () => {
     it('does nothing', async () => {
       const request = makeRequest({ yarValue: 'accepted', analytics: true })
       await handler(request, h)
@@ -119,7 +119,7 @@ describe('analyticsCookieMetrics plugin', () => {
     })
   })
 
-  describe('session is "rejected", cookie_preferences still present', () => {
+  describe('session is "rejected", cookie_policy still present', () => {
     it('does nothing', async () => {
       const request = makeRequest({ yarValue: 'rejected', analytics: false })
       await handler(request, h)
@@ -127,7 +127,7 @@ describe('analyticsCookieMetrics plugin', () => {
     })
   })
 
-  describe('cookie_preferences deleted after accepting', () => {
+  describe('cookie_policy deleted after accepting', () => {
     it('resets session to "shown"', async () => {
       const request = makeRequest({ yarValue: 'accepted', analytics: null })
       await handler(request, h)
@@ -135,7 +135,7 @@ describe('analyticsCookieMetrics plugin', () => {
     })
   })
 
-  describe('cookie_preferences deleted after rejecting', () => {
+  describe('cookie_policy deleted after rejecting', () => {
     it('resets session to "shown"', async () => {
       const request = makeRequest({ yarValue: 'rejected', analytics: null })
       await handler(request, h)
