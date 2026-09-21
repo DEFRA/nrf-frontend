@@ -1,4 +1,5 @@
 import { statusCodes } from '../constants/status-codes.js'
+import { getPageTitle } from './page-title.js'
 
 const errorTemplates = {
   [statusCodes.badRequest]: 'error/400',
@@ -36,15 +37,11 @@ function statusCodeMessage(statusCode) {
  * @returns {object} Hapi view response
  */
 function renderErrorPage({ statusCode, errorMessage, h }) {
-  const template = errorTemplates[statusCode]
+  const template = errorTemplates[statusCode] ?? 'error/index'
 
-  if (template) {
-    return h.view(template, { pageTitle: errorMessage, statusCode })
-  }
-
-  return h.view('error/index', {
-    pageTitle: errorMessage,
-    heading: errorMessage,
+  return h.view(template, {
+    pageTitle: getPageTitle(errorMessage),
+    pageHeading: errorMessage,
     statusCode
   })
 }
