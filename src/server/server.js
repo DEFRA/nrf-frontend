@@ -22,7 +22,6 @@ import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { createLogger } from './common/helpers/logging/logger.js'
 import { csrf } from './common/helpers/csrf.js'
-import { swagger } from './plugins/swagger.js'
 
 const logger = createLogger()
 
@@ -114,11 +113,6 @@ export async function createServer() {
 
   // Register routes after auth is configured
   await server.register(router)
-
-  // Register Swagger documentation (after router so inert is available)
-  if (config.get('useSwagger')) {
-    await server.register(swagger)
-  }
 
   // Sessions are required for core functionality (e.g. persisting quote-journey
   // answers), so refuse to start unless the session store (Redis) is connected.

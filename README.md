@@ -22,21 +22,6 @@ The frontend runs locally as part of the [nrf-solution](https://github.com/DEFRA
 
 See the [nrf-solution README](https://github.com/DEFRA/nrf-solution/blob/main/README.md) for setup, ports and troubleshooting.
 
-### API documentation
-
-Swagger UI is available at `/docs` when the server is running.
-The OpenAPI spec is generated from `@openapi` JSDoc annotations in the route and controller files.
-
-### Keeping Swagger docs in sync
-
-An AI (Claude Code) skill is provided to audit and fix the `@openapi` annotations so they match the actual endpoint implementations.
-
-Run it from nrf-solution with:
-
-```shell
-/sync-swagger
-```
-
 ## Interactive map
 
 The boundary check result page uses [@defra/interactive-map](https://github.com/DEFRA/interactive-map) with MapLibre GL to display uploaded red line boundaries. The map client code is in `src/client/javascripts/boundary-map.js`.
