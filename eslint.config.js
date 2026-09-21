@@ -11,18 +11,5 @@ export default [
   {
     plugins: { 'no-secrets': noSecrets },
     rules: { 'no-secrets/no-secrets': ['error', { tolerance: 4.5 }] }
-  },
-  {
-    files: ['src/server/plugins/swagger-initializer.js'],
-    languageOptions: {
-      globals: {
-        window: 'readonly',
-        document: 'readonly',
-        XMLHttpRequest: 'readonly',
-        SwaggerUIBundle: 'readonly',
-        SwaggerUIStandalonePreset: 'readonly'
-      }
-    },
-    rules: {}
   }
 ]

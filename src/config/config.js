@@ -402,12 +402,6 @@ export const config = convict({
     sensitive: true,
     env: 'FRONTEND_API_KEY'
   },
-  useSwagger: {
-    doc: 'Enable Swagger API documentation at /docs',
-    format: Boolean,
-    default: false,
-    env: 'USE_SWAGGER'
-  },
   map: {
     osApiKey: {
       doc: 'Ordnance Survey Vector Tile API key for the OS Vector Tile API base map.',
