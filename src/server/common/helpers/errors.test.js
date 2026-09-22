@@ -2,7 +2,6 @@ import { vi } from 'vitest'
 
 import { catchAll } from './errors.js'
 import { createServer } from '../../server.js'
-import { config } from '../../../config/config.js'
 import { statusCodes } from '../constants/status-codes.js'
 
 describe('#errors', () => {
@@ -24,7 +23,9 @@ describe('#errors', () => {
     })
 
     expect(result).toEqual(
-      expect.stringContaining(`Page not found | ${config.get('serviceName')}`)
+      expect.stringContaining(
+        'Page not found - Nature restoration levy - GOV.UK'
+      )
     )
     expect(statusCode).toBe(statusCodes.notFound)
   })
@@ -61,7 +62,8 @@ describe('#catchAll', () => {
 
     expect(mockErrorLogger).not.toHaveBeenCalled()
     expect(mockToolkitView).toHaveBeenCalledWith('error/404', {
-      pageTitle: 'Page not found',
+      pageTitle: 'Page not found - Nature restoration levy - GOV.UK',
+      pageHeading: 'Page not found',
       statusCode: statusCodes.notFound
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.notFound)
@@ -72,8 +74,8 @@ describe('#catchAll', () => {
 
     expect(mockErrorLogger).not.toHaveBeenCalled()
     expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Forbidden',
-      heading: 'Forbidden',
+      pageTitle: 'Forbidden - Nature restoration levy - GOV.UK',
+      pageHeading: 'Forbidden',
       statusCode: statusCodes.forbidden
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.forbidden)
@@ -84,8 +86,8 @@ describe('#catchAll', () => {
 
     expect(mockErrorLogger).not.toHaveBeenCalled()
     expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Unauthorized',
-      heading: 'Unauthorized',
+      pageTitle: 'Unauthorized - Nature restoration levy - GOV.UK',
+      pageHeading: 'Unauthorized',
       statusCode: statusCodes.unauthorized
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.unauthorized)
@@ -96,7 +98,9 @@ describe('#catchAll', () => {
 
     expect(mockErrorLogger).not.toHaveBeenCalled()
     expect(mockToolkitView).toHaveBeenCalledWith('error/400', {
-      pageTitle: 'Your details are incomplete',
+      pageTitle:
+        'Your details are incomplete - Nature restoration levy - GOV.UK',
+      pageHeading: 'Your details are incomplete',
       statusCode: statusCodes.badRequest
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badRequest)
@@ -114,7 +118,8 @@ describe('#catchAll', () => {
       'Service unavailable'
     )
     expect(mockToolkitView).toHaveBeenCalledWith('error/503', {
-      pageTitle: 'Service unavailable',
+      pageTitle: 'Service unavailable - Nature restoration levy - GOV.UK',
+      pageHeading: 'Service unavailable',
       statusCode: statusCodes.serviceUnavailable
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.serviceUnavailable)
@@ -125,8 +130,8 @@ describe('#catchAll', () => {
 
     expect(mockErrorLogger).not.toHaveBeenCalled()
     expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Something went wrong',
-      heading: 'Something went wrong',
+      pageTitle: 'Something went wrong - Nature restoration levy - GOV.UK',
+      pageHeading: 'Something went wrong',
       statusCode: statusCodes.imATeapot
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.imATeapot)
@@ -144,11 +149,33 @@ describe('#catchAll', () => {
       'Sorry, there is a problem with the service'
     )
     expect(mockToolkitView).toHaveBeenCalledWith('error/500', {
-      pageTitle: 'Sorry, there is a problem with the service',
+      pageTitle:
+        'Sorry, there is a problem with the service - Nature restoration levy - GOV.UK',
+      pageHeading: 'Sorry, there is a problem with the service',
       statusCode: statusCodes.internalServerError
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(
       statusCodes.internalServerError
     )
+  })
+
+  it('Should provide expected "Sorry, there is a problem with the service" page and log error for badGateway', () => {
+    catchAll(mockRequest(statusCodes.badGateway), mockToolkit)
+
+    expect(mockErrorLogger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isBoom: true,
+        stack: mockStack,
+        output: { statusCode: statusCodes.badGateway }
+      }),
+      'Sorry, there is a problem with the service'
+    )
+    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
+      pageTitle:
+        'Sorry, there is a problem with the service - Nature restoration levy - GOV.UK',
+      pageHeading: 'Sorry, there is a problem with the service',
+      statusCode: statusCodes.badGateway
+    })
+    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badGateway)
   })
 })

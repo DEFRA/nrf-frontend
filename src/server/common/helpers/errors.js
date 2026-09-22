@@ -1,4 +1,5 @@
 import { statusCodes } from '../constants/status-codes.js'
+import { getPageTitle } from './page-title.js'
 
 const errorTemplates = {
   [statusCodes.badRequest]: 'error/400',
@@ -19,6 +20,7 @@ function statusCodeMessage(statusCode) {
       return 'Your details are incomplete'
     case statusCodes.serviceUnavailable:
       return 'Service unavailable'
+    case statusCodes.badGateway:
     case statusCodes.internalServerError:
       return 'Sorry, there is a problem with the service'
     default:
@@ -28,7 +30,7 @@ function statusCodeMessage(statusCode) {
 
 /**
  * Renders the error page for a Boom response status. Dedicated pages exist
- * for 400, 404 and 503; all other statuses use the generic error page.
+ * for 400, 404, 500 and 503; all other statuses use the generic error page.
  * @param {object} options - error page options
  * @param {number} options.statusCode - HTTP status of the Boom response
  * @param {string} options.errorMessage - human-readable message for the status
@@ -36,15 +38,11 @@ function statusCodeMessage(statusCode) {
  * @returns {object} Hapi view response
  */
 function renderErrorPage({ statusCode, errorMessage, h }) {
-  const template = errorTemplates[statusCode]
+  const template = errorTemplates[statusCode] ?? 'error/index'
 
-  if (template) {
-    return h.view(template, { pageTitle: errorMessage, statusCode })
-  }
-
-  return h.view('error/index', {
-    pageTitle: errorMessage,
-    heading: errorMessage,
+  return h.view(template, {
+    pageTitle: getPageTitle(errorMessage),
+    pageHeading: errorMessage,
     statusCode
   })
 }
