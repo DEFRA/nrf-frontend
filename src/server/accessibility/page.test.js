@@ -24,7 +24,7 @@ describe('Accessibility statement page', () => {
       getByRole(document, 'link', { name: SERVICE_NAME })
     ).toBeInTheDocument()
     expect(document.body.textContent).toContain(
-      'This accessibility statement applies to the nature restoration levy service.'
+      'This accessibility statement applies to the Manage the nature restoration levy service.'
     )
   })
 
