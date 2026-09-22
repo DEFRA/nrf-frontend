@@ -8,7 +8,6 @@ import { pulse } from './common/helpers/pulse.js'
 import { catchAll } from './common/helpers/errors.js'
 import { applyCacheControlHeaders } from './common/helpers/cache-control-headers.js'
 import { nunjucksConfig } from '../config/nunjucks/nunjucks.js'
-import { setupProxy } from './common/helpers/proxy/setup-proxy.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { sessionCache } from './common/helpers/session-cache/session-cache.js'
@@ -26,7 +25,6 @@ import { csrf } from './common/helpers/csrf.js'
 const logger = createLogger()
 
 export async function createServer() {
-  setupProxy()
   const { engine: sessionCacheEngine, client: redisClient } = getCacheEngine()
   const server = hapi.server({
     host: config.get('host'),

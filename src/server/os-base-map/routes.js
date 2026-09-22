@@ -100,11 +100,6 @@ async function fetchUpstream(request, path) {
   const isBinaryResource = isBinaryPath(path)
   const logLevel = isBinaryResource ? 'debug' : 'info'
 
-  // Using fetch (backed by Undici) so requests route through the CDP
-  // HTTP_PROXY configured in setup-proxy.js via setGlobalDispatcher.
-  // Note: fetch auto-decompresses responses, so for binary resources the
-  // raw gzip bytes are not preserved. The overhead is minimal since tiles
-  // are small (~20-80KB).
   logger[logLevel](
     `Map proxy ${isBinaryResource ? 'binary' : 'json'} request: ${path || '/'}`
   )

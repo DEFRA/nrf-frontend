@@ -154,13 +154,6 @@ export const config = convict({
       }
     }
   },
-  httpProxy: {
-    doc: 'HTTP Proxy',
-    format: String,
-    nullable: true,
-    default: null,
-    env: 'HTTP_PROXY'
-  },
   isSecureContextEnabled: {
     doc: 'Enable Secure Context',
     format: Boolean,
