@@ -158,4 +158,24 @@ describe('#catchAll', () => {
       statusCodes.internalServerError
     )
   })
+
+  it('Should provide expected "Sorry, there is a problem with the service" page and log error for badGateway', () => {
+    catchAll(mockRequest(statusCodes.badGateway), mockToolkit)
+
+    expect(mockErrorLogger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isBoom: true,
+        stack: mockStack,
+        output: { statusCode: statusCodes.badGateway }
+      }),
+      'Sorry, there is a problem with the service'
+    )
+    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
+      pageTitle:
+        'Sorry, there is a problem with the service - Nature restoration levy - GOV.UK',
+      pageHeading: 'Sorry, there is a problem with the service',
+      statusCode: statusCodes.badGateway
+    })
+    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badGateway)
+  })
 })
