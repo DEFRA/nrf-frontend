@@ -1,6 +1,5 @@
 import { getByRole } from '@testing-library/dom'
 import { JSDOM } from 'jsdom'
-import { config } from '../../config/config.js'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { loadPage } from '../../test-utils/load-page.js'
 import { statusCodes } from '../common/constants/status-codes.js'
@@ -15,7 +14,9 @@ describe('Error pages', () => {
       server: getServer()
     })
 
-    expect(document.title).toBe(`Page not found | ${config.get('serviceName')}`)
+    expect(document.title).toBe(
+      'Page not found - Nature restoration levy - GOV.UK'
+    )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Page not found'
     )
@@ -35,6 +36,9 @@ describe('Error pages', () => {
     expect(statusCode).toBe(statusCodes.badRequest)
 
     const { window } = new JSDOM(result)
+    expect(window.document.title).toBe(
+      'Your details are incomplete - Nature restoration levy - GOV.UK'
+    )
     expect(
       getByRole(window.document, 'heading', { level: 1 })
     ).toHaveTextContent('Your details are incomplete')
