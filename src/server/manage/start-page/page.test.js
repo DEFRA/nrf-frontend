@@ -2,6 +2,7 @@ import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
 
 describe('Start page', () => {
   const getServer = setupTestServer()
@@ -30,5 +31,13 @@ describe('Start page', () => {
       'href',
       'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
     )
+  })
+
+  it('should show contact details for help with the nature restoration levy', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer()
+    })
+    assertContactDetails(document)
   })
 })
