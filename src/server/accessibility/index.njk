@@ -26,17 +26,17 @@
 
       <h2 class="govuk-heading-l">Feedback and contact information</h2>
 
-      <p class="govuk-body">If you find any problems that are not listed on this page, or if you think we’re not meeting accessibility requirements, contact Defra using the details below.</p>
+      <p class="govuk-body">If you find any problems that are not listed on this page, or if you think we’re not meeting accessibility requirements, contact {{ contactDetails.organisation }} using the details below.</p>
 
       <p class="govuk-body">You can also request information in a different format, such as accessible PDF, large print, easy read, audio recording or braille.</p>
 
       <p class="govuk-body">
-        Telephone: 0300 060 3900<br>
-        Monday to Friday, 8:30am to 5pm, except bank holidays
+        Telephone: {{ contactDetails.telephone }}<br>
+        {{ contactDetails.openingHours }}
       </p>
 
       <p class="govuk-body">
-        <a href="https://www.gov.uk/call-charges" class="govuk-link" target="_blank" rel="noopener noreferrer">Find out about call charges (opens in new tab)</a>
+        <a href="{{ contactDetails.callChargesUrl }}" class="govuk-link" target="_blank" rel="noopener noreferrer">Find out about call charges (opens in new tab)</a>
       </p>
 
       <p class="govuk-body">We’ll consider your request and get back to you within 10 working days.</p>

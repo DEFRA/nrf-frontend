@@ -1,0 +1,13 @@
+<h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
+
+<p class="govuk-body">If you need help with the nature restoration levy, contact {{ contactDetails.organisation }}.</p>
+
+<p class="govuk-body">
+    Email: <a href="mailto:{{ contactDetails.email }}" class="govuk-link">{{ contactDetails.email }}</a><br>
+    Telephone: {{ contactDetails.telephone }}<br>
+    {{ contactDetails.openingHours }}
+</p>
+
+<p class="govuk-body">
+    <a href="{{ contactDetails.callChargesUrl }}" class="govuk-link" target="_blank" rel="noopener noreferrer">Find out about call charges (opens in new tab)</a>
+</p>

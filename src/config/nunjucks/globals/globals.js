@@ -1,6 +1,5 @@
-import { quoteRoutes } from './quote-routes.js'
-import { manageRoutes } from './manage-routes.js'
+export const govukRebrand = true
 
-const govukRebrand = true
-
-export { govukRebrand, quoteRoutes, manageRoutes }
+export { quoteRoutes } from './quote-routes.js'
+export { manageRoutes } from './manage-routes.js'
+export { contactDetails } from './contact-details.js'
