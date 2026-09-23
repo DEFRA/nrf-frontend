@@ -12,7 +12,7 @@ export const assertContactDetails = (container) => {
   )
   expect(main).toHaveTextContent('Telephone: 0300 060 3900')
   expect(main).toHaveTextContent(
-    'Monday to Friday, 8:30am to 5pm, except bank holidays'
+    'Monday to Friday, 10am to 4pm, except bank holidays'
   )
   const emailLink = getByRole(container, 'link', {
     name: 'enquiries@naturalengland.org.uk'
