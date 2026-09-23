@@ -37,7 +37,7 @@ describe('getMapStyles', () => {
 
     expect(aerial.attribution).toBe(source.attribution)
     expect(aerial.attribution).toBe(
-      '© Bluesky International Limited and Getmapping Limited 1999-2020<br>© Bluesky International Limited 2021 and onwards'
+      '© Bluesky International Limited 2021 and onwards | © Bluesky International Limited and Getmapping Limited 1999-2020'
     )
   })
 })

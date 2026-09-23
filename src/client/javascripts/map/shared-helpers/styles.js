@@ -21,7 +21,7 @@ function getStyleSourceAttribution(style) {
 }
 
 export function getMapStyles() {
-  return [
+  const styles = [
     {
       id: 'aerial',
       label: 'Aerial',
@@ -51,4 +51,9 @@ export function getMapStyles() {
       attribution: getOrdnanceSurveyAttribution()
     }
   ]
+
+  // interactive-map hides the copyright at its mobile breakpoint unless the
+  // style opts in; the APGB and OS licence terms require the credit on every
+  // device
+  return styles.map((style) => ({ ...style, showAttributionOnMobile: true }))
 }
