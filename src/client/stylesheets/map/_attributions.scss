@@ -1,0 +1,36 @@
+// NRF2-1189: interactive-map wraps the copyright rather than truncating it
+// (Attributions.module.scss), so a long credit such as APGB's spreads over
+// several lines once it no longer fits beside the logo. Hold it to one line
+// instead and truncate with an ellipsis: the credit is ordered newest first,
+// so the cut always falls on the oldest copyright at the right-hand end, and
+// rotating a phone to landscape gives the line room to show in full.
+//
+// text-align also has to become left: text-overflow only renders an ellipsis
+// for inline-end overflow, so the library's right alignment would silently
+// clip the newest credit at the left instead. When the line does fit, the
+// element shrink-wraps the text either way, so this changes nothing visible.
+//
+// The min-width: 0s are what make the truncation actually engage. Both the
+// text element and the stacked row are flex items, whose automatic minimum
+// size is their content — with the text now unbreakable, that grows the row
+// past its 100% flex-basis and the whole credit just bleeds off-screen
+// instead of clipping (no ellipsis, exactly the bug this fixed).
+//
+// The .im-o-app__attributions scope on the text rule isn't structural — the
+// map pages link the library stylesheets after the app CSS (see the head
+// block of draw-boundary/index.njk), so a single-class selector would lose
+// the cascade tie on white-space.
+//
+// The map team plan to move this truncation into the library itself — drop
+// this override when that release lands.
+.im-o-app__attributions .im-c-attributions {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.im-o-app__attributions--stacked {
+  min-width: 0;
+}
