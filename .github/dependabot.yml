@@ -82,7 +82,6 @@ updates:
           - 'ioredis'
           - 'node-fetch'
           - 'nunjucks'
-          - 'undici'
 
     ignore:
       - dependency-name: 'eslint-*'
