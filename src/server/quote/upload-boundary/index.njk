@@ -1,4 +1,5 @@
 {% extends "layouts/page.njk" %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
 
 {% block pageTitle %}{% if uploadError or validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
@@ -51,6 +52,11 @@
                 attributes: {
                     accept: ".geojson,.json,.kml,.zip"
                 }
+            }) }}
+
+            {{ govukDetails({
+                summaryText: "My file is in a different format",
+                html: "You'll need to re-export the shape from the tool used to create it originally. If you don't have access to the file types listed, you can draw on a map instead. <a href=\"#\" class=\"govuk-link\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more about telling us where your development is (opens in a new tab)</a>"
             }) }}
 
             {{ govukButton({
