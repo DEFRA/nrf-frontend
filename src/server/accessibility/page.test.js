@@ -16,7 +16,9 @@ describe('Accessibility statement page', () => {
       server: getServer()
     })
 
-    expect(document.title).toBe(`Accessibility statement | ${SERVICE_NAME}`)
+    expect(document.title).toBe(
+      'Accessibility statement - Nature restoration levy - GOV.UK'
+    )
     expect(
       getByRole(document, 'heading', { level: 1, name: PAGE_HEADING })
     ).toBeInTheDocument()
