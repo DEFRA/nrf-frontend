@@ -115,6 +115,20 @@ describe('Boundary map page', () => {
       expect(document.body.textContent).toContain('(25% of boundary)')
     })
 
+    it('includes the map key plugin stylesheet', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+
+      const mapKeyCss = document.querySelector(
+        'link[href*="interactive-map/plugins/map-key/index.css"]'
+      )
+      expect(mapKeyCss).toBeInTheDocument()
+    })
+
     it('should show save and continue button', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({

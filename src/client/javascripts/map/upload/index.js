@@ -17,14 +17,19 @@ function initUploadPreviewMap() {
 
   const { initialFeature, bounds, center } = readExistingBoundary(mapElement)
 
-  const { mapStyles, datasetsPlugin, mapStylesPlugin, scaleBarPlugin } =
-    createCommonMapPlugins()
+  const {
+    mapStyles,
+    datasetsPlugin,
+    mapKeyPlugin,
+    mapStylesPlugin,
+    scaleBarPlugin
+  } = createCommonMapPlugins()
 
   const interactiveMap = createInteractiveMap(MAP_ELEMENT_ID, {
     mapStyles,
     bounds,
     center,
-    plugins: [datasetsPlugin, mapStylesPlugin, scaleBarPlugin]
+    plugins: [datasetsPlugin, mapKeyPlugin, mapStylesPlugin, scaleBarPlugin]
   })
 
   function onMapReady(mapReadyEvent) {

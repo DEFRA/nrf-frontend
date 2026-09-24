@@ -26,6 +26,7 @@ export function configureMocks(mocks) {
     addFeature: vi.fn()
   })
   mocks.datasetsPlugin.mockReturnValue({ id: 'datasets' })
+  mocks.mapKeyPlugin.mockReturnValue({ id: 'mapKey' })
 
   return {
     _mock: mocks.interactiveMapConstruct,

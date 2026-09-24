@@ -14,7 +14,8 @@ const mocks = vi.hoisted(() => ({
   maplibreProvider: vi.fn(),
   mapStylesPlugin: vi.fn(),
   scaleBarPlugin: vi.fn(),
-  datasetsPlugin: vi.fn()
+  datasetsPlugin: vi.fn(),
+  mapKeyPlugin: vi.fn()
 }))
 
 vi.mock('@defra/interactive-map', () => ({
@@ -33,6 +34,9 @@ vi.mock('@defra/interactive-map/plugins/scale-bar', () => ({
 }))
 vi.mock('@defra/interactive-map/plugins/datasets', () => ({
   default: mocks.datasetsPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/map-key', () => ({
+  default: mocks.mapKeyPlugin
 }))
 
 const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
@@ -69,7 +73,12 @@ describe('upload preview map init', () => {
         containerHeight: '100%',
         enableZoomControls: true,
         transformRequest: expect.any(Function),
-        plugins: [{ id: 'datasets' }, { id: 'mapStyles' }, { id: 'scaleBar' }]
+        plugins: [
+          { id: 'datasets' },
+          { id: 'mapKey' },
+          { id: 'mapStyles' },
+          { id: 'scaleBar' }
+        ]
       })
     )
     expect(mockDefra.mapStylesPlugin).toHaveBeenCalledWith({

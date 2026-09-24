@@ -39,10 +39,11 @@ const STYLES_PANEL_TOP_RIGHT = {
 const TOP_LEFT_SEARCH_SECOND = { slot: 'top-left', showLabel: false, order: 2 }
 
 /**
- * @param {{ datasetsPlugin: object, mapStylesPlugin: object, scaleBarPlugin: object, interactPlugin: object, drawPlugin: object, searchPlugin: object }} params
+ * @param {{ datasetsPlugin: object, mapKeyPlugin: object, mapStylesPlugin: object, scaleBarPlugin: object, interactPlugin: object, drawPlugin: object, searchPlugin: object }} params
  */
 function buildMapPlugins({
   datasetsPlugin,
+  mapKeyPlugin,
   mapStylesPlugin,
   scaleBarPlugin,
   interactPlugin,
@@ -51,6 +52,7 @@ function buildMapPlugins({
 }) {
   return [
     datasetsPlugin,
+    mapKeyPlugin,
     {
       ...mapStylesPlugin,
       manifest: {
@@ -138,8 +140,13 @@ function initDrawBoundaryMap() {
     return
   }
 
-  const { mapStyles, datasetsPlugin, mapStylesPlugin, scaleBarPlugin } =
-    createCommonMapPlugins()
+  const {
+    mapStyles,
+    datasetsPlugin,
+    mapKeyPlugin,
+    mapStylesPlugin,
+    scaleBarPlugin
+  } = createCommonMapPlugins()
   const { interactPlugin, drawPlugin } = createDrawToolsPlugins()
   const searchPlugin = createSearchPlugin({
     osNamesURL: '/os-names-search?query={query}',
@@ -154,6 +161,7 @@ function initDrawBoundaryMap() {
     center,
     plugins: buildMapPlugins({
       datasetsPlugin,
+      mapKeyPlugin,
       mapStylesPlugin,
       scaleBarPlugin,
       interactPlugin,

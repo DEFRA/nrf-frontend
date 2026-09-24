@@ -23,7 +23,8 @@ const mocks = vi.hoisted(() => ({
   searchPlugin: vi.fn(),
   interactPlugin: vi.fn(),
   drawMLPlugin: vi.fn(),
-  datasetsPlugin: vi.fn()
+  datasetsPlugin: vi.fn(),
+  mapKeyPlugin: vi.fn()
 }))
 
 vi.mock('@defra/interactive-map', () => ({
@@ -51,6 +52,9 @@ vi.mock('@defra/interactive-map/plugins/draw-ml', () => ({
 }))
 vi.mock('@defra/interactive-map/plugins/datasets', () => ({
   default: mocks.datasetsPlugin
+}))
+vi.mock('@defra/interactive-map/plugins/map-key', () => ({
+  default: mocks.mapKeyPlugin
 }))
 
 const { interceptDOMContentLoaded, loadModule } = createModuleLoader(
@@ -91,6 +95,7 @@ describe('draw boundary map init', () => {
         transformRequest: expect.any(Function),
         plugins: expect.arrayContaining([
           { id: 'datasets' },
+          { id: 'mapKey' },
           { id: 'scaleBar' },
           expect.objectContaining({ id: 'interact' }),
           expect.objectContaining({ newPolygon: expect.any(Function) }),
