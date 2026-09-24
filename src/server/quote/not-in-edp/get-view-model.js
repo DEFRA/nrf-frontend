@@ -1,7 +1,7 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { appendChangeParam } from '../helpers/change-mode/index.js'
 

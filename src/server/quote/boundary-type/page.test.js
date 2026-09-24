@@ -1,10 +1,12 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 
 describe('Boundary type page', () => {
   const getServer = setupTestServer()
@@ -92,5 +94,81 @@ describe('Boundary type page', () => {
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/quote/upload-boundary')
+  })
+
+  it('should link back to check-your-answers when loaded with change=true', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: await withCompleteQuoteSession(getServer())
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      checkYourAnswersPath
+    )
+  })
+
+  it('should continue to the map page without change=true when a change keeps Draw', async () => {
+    const { response } = await submitForm({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      formData: { boundaryEntryType: 'draw' },
+      cookie: await withCompleteQuoteSession(getServer())
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/draw-boundary')
+  })
+
+  it('should continue to the upload page without change=true when a change selects Upload', async () => {
+    const { response } = await submitForm({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie: await withCompleteQuoteSession(getServer())
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/upload-boundary')
+  })
+
+  it('should fall back to the unit-number back link when a type change has cleared the boundary', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie: await withCompleteQuoteSession(getServer())
+    })
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/quote/unit-number'
+    )
+  })
+
+  it('should keep change mode when a change submission fails validation', async () => {
+    const { response, cookie } = await submitForm({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      formData: {},
+      cookie: await withCompleteQuoteSession(getServer())
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(`${routePath}?change=true`)
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie
+    })
+    expectFieldsetError({
+      document,
+      errorMessage: 'Select how you would like to show your red line boundary'
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      checkYourAnswersPath
+    )
   })
 })
