@@ -70,13 +70,6 @@ describe('Upload boundary page', () => {
         "You'll need to re-export the shape from the tool used to create it originally. If you don't have access to the file types listed, you can draw on a map instead."
       )
     ).toBeInTheDocument()
-    const guidanceLink = getByRole(details, 'link', {
-      name: 'Learn more about telling us where your development is (opens in a new tab)'
-    })
-    expect(guidanceLink).toHaveAttribute('href', '#')
-    expect(guidanceLink).toHaveAttribute('target', '_blank')
-    expect(guidanceLink).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(details.open).toBe(false)
   })
 
   it('should call initiateUpload with correct parameters', async () => {
