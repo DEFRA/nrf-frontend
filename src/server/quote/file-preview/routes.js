@@ -1,7 +1,6 @@
 import { handler, postHandler } from './controller.js'
-import { routePath } from './route-path.js'
 
-export { routePath }
+export const routePath = '/quote/file-preview'
 
 export default [
   {

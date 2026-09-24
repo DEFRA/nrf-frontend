@@ -1,8 +1,7 @@
 import { handler } from './controller.js'
 import { fileUploadRateLimitPre } from '../helpers/session-rate-limit/index.js'
-import { routePath } from './route-path.js'
 
-export { routePath }
+export const routePath = '/quote/upload-boundary'
 
 /**
  * @openapi

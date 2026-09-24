@@ -1,10 +1,6 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { routePath as drawBoundaryPath } from '../draw-boundary/route-path.js'
-import { routePath as uploadBoundaryPath } from '../upload-boundary/route-path.js'
-import { routePath as housingUnitsPath } from '../unit-number/route-path.js'
-import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -119,8 +115,8 @@ describe('Boundary type page', () => {
       formData: { boundaryEntryType: 'draw' },
       cookie: await withCompleteQuoteSession(getServer())
     })
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(drawBoundaryPath)
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/draw-boundary')
   })
 
   it('should continue to the upload page without change=true when a change selects Upload', async () => {
@@ -130,8 +126,8 @@ describe('Boundary type page', () => {
       formData: { boundaryEntryType: 'upload' },
       cookie: await withCompleteQuoteSession(getServer())
     })
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(uploadBoundaryPath)
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/quote/upload-boundary')
   })
 
   it('should fall back to the unit-number back link when a type change has cleared the boundary', async () => {
@@ -148,7 +144,7 @@ describe('Boundary type page', () => {
     })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      housingUnitsPath
+      '/quote/unit-number'
     )
   })
 
@@ -159,7 +155,7 @@ describe('Boundary type page', () => {
       formData: {},
       cookie: await withCompleteQuoteSession(getServer())
     })
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(`${routePath}?change=true`)
     const document = await loadPage({
       requestUrl: `${routePath}?change=true`,

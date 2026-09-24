@@ -5,10 +5,9 @@ import { boundaryGeojsonSchema } from '@defra/nrf-library'
 import { quoteController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
 import { checkBoundaryHandler, saveBoundaryHandler } from './controller.js'
-import { routePath } from './route-path.js'
 
 const routeId = 'draw-boundary'
-export { routePath }
+export const routePath = '/quote/draw-boundary'
 export const checkPath = '/quote/draw-boundary/check'
 export const savePath = '/quote/draw-boundary/save'
 

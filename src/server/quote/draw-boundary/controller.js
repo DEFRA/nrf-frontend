@@ -3,7 +3,7 @@ import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-m
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
-import { routePath as emailPath } from '../email/route-path.js'
+import { routePath as emailPath } from '../email/routes.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
 
