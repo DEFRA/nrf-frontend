@@ -7,28 +7,36 @@ vi.mock('@defra/interactive-map/plugins/map-styles', () => ({
 vi.mock('@defra/interactive-map/plugins/scale-bar', () => ({
   default: vi.fn()
 }))
+vi.mock('@defra/interactive-map/plugins/map-key', () => ({
+  default: vi.fn()
+}))
 vi.mock('./datasets.js', () => ({ createMapDatasetsPlugin: vi.fn() }))
 
 import createMapStylesPlugin from '@defra/interactive-map/plugins/map-styles'
 import createScaleBarPlugin from '@defra/interactive-map/plugins/scale-bar'
+import createMapKeyPlugin from '@defra/interactive-map/plugins/map-key'
 import { createMapDatasetsPlugin } from './datasets.js'
 import { createCommonMapPlugins } from './common-map-plugins.js'
 
 describe('createCommonMapPlugins', () => {
-  it('creates the datasets, map styles and scale bar plugins', () => {
+  it('creates the datasets, map key, map styles and scale bar plugins', () => {
     const datasetsPlugin = { id: 'datasets' }
+    const mapKeyPlugin = { id: 'mapKey' }
     const mapStylesPlugin = { id: 'map-styles' }
     const scaleBarPlugin = { id: 'scale-bar' }
     createMapDatasetsPlugin.mockReturnValue(datasetsPlugin)
+    createMapKeyPlugin.mockReturnValue(mapKeyPlugin)
     createMapStylesPlugin.mockReturnValue(mapStylesPlugin)
     createScaleBarPlugin.mockReturnValue(scaleBarPlugin)
 
     const result = createCommonMapPlugins()
 
     expect(result.datasetsPlugin).toBe(datasetsPlugin)
+    expect(result.mapKeyPlugin).toBe(mapKeyPlugin)
     expect(result.mapStylesPlugin).toBe(mapStylesPlugin)
     expect(result.scaleBarPlugin).toBe(scaleBarPlugin)
     expect(result.mapStyles).toEqual(expect.any(Array))
+    expect(createMapKeyPlugin).toHaveBeenCalledWith()
     expect(createMapStylesPlugin).toHaveBeenCalledWith({
       mapStyles: result.mapStyles
     })

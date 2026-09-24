@@ -12,6 +12,7 @@ export function configureMocks(mocks, mapInstance) {
   mocks.mapStylesPlugin.mockReturnValue({ id: 'mapStyles' })
   mocks.scaleBarPlugin.mockReturnValue({ id: 'scaleBar' })
   mocks.datasetsPlugin.mockReturnValue({ id: 'datasets' })
+  mocks.mapKeyPlugin.mockReturnValue({ id: 'mapKey' })
 
   return {
     _mock: mocks.interactiveMapConstruct,

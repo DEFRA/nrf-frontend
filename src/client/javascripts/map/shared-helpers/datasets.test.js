@@ -37,6 +37,7 @@ describe('datasets', () => {
             'Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)',
           sourceLayer: 'edp_boundaries',
           showInKey: true,
+          showInMenu: false,
           tiles: ['/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt'],
           style: {
             stroke: '#FD0',
@@ -50,6 +51,7 @@ describe('datasets', () => {
           label: 'Excluded areas',
           sourceLayer: 'edp_excluded_areas',
           showInKey: true,
+          showInMenu: false,
           tiles: [
             '/impact-assessor-map/tiles/edp_excluded_areas/{z}/{x}/{y}.mvt'
           ],

@@ -57,6 +57,11 @@ describe('Draw boundary page', () => {
     )
     expect(scaleBarCss).toBeInTheDocument()
 
+    const mapKeyCss = document.querySelector(
+      'link[href*="interactive-map/plugins/map-key/index.css"]'
+    )
+    expect(mapKeyCss).toBeInTheDocument()
+
     const mapScript = document.querySelector('script[src*="draw-boundary-map"]')
     expect(mapScript).toBeInTheDocument()
     expect(mapScript).toHaveAttribute(

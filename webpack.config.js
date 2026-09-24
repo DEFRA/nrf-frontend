@@ -234,6 +234,13 @@ export default {
           to: 'interactive-map/plugins/datasets/index.css'
         },
         {
+          from: path.join(
+            interactiveMapPath,
+            'plugins/map-key/dist/css/index.css'
+          ),
+          to: 'interactive-map/plugins/map-key/index.css'
+        },
+        {
           from: path.join(dirname, 'src/client/data/vts'),
           to: 'data/vts'
         }

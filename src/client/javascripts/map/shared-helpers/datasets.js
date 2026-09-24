@@ -17,6 +17,7 @@ export function createMapDatasetsPlugin() {
         tiles: ['/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt'],
         sourceLayer: 'edp_boundaries',
         showInKey: true,
+        showInMenu: false,
         style: {
           stroke: EDP_BOUNDARY_STROKE_COLOUR,
           fillPattern: 'horizontal-hatch',
@@ -32,6 +33,7 @@ export function createMapDatasetsPlugin() {
         ],
         sourceLayer: 'edp_excluded_areas',
         showInKey: true,
+        showInMenu: false,
         style: {
           stroke: '#f47738',
           fillPattern: 'vertical-hatch',
