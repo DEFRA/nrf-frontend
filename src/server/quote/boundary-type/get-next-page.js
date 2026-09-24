@@ -1,5 +1,5 @@
-import { routePath as routePathUploadBoundary } from '../upload-boundary/routes.js'
-import { routePath as routePathDrawBoundary } from '../draw-boundary/routes.js'
+import { routePath as routePathUploadBoundary } from '../upload-boundary/route-path.js'
+import { routePath as routePathDrawBoundary } from '../draw-boundary/route-path.js'
 
 export default function getNextPage({ boundaryEntryType }) {
   if (boundaryEntryType === 'upload') {

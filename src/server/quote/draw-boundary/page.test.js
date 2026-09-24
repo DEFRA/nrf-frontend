@@ -1,5 +1,6 @@
 import { getByRole } from '@testing-library/dom'
 import { routePath, savePath } from './routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -106,6 +107,6 @@ describe('Draw boundary page', () => {
     })
 
     const mapEl = document.getElementById('draw-boundary-map')
-    expect(mapEl).toHaveAttribute('data-back-link-path', '/quote/boundary-type')
+    expect(mapEl).toHaveAttribute('data-back-link-path', boundaryTypePath)
   })
 })

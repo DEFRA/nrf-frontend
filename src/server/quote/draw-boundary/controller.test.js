@@ -5,7 +5,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { checkPath, savePath } from './routes.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
-import { routePath as emailPath } from '../email/routes.js'
+import { routePath as emailPath } from '../email/route-path.js'
 import {
   boundaryGeojsonWithEdp,
   boundaryGeojsonWithExcludedArea
