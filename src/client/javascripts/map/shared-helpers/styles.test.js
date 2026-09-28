@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getMapStyles } from './styles.js'
 import aerialStyle from '../../../data/vts/APGB_Aerial.json'
+import hybridStyle from '../../../data/vts/APGB_Hybrid.json'
 
 describe('getMapStyles', () => {
   it('keeps aerial at index 0, the map default style', () => {
@@ -8,7 +9,7 @@ describe('getMapStyles', () => {
     // this index is behaviour, not presentation.
     const styles = getMapStyles()
 
-    expect(styles).toHaveLength(4)
+    expect(styles).toHaveLength(5)
     expect(styles[0]).toEqual(
       expect.objectContaining({ id: 'aerial', label: 'Aerial' })
     )
@@ -24,19 +25,64 @@ describe('getMapStyles', () => {
     expect(aerial.thumbnail).toMatch(/aerial\.svg$/)
   })
 
-  it('credits both APGB for the imagery and Ordnance Survey for the coastline', () => {
-    const [aerial] = getMapStyles()
+  it.each([
+    ['aerial', aerialStyle],
+    ['hybrid', hybridStyle]
+  ])(
+    'credits %s imagery to APGB and the sea mask coastline to Ordnance Survey',
+    (id, style) => {
+      const mapStyle = getMapStyles().find((entry) => entry.id === id)
 
-    expect(aerial.attribution).toMatch(/Bluesky International/)
-    expect(aerial.attribution).toMatch(/Ordnance Survey/)
+      expect(mapStyle.attribution).toContain(
+        style.sources['apgb-aerial'].attribution
+      )
+      expect(mapStyle.attribution).toMatch(/Ordnance Survey/)
+    }
+  )
+
+  it('offers hybrid straight after aerial', () => {
+    const [, hybrid] = getMapStyles()
+
+    expect(hybrid).toEqual(
+      expect.objectContaining({ id: 'hybrid', label: 'Hybrid' })
+    )
+    expect(hybrid.url).toMatch(/APGB_Hybrid\.json$/)
+    expect(hybrid.thumbnail).toMatch(/hybrid\.svg$/)
+  })
+})
+
+describe('APGB_Hybrid.json', () => {
+  const layerIds = hybridStyle.layers.map((layer) => layer.id)
+
+  it('shades the sea and land outside imagery coverage as the aerial style does', () => {
+    expect(hybridStyle.sources['sea-mask']).toEqual(
+      aerialStyle.sources['sea-mask']
+    )
+    expect(hybridStyle.layers.slice(0, 3)).toEqual(aerialStyle.layers)
   })
 
-  it('takes the aerial imagery credit from the style JSON so the two cannot drift', () => {
-    const [aerial] = getMapStyles()
-
-    expect(aerial.attribution).toContain(
-      aerialStyle.sources['apgb-aerial'].attribution
+  it('draws labels above the sea mask so they stay readable over water', () => {
+    const firstLabel = hybridStyle.layers.findIndex(
+      (layer) => layer.type === 'symbol'
     )
+
+    expect(layerIds.indexOf('sea-mask')).toBeLessThan(firstLabel)
+  })
+
+  it('writes every label in white so it reads against the dark halo', () => {
+    const darkLabels = hybridStyle.layers
+      .filter((layer) => layer.layout?.['text-field'])
+      .filter((layer) => !/^#F[CF]F[DF]FF$/.test(layer.paint['text-color']))
+      .map((layer) => layer.id)
+
+    expect(darkLabels).toEqual([])
+  })
+
+  it('reads Ordnance Survey tiles and fonts through the os-base-map proxy', () => {
+    expect(hybridStyle.sources.esri.tiles).toEqual([
+      '/os-base-map/tile/{z}/{y}/{x}.pbf'
+    ])
+    expect(hybridStyle.glyphs).toMatch(/^\/os-base-map\//)
   })
 })
 
