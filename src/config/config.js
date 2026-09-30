@@ -441,6 +441,12 @@ export const config = convict({
       default: oneDaySeconds,
       env: 'MAP_TILE_CACHE_CONTROL_MAX_AGE'
     },
+    seaMaskUpstreamTimeoutMs: {
+      doc: 'How long, in milliseconds, the sea mask waits for an Ordnance Survey tile before serving an empty tile.',
+      format: Number,
+      default: isTest ? 100 : 5000,
+      env: 'MAP_SEA_MASK_UPSTREAM_TIMEOUT_MS'
+    },
     aerialTileCacheControlMaxAge: {
       doc: 'max-age, in seconds, sent on the Cache-Control header for aerial imagery responses.',
       format: Number,

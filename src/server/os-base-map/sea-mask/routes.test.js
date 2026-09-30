@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, delay } from 'msw'
 import { VectorTile } from '@mapbox/vector-tile'
 import { PbfReader } from 'pbf'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -11,6 +11,8 @@ import { seaLayerName } from './encode-sea-tile.js'
 const extent = 4096
 const osTileUrl = 'https://api.os.uk/maps/vector/v1/vts/tile/:z/:y/:x.pbf'
 const seaMaskUrl = '/os-base-map/sea-mask/11/1033/670.pbf'
+const midAtlanticSeaMaskUrl = '/os-base-map/sea-mask/11/853/647.pbf'
+const slowUpstreamMs = 300
 
 const westernHalfIsLand = [
   [
@@ -70,5 +72,40 @@ describe('sea mask tile route', () => {
 
     expect(response.statusCode).toBe(statusCodes.noContent)
     expect(response.rawPayload).toHaveLength(0)
+    expect(response.headers['cache-control']).toContain('no-store')
+  })
+
+  it('serves an empty tile when Ordnance Survey is too slow to respond', async () => {
+    mswServer.use(
+      http.get(osTileUrl, async () => {
+        await delay(slowUpstreamMs)
+        return HttpResponse.arrayBuffer(
+          createVectorTile({ layers: { GB_land: [westernHalfIsLand] }, extent })
+        )
+      })
+    )
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: seaMaskUrl
+    })
+
+    expect(response.statusCode).toBe(statusCodes.noContent)
+  })
+
+  it('masks a tile far from England as all sea without asking Ordnance Survey', async () => {
+    // No handler is registered, so any Ordnance Survey request would fail and
+    // the route would fall back to an empty tile.
+    const response = await getServer().inject({
+      method: 'GET',
+      url: midAtlanticSeaMaskUrl
+    })
+
+    expect(response.statusCode).toBe(statusCodes.ok)
+    const layer = new VectorTile(new PbfReader(response.rawPayload)).layers[
+      seaLayerName
+    ]
+    expect(layer.length).toBe(1)
+    expect(response.headers['cache-control']).toContain('public')
   })
 })
