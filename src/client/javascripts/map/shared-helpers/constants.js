@@ -13,3 +13,7 @@ const NORFOLK_LONGITUDE = 1.1405503
 const NORFOLK_LATITUDE = 52.7089441
 
 export const DEFAULT_MAP_CENTER = [NORFOLK_LONGITUDE, NORFOLK_LATITUDE]
+
+// England plus a margin, so a boundary on the coast or the Welsh or Scottish
+// border can still be seen in context. [west, south, east, north]
+export const ENGLAND_MAX_BOUNDS = [-7.5, 49.5, 2.5, 56.2]

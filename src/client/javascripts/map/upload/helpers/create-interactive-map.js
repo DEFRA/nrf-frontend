@@ -2,7 +2,8 @@ import { InteractiveMap } from '@defra/interactive-map'
 import maplibreProvider from '@defra/interactive-map/providers/maplibre'
 import {
   BOUNDARY_MAP_MAX_ZOOM,
-  DEFAULT_MAP_CENTER
+  DEFAULT_MAP_CENTER,
+  ENGLAND_MAX_BOUNDS
 } from '../../shared-helpers/constants.js'
 import { configureMaplibreWorker } from '../../shared-helpers/configure-maplibre-worker.js'
 import { transformRequest } from '../../shared-helpers/transform-request.js'
@@ -24,6 +25,7 @@ export function createInteractiveMap(
     mapStyle: mapStyles[0],
     center: center || DEFAULT_MAP_CENTER,
     bounds,
+    maxBounds: ENGLAND_MAX_BOUNDS,
     maxZoom: BOUNDARY_MAP_MAX_ZOOM,
     containerHeight: '100%',
     enableZoomControls: true,
