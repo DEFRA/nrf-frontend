@@ -18,7 +18,7 @@
             <input type="hidden" name="confirmDeleteQuote" value="Yes">
             <div class="govuk-button-group">
                 {{ govukButton({ text: "Delete", classes: "govuk-button--warning" }) }}
-                <a class="govuk-link" href="{{ quoteRoutes.checkYourAnswers }}">Cancel</a>
+                <a class="govuk-link" href="{{ quoteRoutes.checkYourAnswers }}">Cancel<span class="govuk-visually-hidden"> deleting your quote</span></a>
             </div>
         </form>
     </div>
