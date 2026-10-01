@@ -1,5 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { routePath as planningTypePath } from '../planning-type/routes.js'
+import { routePath as planningTypePath } from '../planning-type/route-path.js'
 
 const pageHeading = 'Are you developing housing units?'
 const pageTitle = 'Confirm housing'

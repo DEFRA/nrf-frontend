@@ -40,6 +40,8 @@
       <p class="govuk-body">Essential cookies keep your information secure while you use this service. We do not need to ask permission to use them.</p>
 
       {{ govukTable({
+        caption: "Essential cookies",
+        captionClasses: "govuk-visually-hidden",
         head: [
           {
             text: "Name"
@@ -107,6 +109,8 @@
       <p class="govuk-body">We use Google Analytics to understand how you use the service. It uses the following cookies:</p>
 
       {{ govukTable({
+        caption: "Google Analytics cookies",
+        captionClasses: "govuk-visually-hidden",
         head: [
           {
             text: "Name"
@@ -146,7 +150,7 @@
 
       <h3 class="govuk-heading-m">Change your analytics cookie preference</h3>
 
-      <form method="post" novalidate>
+      <form method="post" action="/cookies" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
         <input type="hidden" name="source" value="page">
         {% if redirectUrl %}
