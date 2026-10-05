@@ -3,9 +3,11 @@ import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'boundary-type'
-export const routePath = '/quote/boundary-type'
+
+export { routePath }
 
 /**
  * @openapi
@@ -57,7 +59,8 @@ export default [
       routeId,
       formValidation,
       getViewModel,
-      getNextPage
+      getNextPage,
+      continueToNextPageInChangeMode: true
     })
   }
 ]

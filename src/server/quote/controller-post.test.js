@@ -107,4 +107,24 @@ describe('resolveChangeModeRedirect', () => {
       resolveChangeModeRedirect({ nextPage: confirmHousingPath, query: {} })
     ).toBe(confirmHousingPath)
   })
+
+  it('should follow the next page (without change=true) in change mode when continueToNextPageInChangeMode is set', () => {
+    expect(
+      resolveChangeModeRedirect({
+        nextPage: confirmHousingPath,
+        query: { change: 'true' },
+        continueToNextPageInChangeMode: true
+      })
+    ).toBe(confirmHousingPath)
+  })
+
+  it('should still redirect to the dropout page carrying change=true in change mode when continueToNextPageInChangeMode is set', () => {
+    expect(
+      resolveChangeModeRedirect({
+        nextPage: applicationTypeNotAvailablePath,
+        query: { change: 'true' },
+        continueToNextPageInChangeMode: true
+      })
+    ).toBe(`${applicationTypeNotAvailablePath}?change=true`)
+  })
 })

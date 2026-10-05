@@ -6,7 +6,6 @@ import { checkPath, savePath } from './routes.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { routePath as emailPath } from '../email/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import {
   boundaryGeojsonWithEdp,
   boundaryGeojsonWithExcludedArea
@@ -280,7 +279,7 @@ describe('POST /quote/draw-boundary/save', () => {
     expect(response.headers.location).toBe(emailPath)
   })
 
-  it('saves and redirects to check-your-answers when change=true and there are intersections', async () => {
+  it('drops a stray change=true param and redirects to email when there are intersections', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -292,10 +291,10 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryFilename: null
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(checkYourAnswersPath)
+    expect(response.headers.location).toBe(emailPath)
   })
 
-  it('still redirects to excluded-area on change=true when intersectingExcludedAreas is non-empty, carrying the param', async () => {
+  it('drops a stray change=true param when redirecting to excluded-area', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -303,10 +302,10 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(`${excludedAreaPath}?change=true`)
+    expect(response.headers.location).toBe(excludedAreaPath)
   })
 
-  it('redirects to not-in-edp with the param on change=true when there are no intersections', async () => {
+  it('drops a stray change=true param when redirecting to not-in-edp', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -314,7 +313,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(`${notInEdpPath}?change=true`)
+    expect(response.headers.location).toBe(notInEdpPath)
   })
 
   it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {

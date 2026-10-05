@@ -39,13 +39,22 @@ export const redirectToFormWithValidationErrors = (request, h, err) => {
  * @param {object} params
  * @param {string} params.nextPage - journey-derived next page path
  * @param {object} params.query - the parsed request query
+ * @param {boolean} [params.continueToNextPageInChangeMode=false] - when true,
+ *   a change-mode POST still follows nextPage (without change=true). For
+ *   pages like boundary-type whose answer starts a sub-journey (draw or
+ *   upload) that must run in normal mode before the user returns to
+ *   check-your-answers.
  * @returns {string} redirect path
  */
-export const resolveChangeModeRedirect = ({ nextPage, query }) => {
+export const resolveChangeModeRedirect = ({
+  nextPage,
+  query,
+  continueToNextPageInChangeMode = false
+}) => {
   if (isDropoutPage(nextPage)) {
     return appendChangeParam(nextPage, query)
   }
-  if (isChangeMode(query)) {
+  if (isChangeMode(query) && !continueToNextPageInChangeMode) {
     return checkYourAnswersPath
   }
   return nextPage
@@ -54,7 +63,8 @@ export const resolveChangeModeRedirect = ({ nextPage, query }) => {
 export const quotePostController = ({
   formValidation,
   getNextPage,
-  payloadOptions
+  payloadOptions,
+  continueToNextPageInChangeMode = false
 }) => ({
   options: {
     ...(payloadOptions && { payload: payloadOptions }),
@@ -68,7 +78,13 @@ export const quotePostController = ({
     const quoteData = saveQuoteDataToCache(request, payload)
     const nextPage = getNextPage(quoteData)
     return h
-      .redirect(resolveChangeModeRedirect({ nextPage, query }))
+      .redirect(
+        resolveChangeModeRedirect({
+          nextPage,
+          query,
+          continueToNextPageInChangeMode
+        })
+      )
       .code(statusCodes.redirectAfterPost)
   }
 })

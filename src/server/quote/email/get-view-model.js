@@ -1,7 +1,7 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as filePreviewPath } from '../file-preview/routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { isChangeMode } from '../helpers/change-mode/index.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'

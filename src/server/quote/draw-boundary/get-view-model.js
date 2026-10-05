@@ -1,25 +1,16 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { config } from '../../../config/config.js'
 import { checkPath, savePath } from './routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { isChangeMode } from '../helpers/change-mode/index.js'
+import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
 
 const pageHeading = 'Draw your boundary on a map'
 const pageTitle = 'Draw boundary'
 
-export default function getViewModel(quoteData = {}, query = {}) {
+export default function getViewModel(quoteData = {}) {
   const existingBoundaryGeojson =
     quoteData?.boundaryGeojson?.boundaryGeometryWgs84 ?? null
   const existingBoundaryMetadata =
     quoteData.boundaryGeojson?.boundaryMetadata ?? null
-
-  const isChangeRequest = isChangeMode(query)
-
-  // When editing from check-your-answers, always return there instead of the
-  // boundary type page, and carry the flag on the save POST so the handler
-  // redirects there too instead of the email page
-  const backLinkPath = isChangeRequest ? checkYourAnswersPath : boundaryTypePath
 
   return {
     pageTitle: getPageTitle(pageTitle),
@@ -27,8 +18,8 @@ export default function getViewModel(quoteData = {}, query = {}) {
     mapStyleUrl: config.get('map.defaultStyleUrl'),
     impactAssessorLayers: config.get('map.impactAssessorLayers'),
     boundaryValidationUrl: checkPath,
-    saveAndContinueUrl: isChangeRequest ? `${savePath}?change=true` : savePath,
-    backLinkPath,
+    saveAndContinueUrl: savePath,
+    backLinkPath: boundaryTypePath,
     existingBoundaryGeojson: JSON.stringify(existingBoundaryGeojson),
     existingBoundaryMetadata: JSON.stringify(existingBoundaryMetadata)
   }

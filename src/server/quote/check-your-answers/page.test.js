@@ -5,7 +5,7 @@ import { config } from '../../../config/config.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
 import { routePath as planningTypePath } from '../planning-type/routes.js'
-import { routePath as boundaryTypePath } from '../boundary-type/routes.js'
+import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
 import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -104,7 +104,7 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changedrawn red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/draw-boundary?change=true')
+    ).toHaveAttribute('href', `${boundaryTypePath}?change=true`)
     expect(
       getByRole(document, 'link', { name: 'Changenumber of units' })
     ).toHaveAttribute('href', '/quote/unit-number?change=true')
@@ -151,7 +151,7 @@ describe('Check your answers page', () => {
     ).toHaveTextContent('Yes')
   })
 
-  it('should link to the map page if the boundary was drawn', async () => {
+  it('should link to the boundary type page if the boundary was drawn', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
@@ -164,7 +164,7 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: 'Changedrawn red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/draw-boundary?change=true')
+    ).toHaveAttribute('href', `${boundaryTypePath}?change=true`)
   })
 
   it('should show the uploaded filename when present', async () => {
@@ -214,6 +214,13 @@ describe('Check your answers page', () => {
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('site-boundary.geojson')
+    // The uploaded row deliberately still links straight to the file preview
+    // (NRF2-1188 only changed the drawn row)
+    expect(
+      getByRole(document, 'link', {
+        name: 'Changeuploaded red line boundary'
+      })
+    ).toHaveAttribute('href', '/quote/file-preview?change=true')
   })
 
   it('should set a no-store Cache-Control header so the page cannot be shown from cache', async () => {
