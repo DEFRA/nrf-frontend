@@ -20,15 +20,15 @@
     "frontend:watch": "cross-env NODE_ENV=development webpack --watch",
     "git:pre-commit-hook": "npm run security-audit && npm run format:check && npm run lint && npm test",
     "postinstall": "npm run setup:husky",
-    "security-audit": "npm audit --audit-level=moderate",
+    "security-audit": "npm audit --omit=dev --audit-level=moderate",
     "lint": "run-s lint:js lint:scss",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "lint:scss": "stylelint \"src/**/*.scss\" --cache --cache-location .cache/stylelint --cache-strategy content --color --ignore-path .gitignore",
     "test": "cross-env TZ=UTC vitest run --coverage",
     "test:watch": "cross-env TZ=UTC vitest",
-    "server:watch": "nodemon --inspect=0.0.0.0:9230 --ext js,json --legacy-watch ./src",
-    "server:debug": "nodemon --inspect-brk=0.0.0.0:9230 --ext js,json --legacy-watch ./src",
+    "server:watch": "nodemon --inspect=0.0.0.0:9230 --ext js,json --legacy-watch --polling-interval 100 ./src",
+    "server:debug": "nodemon --inspect-brk=0.0.0.0:9230 --ext js,json --legacy-watch --polling-interval 100 ./src",
     "prestart": "npm run build:frontend",
     "start": "NODE_ENV=production node --use-strict .",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module"
@@ -39,7 +39,13 @@
     "maplibre-gl": "$maplibre-gl",
     "joi": "$joi",
     "@hapi/joi": "npm:joi@^18.2.9",
-    "minimatch": "^10.2.5"
+    "minimatch": "^10.2.5",
+    "nodemon": {
+      "chokidar": "^4.0.3"
+    },
+    "nunjucks": {
+      "chokidar": "^4.0.3"
+    }
   },
   "dependencies": {
     "@defra/cdp-auditing": "^0.6.1",
