@@ -1,6 +1,6 @@
 import Boom from '@hapi/boom'
 import { getQuoteFromBackend } from '../../common/services/nrf-backend.js'
-import { quoteAccessStatus } from '../quote-details/helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 
 export const confirmationGetController = ({ routeId, getViewModel }) => ({
   async handler(request, h) {
@@ -12,7 +12,7 @@ export const confirmationGetController = ({ routeId, getViewModel }) => ({
     // reference doesn't resolve to a quote.
     const { payload } = await getQuoteFromBackend({ reference })
 
-    if (payload.accessStatus === quoteAccessStatus.notFound) {
+    if (payload.accessStatus === QUOTE_ACCESS_STATUS.notFound) {
       return Boom.notFound()
     }
 

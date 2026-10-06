@@ -1,15 +1,7 @@
-import hapiPulse from 'hapi-pulse'
+import { createPulse } from '@defra/nrf-library'
 
 import { createLogger } from './logging/logger.js'
 
-const tenSeconds = 10 * 1000
-
-const pulse = {
-  plugin: hapiPulse,
-  options: {
-    logger: createLogger(),
-    timeout: tenSeconds
-  }
-}
+const pulse = createPulse(createLogger())
 
 export { pulse }

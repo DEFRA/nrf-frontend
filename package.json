@@ -46,7 +46,7 @@
     "@defra/hapi-secure-context": "^0.4.0",
     "@defra/hapi-tracing": "^1.30.0",
     "@defra/interactive-map": "^0.0.50-alpha",
-    "@defra/nrf-library": "github:DEFRA/nrf-library#v1.11.0",
+    "@defra/nrf-library": "github:DEFRA/nrf-library#2bfbc8602ee63cb92ee646a2f284034bfbe7fa50",
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/catbox-redis": "^7.1.0",
     "@hapi/crumb": "^9.0.1",
