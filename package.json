@@ -20,7 +20,7 @@
     "frontend:watch": "cross-env NODE_ENV=development webpack --watch",
     "git:pre-commit-hook": "npm run security-audit && npm run format:check && npm run lint && npm test",
     "postinstall": "npm run setup:husky",
-    "security-audit": "npm audit --audit-level=moderate",
+    "security-audit": "npm audit --omit=dev --audit-level=moderate",
     "lint": "run-s lint:js lint:scss",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
@@ -39,7 +39,13 @@
     "maplibre-gl": "$maplibre-gl",
     "joi": "$joi",
     "@hapi/joi": "npm:joi@^18.2.9",
-    "minimatch": "^10.2.5"
+    "minimatch": "^10.2.5",
+    "nodemon": {
+      "chokidar": "^5.0.0"
+    },
+    "nunjucks": {
+      "chokidar": "^5.0.0"
+    }
   },
   "dependencies": {
     "@defra/cdp-auditing": "^0.6.1",
