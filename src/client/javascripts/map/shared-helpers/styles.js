@@ -30,35 +30,35 @@ export function getMapStyles() {
       id: 'aerial',
       label: 'Aerial',
       url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.svg`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.jpg`,
       attribution: getApgbAttribution(apgbAerialStyle)
     },
     {
       id: 'hybrid',
       label: 'Hybrid',
       url: `${VTS_STYLE_BASE_URL}/APGB_Hybrid.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/hybrid.svg`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/hybrid.jpg`,
       attribution: getApgbAttribution(apgbHybridStyle)
     },
     {
       id: 'outdoor-os',
       label: 'Outdoor OS',
       url: `${VTS_STYLE_BASE_URL}/OS_VTS_3857_Outdoor.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/outdoor-os.svg`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/outdoor-os.jpg`,
       attribution: getOrdnanceSurveyAttribution()
     },
     {
       id: 'dark',
       label: 'Dark',
       url: `${VTS_STYLE_BASE_URL}/OS_VTS_3857_Dark.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/dark.svg`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/dark.jpg`,
       attribution: getOrdnanceSurveyAttribution()
     },
     {
       id: 'black-and-white',
       label: 'Black and white',
       url: `${VTS_STYLE_BASE_URL}/OS_VTS_3857_Black_and_White.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/black-and-white.svg`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/black-and-white.jpg`,
       attribution: getOrdnanceSurveyAttribution()
     }
   ]

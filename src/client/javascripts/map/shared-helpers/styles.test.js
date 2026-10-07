@@ -22,7 +22,7 @@ describe('getMapStyles', () => {
   it('points aerial at its own thumbnail file', () => {
     const [aerial] = getMapStyles()
 
-    expect(aerial.thumbnail).toMatch(/aerial\.svg$/)
+    expect(aerial.thumbnail).toMatch(/aerial\.jpg$/)
   })
 
   it.each([
@@ -47,7 +47,7 @@ describe('getMapStyles', () => {
       expect.objectContaining({ id: 'hybrid', label: 'Hybrid' })
     )
     expect(hybrid.url).toMatch(/APGB_Hybrid\.json$/)
-    expect(hybrid.thumbnail).toMatch(/hybrid\.svg$/)
+    expect(hybrid.thumbnail).toMatch(/hybrid\.jpg$/)
   })
 })
 
