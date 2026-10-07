@@ -11,6 +11,7 @@ const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
 const oneDaySeconds = 86400
+const fiveSecondsMs = 5000
 
 const SESSION_RATE_LIMIT_MAX = 60
 const SESSION_RATE_LIMIT_MAX_TEST = 35
@@ -444,7 +445,7 @@ export const config = convict({
     seaMaskUpstreamTimeoutMs: {
       doc: 'How long, in milliseconds, the sea mask waits for an Ordnance Survey tile before serving an empty tile.',
       format: Number,
-      default: isTest ? 100 : 5000,
+      default: isTest ? 100 : fiveSecondsMs,
       env: 'MAP_SEA_MASK_UPSTREAM_TIMEOUT_MS'
     },
     aerialTileCacheControlMaxAge: {

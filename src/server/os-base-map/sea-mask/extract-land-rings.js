@@ -6,6 +6,8 @@ import { PbfReader } from 'pbf'
 // own layer rather than being left as holes in the sea.
 const landLayerNames = ['GB_land']
 const polygonFeatureType = 3
+// A closed ring repeats its first point, so a triangle is the smallest real one.
+const minimumRingPoints = 4
 
 /**
  * OS tiles carry a small overlap beyond the tile edge. Differencing against the
@@ -33,6 +35,21 @@ function getLayerBuffer(layer) {
 }
 
 /**
+ * @param {import('@mapbox/vector-tile').VectorTileFeature} feature
+ * @returns {number[][][]}
+ */
+function getPolygonRings(feature) {
+  if (feature.type !== polygonFeatureType) {
+    return []
+  }
+
+  return feature
+    .loadGeometry()
+    .filter((ring) => ring.length >= minimumRingPoints)
+    .map((ring) => ring.map((point) => [point.x, point.y]))
+}
+
+/**
  * @param {Buffer} tileBuffer
  * @returns {{ rings: number[][][], extent: number, buffer: number }}
  */
@@ -52,17 +69,7 @@ export function extractLandRings(tileBuffer) {
     buffer = Math.max(buffer, getLayerBuffer(layer))
 
     for (let index = 0; index < layer.length; index++) {
-      const feature = layer.feature(index)
-      if (feature.type !== polygonFeatureType) {
-        continue
-      }
-
-      for (const ring of feature.loadGeometry()) {
-        if (ring.length < 4) {
-          continue
-        }
-        rings.push(ring.map((point) => [point.x, point.y]))
-      }
+      rings.push(...getPolygonRings(layer.feature(index)))
     }
   }
 

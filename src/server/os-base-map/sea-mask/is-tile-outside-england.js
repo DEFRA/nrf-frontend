@@ -4,13 +4,16 @@ import { ENGLAND_MAX_BOUNDS } from '../../../client/javascripts/map/shared-helpe
 // still masked against the real coastline.
 const [westBound, southBound, eastBound, northBound] = ENGLAND_MAX_BOUNDS
 
+const degreesInCircle = 360
+const degreesInHalfCircle = 180
+
 function tileToLongitude({ x, z }) {
-  return (x / 2 ** z) * 360 - 180
+  return (x / 2 ** z) * degreesInCircle - degreesInHalfCircle
 }
 
 function tileToLatitude({ y, z }) {
   const mercatorY = Math.PI * (1 - (2 * y) / 2 ** z)
-  return (Math.atan(Math.sinh(mercatorY)) * 180) / Math.PI
+  return (Math.atan(Math.sinh(mercatorY)) * degreesInHalfCircle) / Math.PI
 }
 
 /**
