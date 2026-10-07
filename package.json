@@ -51,7 +51,7 @@
     "@defra/cdp-auditing": "^0.6.1",
     "@defra/hapi-secure-context": "^0.4.0",
     "@defra/hapi-tracing": "^1.30.0",
-    "@defra/interactive-map": "^0.0.50-alpha",
+    "@defra/interactive-map": "^0.0.51-apha",
     "@defra/nrf-library": "github:DEFRA/nrf-library#2bfbc8602ee63cb92ee646a2f284034bfbe7fa50",
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/catbox-redis": "^7.1.0",
