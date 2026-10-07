@@ -4,14 +4,14 @@ import aerialStyle from '../../../data/vts/APGB_Aerial.json'
 import hybridStyle from '../../../data/vts/APGB_Hybrid.json'
 
 describe('getMapStyles', () => {
-  it('keeps aerial at index 0, the map default style', () => {
+  it('keeps hybrid at index 0, the map default style', () => {
     // create-interactive-map.js reads mapStyles[0] as the initial style, so
     // this index is behaviour, not presentation.
     const styles = getMapStyles()
 
     expect(styles).toHaveLength(5)
     expect(styles[0]).toEqual(
-      expect.objectContaining({ id: 'aerial', label: 'Aerial' })
+      expect.objectContaining({ id: 'hybrid', label: 'Hybrid' })
     )
   })
 
@@ -20,7 +20,7 @@ describe('getMapStyles', () => {
   })
 
   it('points aerial at its own thumbnail file', () => {
-    const [aerial] = getMapStyles()
+    const aerial = getMapStyles().find((style) => style.id === 'aerial')
 
     expect(aerial.thumbnail).toMatch(/aerial\.jpg$/)
   })
@@ -40,11 +40,11 @@ describe('getMapStyles', () => {
     }
   )
 
-  it('offers hybrid straight after aerial', () => {
-    const [, hybrid] = getMapStyles()
+  it('offers aerial straight after hybrid', () => {
+    const [hybrid, aerial] = getMapStyles()
 
-    expect(hybrid).toEqual(
-      expect.objectContaining({ id: 'hybrid', label: 'Hybrid' })
+    expect(aerial).toEqual(
+      expect.objectContaining({ id: 'aerial', label: 'Aerial' })
     )
     expect(hybrid.url).toMatch(/APGB_Hybrid\.json$/)
     expect(hybrid.thumbnail).toMatch(/hybrid\.jpg$/)

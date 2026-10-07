@@ -67,7 +67,7 @@ describe('upload preview map init', () => {
       expect.objectContaining({
         behaviour: 'inline',
         mapLabel: 'Red line boundary',
-        mapStyle: expect.objectContaining({ id: 'aerial' }),
+        mapStyle: expect.objectContaining({ id: 'hybrid' }),
         center: [1.1405503, 52.7089441],
         bounds: null,
         containerHeight: '100%',

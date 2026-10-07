@@ -27,18 +27,18 @@ function getApgbAttribution(style) {
 export function getMapStyles() {
   const styles = [
     {
-      id: 'aerial',
-      label: 'Aerial',
-      url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
-      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.jpg`,
-      attribution: getApgbAttribution(apgbAerialStyle)
-    },
-    {
       id: 'hybrid',
       label: 'Hybrid',
       url: `${VTS_STYLE_BASE_URL}/APGB_Hybrid.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/hybrid.jpg`,
       attribution: getApgbAttribution(apgbHybridStyle)
+    },
+    {
+      id: 'aerial',
+      label: 'Aerial',
+      url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
+      thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.jpg`,
+      attribution: getApgbAttribution(apgbAerialStyle)
     },
     {
       id: 'outdoor-os',
