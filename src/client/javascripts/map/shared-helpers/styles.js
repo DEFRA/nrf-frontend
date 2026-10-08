@@ -24,6 +24,9 @@ function getApgbAttribution(style) {
   return [...credits, getOrdnanceSurveyAttribution()].join(' | ')
 }
 
+// mapColorScheme 'dark' tells interactive-map the basemap is dark, so the
+// scale bar and draw-ml edit lines and vertices switch to white with a dark
+// halo instead of near-black
 export function getMapStyles() {
   const styles = [
     {
@@ -31,14 +34,16 @@ export function getMapStyles() {
       label: 'Hybrid',
       url: `${VTS_STYLE_BASE_URL}/APGB_Hybrid.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/hybrid.jpg`,
-      attribution: getApgbAttribution(apgbHybridStyle)
+      attribution: getApgbAttribution(apgbHybridStyle),
+      mapColorScheme: 'dark'
     },
     {
       id: 'aerial',
       label: 'Aerial',
       url: `${VTS_STYLE_BASE_URL}/APGB_Aerial.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/aerial.jpg`,
-      attribution: getApgbAttribution(apgbAerialStyle)
+      attribution: getApgbAttribution(apgbAerialStyle),
+      mapColorScheme: 'dark'
     },
     {
       id: 'outdoor-os',
@@ -52,7 +57,8 @@ export function getMapStyles() {
       label: 'Dark',
       url: `${VTS_STYLE_BASE_URL}/OS_VTS_3857_Dark.json`,
       thumbnail: `${VTS_THUMBNAIL_BASE_URL}/dark.jpg`,
-      attribution: getOrdnanceSurveyAttribution()
+      attribution: getOrdnanceSurveyAttribution(),
+      mapColorScheme: 'dark'
     },
     {
       id: 'black-and-white',

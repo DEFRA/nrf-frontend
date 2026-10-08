@@ -40,6 +40,21 @@ describe('getMapStyles', () => {
     }
   )
 
+  it.each([
+    ['hybrid', 'dark'],
+    ['aerial', 'dark'],
+    ['dark', 'dark'],
+    ['outdoor-os', undefined],
+    ['black-and-white', undefined]
+  ])(
+    'gives %s a %s map colour scheme for the draw and scale bar overlays',
+    (id, mapColorScheme) => {
+      const mapStyle = getMapStyles().find((entry) => entry.id === id)
+
+      expect(mapStyle.mapColorScheme).toBe(mapColorScheme)
+    }
+  )
+
   it('offers aerial straight after hybrid', () => {
     const [hybrid, aerial] = getMapStyles()
 
