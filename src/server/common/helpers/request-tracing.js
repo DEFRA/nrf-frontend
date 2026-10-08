@@ -1,8 +1,5 @@
-import { tracing } from '@defra/hapi-tracing'
+import { createRequestTracing } from '@defra/nrf-library'
 
 import { config } from '../../../config/config.js'
 
-export const requestTracing = {
-  plugin: tracing.plugin,
-  options: { tracingHeader: config.get('tracing.header') }
-}
+export const requestTracing = createRequestTracing(config.get('tracing.header'))

@@ -1,8 +1,5 @@
-import hapiPino from 'hapi-pino'
+import { createRequestLogger } from '@defra/nrf-library'
 
 import { loggerOptions } from './logger-options.js'
 
-export const requestLogger = {
-  plugin: hapiPino,
-  options: loggerOptions
-}
+export const requestLogger = createRequestLogger(loggerOptions)

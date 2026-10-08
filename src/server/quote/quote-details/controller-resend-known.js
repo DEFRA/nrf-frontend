@@ -2,7 +2,7 @@ import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { saveResendConfirmationToCache } from './helpers/resend-confirmation-session.js'
 import getErrorViewModel from './get-error-view-model.js'
-import { quoteAccessStatus } from './helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 
 /**
  * Handles the one-click resend from the "link no longer active" page (State 2).
@@ -33,7 +33,7 @@ export const quoteDetailsResendKnownController = {
     if (!payload.message) {
       return h.view(
         'quote/quote-details/error',
-        getErrorViewModel(quoteAccessStatus.invalid, { reference, token })
+        getErrorViewModel(QUOTE_ACCESS_STATUS.invalid, { reference, token })
       )
     }
 

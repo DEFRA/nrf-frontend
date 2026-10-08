@@ -1,8 +1,8 @@
-import { pino } from 'pino'
+import { buildLogger } from '@defra/nrf-library'
 
 import { loggerOptions } from './logger-options.js'
 
-const logger = pino(loggerOptions)
+const logger = buildLogger(loggerOptions)
 
 function createLogger() {
   return logger

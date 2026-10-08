@@ -1,7 +1,7 @@
 import { getQuoteFromBackend } from '../../common/services/nrf-backend.js'
 import getViewModel, { heading } from './get-view-model.js'
 import getErrorViewModel from './get-error-view-model.js'
-import { quoteAccessStatus } from './helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 import { isPrefetchRequest } from './helpers/is-prefetch-request.js'
 import {
   hasQuoteDetailsSessionCookie,
@@ -35,7 +35,7 @@ export const quoteDetailsGetController = {
     })
     const { accessStatus, quote } = payload
 
-    if (accessStatus !== quoteAccessStatus.valid) {
+    if (accessStatus !== QUOTE_ACCESS_STATUS.valid) {
       // A failed resend-unknown email validation redirects back here with the
       // error in the session flash so the inline error renders after PRG.
       const flash = getValidationFlashFromCache(request)

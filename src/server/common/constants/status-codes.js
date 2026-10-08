@@ -1,16 +1,3 @@
-export const statusCodes = {
-  ok: 200,
-  noContent: 204,
-  found: 302,
-  redirectAfterPost: 303,
-  badRequest: 400,
-  unauthorized: 401,
-  forbidden: 403,
-  notFound: 404,
-  payloadTooLarge: 413,
-  tooManyRequests: 429,
-  imATeapot: 418,
-  internalServerError: 500,
-  badGateway: 502,
-  serviceUnavailable: 503
-}
+// Re-exported from @defra/nrf-library (NRF2-1213) — the shared map of HTTP
+// status codes, aligned with nrf-backend and nrf-admin-frontend.
+export { statusCodes } from '@defra/nrf-library'
