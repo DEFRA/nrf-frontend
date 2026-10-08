@@ -8,7 +8,7 @@ import { saveValidationFlashToCache } from '../helpers/form-validation-session/i
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { emailField } from '../../common/validation/email.js'
 import getErrorViewModel from './get-error-view-model.js'
-import { quoteAccessStatus } from './helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 
 export const resendKnownPath = '/quote/{reference}/resend-known'
 export const resendUnknownPath = '/quote/{reference}/resend-unknown'
@@ -38,7 +38,7 @@ const invalidKnownResendFailAction = (request, h) => {
   return h
     .view(
       'quote/quote-details/error',
-      getErrorViewModel(quoteAccessStatus.invalid, { reference })
+      getErrorViewModel(QUOTE_ACCESS_STATUS.invalid, { reference })
     )
     .takeover()
 }

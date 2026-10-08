@@ -1,7 +1,7 @@
 import { ecsFormat } from '@elastic/ecs-pino-format'
 import { config } from '../../../../config/config.js'
 import { getTraceId } from '@defra/hapi-tracing'
-import { structureErrorForECS } from './log-formatters.js'
+import { structureErrorForECS } from '@defra/nrf-library'
 
 const logConfig = config.get('log')
 const serviceName = config.get('serviceName')

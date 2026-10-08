@@ -3,6 +3,13 @@ import { defineConfig, configDefaults } from 'vitest/config'
 export default defineConfig({
   test: {
     globals: true,
+    // Inline @defra/nrf-library so vi.mock intercepts the packages it
+    // imports (for example aws-embedded-metrics in the metrics helper)
+    server: {
+      deps: {
+        inline: ['@defra/nrf-library']
+      }
+    },
     setupFiles: ['.vite/setup-files.js'],
     globalSetup: ['.vite/global-setup.js'],
     environment: 'node',
