@@ -7,7 +7,7 @@ describe('units form validation', () => {
       it.each([
         ['a valid integer', 6],
         ['the minimum allowed value', 1],
-        ['the maximum allowed value', 50000]
+        ['the maximum allowed value', 15780]
       ])('passes for %s (%s)', (_description, input) => {
         const { error } = getSchema().validate({ housingUnits: input })
         expect(error).toBeUndefined()
@@ -30,7 +30,7 @@ describe('units form validation', () => {
       it.each([
         ['spaces between digits', '3 4  5', 345],
         ['a thousand-separator comma', '1,000', 1000],
-        ['the maximum allowed value with thousand separators', '50,000', 50000]
+        ['the maximum allowed value with thousand separators', '15,780', 15780]
       ])(
         'passes for a string with %s (%s)',
         (_description, input, expected) => {
@@ -85,21 +85,21 @@ describe('units form validation', () => {
     })
 
     describe('extremely large numbers', () => {
-      it('fails when a comma-separated value exceeds the maximum ("50,001")', () => {
+      it('fails when a comma-separated value exceeds the maximum ("15,781")', () => {
         const { error } = getSchema().validate({
-          housingUnits: '50,001'
+          housingUnits: '15,781'
         })
         expect(error.details[0].message).toBe(
-          'Housing units must be 50,000 or fewer'
+          'Housing units must be 15,780 or fewer'
         )
       })
 
-      it('fails when exceeding maximum (50001)', () => {
+      it('fails when exceeding maximum (15781)', () => {
         const { error } = getSchema().validate({
-          housingUnits: 50001
+          housingUnits: 15781
         })
         expect(error.details[0].message).toBe(
-          'Housing units must be 50,000 or fewer'
+          'Housing units must be 15,780 or fewer'
         )
       })
 
@@ -108,7 +108,7 @@ describe('units form validation', () => {
           housingUnits: 999999999
         })
         expect(error.details[0].message).toBe(
-          'Housing units must be 50,000 or fewer'
+          'Housing units must be 15,780 or fewer'
         )
       })
     })
