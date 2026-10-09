@@ -140,7 +140,8 @@ describe('sea mask tile route', () => {
     ['a negative column', '11/-1/670'],
     ['a fractional row', '11/1033/670.5'],
     ['a smuggled query string', '11/1033%3Fkey%3Dx/670'],
-    ['a smuggled fragment', '11/1033%23/670']
+    ['a smuggled fragment', '11/1033%23/670'],
+    ['a non-numeric column', '11/abc/670']
   ])(
     'rejects %s without asking Ordnance Survey',
     async (_description, tile) => {
