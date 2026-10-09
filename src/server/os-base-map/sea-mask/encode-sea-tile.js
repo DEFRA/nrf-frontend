@@ -1,4 +1,4 @@
-import vtPbf from 'vt-pbf'
+import { fromGeojsonVt } from '@maplibre/vt-pbf'
 
 export const seaLayerName = 'sea'
 
@@ -15,7 +15,7 @@ export function encodeSeaTile({ polygons, extent }) {
   })
 
   return Buffer.from(
-    vtPbf.fromGeojsonVt(
+    fromGeojsonVt(
       { [seaLayerName]: { features } },
       { version: vectorTileSpecVersion, extent }
     )

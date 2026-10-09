@@ -1,4 +1,4 @@
-import vtPbf from 'vt-pbf'
+import { fromGeojsonVt } from '@maplibre/vt-pbf'
 
 /**
  * Encodes a real vector tile so decoding logic can be tested against bytes
@@ -19,5 +19,5 @@ export function createVectorTile({ layers, extent = 4096 }) {
     ])
   )
 
-  return Buffer.from(vtPbf.fromGeojsonVt(encoded, { version: 2, extent }))
+  return Buffer.from(fromGeojsonVt(encoded, { version: 2, extent }))
 }
