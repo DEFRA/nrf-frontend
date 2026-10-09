@@ -2,7 +2,7 @@ import { referenceParam, tokenParam } from '@defra/nrf-library'
 import joi from 'joi'
 import { quoteDetailsGetController } from './controller-get.js'
 import getErrorViewModel from './get-error-view-model.js'
-import { quoteAccessStatus } from './helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 
 export const routePath = '/quote/{reference}/{token}'
 
@@ -15,8 +15,8 @@ const invalidLinkFailAction = (request, h, err) => {
   const { reference, token } = request.params
   const referenceInvalid = err.details?.some((d) => d.path?.[0] === 'reference')
   const status = referenceInvalid
-    ? quoteAccessStatus.notFound
-    : quoteAccessStatus.invalid
+    ? QUOTE_ACCESS_STATUS.notFound
+    : QUOTE_ACCESS_STATUS.invalid
   return h
     .view(
       'quote/quote-details/error',

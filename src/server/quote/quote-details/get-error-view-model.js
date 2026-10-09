@@ -1,5 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { quoteAccessStatus } from './helpers/quote-access-status.js'
+import { QUOTE_ACCESS_STATUS } from '@defra/nrf-library'
 
 // View-model variants mapping onto the backend access statuses.
 export const errorVariant = {
@@ -9,15 +9,15 @@ export const errorVariant = {
 }
 
 const variantByStatus = {
-  [quoteAccessStatus.expired]: {
+  [QUOTE_ACCESS_STATUS.expired]: {
     variant: errorVariant.knownExpired,
     heading: 'This link is no longer active'
   },
-  [quoteAccessStatus.invalid]: {
+  [QUOTE_ACCESS_STATUS.invalid]: {
     variant: errorVariant.unknownExpired,
     heading: 'The link is invalid'
   },
-  [quoteAccessStatus.notFound]: {
+  [QUOTE_ACCESS_STATUS.notFound]: {
     variant: errorVariant.noQuote,
     heading:
       'The NRL reference you have supplied does not match an existing quote'
@@ -36,7 +36,7 @@ const variantByStatus = {
  */
 export default function getErrorViewModel(status, { reference, token } = {}) {
   const { variant, heading } =
-    variantByStatus[status] ?? variantByStatus[quoteAccessStatus.invalid]
+    variantByStatus[status] ?? variantByStatus[QUOTE_ACCESS_STATUS.invalid]
 
   return {
     pageTitle: getPageTitle(heading),
