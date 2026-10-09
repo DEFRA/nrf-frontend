@@ -2,8 +2,13 @@ import { config } from '../../../config/config.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { getOrdnanceSurveyMapUrl } from '../ordnance-survey-url.js'
+import {
+  getCachedTile,
+  setCachedTile
+} from '../../common/services/tile-cache.js'
 import { buildSeaMaskTile } from './build-sea-mask-tile.js'
 import { isTileOutsideEngland } from './is-tile-outside-england.js'
+import { tileParamsSchema } from './tile-params-validation.js'
 
 const logger = createLogger()
 const mvtContentType = 'application/vnd.mapbox-vector-tile'
@@ -48,7 +53,7 @@ function seaTile(h, tile) {
 }
 
 /**
- * @param {{ z: string, x: string, y: string }} params
+ * @param {{ z: number, x: number, y: number }} params
  * @returns {Promise<Buffer|null>}
  */
 async function fetchLandTile({ z, x, y }) {
@@ -71,26 +76,52 @@ async function fetchLandTile({ z, x, y }) {
   return Buffer.from(await response.arrayBuffer())
 }
 
+/**
+ * Clipping detailed coastline is CPU heavy, so built tiles are kept in Redis.
+ * Only for a short time: the mask is derived from Ordnance Survey data, which
+ * may be cached temporarily for performance but never stored permanently.
+ *
+ * @param {{ z: number, x: number, y: number }} tile
+ * @returns {Promise<Buffer|null>} null when Ordnance Survey has no tile for us
+ */
+async function getSeaMaskTile({ z, x, y }) {
+  const cacheKey = `sea-mask/${z}/${x}/${y}`
+  const cached = await getCachedTile(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const landTile = await fetchLandTile({ z, x, y })
+  if (landTile === null) {
+    return null
+  }
+
+  const seaMaskTile = buildSeaMaskTile(landTile)
+  await setCachedTile(cacheKey, seaMaskTile, {
+    ttlSeconds: config.get('map.seaMaskRedisCacheTtlSeconds')
+  })
+  return seaMaskTile
+}
+
 const seaMaskHandler = {
   method: 'GET',
   path: `${seaMaskRoutePath}/{z}/{x}/{y}.pbf`,
   options: {
-    auth: false
+    auth: false,
+    validate: {
+      params: tileParamsSchema
+    }
   },
   async handler(request, h) {
     const { z, x, y } = request.params
 
-    if (isTileOutsideEngland({ z: +z, x: +x, y: +y })) {
+    if (isTileOutsideEngland({ z, x, y })) {
       return seaTile(h, allSeaTile)
     }
 
     try {
-      const landTile = await fetchLandTile({ z, x, y })
-      if (landTile === null) {
-        return emptyTile(h)
-      }
-
-      return seaTile(h, buildSeaMaskTile(landTile))
+      const seaMaskTile = await getSeaMaskTile({ z, x, y })
+      return seaMaskTile === null ? emptyTile(h) : seaTile(h, seaMaskTile)
     } catch (err) {
       logger.error(err, `Sea mask tile failed for ${z}/${x}/${y}`)
       return emptyTile(h)

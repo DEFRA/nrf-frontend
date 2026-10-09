@@ -1,7 +1,6 @@
-import { ENGLAND_MAX_BOUNDS } from '../../../client/javascripts/map/shared-helpers/constants.js'
+import { ENGLAND_MAX_BOUNDS } from '../../../shared/england-max-bounds.js'
 
-// The same box the map is held within, so every tile a user can pan to is
-// still masked against the real coastline.
+// Every tile a user can pan to is still masked against the real coastline.
 const [westBound, southBound, eastBound, northBound] = ENGLAND_MAX_BOUNDS
 
 const degreesInCircle = 360

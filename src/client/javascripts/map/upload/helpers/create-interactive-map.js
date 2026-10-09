@@ -2,9 +2,9 @@ import { InteractiveMap } from '@defra/interactive-map'
 import maplibreProvider from '@defra/interactive-map/providers/maplibre'
 import {
   BOUNDARY_MAP_MAX_ZOOM,
-  DEFAULT_MAP_CENTER,
-  ENGLAND_MAX_BOUNDS
+  DEFAULT_MAP_CENTER
 } from '../../shared-helpers/constants.js'
+import { ENGLAND_MAX_BOUNDS } from '../../../../../shared/england-max-bounds.js'
 import { configureMaplibreWorker } from '../../shared-helpers/configure-maplibre-worker.js'
 import { transformRequest } from '../../shared-helpers/transform-request.js'
 
