@@ -11,6 +11,7 @@ const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
 const oneDaySeconds = 86400
+const fiveSecondsMs = 5000
 
 const SESSION_RATE_LIMIT_MAX = 60
 const SESSION_RATE_LIMIT_MAX_TEST = 35
@@ -440,6 +441,18 @@ export const config = convict({
       format: Number,
       default: oneDaySeconds,
       env: 'MAP_TILE_CACHE_CONTROL_MAX_AGE'
+    },
+    seaMaskUpstreamTimeoutMs: {
+      doc: 'How long, in milliseconds, the sea mask waits for an Ordnance Survey tile before serving an empty tile.',
+      format: Number,
+      default: isTest ? 100 : fiveSecondsMs,
+      env: 'MAP_SEA_MASK_UPSTREAM_TIMEOUT_MS'
+    },
+    seaMaskRedisCacheTtlSeconds: {
+      doc: 'Time-to-live, in seconds, for sea mask tiles cached in Redis. Kept short because the mask is derived from Ordnance Survey data, which may only be stored temporarily.',
+      format: Number,
+      default: oneDaySeconds,
+      env: 'MAP_SEA_MASK_REDIS_CACHE_TTL_SECONDS'
     },
     aerialTileCacheControlMaxAge: {
       doc: 'max-age, in seconds, sent on the Cache-Control header for aerial imagery responses.',

@@ -4,6 +4,7 @@ import {
   DEFAULT_MAP_CENTER,
   DRAW_MAP_MAX_ZOOM
 } from '../../shared-helpers/constants.js'
+import { ENGLAND_MAX_BOUNDS } from '../../../../../shared/england-max-bounds.js'
 import { configureMaplibreWorker } from '../../shared-helpers/configure-maplibre-worker.js'
 import { transformRequest } from '../../shared-helpers/transform-request.js'
 
@@ -25,6 +26,7 @@ export function createInteractiveMap(
     mapStyle: mapStyles[0],
     center: center || DEFAULT_MAP_CENTER,
     bounds,
+    maxBounds: ENGLAND_MAX_BOUNDS,
     maxZoom: DRAW_MAP_MAX_ZOOM,
     zoom: DEFAULT_ZOOM,
     containerHeight: '100%',

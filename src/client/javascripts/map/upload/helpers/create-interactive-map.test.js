@@ -37,6 +37,7 @@ describe('createInteractiveMap', () => {
         mapStyle: mapStyles[0],
         center: [1.1405503, 52.7089441],
         bounds: null,
+        maxBounds: [-7.5, 49.5, 2.5, 56.2],
         maxZoom: 18,
         containerHeight: '100%',
         enableZoomControls: true,

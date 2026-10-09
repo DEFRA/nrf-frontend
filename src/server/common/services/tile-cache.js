@@ -42,14 +42,18 @@ export async function getCachedTile(path) {
   }
 }
 
-export async function setCachedTile(path, buffer) {
+/**
+ * @param {string} path
+ * @param {Buffer} buffer
+ * @param {{ ttlSeconds?: number }} [options]
+ */
+export async function setCachedTile(
+  path,
+  buffer,
+  { ttlSeconds = config.get('map.tileRedisCacheTtlSeconds') } = {}
+) {
   try {
-    await getClient().set(
-      `${keyPrefix}${path}`,
-      buffer,
-      'EX',
-      config.get('map.tileRedisCacheTtlSeconds')
-    )
+    await getClient().set(`${keyPrefix}${path}`, buffer, 'EX', ttlSeconds)
   } catch (err) {
     logger.error(err, `Tile cache write failed for ${path}`)
   }

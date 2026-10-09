@@ -166,6 +166,20 @@ describe('tile-cache', () => {
       )
     })
 
+    it('writes the buffer with a TTL chosen by the caller', async () => {
+      const buffer = Buffer.from('sea')
+      const ttlSeconds = 3600
+
+      await setCachedTile('sea-mask/11/1033/670', buffer, { ttlSeconds })
+
+      expect(mockClient.set).toHaveBeenCalledWith(
+        'tile:sea-mask/11/1033/670',
+        buffer,
+        'EX',
+        ttlSeconds
+      )
+    })
+
     it('writes an aerial tile under the shared tile: prefix', async () => {
       const buffer = Buffer.from('aerial')
 

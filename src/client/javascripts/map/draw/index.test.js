@@ -90,7 +90,7 @@ describe('draw boundary map init', () => {
         behaviour: 'inline',
         center: [1.1405503, 52.7089441],
         zoom: 8.5,
-        mapStyle: expect.objectContaining({ id: 'aerial' }),
+        mapStyle: expect.objectContaining({ id: 'hybrid' }),
         containerHeight: '100%',
         transformRequest: expect.any(Function),
         plugins: expect.arrayContaining([

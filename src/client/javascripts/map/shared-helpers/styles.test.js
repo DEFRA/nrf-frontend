@@ -1,16 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { getMapStyles } from './styles.js'
 import aerialStyle from '../../../data/vts/APGB_Aerial.json'
+import hybridStyle from '../../../data/vts/APGB_Hybrid.json'
 
 describe('getMapStyles', () => {
-  it('keeps aerial at index 0, the map default style', () => {
+  it('keeps hybrid at index 0, the map default style', () => {
     // create-interactive-map.js reads mapStyles[0] as the initial style, so
     // this index is behaviour, not presentation.
     const styles = getMapStyles()
 
-    expect(styles).toHaveLength(4)
+    expect(styles).toHaveLength(5)
     expect(styles[0]).toEqual(
-      expect.objectContaining({ id: 'aerial', label: 'Aerial' })
+      expect.objectContaining({ id: 'hybrid', label: 'Hybrid' })
     )
   })
 
@@ -19,26 +20,84 @@ describe('getMapStyles', () => {
   })
 
   it('points aerial at its own thumbnail file', () => {
-    const [aerial] = getMapStyles()
+    const aerial = getMapStyles().find((style) => style.id === 'aerial')
 
-    expect(aerial.thumbnail).toMatch(/aerial\.svg$/)
+    expect(aerial.thumbnail).toMatch(/aerial\.jpg$/)
   })
 
-  it('credits aerial imagery to APGB rather than Ordnance Survey', () => {
-    const [aerial, outdoorOs] = getMapStyles()
+  it.each([
+    ['aerial', aerialStyle],
+    ['hybrid', hybridStyle]
+  ])(
+    'credits %s imagery to APGB and the sea mask coastline to Ordnance Survey',
+    (id, style) => {
+      const mapStyle = getMapStyles().find((entry) => entry.id === id)
 
-    expect(aerial.attribution).not.toBe(outdoorOs.attribution)
-    expect(aerial.attribution).not.toMatch(/Ordnance Survey/)
-  })
+      expect(mapStyle.attribution).toContain(
+        style.sources['apgb-aerial'].attribution
+      )
+      expect(mapStyle.attribution).toMatch(/Ordnance Survey/)
+    }
+  )
 
-  it('takes the aerial credit from the style JSON so the two cannot drift', () => {
-    const [source] = Object.values(aerialStyle.sources)
-    const [aerial] = getMapStyles()
+  it.each([
+    ['hybrid', 'dark'],
+    ['aerial', 'dark'],
+    ['dark', 'dark'],
+    ['outdoor-os', undefined],
+    ['black-and-white', undefined]
+  ])(
+    'gives %s a %s map colour scheme for the draw and scale bar overlays',
+    (id, mapColorScheme) => {
+      const mapStyle = getMapStyles().find((entry) => entry.id === id)
 
-    expect(aerial.attribution).toBe(source.attribution)
-    expect(aerial.attribution).toBe(
-      '© Bluesky International Limited 2021 and onwards | © Bluesky International Limited and Getmapping Limited 1999-2020'
+      expect(mapStyle.mapColorScheme).toBe(mapColorScheme)
+    }
+  )
+
+  it('offers aerial straight after hybrid', () => {
+    const [hybrid, aerial] = getMapStyles()
+
+    expect(aerial).toEqual(
+      expect.objectContaining({ id: 'aerial', label: 'Aerial' })
     )
+    expect(hybrid.url).toMatch(/APGB_Hybrid\.json$/)
+    expect(hybrid.thumbnail).toMatch(/hybrid\.jpg$/)
+  })
+})
+
+describe('APGB_Hybrid.json', () => {
+  const layerIds = hybridStyle.layers.map((layer) => layer.id)
+
+  it('shades the sea and land outside imagery coverage as the aerial style does', () => {
+    expect(hybridStyle.sources['sea-mask']).toEqual(
+      aerialStyle.sources['sea-mask']
+    )
+    expect(hybridStyle.layers.slice(0, 3)).toEqual(aerialStyle.layers)
+  })
+
+  it('draws labels above the sea mask so they stay readable over water', () => {
+    const firstLabel = hybridStyle.layers.findIndex(
+      (layer) => layer.type === 'symbol'
+    )
+
+    expect(layerIds.indexOf('sea-mask')).toBeLessThan(firstLabel)
+  })
+
+  it('writes every label in white so it reads against the dark halo', () => {
+    const darkLabels = hybridStyle.layers
+      .filter((layer) => layer.layout?.['text-field'])
+      .filter((layer) => !/^#F[CF]F[DF]FF$/.test(layer.paint['text-color']))
+      .map((layer) => layer.id)
+
+    expect(darkLabels).toEqual([])
+  })
+
+  it('reads Ordnance Survey tiles and fonts through the os-base-map proxy', () => {
+    expect(hybridStyle.sources.esri.tiles).toEqual([
+      '/os-base-map/tile/{z}/{y}/{x}.pbf'
+    ])
+    expect(hybridStyle.glyphs).toMatch(/^\/os-base-map\//)
   })
 })
 
