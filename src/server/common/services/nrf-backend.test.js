@@ -23,19 +23,11 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('@defra/hapi-tracing', () => ({
-  withTraceId: vi.fn()
-}))
-
-import { withTraceId } from '@defra/hapi-tracing'
-
 describe('nrf-backend service', () => {
   describe('getRequestFromBackend', () => {
     it('should call the correct URL and return the response', async () => {
       const mockResponse = { payload: { id: '123', status: 'ok' } }
       vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       const result = await getRequestFromBackend({
         endpointPath: '/quotes/123'
       })
@@ -47,24 +39,8 @@ describe('nrf-backend service', () => {
       expect(result).toBe(mockResponse)
     })
 
-    it('should include the tracing header when a trace ID is present', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({
-        'x-cdp-request-id': 'trace-abc-123'
-      })
-
-      await getRequestFromBackend({ endpointPath: '/quotes/123' })
-
-      expect(Wreck.get).toHaveBeenCalledWith(`${backendUrl}/quotes/123`, {
-        json: true,
-        headers: { 'x-cdp-request-id': 'trace-abc-123' }
-      })
-    })
-
     it('should not include the tracing header when no trace ID is present', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getRequestFromBackend({ endpointPath: '/quotes/123' })
 
       const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
@@ -73,8 +49,6 @@ describe('nrf-backend service', () => {
 
     it('should merge extra headers when provided', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getRequestFromBackend({
         endpointPath: '/quotes/123',
         headers: { Authorization: 'Bearer my-secret-token' }
@@ -88,8 +62,6 @@ describe('nrf-backend service', () => {
 
     it('should not include extra headers when none are provided', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getRequestFromBackend({ endpointPath: '/quotes/123' })
 
       const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
@@ -99,8 +71,6 @@ describe('nrf-backend service', () => {
     it('should log and rethrow errors when the request fails', async () => {
       const error = new Error('Network error')
       vi.mocked(Wreck.get).mockRejectedValue(error)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await expect(
         getRequestFromBackend({ endpointPath: '/quotes/123' })
       ).rejects.toThrow('Network error')
@@ -117,8 +87,6 @@ describe('nrf-backend service', () => {
       vi.mocked(Wreck.get).mockResolvedValue({
         payload: { reference: 'NRL-123' }
       })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getQuoteFromBackend({ reference: 'NRL-123' })
 
       expect(Wreck.get).toHaveBeenCalledWith(
@@ -129,8 +97,6 @@ describe('nrf-backend service', () => {
 
     it('should include Authorization header when bearerToken is provided', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getQuoteFromBackend({
         reference: 'NRL-123',
         bearerToken: 'my-secret-token'
@@ -148,8 +114,6 @@ describe('nrf-backend service', () => {
 
     it('should not include Authorization header when bearerToken is not provided', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await getQuoteFromBackend({ reference: 'NRL-123' })
 
       const callArgs = vi.mocked(Wreck.get).mock.calls[0][1]
@@ -158,8 +122,6 @@ describe('nrf-backend service', () => {
 
     it('should include the x-api-key header when backend.apiKey is set', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       const original = config.get('backend.apiKey')
       config.set('backend.apiKey', 'secret-key')
       try {
@@ -182,8 +144,6 @@ describe('nrf-backend service', () => {
         payload: { defraId: 'user-123', email: 'test@example.com' }
       }
       vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       const result = await getUserFromBackend({ defraId: 'user-123' })
 
       expect(Wreck.get).toHaveBeenCalledWith(
@@ -199,8 +159,6 @@ describe('nrf-backend service', () => {
     it('should rethrow when the request fails', async () => {
       const error = new Error('Not found')
       vi.mocked(Wreck.get).mockRejectedValue(error)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await expect(getUserFromBackend({ defraId: 'user-123' })).rejects.toThrow(
         'Not found'
       )
@@ -211,8 +169,6 @@ describe('nrf-backend service', () => {
     it('should call the correct URL with payload and return the response', async () => {
       const mockResponse = { payload: { id: '123', status: 'ok' } }
       vi.mocked(Wreck.post).mockResolvedValue(mockResponse)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       const result = await postRequestToBackend({
         endpointPath: '/quotes',
         payload: { foo: 'bar' }
@@ -226,28 +182,8 @@ describe('nrf-backend service', () => {
       expect(result).toBe(mockResponse)
     })
 
-    it('should include the tracing header when a trace ID is present', async () => {
-      vi.mocked(Wreck.post).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({
-        'x-cdp-request-id': 'trace-abc-123'
-      })
-
-      await postRequestToBackend({
-        endpointPath: '/quotes',
-        payload: { foo: 'bar' }
-      })
-
-      expect(Wreck.post).toHaveBeenCalledWith(`${backendUrl}/quotes`, {
-        payload: { foo: 'bar' },
-        json: true,
-        headers: { 'x-cdp-request-id': 'trace-abc-123' }
-      })
-    })
-
     it('should not include the tracing header when no trace ID is present', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({ payload: {} })
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await postRequestToBackend({
         endpointPath: '/quotes',
         payload: {}
@@ -260,8 +196,6 @@ describe('nrf-backend service', () => {
     it('should log and rethrow errors when the request fails', async () => {
       const error = new Error('Network error')
       vi.mocked(Wreck.post).mockRejectedValue(error)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await expect(
         postRequestToBackend({ endpointPath: '/quotes', payload: {} })
       ).rejects.toThrow('Network error')
@@ -277,8 +211,6 @@ describe('nrf-backend service', () => {
     it('should call the correct URL with payload and return the response', async () => {
       const mockResponse = { statusCode: 204 }
       vi.mocked(Wreck.patch).mockResolvedValue(mockResponse)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       const result = await patchRequestToBackend({
         endpointPath: '/users/user-123',
         payload: { email: 'test@example.com' }
@@ -295,8 +227,6 @@ describe('nrf-backend service', () => {
     it('should log and rethrow errors when the request fails', async () => {
       const error = new Error('Network error')
       vi.mocked(Wreck.patch).mockRejectedValue(error)
-      vi.mocked(withTraceId).mockReturnValue({})
-
       await expect(
         patchRequestToBackend({ endpointPath: '/users/user-123', payload: {} })
       ).rejects.toThrow('Network error')
