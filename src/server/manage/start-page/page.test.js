@@ -2,6 +2,9 @@ import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
+import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
 
 describe('Start page', () => {
@@ -39,5 +42,15 @@ describe('Start page', () => {
       server: getServer()
     })
     assertContactDetails(document)
+  })
+
+  it('should redirect to the what would you like to do page when the start form is submitted', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: {}
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(whatWouldYouLikeToDoPath)
   })
 })
