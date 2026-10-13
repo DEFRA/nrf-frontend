@@ -3,6 +3,7 @@ import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as startPagePath } from '../start-page/route-path.js'
 import { routePath as planningTypePath } from '../../quote/planning-type/route-path.js'
+import { routePath as haveNrlReferencePath } from '../../request-to-use/have-nrl-reference/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -62,7 +63,7 @@ describe('What would you like to do page', () => {
     },
     {
       option: 'request-to-use',
-      nextPage: '/request-to-use/have-nrl-reference'
+      nextPage: haveNrlReferencePath
     }
   ])(
     'should redirect to $nextPage when "$option" is selected',

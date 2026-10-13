@@ -1,7 +1,5 @@
 import { routePath as planningTypePath } from '../../quote/planning-type/route-path.js'
-
-// Page not built yet: swap for a route-path.js import when it exists
-const haveNrlReferencePath = '/request-to-use/have-nrl-reference'
+import { routePath as haveNrlReferencePath } from '../../request-to-use/have-nrl-reference/route-path.js'
 
 /**
  * @param {{ whatWouldYouLikeToDo: string }} formData - the validated payload

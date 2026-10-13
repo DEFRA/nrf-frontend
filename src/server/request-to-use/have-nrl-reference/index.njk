@@ -1,0 +1,49 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate>
+      {% include "partials/csrf-token.njk" %}
+
+      {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+      {% endif %}
+
+      {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+      {{ govukRadios({
+        name: "hasNrlReference",
+        fieldset: {
+          legend: {
+            html: legendHtml,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: {
+          text: "You can find this reference in your quote email."
+        },
+        errorMessage: validationErrors.messagesByFormField.hasNrlReference,
+        value: formSubmitData.hasNrlReference,
+        items: hasNrlReferenceOptions
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <a class="govuk-link" href="{{ cancelLinkPath }}">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -3,11 +3,11 @@ import { quoteController } from './controller-get.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from './helpers/form-validation-session/index.js'
+} from '../common/helpers/form-validation-session/index.js'
 import { getQuoteDataFromCache } from './helpers/quote-session-cache/index.js'
 
 vi.mock('./helpers/quote-session-cache/index.js')
-vi.mock('./helpers/form-validation-session/index.js')
+vi.mock('../common/helpers/form-validation-session/index.js')
 
 describe('quoteController', () => {
   const routeId = 'start'

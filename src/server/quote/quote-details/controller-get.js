@@ -11,7 +11,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../helpers/form-validation-session/index.js'
+} from '../../common/helpers/form-validation-session/index.js'
 
 const routeId = 'quote-details'
 

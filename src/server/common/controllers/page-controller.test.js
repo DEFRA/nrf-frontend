@@ -3,11 +3,11 @@ import { createPageController } from './page-controller.js'
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../../quote/helpers/form-validation-session/index.js'
+} from '../helpers/form-validation-session/index.js'
 import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
 
 vi.mock('../../quote/helpers/quote-session-cache/index.js')
-vi.mock('../../quote/helpers/form-validation-session/index.js')
+vi.mock('../helpers/form-validation-session/index.js')
 
 describe('createPageController', () => {
   const routeId = 'planning-type'

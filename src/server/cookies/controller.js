@@ -10,7 +10,7 @@ import {
   clearValidationFlashFromCache,
   getValidationFlashFromCache,
   saveValidationFlashToCache
-} from '../quote/helpers/form-validation-session/index.js'
+} from '../common/helpers/form-validation-session/index.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 import { routePath as startPagePath } from '../manage/start-page/routes.js'
 
