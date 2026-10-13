@@ -1,0 +1,70 @@
+import { requestToUseController } from '../controller-get.js'
+import { requestToUsePostController } from '../controller-post.js'
+import getViewModel from './get-view-model.js'
+import formValidation from './form-validation.js'
+import getNextPage from './get-next-page.js'
+import { routePath } from './route-path.js'
+
+const routeId = 'enter-nrl-reference'
+
+export { routePath }
+
+/**
+ * @openapi
+ * /request-to-use/enter-nrl-reference:
+ *   get:
+ *     tags:
+ *       - RequestToUse
+ *     summary: Enter your NRL reference page
+ *     description: >
+ *       Renders the question asking for the user's NRL reference. A valid
+ *       reference in the nrlReference query parameter pre-fills the input; an
+ *       invalid one is ignored. The reference is not PII but it is recorded in
+ *       access logs when supplied in the URL.
+ *     parameters:
+ *       - in: query
+ *         name: nrlReference
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: NRL-123456
+ *     responses:
+ *       200:
+ *         description: HTML form page
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *   post:
+ *     tags:
+ *       - RequestToUse
+ *     summary: Submit the NRL reference
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nrlReference
+ *             properties:
+ *               nrlReference:
+ *                 type: string
+ *                 description: Quote reference, NRL- followed by six digits. Whitespace is trimmed and lowercase accepted.
+ *                 example: NRL-123456
+ *     responses:
+ *       303:
+ *         description: Redirect to the next page on success, or back to the form (keeping the query string) on validation failure
+ */
+export default [
+  {
+    method: 'GET',
+    path: routePath,
+    ...requestToUseController({ routeId, getViewModel })
+  },
+  {
+    method: 'POST',
+    path: routePath,
+    ...requestToUsePostController({ formValidation, getNextPage })
+  }
+]

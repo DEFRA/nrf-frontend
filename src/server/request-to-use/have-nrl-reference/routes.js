@@ -1,5 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
-import { haveNrlReferencePostController } from './controller-post.js'
+import { requestToUsePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
@@ -55,6 +55,6 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...haveNrlReferencePostController({ formValidation, getNextPage })
+    ...requestToUsePostController({ formValidation, getNextPage })
   }
 ]

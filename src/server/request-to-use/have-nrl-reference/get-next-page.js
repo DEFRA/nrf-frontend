@@ -1,5 +1,6 @@
-// Pages not built yet: swap for route-path.js imports when they exist
-const quoteReferencePath = '/request-to-use/quote-reference'
+import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
+
+// Page not built yet: swap for a route-path.js import when it exists
 const noNrlReferencePath = '/request-to-use/no-nrl-reference'
 
 /**
@@ -8,7 +9,7 @@ const noNrlReferencePath = '/request-to-use/no-nrl-reference'
  */
 export default function getNextPage({ hasNrlReference }) {
   if (hasNrlReference === 'yes') {
-    return quoteReferencePath
+    return enterNrlReferencePath
   }
 
   return noNrlReferencePath
