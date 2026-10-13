@@ -3,6 +3,7 @@ import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../application-type-not-available/route-path.js'
+import { routePath as whatWouldYouLikeToDoPath } from '../../manage/what-would-you-like-to-do/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -26,14 +27,14 @@ describe('Planning type page', () => {
       server: getServer(),
       cookie: sessionCookie
     })
-    const { pageTitle, pageHeading, backLinkPath } = getViewModel()
+    const { pageTitle, pageHeading } = getViewModel()
     expect(document.title).toBe(pageTitle)
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       pageHeading
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      backLinkPath
+      whatWouldYouLikeToDoPath
     )
     expect(
       getByLabelText(document, 'Full planning permission')

@@ -1,11 +1,13 @@
 import { manageController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
 import { initQuoteSession } from '../../quote/helpers/quote-session-cache/index.js'
-import { routePath as planningTypePath } from '../../quote/planning-type/routes.js'
+import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
+import { routePath } from './route-path.js'
 
 const routeId = 'start-page'
-export const routePath = '/manage/start-page'
+
+export { routePath }
 
 /**
  * @openapi
@@ -29,7 +31,7 @@ export const routePath = '/manage/start-page'
  *     description: Creates an empty quote session and redirects to the first step
  *     responses:
  *       303:
- *         description: Redirect to planning type page
+ *         description: Redirect to the what would you like to do page
  */
 export default [
   {
@@ -42,7 +44,9 @@ export default [
     path: routePath,
     handler(request, h) {
       initQuoteSession(request)
-      return h.redirect(planningTypePath).code(statusCodes.redirectAfterPost)
+      return h
+        .redirect(whatWouldYouLikeToDoPath)
+        .code(statusCodes.redirectAfterPost)
     }
   }
 ]
