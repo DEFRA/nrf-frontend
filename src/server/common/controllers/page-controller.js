@@ -1,7 +1,7 @@
 import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
-} from '../../quote/helpers/form-validation-session/index.js'
+} from '../helpers/form-validation-session/index.js'
 import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
 
 /**

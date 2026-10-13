@@ -8,12 +8,12 @@ import {
   clearValidationFlashFromCache,
   getValidationFlashFromCache,
   saveValidationFlashToCache
-} from '../quote/helpers/form-validation-session/index.js'
+} from '../common/helpers/form-validation-session/index.js'
 import { routePath as startPagePath } from '../manage/start-page/routes.js'
 
 vi.mock('./helpers/cookie-preferences.js')
 vi.mock('./helpers/cookie-service.js')
-vi.mock('../quote/helpers/form-validation-session/index.js')
+vi.mock('../common/helpers/form-validation-session/index.js')
 
 const createMockRequest = (overrides = {}) => ({
   query: {},

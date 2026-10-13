@@ -2,13 +2,13 @@
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { getValidationFlashFromCache } from '../helpers/form-validation-session/index.js'
+import { getValidationFlashFromCache } from '../../common/helpers/form-validation-session/index.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 import { getQuoteDataFromCache } from '../helpers/quote-session-cache/index.js'
 import { initiateUpload } from '../../common/services/uploader.js'
 
 vi.mock('../helpers/quote-session-cache/index.js')
-vi.mock('../helpers/form-validation-session/index.js')
+vi.mock('../../common/helpers/form-validation-session/index.js')
 vi.mock('../../common/services/uploader.js')
 
 describe('Upload boundary page accessibility checks', () => {

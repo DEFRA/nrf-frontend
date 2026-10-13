@@ -1,4 +1,4 @@
-import { redirectToFormWithValidationErrors } from '../../quote/controller-post.js'
+import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 
 /**
