@@ -12,7 +12,9 @@ describe('enter-nrl-reference form validation', () => {
     it.each([
       { scenario: 'a valid reference', value: validReference },
       { scenario: 'a lowercase reference', value: 'nrl-123456' },
-      { scenario: 'surrounding whitespace', value: ` ${validReference}\t` }
+      { scenario: 'surrounding whitespace', value: ` ${validReference}\t` },
+      { scenario: 'six digits without the NRL- prefix', value: '123456' },
+      { scenario: 'padded six digits without the prefix', value: ' 123456\t' }
     ])('passes and normalises $scenario', ({ value }) => {
       const result = formValidation().validate({ nrlReference: value })
       expect(result.error).toBeUndefined()
@@ -33,6 +35,10 @@ describe('enter-nrl-reference form validation', () => {
       'NRL-12345',
       'NRL-1234567',
       'NRL123456',
+      '12345',
+      '1234567',
+      '12345A',
+      '123 456',
       'NRL-12345A',
       'XNRL-123456',
       'NRL-123456 7',

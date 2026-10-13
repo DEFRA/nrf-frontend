@@ -117,7 +117,11 @@ describe('Enter your NRL reference page', () => {
   it.each([
     { scenario: 'a valid reference', value: validReference },
     { scenario: 'a lowercase reference', value: validReference.toLowerCase() },
-    { scenario: 'a reference with whitespace', value: `  ${validReference} ` }
+    { scenario: 'a reference with whitespace', value: `  ${validReference} ` },
+    {
+      scenario: 'six digits without the NRL- prefix',
+      value: validReference.replace('NRL-', '')
+    }
   ])('should redirect to the next page for $scenario', async ({ value }) => {
     const { response } = await submitForm({
       requestUrl: routePath,

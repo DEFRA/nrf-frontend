@@ -50,7 +50,7 @@ export { routePath }
  *             properties:
  *               nrlReference:
  *                 type: string
- *                 description: Quote reference, NRL- followed by six digits. Whitespace is trimmed and lowercase accepted.
+ *                 description: Quote reference, NRL- followed by six digits. Whitespace is trimmed, lowercase accepted, and six digits on their own are accepted and given the NRL- prefix.
  *                 example: NRL-123456
  *     responses:
  *       303:

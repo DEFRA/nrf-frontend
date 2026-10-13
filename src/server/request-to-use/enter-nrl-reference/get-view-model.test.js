@@ -20,6 +20,7 @@ describe('enter-nrl-reference getViewModel', () => {
   it.each([
     { scenario: 'valid', query: validReference },
     { scenario: 'lowercase', query: 'nrl-123456' },
+    { scenario: 'six digits without the prefix', query: '123456' },
     { scenario: 'padded with whitespace', query: ` ${validReference} ` }
   ])(
     'pre-fills the normalised reference when the query is $scenario',
