@@ -13,7 +13,7 @@ export function createMapDatasetsPlugin() {
       {
         id: 'edp_boundaries',
         label:
-          'Broads SAC, Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2026 to 2036)',
+          'Norfolk: Broads Special Area of Conservation (SAC) (Yare and Bure), Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2027 to 2037)',
         tiles: ['/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt'],
         sourceLayer: 'edp_boundaries',
         showInKey: true,
