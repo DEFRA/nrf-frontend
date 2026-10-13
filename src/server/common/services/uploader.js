@@ -1,4 +1,5 @@
 import Wreck from '@hapi/wreck'
+import { wreckErrorContext } from '@defra/nrf-library'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
 import { backendHeaders } from './nrf-backend.js'
@@ -54,8 +55,7 @@ export async function initiateUpload({ redirect }) {
       uploadUrl: buildUploadUrl(payload.uploadUrl)
     }
   } catch (error) {
-    const statusCode = error?.output?.statusCode
-    const responsePayload = error?.data?.payload
+    const { statusCode, responsePayload } = wreckErrorContext(error)
     logger.error(
       error,
       `Error initiating upload - url: ${url}, backendUrl: ${backendUrl}, redirect: ${redirect}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
@@ -88,8 +88,7 @@ export async function getUploadStatus(uploadId) {
       ...(payload.error && { error: payload.error })
     }
   } catch (error) {
-    const statusCode = error?.output?.statusCode
-    const responsePayload = error?.data?.payload
+    const { statusCode, responsePayload } = wreckErrorContext(error)
     logger.error(
       error,
       `Error fetching upload status - url: ${url}, backendUrl: ${backendUrl}, uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`

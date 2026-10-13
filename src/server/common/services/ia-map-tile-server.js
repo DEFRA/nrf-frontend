@@ -1,5 +1,5 @@
+import { buildServiceHeaders } from '@defra/nrf-library'
 import { config } from '../../../config/config.js'
-import { withTraceId } from '@defra/hapi-tracing'
 import { createLogger } from '../helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -15,11 +15,10 @@ function getImpactAssessorUrl(path, query) {
 export const getMapTile = async (path, request) => {
   const upstreamUrl = getImpactAssessorUrl(path, request.query)
   logger.debug(`Impact assessor proxy request: ${path || '/'}`)
-  const headers = withTraceId(config.get('tracing.header'))
-  const apiKey = config.get('map.impactAssessorApiKey')
-  if (apiKey) {
-    headers['x-api-key'] = apiKey
-  }
+  const headers = buildServiceHeaders({
+    traceHeaderName: config.get('tracing.header'),
+    serviceKey: config.get('map.impactAssessorApiKey')
+  })
   return fetch(upstreamUrl, {
     redirect: 'follow',
     headers

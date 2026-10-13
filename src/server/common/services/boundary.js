@@ -1,4 +1,8 @@
-import { BOUNDARY_ERRORS, KNOWN_BOUNDARY_ERROR_CODES } from '@defra/nrf-library'
+import {
+  BOUNDARY_ERRORS,
+  KNOWN_BOUNDARY_ERROR_CODES,
+  wreckErrorContext
+} from '@defra/nrf-library'
 import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../helpers/logging/logger.js'
 import { postRequestToBackend } from './nrf-backend.js'
@@ -38,8 +42,7 @@ export async function checkBoundary(uploadId) {
 
     return { geojson: payload }
   } catch (error) {
-    const statusCode = error?.output?.statusCode
-    const responsePayload = error?.data?.payload
+    const { statusCode, responsePayload } = wreckErrorContext(error)
     logger.error(
       error,
       `Error checking boundary - uploadId: ${uploadId}, statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`
@@ -86,8 +89,7 @@ export async function checkBoundaryGeometry(geometry) {
 
     return { geojson: payload }
   } catch (error) {
-    const statusCode = error?.output?.statusCode
-    const responsePayload = error?.data?.payload
+    const { statusCode, responsePayload } = wreckErrorContext(error)
     logger.error(
       error,
       `Error checking boundary geometry - statusCode: ${statusCode}, responsePayload: ${JSON.stringify(responsePayload)}, message: ${error?.message}`

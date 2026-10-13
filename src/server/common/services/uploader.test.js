@@ -17,12 +17,6 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('@defra/hapi-tracing', () => ({
-  withTraceId: vi.fn((_, headers = {}) => headers)
-}))
-
-import { withTraceId } from '@defra/hapi-tracing'
-
 describe('uploader service', () => {
   describe('initiateUpload', () => {
     it('should return uploadId and uploadUrl on successful response', async () => {
@@ -49,38 +43,6 @@ describe('uploader service', () => {
       expect(result).toEqual({
         uploadId: 'test-upload-id',
         uploadUrl: '/upload-and-scan/test-upload-id'
-      })
-    })
-
-    it('should call withTraceId with the tracing header name', async () => {
-      vi.mocked(Wreck.post).mockResolvedValue({
-        payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
-      })
-
-      await initiateUpload({
-        redirect: '/quote/checking-file'
-      })
-
-      expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
-    })
-
-    it('should include tracing header returned by withTraceId', async () => {
-      vi.mocked(withTraceId).mockReturnValue({
-        'Content-Type': 'application/json',
-        'x-cdp-request-id': 'trace-abc-123'
-      })
-      vi.mocked(Wreck.post).mockResolvedValue({
-        payload: { uploadId: 'id', uploadUrl: '/upload-and-scan/id' }
-      })
-
-      await initiateUpload({
-        redirect: '/quote/checking-file'
-      })
-
-      const callArgs = vi.mocked(Wreck.post).mock.calls[0][1]
-      expect(callArgs.headers).toEqual({
-        'Content-Type': 'application/json',
-        'x-cdp-request-id': 'trace-abc-123'
       })
     })
 
