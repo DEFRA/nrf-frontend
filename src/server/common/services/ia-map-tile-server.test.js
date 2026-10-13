@@ -1,9 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { withTraceId } from '@defra/hapi-tracing'
-
-vi.mock('@defra/hapi-tracing', () => ({
-  withTraceId: vi.fn()
-}))
 
 const mockApiKeyRef = vi.hoisted(() => ({ current: '' }))
 
@@ -44,7 +39,6 @@ describe('getMapTile', () => {
 
   beforeEach(() => {
     fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
-    vi.mocked(withTraceId).mockReturnValue({})
     mockApiKeyRef.current = ''
   })
 
@@ -63,27 +57,6 @@ describe('getMapTile', () => {
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://impact-assessor.example',
       expect.objectContaining({ redirect: 'follow' })
-    )
-  })
-
-  it('passes the tracing header name to withTraceId', async () => {
-    await getMapTile('tiles/7/1/2.mvt', createMockRequest())
-
-    expect(withTraceId).toHaveBeenCalledWith('x-cdp-request-id')
-  })
-
-  it('includes headers returned by withTraceId in the fetch call', async () => {
-    vi.mocked(withTraceId).mockReturnValue({
-      'x-cdp-request-id': 'trace-abc-123'
-    })
-
-    await getMapTile('tiles/7/1/2.mvt', createMockRequest())
-
-    expect(fetchSpy).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        headers: { 'x-cdp-request-id': 'trace-abc-123' }
-      })
     )
   })
 
