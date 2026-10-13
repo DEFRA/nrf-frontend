@@ -9,6 +9,7 @@ import { profile } from './profile/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
 import { quote } from './quote/index.js'
 import { manage } from './manage/index.js'
+import { requestToUse } from './request-to-use/index.js'
 import { osBaseMap } from './os-base-map/index.js'
 import { osNamesSearch } from './os-names-search/index.js'
 import { impactAssessorMap } from './impact-assessor-map/index.js'
@@ -35,6 +36,7 @@ export const router = {
         profile,
         quote,
         manage,
+        requestToUse,
         osBaseMap,
         osNamesSearch,
         impactAssessorMap,
