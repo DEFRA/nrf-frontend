@@ -9,11 +9,15 @@ import { routePath } from './route-path.js'
 const routeId = 'enter-email'
 
 /**
- * The email is never stored in the session, so saving only reads the retrieve quote data.
+ * The email is never stored in the session. Submitting ends the retrieve quote
+ * journey, so its answers are cleared and going back redirects to the start page.
  * @param {import('@hapi/hapi').Request} request
- * @returns {object | null} the retrieve quote data
+ * @returns {null} no session data remains
  */
-const readRetrieveQuoteData = (request) => retrieveQuoteSession.get(request)
+const clearRetrieveQuoteData = (request) => {
+  retrieveQuoteSession.clear(request)
+  return null
+}
 
 export { routePath }
 
@@ -69,7 +73,7 @@ export default [
     ...createPostController({
       formValidation,
       getNextPage,
-      saveToSession: readRetrieveQuoteData
+      saveToSession: clearRetrieveQuoteData
     })
   }
 ]

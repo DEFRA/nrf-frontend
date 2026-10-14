@@ -1,4 +1,4 @@
-import { getByRole, getByLabelText } from '@testing-library/dom'
+import { getByRole, getByLabelText, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../../manage/what-would-you-like-to-do/route-path.js'
@@ -9,18 +9,26 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { getResponse } from '../../../test-utils/get-response.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 
 const yes = 'yes'
 
 describe('Do you have an NRL reference page', () => {
   const getServer = setupTestServer()
+  let sessionCookie
+
+  beforeEach(async () => {
+    sessionCookie = await withValidRetrieveQuoteSession(getServer())
+  })
 
   it('should render all page elements', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     const { pageTitle, pageHeading } = getViewModel()
     expect(document.title).toBe(pageTitle)
@@ -37,7 +45,8 @@ describe('Do you have an NRL reference page', () => {
   it('should link back to the what would you like to do page', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
@@ -45,21 +54,22 @@ describe('Do you have an NRL reference page', () => {
     )
   })
 
-  it('should link the Cancel link to the start page', async () => {
+  it('should not have a Cancel link', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
-    expect(getByRole(document, 'link', { name: 'Cancel' })).toHaveAttribute(
-      'href',
-      startPagePath
-    )
+    expect(
+      queryByRole(document, 'link', { name: 'Cancel' })
+    ).not.toBeInTheDocument()
   })
 
   it('should contain a CSRF token in the form', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie: sessionCookie
     })
     const csrfToken = document.querySelector('form input[name="csrfToken"]')
     expect(csrfToken).toBeInTheDocument()
@@ -74,7 +84,8 @@ describe('Do you have an NRL reference page', () => {
       const { response } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData: { hasNrlReference: answer }
+        formData: { hasNrlReference: answer },
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(nextPage)
@@ -93,7 +104,8 @@ describe('Do you have an NRL reference page', () => {
       const { response, cookie } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData
+        formData,
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(routePath)
@@ -110,23 +122,23 @@ describe('Do you have an NRL reference page', () => {
     }
   )
 
-  it.each([
-    { answer: yes, label: 'Yes' },
-    { answer: 'no', label: 'No' }
-  ])(
-    'should show the previous answer of "$answer" when returning to the page',
-    async ({ answer, label }) => {
+  it.each([yes, 'no'])(
+    'should show the previous answer of "%s" when returning to the page',
+    async (answer) => {
       const { cookie } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData: { hasNrlReference: answer }
+        formData: { hasNrlReference: answer },
+        cookie: sessionCookie
       })
       const document = await loadPage({
         requestUrl: routePath,
         server: getServer(),
         cookie
       })
-      expect(getByLabelText(document, label)).toBeChecked()
+      expect(
+        getByLabelText(document, answer === yes ? 'Yes' : 'No')
+      ).toBeChecked()
     }
   )
 
@@ -135,7 +147,8 @@ describe('Do you have an NRL reference page', () => {
     let { cookie } = await submitForm({
       requestUrl: routePath,
       server,
-      formData: { hasNrlReference: yes }
+      formData: { hasNrlReference: yes },
+      cookie: sessionCookie
     })
     ;({ cookie } = await submitForm({
       requestUrl: enterNrlReferencePath,
@@ -155,5 +168,14 @@ describe('Do you have an NRL reference page', () => {
       cookie
     })
     expect(getByLabelText(document, 'Enter your NRL reference')).toHaveValue('')
+  })
+
+  it('should redirect to the start page when there is no session', async () => {
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: routePath
+    })
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPagePath)
   })
 })

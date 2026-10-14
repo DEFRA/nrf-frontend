@@ -13,6 +13,7 @@ import { getResponse } from '../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { routePath as checkYourAnswersPath } from '../../quote/check-your-answers/route-path.js'
+import { routePath as enterNrlReferencePath } from '../../request-to-use/enter-nrl-reference/route-path.js'
 
 const quoteOption = 'quote'
 const requestToUseOption = 'request-to-use'
@@ -124,68 +125,53 @@ describe('What would you like to do page', () => {
     }
   )
 
-  describe('switching journey', () => {
-    const choose = (option, cookie) =>
-      submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { whatWouldYouLikeToDo: option },
-        cookie
-      })
-
-    const answerHaveNrlReference = async () => {
-      const server = getServer()
-      return submitForm({
-        requestUrl: haveNrlReferencePath,
-        server,
-        formData: { hasNrlReference: 'yes' },
-        cookie: await withValidRetrieveQuoteSession(server)
-      })
-    }
-
-    const loadHaveNrlReference = (cookie) =>
-      loadPage({
-        requestUrl: haveNrlReferencePath,
-        server: getServer(),
-        cookie
-      })
-
-    it('should clear the quote answers when request to use is chosen', async () => {
-      const cookie = await withCompleteQuoteSession(getServer())
-      const { cookie: updatedCookie } = await choose(requestToUseOption, cookie)
-      const response = await getResponse({
-        server: getServer(),
-        requestUrl: checkYourAnswersPath,
-        cookie: updatedCookie
-      })
-      expect(response.statusCode).toBe(statusCodes.found)
-      expect(response.headers.location).toBe(startPagePath)
+  it('should clear the quote answers when request to use is chosen', async () => {
+    const cookie = await withCompleteQuoteSession(getServer())
+    const { cookie: updatedCookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { whatWouldYouLikeToDo: requestToUseOption },
+      cookie
     })
-
-    it('should keep the quote answers when quote is chosen again', async () => {
-      const cookie = await withCompleteQuoteSession(getServer())
-      const { cookie: updatedCookie } = await choose(quoteOption, cookie)
-      const response = await getResponse({
-        server: getServer(),
-        requestUrl: checkYourAnswersPath,
-        cookie: updatedCookie
-      })
-      expect(response.statusCode).toBe(statusCodes.ok)
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: checkYourAnswersPath,
+      cookie: updatedCookie
     })
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPagePath)
+  })
 
-    it('should clear the request to use answers when quote is chosen', async () => {
-      let { cookie } = await answerHaveNrlReference()
-      ;({ cookie } = await choose(quoteOption, cookie))
-      ;({ cookie } = await choose(requestToUseOption, cookie))
-      const document = await loadHaveNrlReference(cookie)
-      expect(getByLabelText(document, 'Yes')).not.toBeChecked()
+  it('should clear the request to use answers when quote is chosen', async () => {
+    const cookie = await withValidRetrieveQuoteSession(getServer())
+    const { cookie: updatedCookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { whatWouldYouLikeToDo: quoteOption },
+      cookie
     })
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: enterNrlReferencePath,
+      cookie: updatedCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPagePath)
+  })
 
-    it('should keep the request to use answers when request to use is chosen again', async () => {
-      let { cookie } = await answerHaveNrlReference()
-      ;({ cookie } = await choose(requestToUseOption, cookie))
-      const document = await loadHaveNrlReference(cookie)
-      expect(getByLabelText(document, 'Yes')).toBeChecked()
+  it('should keep the quote answers when quote is chosen again', async () => {
+    const cookie = await withCompleteQuoteSession(getServer())
+    const { cookie: updatedCookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { whatWouldYouLikeToDo: quoteOption },
+      cookie
     })
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: checkYourAnswersPath,
+      cookie: updatedCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.ok)
   })
 })

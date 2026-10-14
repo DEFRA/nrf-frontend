@@ -1,7 +1,6 @@
 import { manageController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
 import { clearAllSessionData } from '../../common/helpers/journey-session/index.js'
-import { initQuoteSession } from '../../quote/helpers/quote-session-cache/index.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './route-path.js'
@@ -45,7 +44,6 @@ export default [
     path: routePath,
     handler(request, h) {
       clearAllSessionData(request)
-      initQuoteSession(request)
       return h
         .redirect(whatWouldYouLikeToDoPath)
         .code(statusCodes.redirectAfterPost)

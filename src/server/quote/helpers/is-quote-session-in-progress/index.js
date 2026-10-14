@@ -8,6 +8,10 @@ import { routePath as confirmHousingPath } from '../../confirm-housing/route-pat
 import { routePath as notHousingPath } from '../../not-housing/route-path.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { appendChangeParam } from '../change-mode/index.js'
+import {
+  isJourneySelected,
+  journeys
+} from '../../../common/helpers/journey-session/index.js'
 
 const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
 
@@ -82,7 +86,10 @@ export const checkForValidQuoteSession = (request, h) => {
   }
 
   const quoteData = getQuoteDataFromCache(request)
-  if (quoteData === null) {
+  if (
+    quoteData === null ||
+    !isJourneySelected({ request, journey: journeys.quote })
+  ) {
     return h.redirect(startPath).takeover()
   }
 
