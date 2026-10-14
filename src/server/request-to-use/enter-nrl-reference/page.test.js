@@ -49,6 +49,36 @@ describe('Enter your NRL reference page', () => {
     )
   })
 
+  it.each([
+    { scenario: 'a valid reference', query: validReference },
+    { scenario: 'an invalid reference', query: 'not-a-reference' }
+  ])(
+    'should not show a back link when arriving from the quote email with $scenario',
+    async ({ query }) => {
+      const document = await loadForm(urlWithReference(query))
+      expect(
+        queryByRole(document, 'link', { name: 'Back' })
+      ).not.toBeInTheDocument()
+    }
+  )
+
+  it('should not show a back link after a validation error on an email arrival', async () => {
+    const requestUrl = urlWithReference(validReference)
+    const { cookie } = await submitForm({
+      requestUrl,
+      server: getServer(),
+      formData: { nrlReference: '' }
+    })
+    const document = await loadPage({
+      requestUrl,
+      server: getServer(),
+      cookie
+    })
+    expect(
+      queryByRole(document, 'link', { name: 'Back' })
+    ).not.toBeInTheDocument()
+  })
+
   it('should not have a Cancel link', async () => {
     const document = await loadForm()
     expect(
