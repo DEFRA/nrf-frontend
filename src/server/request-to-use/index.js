@@ -2,6 +2,7 @@ import routesHaveNrlReference from './have-nrl-reference/routes.js'
 import routesNoNrlReference from './no-nrl-reference/routes.js'
 import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesEnterEmail from './enter-email/routes.js'
+import routesQuoteNotMatched from './quote-not-matched/routes.js'
 
 export const requestToUse = {
   plugin: {
@@ -11,7 +12,8 @@ export const requestToUse = {
         ...routesHaveNrlReference,
         ...routesEnterNrlReference,
         ...routesNoNrlReference,
-        ...routesEnterEmail
+        ...routesEnterEmail,
+        ...routesQuoteNotMatched
       ])
     }
   }
