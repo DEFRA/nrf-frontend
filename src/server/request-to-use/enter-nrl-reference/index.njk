@@ -3,7 +3,9 @@
 {% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
-  {{ backLink({href: backLinkPath}) }}
+  {% if backLinkPath %}
+    {{ backLink({href: backLinkPath}) }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}

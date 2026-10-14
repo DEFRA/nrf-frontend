@@ -13,6 +13,14 @@ describe('enter-nrl-reference getViewModel', () => {
     expect(viewModel.backLinkPath).toBe(haveNrlReferencePath)
   })
 
+  it.each([
+    { scenario: 'a valid reference', query: { nrlReference: validReference } },
+    { scenario: 'an invalid reference', query: { nrlReference: 'ABC-123' } },
+    { scenario: 'an empty reference', query: { nrlReference: '' } }
+  ])('returns no back link when the query has $scenario', ({ query }) => {
+    expect(getViewModel({}, query).backLinkPath).toBeUndefined()
+  })
+
   it('does not return a cancel link', () => {
     expect(getViewModel()).not.toHaveProperty('cancelLinkPath')
   })

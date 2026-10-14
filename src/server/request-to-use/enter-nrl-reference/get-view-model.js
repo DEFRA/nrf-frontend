@@ -16,6 +16,14 @@ function getValidQueryReference(query) {
 }
 
 /**
+ * @param {object} query - parsed query string
+ * @returns {boolean} true when the user followed the link in the quote email
+ */
+function isFromQuoteEmail(query) {
+  return Object.hasOwn(query, 'nrlReference')
+}
+
+/**
  * @param {{ nrlReference?: string } | null} data - submitted form data (re-shown after a validation error); null when there is no session data
  * @param {object} query - parsed query string; `nrlReference` pre-fills the input
  * @returns {object} template data
@@ -24,7 +32,7 @@ export default function getViewModel(data = {}, query = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    backLinkPath: haveNrlReferencePath,
+    backLinkPath: isFromQuoteEmail(query) ? undefined : haveNrlReferencePath,
     nrlReference: data?.nrlReference ?? getValidQueryReference(query)
   }
 }
