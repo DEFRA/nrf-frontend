@@ -7,25 +7,27 @@ import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/i
 /**
  * Builds a GET route handler that renders `${viewsDir}/${routeId}/index`,
  * merging in any flashed form validation state from a previous PRG redirect.
- * Shared by the `quote` and `manage` route groups so both can render pages
- * consistently without duplicating the flash/session-merge logic.
+ * Shared by the `quote`, `manage` and `request-to-use` route groups so they
+ * can render pages consistently without duplicating the flash/session-merge
+ * logic. Each route says which session data it reads through `getSessionData`
+ * (default: the quote session).
  */
 export const createPageController =
   ({ viewsDir }) =>
-  ({ routeId, getViewModel }) => ({
+  ({ routeId, getViewModel, getSessionData }) => ({
     async handler(request, h) {
       const formValidationErrors = getValidationFlashFromCache(request)
       let validationErrors
-      let quoteData = getQuoteDataFromCache(request)
+      let sessionData = (getSessionData ?? getQuoteDataFromCache)(request)
       if (formValidationErrors) {
-        quoteData = { ...quoteData, ...formValidationErrors.formSubmitData }
+        sessionData = { ...sessionData, ...formValidationErrors.formSubmitData }
         validationErrors = formValidationErrors.validationErrors
         clearValidationFlashFromCache(request)
       }
-      const baseViewModel = await getViewModel(quoteData, request.query)
+      const baseViewModel = await getViewModel(sessionData, request.query)
       const viewModel = {
         ...baseViewModel,
-        formSubmitData: quoteData,
+        formSubmitData: sessionData,
         validationErrors
       }
       return h.view(`${viewsDir}/${routeId}/index`, viewModel)
