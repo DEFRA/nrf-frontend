@@ -1,7 +1,5 @@
 import { routePath as noNrlReferencePath } from '../no-nrl-reference/route-path.js'
-
-// Pages not built yet: swap for route-path.js imports when they exist
-const quoteReferencePath = '/request-to-use/quote-reference'
+import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
 
 /**
  * @param {{ hasNrlReference: string }} formData - the validated payload
@@ -9,7 +7,7 @@ const quoteReferencePath = '/request-to-use/quote-reference'
  */
 export default function getNextPage({ hasNrlReference }) {
   if (hasNrlReference === 'yes') {
-    return quoteReferencePath
+    return enterNrlReferencePath
   }
 
   return noNrlReferencePath

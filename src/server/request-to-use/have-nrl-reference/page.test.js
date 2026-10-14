@@ -4,6 +4,7 @@ import getViewModel from './get-view-model.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../../manage/what-would-you-like-to-do/route-path.js'
 import { routePath as noNrlReferencePath } from '../no-nrl-reference/route-path.js'
 import { routePath as startPagePath } from '../../manage/start-page/route-path.js'
+import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -62,7 +63,7 @@ describe('Do you have an NRL reference page', () => {
   })
 
   it.each([
-    { answer: 'yes', nextPage: '/request-to-use/quote-reference' },
+    { answer: 'yes', nextPage: enterNrlReferencePath },
     { answer: 'no', nextPage: noNrlReferencePath }
   ])(
     'should redirect to $nextPage when "$answer" is selected',
