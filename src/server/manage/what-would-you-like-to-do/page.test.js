@@ -9,7 +9,13 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { getResponse } from '../../../test-utils/get-response.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
+import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
+import { routePath as checkYourAnswersPath } from '../../quote/check-your-answers/route-path.js'
 
+const quoteOption = 'quote'
+const requestToUseOption = 'request-to-use'
 const quoteLabel = 'I want a quote for the nature restoration levy'
 const requestToUseLabel =
   'I am ready to request to use the nature restoration levy'
@@ -58,11 +64,11 @@ describe('What would you like to do page', () => {
 
   it.each([
     {
-      option: 'quote',
+      option: quoteOption,
       nextPage: planningTypePath
     },
     {
-      option: 'request-to-use',
+      option: requestToUseOption,
       nextPage: haveNrlReferencePath
     }
   ])(
@@ -96,5 +102,90 @@ describe('What would you like to do page', () => {
       errorMessage: 'Select what you would like to do'
     })
     expect(document.title).toBe(`Error: ${getViewModel().pageTitle}`)
+  })
+
+  it.each([
+    { option: quoteOption, label: quoteLabel },
+    { option: requestToUseOption, label: requestToUseLabel }
+  ])(
+    'should show the previous selection of "$option" when returning to the page',
+    async ({ option, label }) => {
+      const { cookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { whatWouldYouLikeToDo: option }
+      })
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+      expect(getByLabelText(document, label)).toBeChecked()
+    }
+  )
+
+  describe('switching journey', () => {
+    const choose = (option, cookie) =>
+      submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { whatWouldYouLikeToDo: option },
+        cookie
+      })
+
+    const answerHaveNrlReference = async () => {
+      const server = getServer()
+      return submitForm({
+        requestUrl: haveNrlReferencePath,
+        server,
+        formData: { hasNrlReference: 'yes' },
+        cookie: await withValidRetrieveQuoteSession(server)
+      })
+    }
+
+    const loadHaveNrlReference = (cookie) =>
+      loadPage({
+        requestUrl: haveNrlReferencePath,
+        server: getServer(),
+        cookie
+      })
+
+    it('should clear the quote answers when request to use is chosen', async () => {
+      const cookie = await withCompleteQuoteSession(getServer())
+      const { cookie: updatedCookie } = await choose(requestToUseOption, cookie)
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: checkYourAnswersPath,
+        cookie: updatedCookie
+      })
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPagePath)
+    })
+
+    it('should keep the quote answers when quote is chosen again', async () => {
+      const cookie = await withCompleteQuoteSession(getServer())
+      const { cookie: updatedCookie } = await choose(quoteOption, cookie)
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: checkYourAnswersPath,
+        cookie: updatedCookie
+      })
+      expect(response.statusCode).toBe(statusCodes.ok)
+    })
+
+    it('should clear the request to use answers when quote is chosen', async () => {
+      let { cookie } = await answerHaveNrlReference()
+      ;({ cookie } = await choose(quoteOption, cookie))
+      ;({ cookie } = await choose(requestToUseOption, cookie))
+      const document = await loadHaveNrlReference(cookie)
+      expect(getByLabelText(document, 'Yes')).not.toBeChecked()
+    })
+
+    it('should keep the request to use answers when request to use is chosen again', async () => {
+      let { cookie } = await answerHaveNrlReference()
+      ;({ cookie } = await choose(requestToUseOption, cookie))
+      const document = await loadHaveNrlReference(cookie)
+      expect(getByLabelText(document, 'Yes')).toBeChecked()
+    })
   })
 })

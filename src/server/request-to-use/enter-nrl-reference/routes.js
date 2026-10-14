@@ -1,4 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
+import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
@@ -60,11 +61,19 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...requestToUseController({ routeId, getViewModel })
+    ...requestToUseController({
+      routeId,
+      getViewModel,
+      getSessionData: retrieveQuoteSession.get
+    })
   },
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    ...createPostController({
+      formValidation,
+      getNextPage,
+      saveToSession: retrieveQuoteSession.save
+    })
   }
 ]

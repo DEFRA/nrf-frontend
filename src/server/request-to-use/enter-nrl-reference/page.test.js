@@ -222,4 +222,33 @@ describe('Enter your NRL reference page', () => {
     })
     expect(getByLabelText(document, inputLabel)).toHaveValue('ABC-123')
   })
+
+  it('should show the previously entered reference when returning to the page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { nrlReference: validReference }
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    expect(getByLabelText(document, inputLabel)).toHaveValue(validReference)
+  })
+
+  it('should show the saved reference in preference to the pre-filled one', async () => {
+    const savedReference = 'NRL-654321'
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { nrlReference: savedReference }
+    })
+    const document = await loadPage({
+      requestUrl: urlWithReference(validReference),
+      server: getServer(),
+      cookie
+    })
+    expect(getByLabelText(document, inputLabel)).toHaveValue(savedReference)
+  })
 })

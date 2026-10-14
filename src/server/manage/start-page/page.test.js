@@ -1,4 +1,4 @@
-import { getByRole } from '@testing-library/dom'
+import { getByRole, getByLabelText, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -6,6 +6,9 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
+import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
+import { routePath as planningTypePath } from '../../quote/planning-type/route-path.js'
+import { routePath as haveNrlReferencePath } from '../../request-to-use/have-nrl-reference/route-path.js'
 
 describe('Start page', () => {
   const getServer = setupTestServer()
@@ -52,5 +55,57 @@ describe('Start page', () => {
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(whatWouldYouLikeToDoPath)
+  })
+
+  describe('starting again after providing answers', () => {
+    const startAgain = (cookie) =>
+      submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: {},
+        cookie
+      })
+
+    it('should forget the quote answers', async () => {
+      const server = getServer()
+      const { cookie } = await submitForm({
+        requestUrl: planningTypePath,
+        server,
+        formData: { planningType: 'full-planning-permission' },
+        cookie: (await startAgain()).cookie
+      })
+      const { cookie: restartedCookie } = await startAgain(cookie)
+      const document = await loadPage({
+        requestUrl: planningTypePath,
+        server,
+        cookie: restartedCookie
+      })
+      expect(
+        queryByRole(document, 'radio', { checked: true })
+      ).not.toBeInTheDocument()
+    })
+
+    it('should forget the request to use answers', async () => {
+      const server = getServer()
+      let { cookie } = await submitForm({
+        requestUrl: haveNrlReferencePath,
+        server,
+        formData: { hasNrlReference: 'yes' },
+        cookie: await withValidRetrieveQuoteSession(server)
+      })
+      ;({ cookie } = await startAgain(cookie))
+      ;({ cookie } = await submitForm({
+        requestUrl: whatWouldYouLikeToDoPath,
+        server,
+        formData: { whatWouldYouLikeToDo: 'request-to-use' },
+        cookie
+      }))
+      const document = await loadPage({
+        requestUrl: haveNrlReferencePath,
+        server,
+        cookie
+      })
+      expect(getByLabelText(document, 'Yes')).not.toBeChecked()
+    })
   })
 })
