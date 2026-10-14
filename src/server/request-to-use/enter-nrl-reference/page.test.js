@@ -2,6 +2,7 @@ import { getByRole, getByLabelText, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-path.js'
+import { routePath as enterEmailPath } from '../enter-email/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -13,7 +14,6 @@ const inputLabel = 'Enter your NRL reference'
 const missingMessage = 'Enter your NRL reference'
 const formatMessage =
   'Enter a NRL reference in the correct format, like NRL-123456'
-const enterEmailPath = '/request-to-use/enter-email'
 const validReference = fullQuote.reference
 
 const urlWithReference = (value) =>

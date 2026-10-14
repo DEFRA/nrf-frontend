@@ -1,6 +1,7 @@
 import routesHaveNrlReference from './have-nrl-reference/routes.js'
 import routesNoNrlReference from './no-nrl-reference/routes.js'
 import routesEnterNrlReference from './enter-nrl-reference/routes.js'
+import routesEnterEmail from './enter-email/routes.js'
 
 export const requestToUse = {
   plugin: {
@@ -9,7 +10,8 @@ export const requestToUse = {
       server.route([
         ...routesHaveNrlReference,
         ...routesEnterNrlReference,
-        ...routesNoNrlReference
+        ...routesNoNrlReference,
+        ...routesEnterEmail
       ])
     }
   }
