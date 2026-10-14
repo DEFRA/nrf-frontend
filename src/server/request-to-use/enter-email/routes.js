@@ -1,4 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
+import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
@@ -6,6 +7,13 @@ import getNextPage from './get-next-page.js'
 import { routePath } from './route-path.js'
 
 const routeId = 'enter-email'
+
+/**
+ * The email is never stored in the session, so saving only reads the retrieve quote data.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {object | null} the retrieve quote data
+ */
+const readRetrieveQuoteData = (request) => retrieveQuoteSession.get(request)
 
 export { routePath }
 
@@ -49,11 +57,19 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...requestToUseController({ routeId, getViewModel })
+    ...requestToUseController({
+      routeId,
+      getViewModel,
+      getSessionData: retrieveQuoteSession.get
+    })
   },
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    ...createPostController({
+      formValidation,
+      getNextPage,
+      saveToSession: readRetrieveQuoteData
+    })
   }
 ]

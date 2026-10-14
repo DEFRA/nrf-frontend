@@ -1,5 +1,6 @@
 import { manageController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
+import { clearAllSessionData } from '../../common/helpers/journey-session/index.js'
 import { initQuoteSession } from '../../quote/helpers/quote-session-cache/index.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -27,8 +28,8 @@ export { routePath }
  *   post:
  *     tags:
  *       - Manage
- *     summary: Initialise quote session
- *     description: Creates an empty quote session and redirects to the first step
+ *     summary: Reset the session
+ *     description: Clears every answer stored in the session and redirects to the first step
  *     responses:
  *       303:
  *         description: Redirect to the what would you like to do page
@@ -43,6 +44,7 @@ export default [
     method: 'POST',
     path: routePath,
     handler(request, h) {
+      clearAllSessionData(request)
       initQuoteSession(request)
       return h
         .redirect(whatWouldYouLikeToDoPath)
