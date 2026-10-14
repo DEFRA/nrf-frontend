@@ -1,0 +1,21 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    <p class="govuk-body">Check and enter your email address and NRL reference again.</p>
+
+    <p class="govuk-body">If you don't have a quote, or want to get another one, you can <a href="/" class="govuk-link">get a quote at any time</a>.</p>
+
+  </div>
+</div>
+{% endblock %}
