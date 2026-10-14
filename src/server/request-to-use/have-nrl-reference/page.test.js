@@ -12,6 +12,8 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 
+const yes = 'yes'
+
 describe('Do you have an NRL reference page', () => {
   const getServer = setupTestServer()
 
@@ -64,7 +66,7 @@ describe('Do you have an NRL reference page', () => {
   })
 
   it.each([
-    { answer: 'yes', nextPage: enterNrlReferencePath },
+    { answer: yes, nextPage: enterNrlReferencePath },
     { answer: 'no', nextPage: noNrlReferencePath }
   ])(
     'should redirect to $nextPage when "$answer" is selected',
@@ -109,7 +111,7 @@ describe('Do you have an NRL reference page', () => {
   )
 
   it.each([
-    { answer: 'yes', label: 'Yes' },
+    { answer: yes, label: 'Yes' },
     { answer: 'no', label: 'No' }
   ])(
     'should show the previous answer of "$answer" when returning to the page',
@@ -133,7 +135,7 @@ describe('Do you have an NRL reference page', () => {
     let { cookie } = await submitForm({
       requestUrl: routePath,
       server,
-      formData: { hasNrlReference: 'yes' }
+      formData: { hasNrlReference: yes }
     })
     ;({ cookie } = await submitForm({
       requestUrl: enterNrlReferencePath,

@@ -14,6 +14,8 @@ import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quot
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { routePath as checkYourAnswersPath } from '../../quote/check-your-answers/route-path.js'
 
+const quoteOption = 'quote'
+const requestToUseOption = 'request-to-use'
 const quoteLabel = 'I want a quote for the nature restoration levy'
 const requestToUseLabel =
   'I am ready to request to use the nature restoration levy'
@@ -62,11 +64,11 @@ describe('What would you like to do page', () => {
 
   it.each([
     {
-      option: 'quote',
+      option: quoteOption,
       nextPage: planningTypePath
     },
     {
-      option: 'request-to-use',
+      option: requestToUseOption,
       nextPage: haveNrlReferencePath
     }
   ])(
@@ -103,8 +105,8 @@ describe('What would you like to do page', () => {
   })
 
   it.each([
-    { option: 'quote', label: quoteLabel },
-    { option: 'request-to-use', label: requestToUseLabel }
+    { option: quoteOption, label: quoteLabel },
+    { option: requestToUseOption, label: requestToUseLabel }
   ])(
     'should show the previous selection of "$option" when returning to the page',
     async ({ option, label }) => {
@@ -150,7 +152,7 @@ describe('What would you like to do page', () => {
 
     it('should clear the quote answers when request to use is chosen', async () => {
       const cookie = await withCompleteQuoteSession(getServer())
-      const { cookie: updatedCookie } = await choose('request-to-use', cookie)
+      const { cookie: updatedCookie } = await choose(requestToUseOption, cookie)
       const response = await getResponse({
         server: getServer(),
         requestUrl: checkYourAnswersPath,
@@ -162,7 +164,7 @@ describe('What would you like to do page', () => {
 
     it('should keep the quote answers when quote is chosen again', async () => {
       const cookie = await withCompleteQuoteSession(getServer())
-      const { cookie: updatedCookie } = await choose('quote', cookie)
+      const { cookie: updatedCookie } = await choose(quoteOption, cookie)
       const response = await getResponse({
         server: getServer(),
         requestUrl: checkYourAnswersPath,
@@ -173,15 +175,15 @@ describe('What would you like to do page', () => {
 
     it('should clear the request to use answers when quote is chosen', async () => {
       let { cookie } = await answerHaveNrlReference()
-      ;({ cookie } = await choose('quote', cookie))
-      ;({ cookie } = await choose('request-to-use', cookie))
+      ;({ cookie } = await choose(quoteOption, cookie))
+      ;({ cookie } = await choose(requestToUseOption, cookie))
       const document = await loadHaveNrlReference(cookie)
       expect(getByLabelText(document, 'Yes')).not.toBeChecked()
     })
 
     it('should keep the request to use answers when request to use is chosen again', async () => {
       let { cookie } = await answerHaveNrlReference()
-      ;({ cookie } = await choose('request-to-use', cookie))
+      ;({ cookie } = await choose(requestToUseOption, cookie))
       const document = await loadHaveNrlReference(cookie)
       expect(getByLabelText(document, 'Yes')).toBeChecked()
     })

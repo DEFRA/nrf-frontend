@@ -7,7 +7,18 @@ import {
   initQuoteSession
 } from '../../../quote/helpers/quote-session-cache/index.js'
 
+// Written by magic link redemption (NRF2-1256), which is not built yet; cleared
+// here so it never outlives a restart or a switch of journey.
 const requestToUseKey = 'requestToUse'
+
+// Quote journey state the upload controllers keep outside the quote key.
+const quoteUploadKeys = [
+  'boundaryFailureReason',
+  'boundaryGeojson',
+  'pendingUploadId',
+  'pendingUploadUrl',
+  'uploadRejectionReason'
+]
 
 export const journeys = {
   quote: 'quote',
@@ -15,20 +26,29 @@ export const journeys = {
 }
 
 /**
+ * @param {import('@hapi/hapi').Request} request
+ */
+const clearQuoteJourneyData = (request) => {
+  clearQuoteDataFromCache(request)
+  for (const key of quoteUploadKeys) {
+    request.yar.clear(key)
+  }
+}
+
+/**
  * Clears everything a journey stores except the what would you like to do
- * answer, which is only cleared when the user starts again or cancels.
+ * answer, which is only cleared when the user starts again.
  * @param {import('@hapi/hapi').Request} request
  */
 export const clearJourneySessions = (request) => {
-  clearQuoteDataFromCache(request)
+  clearQuoteJourneyData(request)
   retrieveQuoteSession.clear(request)
   request.yar.clear(requestToUseKey)
 }
 
 /**
  * Clears everything the user has entered, including the what would you like
- * to do answer and any validation flash. Used when the user starts again or
- * cancels.
+ * to do answer and any validation flash. Used when the user starts again.
  * @param {import('@hapi/hapi').Request} request
  */
 export const clearAllSessionData = (request) => {
@@ -55,7 +75,7 @@ const initialiseRetrieveQuote = (request) => {
   if (retrieveQuoteSession.get(request) === null) {
     retrieveQuoteSession.init(request)
   }
-  clearQuoteDataFromCache(request)
+  clearQuoteJourneyData(request)
   request.yar.clear(requestToUseKey)
 }
 

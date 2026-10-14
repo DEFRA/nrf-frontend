@@ -1,4 +1,4 @@
-import { getByRole } from '@testing-library/dom'
+import { getByRole, getByLabelText, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -6,7 +6,6 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
-import { getByLabelText } from '@testing-library/dom'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { routePath as planningTypePath } from '../../quote/planning-type/route-path.js'
 import { routePath as haveNrlReferencePath } from '../../request-to-use/have-nrl-reference/route-path.js'
@@ -82,8 +81,8 @@ describe('Start page', () => {
         cookie: restartedCookie
       })
       expect(
-        document.querySelector('input[name="planningType"]:checked')
-      ).toBeNull()
+        queryByRole(document, 'radio', { checked: true })
+      ).not.toBeInTheDocument()
     })
 
     it('should forget the request to use answers', async () => {

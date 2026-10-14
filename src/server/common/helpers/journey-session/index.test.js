@@ -6,6 +6,12 @@ import {
   selectJourney
 } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
+import { quoteUploadSession } from '../../../../test-utils/fixtures/upload-session.js'
+
+const MANAGE_KEY = 'manage'
+const QUOTE_KEY = 'quote'
+const RETRIEVE_QUOTE_KEY = 'retrieveQuote'
+const REQUEST_TO_USE_KEY = 'requestToUse'
 
 const quoteAnswers = { planningType: 'full-planning-permission' }
 const retrieveQuoteAnswers = {
@@ -23,9 +29,9 @@ describe('journey session', () => {
 
       const result = selectJourney({ request, journey: journeys.quote })
 
-      expect(result).toEqual({ whatWouldYouLikeToDo: 'quote' })
-      expect(request.yar.get('manage')).toEqual({
-        whatWouldYouLikeToDo: 'quote'
+      expect(result).toEqual({ whatWouldYouLikeToDo: journeys.quote })
+      expect(request.yar.get(MANAGE_KEY)).toEqual({
+        whatWouldYouLikeToDo: journeys.quote
       })
     })
 
@@ -37,9 +43,9 @@ describe('journey session', () => {
 
       selectJourney({ request, journey: journeys.quote })
 
-      expect(request.yar.get('quote')).toEqual({})
-      expect(request.yar.get('retrieveQuote')).toBeNull()
-      expect(request.yar.get('requestToUse')).toBeNull()
+      expect(request.yar.get(QUOTE_KEY)).toEqual({})
+      expect(request.yar.get(RETRIEVE_QUOTE_KEY)).toBeNull()
+      expect(request.yar.get(REQUEST_TO_USE_KEY)).toBeNull()
     })
 
     it('creates empty retrieve quote data and clears the quote and request to use data when request to use is chosen', () => {
@@ -50,20 +56,20 @@ describe('journey session', () => {
 
       selectJourney({ request, journey: journeys.requestToUse })
 
-      expect(request.yar.get('retrieveQuote')).toEqual({})
-      expect(request.yar.get('quote')).toBeNull()
-      expect(request.yar.get('requestToUse')).toBeNull()
+      expect(request.yar.get(RETRIEVE_QUOTE_KEY)).toEqual({})
+      expect(request.yar.get(QUOTE_KEY)).toBeNull()
+      expect(request.yar.get(REQUEST_TO_USE_KEY)).toBeNull()
     })
 
     it.each([
       {
         journey: journeys.quote,
-        key: 'quote',
+        key: QUOTE_KEY,
         answers: quoteAnswers
       },
       {
         journey: journeys.requestToUse,
-        key: 'retrieveQuote',
+        key: RETRIEVE_QUOTE_KEY,
         answers: retrieveQuoteAnswers
       }
     ])(
@@ -81,9 +87,49 @@ describe('journey session', () => {
     )
   })
 
+  describe('quote upload state', () => {
+    const uploadKeys = Object.keys(quoteUploadSession)
+
+    it('is cleared when request to use is chosen', () => {
+      const request = buildRequest({
+        quote: quoteAnswers,
+        ...quoteUploadSession
+      })
+
+      selectJourney({ request, journey: journeys.requestToUse })
+
+      for (const key of uploadKeys) {
+        expect(request.yar.get(key)).toBeNull()
+      }
+    })
+
+    it('is kept when quote is chosen again', () => {
+      const request = buildRequest({
+        quote: quoteAnswers,
+        ...quoteUploadSession
+      })
+
+      selectJourney({ request, journey: journeys.quote })
+
+      for (const key of uploadKeys) {
+        expect(request.yar.get(key)).toEqual(quoteUploadSession[key])
+      }
+    })
+
+    it('is cleared when the journeys are cleared', () => {
+      const request = buildRequest({ ...quoteUploadSession })
+
+      clearJourneySessions(request)
+
+      for (const key of uploadKeys) {
+        expect(request.yar.get(key)).toBeNull()
+      }
+    })
+  })
+
   describe('clearJourneySessions', () => {
     it('clears the quote, retrieve quote and request to use data but keeps manage', () => {
-      const manage = { whatWouldYouLikeToDo: 'request-to-use' }
+      const manage = { whatWouldYouLikeToDo: journeys.requestToUse }
       const request = buildRequest({
         manage,
         quote: quoteAnswers,
@@ -93,17 +139,17 @@ describe('journey session', () => {
 
       clearJourneySessions(request)
 
-      expect(request.yar.get('quote')).toBeNull()
-      expect(request.yar.get('retrieveQuote')).toBeNull()
-      expect(request.yar.get('requestToUse')).toBeNull()
-      expect(request.yar.get('manage')).toEqual(manage)
+      expect(request.yar.get(QUOTE_KEY)).toBeNull()
+      expect(request.yar.get(RETRIEVE_QUOTE_KEY)).toBeNull()
+      expect(request.yar.get(REQUEST_TO_USE_KEY)).toBeNull()
+      expect(request.yar.get(MANAGE_KEY)).toEqual(manage)
     })
   })
 
   describe('clearAllSessionData', () => {
     it('clears every journey key, the what would you like to do answer and the validation flash', () => {
       const request = buildRequest({
-        manage: { whatWouldYouLikeToDo: 'request-to-use' },
+        manage: { whatWouldYouLikeToDo: journeys.requestToUse },
         quote: quoteAnswers,
         retrieveQuote: retrieveQuoteAnswers,
         requestToUse: requestToUseAnswers,
@@ -113,10 +159,10 @@ describe('journey session', () => {
       clearAllSessionData(request)
 
       for (const key of [
-        'manage',
-        'quote',
-        'retrieveQuote',
-        'requestToUse',
+        MANAGE_KEY,
+        QUOTE_KEY,
+        RETRIEVE_QUOTE_KEY,
+        REQUEST_TO_USE_KEY,
         'quoteFlash'
       ]) {
         expect(request.yar.get(key)).toBeNull()

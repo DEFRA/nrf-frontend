@@ -4,10 +4,13 @@ import { createSessionNamespace } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 
 const key = 'example'
+const RED = 'red'
+const BLUE = 'blue'
+const LARGE = 'large'
 const namespace = createSessionNamespace({
   key,
   schema: joi.object({
-    colour: joi.string().valid('red', 'blue').optional().allow(null),
+    colour: joi.string().valid(RED, BLUE).optional().allow(null),
     size: joi.string().optional().allow(null)
   })
 })
@@ -28,27 +31,27 @@ describe('createSessionNamespace', () => {
   })
 
   it('saves data and returns the merged result', () => {
-    const request = buildRequest({ [key]: { colour: 'red' } })
+    const request = buildRequest({ [key]: { colour: RED } })
 
-    const result = namespace.save(request, { size: 'large' })
+    const result = namespace.save(request, { size: LARGE })
 
-    expect(result).toEqual({ colour: 'red', size: 'large' })
-    expect(namespace.get(request)).toEqual({ colour: 'red', size: 'large' })
+    expect(result).toEqual({ colour: RED, size: LARGE })
+    expect(namespace.get(request)).toEqual({ colour: RED, size: LARGE })
   })
 
   it('overwrites an existing value and allows null to clear it', () => {
-    const request = buildRequest({ [key]: { colour: 'red', size: 'large' } })
+    const request = buildRequest({ [key]: { colour: RED, size: LARGE } })
 
-    const result = namespace.save(request, { colour: 'blue', size: null })
+    const result = namespace.save(request, { colour: BLUE, size: null })
 
-    expect(result).toEqual({ colour: 'blue', size: null })
+    expect(result).toEqual({ colour: BLUE, size: null })
   })
 
   it('creates the namespace when saving into nothing', () => {
     const request = buildRequest()
 
-    expect(namespace.save(request, { colour: 'red' })).toEqual({
-      colour: 'red'
+    expect(namespace.save(request, { colour: RED })).toEqual({
+      colour: RED
     })
   })
 
@@ -64,7 +67,7 @@ describe('createSessionNamespace', () => {
   })
 
   it('clears the stored data', () => {
-    const request = buildRequest({ [key]: { colour: 'red' } })
+    const request = buildRequest({ [key]: { colour: RED } })
 
     namespace.clear(request)
 

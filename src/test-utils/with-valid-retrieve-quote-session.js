@@ -1,5 +1,5 @@
 import { submitForm } from './submit-form.js'
-import { routePath as startPath } from '../server/manage/start-page/routes.js'
+import { routePath as startPath } from '../server/manage/start-page/route-path.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../server/manage/what-would-you-like-to-do/route-path.js'
 
 /**
