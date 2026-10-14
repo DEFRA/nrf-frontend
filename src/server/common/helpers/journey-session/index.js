@@ -15,6 +15,15 @@ export const journeys = {
 }
 
 /**
+ * @param {object} params
+ * @param {import('@hapi/hapi').Request} params.request
+ * @param {string} params.journey - one of journeys
+ * @returns {boolean} whether the user chose this journey on the what would you like to do page
+ */
+export const isJourneySelected = ({ request, journey }) =>
+  manageSession.get(request)?.whatWouldYouLikeToDo === journey
+
+/**
  * Clears everything a journey stores except the what would you like to do
  * answer, which is only cleared when the user starts again or cancels.
  * @param {import('@hapi/hapi').Request} request

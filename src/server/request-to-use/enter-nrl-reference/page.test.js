@@ -7,8 +7,11 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { getResponse } from '../../../test-utils/get-response.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
 const inputLabel = 'Enter your NRL reference'
 const missingMessage = 'Enter your NRL reference'
@@ -21,9 +24,14 @@ const urlWithReference = (value) =>
 
 describe('Enter your NRL reference page', () => {
   const getServer = setupTestServer()
+  let sessionCookie
+
+  beforeEach(async () => {
+    sessionCookie = await withValidRetrieveQuoteSession(getServer())
+  })
 
   const loadForm = (requestUrl = routePath) =>
-    loadPage({ requestUrl, server: getServer() })
+    loadPage({ requestUrl, server: getServer(), cookie: sessionCookie })
 
   it('should render all page elements', async () => {
     const document = await loadForm()
@@ -100,7 +108,8 @@ describe('Enter your NRL reference page', () => {
       const { response, cookie } = await submitForm({
         requestUrl,
         server: getServer(),
-        formData: { nrlReference: '' }
+        formData: { nrlReference: '' },
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(requestUrl)
@@ -126,7 +135,8 @@ describe('Enter your NRL reference page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { nrlReference: value }
+      formData: { nrlReference: value },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(enterEmailPath)
@@ -165,7 +175,8 @@ describe('Enter your NRL reference page', () => {
       const { response, cookie } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData
+        formData,
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(routePath)
@@ -183,7 +194,8 @@ describe('Enter your NRL reference page', () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { nrlReference: 'ABC-123' }
+      formData: { nrlReference: 'ABC-123' },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
@@ -197,7 +209,8 @@ describe('Enter your NRL reference page', () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { nrlReference: validReference }
+      formData: { nrlReference: validReference },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
@@ -212,7 +225,8 @@ describe('Enter your NRL reference page', () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { nrlReference: savedReference }
+      formData: { nrlReference: savedReference },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: urlWithReference(validReference),
@@ -220,5 +234,49 @@ describe('Enter your NRL reference page', () => {
       cookie
     })
     expect(getByLabelText(document, inputLabel)).toHaveValue(savedReference)
+  })
+
+  describe('without a session', () => {
+    it('should redirect to the start page', async () => {
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: routePath
+      })
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPath)
+    })
+
+    it('should redirect to the start page when the pre-filled reference is invalid', async () => {
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: urlWithReference('not-a-reference')
+      })
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPath)
+    })
+
+    it('should show the page with the reference when it is pre-filled with a valid one', async () => {
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: urlWithReference(validReference)
+      })
+      expect(response.statusCode).toBe(statusCodes.ok)
+    })
+
+    it('should let the back link be followed after a pre-filled visit', async () => {
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: urlWithReference(validReference)
+      })
+      const cookie = response.headers['set-cookie']
+        .map((c) => c.split(';')[0])
+        .join('; ')
+      const backResponse = await getResponse({
+        server: getServer(),
+        requestUrl: haveNrlReferencePath,
+        cookie
+      })
+      expect(backResponse.statusCode).toBe(statusCodes.ok)
+    })
   })
 })

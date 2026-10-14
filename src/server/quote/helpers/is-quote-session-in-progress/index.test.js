@@ -8,13 +8,22 @@ import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/route-path.js'
 import { routePath as notHousingPath } from '../../not-housing/route-path.js'
+import { createMockYar } from '../../../../test-utils/create-mock-yar.js'
 
 vi.mock('../quote-session-cache/index.js')
 
-const makeRequest = ({ path, method = 'get', query = {} } = {}) => ({
+const quoteJourneySession = { manage: { whatWouldYouLikeToDo: 'quote' } }
+
+const makeRequest = ({
+  path,
+  method = 'get',
+  query = {},
+  session = quoteJourneySession
+} = {}) => ({
   path,
   method,
-  query
+  query,
+  yar: createMockYar(session)
 })
 
 const makeH = () => {
@@ -60,6 +69,25 @@ describe('checkForValidQuoteSession', () => {
 
     expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
+
+  it.each([
+    { scenario: 'nothing has been chosen', session: {} },
+    {
+      scenario: 'request to use was chosen',
+      session: { manage: { whatWouldYouLikeToDo: 'request-to-use' } }
+    }
+  ])(
+    'redirects to start when the quote journey is not selected because $scenario',
+    ({ session }) => {
+      vi.mocked(getQuoteDataFromCache).mockReturnValue({})
+      const request = makeRequest({ path: '/quote/planning-type', session })
+      const h = makeH()
+
+      checkForValidQuoteSession(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
 
   it('continues without session check for non-quote paths', () => {
     const request = makeRequest({ path: '/about' })

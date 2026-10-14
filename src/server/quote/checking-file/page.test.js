@@ -4,6 +4,8 @@ import { routePath, checkBoundaryPath } from './routes.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { mergeCookies } from '../../../test-utils/merge-cookies.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { getUploadStatus } from '../../common/services/uploader.js'
 import { checkBoundary } from '../../common/services/boundary.js'
 
@@ -14,22 +16,29 @@ vi.mock('../../common/services/uploader.js')
 vi.mock('../../common/services/boundary.js')
 
 /**
- * Loads the upload-received page with a pendingUploadId in the session.
- * Uses a temporary route to set the yar session value, captures the cookie,
- * then makes the real page request with that cookie.
+ * Starts a quote journey session and adds a pendingUploadId to it, using a
+ * temporary route to set the yar session value. Returns the session cookie.
  */
-async function loadPageWithSession({ server, uploadId = 'test-upload-id' }) {
+async function withPendingUploadSession(server) {
+  const quoteCookie = await withValidQuoteSession(server)
   const setupResponse = await server.inject({
     method: 'GET',
-    url: '/__test-setup-session'
+    url: '/__test-setup-session',
+    headers: { cookie: quoteCookie }
   })
+  return mergeCookies(quoteCookie, setupResponse.headers['set-cookie'])
+}
 
-  const cookie = setupResponse.headers['set-cookie']?.[0]?.split(';')[0]
+/**
+ * Loads the upload-received page with a pendingUploadId in the session.
+ */
+async function loadPageWithSession({ server }) {
+  const cookie = await withPendingUploadSession(server)
 
   const response = await server.inject({
     method: 'GET',
     url: routePath,
-    headers: cookie ? { cookie } : {}
+    headers: { cookie }
   })
 
   const { window } = new JSDOM(response.result)
@@ -111,16 +120,12 @@ describe('Upload received page', () => {
       error: 'Upload failed'
     })
 
-    const setupResponse = await getServer().inject({
-      method: 'GET',
-      url: '/__test-setup-session'
-    })
-    const cookie = setupResponse.headers['set-cookie']?.[0]?.split(';')[0]
+    const cookie = await withPendingUploadSession(getServer())
 
     const response = await getServer().inject({
       method: 'GET',
       url: routePath,
-      headers: cookie ? { cookie } : {}
+      headers: { cookie }
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
