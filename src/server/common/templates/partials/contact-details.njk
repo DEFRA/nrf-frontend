@@ -1,6 +1,8 @@
 <h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
 
+{% if not hideContactIntro %}
 <p class="govuk-body">If you need help with the nature restoration levy, contact {{ contactDetails.organisation }}.</p>
+{% endif %}
 
 <p class="govuk-body">
     Email: <a href="mailto:{{ contactDetails.email }}" class="govuk-link">{{ contactDetails.email }}</a><br>
