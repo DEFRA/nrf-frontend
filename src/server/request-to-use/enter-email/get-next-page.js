@@ -1,9 +1,8 @@
-// Page not built yet: swap for a route-path.js import when it exists
-const emailSentPath = '/request-to-use/email-sent'
+import { routePath } from '../email-confirmation/route-path.js'
 
 /**
  * @returns {string} path of the page to redirect to
  */
 export default function getNextPage() {
-  return emailSentPath
+  return routePath
 }

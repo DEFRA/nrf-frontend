@@ -1,0 +1,22 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    {{ govukPanel({
+      titleText: pageHeading,
+      classes: 'govuk-!-margin-bottom-6'
+    }) }}
+
+    <p class="govuk-body">We’ve sent an email to {{ email }}.</p>
+    <p class="govuk-body">The email contains a link you can use to retrieve your quote details.</p>
+    <p class="govuk-body">If you do not receive the email, check your spam or junk folder.</p>
+
+    {% include "partials/contact-details.njk" %}
+
+  </div>
+</div>
+{% endblock %}

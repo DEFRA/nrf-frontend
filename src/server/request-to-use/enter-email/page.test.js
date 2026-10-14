@@ -2,6 +2,7 @@ import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
+import { routePath as emailConfirmationPath } from '../email-confirmation/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -13,7 +14,6 @@ const inputLabel = 'Enter your email address'
 const missingMessage = 'Enter your email address'
 const formatMessage =
   'Enter an email address in the correct format, like name@example.com'
-const emailSentPath = '/request-to-use/email-sent'
 const validEmail = fullQuote.email.address
 
 describe('Enter your email address page', () => {
@@ -63,7 +63,7 @@ describe('Enter your email address page', () => {
       formData: { email: value }
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(emailSentPath)
+    expect(response.headers.location).toBe(emailConfirmationPath)
   })
 
   it.each([
