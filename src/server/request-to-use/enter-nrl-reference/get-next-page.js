@@ -1,5 +1,4 @@
-// Page not built yet: swap for a route-path.js import when it exists
-const enterEmailPath = '/request-to-use/enter-email'
+import { routePath as enterEmailPath } from '../enter-email/route-path.js'
 
 /**
  * @returns {string} path of the page to redirect to
