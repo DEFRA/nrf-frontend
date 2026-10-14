@@ -10,6 +10,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 
 describe('Do you have an NRL reference page', () => {
   const getServer = setupTestServer()
@@ -106,4 +107,51 @@ describe('Do you have an NRL reference page', () => {
       expect(document.title).toBe(`Error: ${getViewModel().pageTitle}`)
     }
   )
+
+  it.each([
+    { answer: 'yes', label: 'Yes' },
+    { answer: 'no', label: 'No' }
+  ])(
+    'should show the previous answer of "$answer" when returning to the page',
+    async ({ answer, label }) => {
+      const { cookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { hasNrlReference: answer }
+      })
+      const document = await loadPage({
+        requestUrl: routePath,
+        server: getServer(),
+        cookie
+      })
+      expect(getByLabelText(document, label)).toBeChecked()
+    }
+  )
+
+  it('should forget a saved NRL reference when the answer is changed to no', async () => {
+    const server = getServer()
+    let { cookie } = await submitForm({
+      requestUrl: routePath,
+      server,
+      formData: { hasNrlReference: 'yes' }
+    })
+    ;({ cookie } = await submitForm({
+      requestUrl: enterNrlReferencePath,
+      server,
+      formData: { nrlReference: fullQuote.reference },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: routePath,
+      server,
+      formData: { hasNrlReference: 'no' },
+      cookie
+    }))
+    const document = await loadPage({
+      requestUrl: enterNrlReferencePath,
+      server,
+      cookie
+    })
+    expect(getByLabelText(document, 'Enter your NRL reference')).toHaveValue('')
+  })
 })

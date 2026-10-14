@@ -1,11 +1,21 @@
 import { manageController } from '../controller-get.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
+import { manageSession } from '../helpers/manage-session/index.js'
+import { selectJourney } from '../../common/helpers/journey-session/index.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
 import { routePath } from './route-path.js'
 
 const routeId = 'what-would-you-like-to-do'
+
+/**
+ * @param {import('@hapi/hapi').Request} request
+ * @param {{ whatWouldYouLikeToDo: string }} payload - the validated payload
+ * @returns {object | null} the saved what would you like to do data
+ */
+const saveWhatWouldYouLikeToDo = (request, { whatWouldYouLikeToDo }) =>
+  selectJourney({ request, journey: whatWouldYouLikeToDo })
 
 export { routePath }
 
@@ -50,11 +60,19 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...manageController({ routeId, getViewModel })
+    ...manageController({
+      routeId,
+      getViewModel,
+      getSessionData: manageSession.get
+    })
   },
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    ...createPostController({
+      formValidation,
+      getNextPage,
+      saveToSession: saveWhatWouldYouLikeToDo
+    })
   }
 ]
