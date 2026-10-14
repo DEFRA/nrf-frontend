@@ -2,12 +2,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { createPageController } from './page-controller.js'
 import {
   getValidationFlashFromCache,
-  clearValidationFlashFromCache
+  saveValidationFlashToCache
 } from '../helpers/form-validation-session/index.js'
-import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
-
-vi.mock('../../quote/helpers/quote-session-cache/index.js')
-vi.mock('../helpers/form-validation-session/index.js')
+import { createSessionRequest } from '../../../test-utils/create-session-request.js'
 
 describe('createPageController', () => {
   const routeId = 'planning-type'
@@ -16,6 +13,12 @@ describe('createPageController', () => {
   const buildH = () => ({
     view: (template, model) => ({ template, model })
   })
+  const buildRequest = (session = {}, extra = {}) =>
+    createSessionRequest({ session, ...extra })
+  const flash = {
+    validationErrors: { summary: [{ href: '#field1', text: 'Required' }] },
+    formSubmitData: { field1: 'bad' }
+  }
 
   it('renders the view at viewsDir/routeId/index', async () => {
     const controller = createPageController({ viewsDir: 'quote' })({
@@ -23,7 +26,7 @@ describe('createPageController', () => {
       getViewModel
     })
 
-    const result = await controller.handler({}, buildH())
+    const result = await controller.handler(buildRequest(), buildH())
 
     expect(result.template).toBe('quote/planning-type/index')
   })
@@ -34,7 +37,7 @@ describe('createPageController', () => {
       getViewModel
     })
 
-    const result = await controller.handler({}, buildH())
+    const result = await controller.handler(buildRequest(), buildH())
 
     expect(result.template).toBe('manage/start-page/index')
   })
@@ -45,7 +48,7 @@ describe('createPageController', () => {
       getViewModel
     })
 
-    const result = await controller.handler({}, buildH())
+    const result = await controller.handler(buildRequest(), buildH())
 
     expect(result.model).toMatchObject(viewModel)
   })
@@ -57,55 +60,71 @@ describe('createPageController', () => {
       getViewModel: asyncGetViewModel
     })
 
-    const result = await controller.handler({}, buildH())
+    const result = await controller.handler(buildRequest(), buildH())
 
     expect(result.model).toMatchObject(viewModel)
   })
 
-  it('calls getViewModel with the cached quote data and the request query', async () => {
+  it('reads the quote session by default and passes it and the request query to getViewModel', async () => {
     const quoteData = { boundaryEntryType: 'draw' }
-    vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
     const controller = createPageController({ viewsDir: 'quote' })({
       routeId,
       getViewModel: mockGetViewModel
     })
-    const request = { query: { change: 'true' } }
+    const request = buildRequest(
+      { quote: quoteData },
+      { query: { change: 'true' } }
+    )
 
     await controller.handler(request, buildH())
 
     expect(mockGetViewModel).toHaveBeenCalledWith(quoteData, request.query)
   })
 
-  it('sets formSubmitData from the cached quote data when there is no flash', async () => {
-    vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
+  it('reads the session data given by getSessionData instead of the quote session', async () => {
+    const otherData = { hasNrlReference: 'yes' }
+    const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
+    const getSessionData = vi.fn().mockReturnValue(otherData)
+    const controller = createPageController({ viewsDir: 'request-to-use' })({
+      routeId,
+      getViewModel: mockGetViewModel,
+      getSessionData
+    })
+    const request = buildRequest({ quote: { boundaryEntryType: 'draw' } })
+
+    const result = await controller.handler(request, buildH())
+
+    expect(getSessionData).toHaveBeenCalledWith(request)
+    expect(mockGetViewModel).toHaveBeenCalledWith(otherData, undefined)
+    expect(result.model.formSubmitData).toEqual(otherData)
+  })
+
+  it('sets formSubmitData from the session data when there is no flash', async () => {
     const quoteData = { boundaryEntryType: 'upload' }
-    vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const controller = createPageController({ viewsDir: 'quote' })({
       routeId,
       getViewModel
     })
 
-    const result = await controller.handler({}, buildH())
+    const result = await controller.handler(
+      buildRequest({ quote: quoteData }),
+      buildH()
+    )
 
     expect(result.model.formSubmitData).toEqual(quoteData)
     expect(result.model.validationErrors).toBeUndefined()
   })
 
-  it('merges flashed form submit data over the cached quote data', async () => {
+  it('merges flashed form submit data over the session data', async () => {
     const quoteData = { boundaryEntryType: 'upload' }
-    vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
-    const flash = {
-      validationErrors: { summary: [{ href: '#field1', text: 'Required' }] },
-      formSubmitData: { field1: 'bad' }
-    }
-    vi.mocked(getValidationFlashFromCache).mockReturnValue(flash)
     const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
     const controller = createPageController({ viewsDir: 'quote' })({
       routeId,
       getViewModel: mockGetViewModel
     })
-    const request = {}
+    const request = buildRequest({ quote: quoteData })
+    saveValidationFlashToCache(request, flash)
 
     const result = await controller.handler(request, buildH())
 
@@ -120,32 +139,30 @@ describe('createPageController', () => {
     expect(result.model.validationErrors).toEqual(flash.validationErrors)
   })
 
+  it('shows the flashed form data when there is no session data', async () => {
+    const controller = createPageController({ viewsDir: 'request-to-use' })({
+      routeId,
+      getViewModel,
+      getSessionData: () => null
+    })
+    const request = buildRequest()
+    saveValidationFlashToCache(request, flash)
+
+    const result = await controller.handler(request, buildH())
+
+    expect(result.model.formSubmitData).toEqual(flash.formSubmitData)
+  })
+
   it('clears the flash after reading it', async () => {
-    const flash = {
-      validationErrors: { summary: [] },
-      formSubmitData: {}
-    }
-    vi.mocked(getValidationFlashFromCache).mockReturnValue(flash)
     const controller = createPageController({ viewsDir: 'quote' })({
       routeId,
       getViewModel
     })
-    const request = {}
+    const request = buildRequest()
+    saveValidationFlashToCache(request, flash)
 
     await controller.handler(request, buildH())
 
-    expect(clearValidationFlashFromCache).toHaveBeenCalledWith(request)
-  })
-
-  it('does not clear the flash when there is none to clear', async () => {
-    vi.mocked(getValidationFlashFromCache).mockReturnValue(null)
-    const controller = createPageController({ viewsDir: 'quote' })({
-      routeId,
-      getViewModel
-    })
-
-    await controller.handler({}, buildH())
-
-    expect(clearValidationFlashFromCache).not.toHaveBeenCalled()
+    expect(getValidationFlashFromCache(request)).toBeNull()
   })
 })

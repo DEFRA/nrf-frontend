@@ -1,5 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
-import { requestToUsePostController } from '../controller-post.js'
+import { createPostController } from '../../common/controllers/post-controller.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
@@ -55,6 +55,6 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...requestToUsePostController({ formValidation, getNextPage })
+    ...createPostController({ formValidation, getNextPage })
   }
 ]

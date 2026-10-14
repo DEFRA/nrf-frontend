@@ -1,5 +1,4 @@
-import { redirectToFormWithValidationErrors } from '../common/helpers/redirect-to-form-with-validation-errors.js'
-import { statusCodes } from '../common/constants/status-codes.js'
+import { createPostController } from '../common/controllers/post-controller.js'
 import { saveQuoteDataToCache } from './helpers/quote-session-cache/index.js'
 import { routePath as checkYourAnswersPath } from './check-your-answers/route-path.js'
 import {
@@ -42,26 +41,16 @@ export const quotePostController = ({
   getNextPage,
   payloadOptions,
   continueToNextPageInChangeMode = false
-}) => ({
-  options: {
-    ...(payloadOptions && { payload: payloadOptions }),
-    validate: {
-      payload: formValidation(),
-      failAction: redirectToFormWithValidationErrors
-    }
-  },
-  handler(request, h) {
-    const { payload, query } = request
-    const quoteData = saveQuoteDataToCache(request, payload)
-    const nextPage = getNextPage(quoteData)
-    return h
-      .redirect(
-        resolveChangeModeRedirect({
-          nextPage,
-          query,
-          continueToNextPageInChangeMode
-        })
-      )
-      .code(statusCodes.redirectAfterPost)
-  }
-})
+}) =>
+  createPostController({
+    formValidation,
+    getNextPage,
+    payloadOptions,
+    saveToSession: saveQuoteDataToCache,
+    resolveRedirect: ({ nextPage, request }) =>
+      resolveChangeModeRedirect({
+        nextPage,
+        query: request.query,
+        continueToNextPageInChangeMode
+      })
+  })
