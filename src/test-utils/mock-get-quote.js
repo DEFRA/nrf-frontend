@@ -23,6 +23,14 @@ export const mockGetQuoteStatus = (mswServer, reference, accessStatus) => {
   )
 }
 
+export const mockGetQuoteError = (mswServer, reference, status) => {
+  mswServer.use(
+    http.get(`${config.get('backend').apiUrl}/quotes/${reference}`, () =>
+      HttpResponse.json({ ok: false }, { status })
+    )
+  )
+}
+
 export const mockResendKnown = (
   mswServer,
   reference,
