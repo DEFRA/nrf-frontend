@@ -11,12 +11,13 @@ import { routePath as quoteNotMatchedPath } from '../../quote-not-matched/route-
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createRetrieveQuoteRequest } from '../../../../test-utils/create-retrieve-quote-request.js'
 import { createMockRedirectToolkit } from '../../../../test-utils/create-mock-redirect-toolkit.js'
+import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 import {
   quoteJourneySession,
   requestToUseJourneySession
 } from '../../../../test-utils/fixtures/session.js'
 
-const validReference = 'NRL-123456'
+const validReference = fullQuote.reference
 const guardedPaths = [
   haveNrlReferencePath,
   enterNrlReferencePath,

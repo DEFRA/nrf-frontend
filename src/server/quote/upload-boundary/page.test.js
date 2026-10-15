@@ -1,5 +1,6 @@
 import { getByRole, getByText, within } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
@@ -164,6 +165,6 @@ describe('Upload boundary page', () => {
       url: routePath,
       headers: { cookie }
     })
-    expect(response.statusCode).toBe(429)
+    expect(response.statusCode).toBe(statusCodes.tooManyRequests)
   })
 })

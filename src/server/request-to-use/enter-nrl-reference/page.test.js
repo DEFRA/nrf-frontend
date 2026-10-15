@@ -288,11 +288,11 @@ describe('Enter your NRL reference page', () => {
     })
 
     it('should show the page with the reference when it is pre-filled with a valid one', async () => {
-      const response = await getResponse({
-        server: getServer(),
-        requestUrl: urlWithReference(validReference)
+      const document = await loadPage({
+        requestUrl: urlWithReference(validReference),
+        server: getServer()
       })
-      expect(response.statusCode).toBe(statusCodes.ok)
+      expect(getByLabelText(document, inputLabel)).toHaveValue(validReference)
     })
 
     it('should let the user continue to the email address page after a pre-filled visit', async () => {

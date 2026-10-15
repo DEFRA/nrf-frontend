@@ -18,9 +18,7 @@ const guardedPaths = new Set([
 ])
 
 /**
- * @param {object} params
- * @param {string} params.path - the request path
- * @param {object} params.query - the parsed request query
+ * @param {import('@hapi/hapi').Request} request
  * @returns {boolean} whether this is the enter your NRL reference page with a valid reference to pre-fill
  */
 const hasValidPrefillReference = ({ path, query }) =>
