@@ -1,7 +1,9 @@
 import { getByRole, getByText, within } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { initiateUpload } from '../../common/services/uploader.js'
 import { config } from '../../../config/config.js'
 
@@ -14,8 +16,10 @@ const MAX = config.get('sessionRateLimit.maxRequestsPerSession')
 
 describe('Upload boundary page', () => {
   const getServer = setupTestServer()
+  let cookie
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    cookie = await withValidQuoteSession(getServer())
     vi.mocked(getQuoteDataFromCache).mockReturnValue({
       planningType: 'full-planning-permission',
       boundaryEntryType: 'upload'
@@ -29,7 +33,8 @@ describe('Upload boundary page', () => {
   it('should render a page heading, title and back link', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       'Upload a red line boundary file'
@@ -46,7 +51,8 @@ describe('Upload boundary page', () => {
   it('should render a form with action pointing to upload endpoint', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     const form = document.querySelector('main form')
     expect(form).toHaveAttribute('action', '/upload-and-scan/test-upload-id')
@@ -57,7 +63,8 @@ describe('Upload boundary page', () => {
   it('should render the different-format guidance in a collapsed details component', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     const form = document.querySelector('main form')
     const details = getByRole(form, 'group')
@@ -75,7 +82,8 @@ describe('Upload boundary page', () => {
   it('should call initiateUpload with correct parameters', async () => {
     await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     expect(initiateUpload).toHaveBeenCalledWith({
       redirect: '/quote/checking-file'
@@ -89,7 +97,8 @@ describe('Upload boundary page', () => {
 
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
 
     expect(document.title).toBe(
@@ -106,7 +115,8 @@ describe('Upload boundary page', () => {
 
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
 
     expect(
@@ -132,7 +142,8 @@ describe('Upload boundary page', () => {
     it('does not push on a normal page load with no upload rejection', async () => {
       const document = await loadPage({
         requestUrl: routePath,
-        server: getServer()
+        server: getServer(),
+        cookie
       })
 
       const { queryByTestId } = within(document.documentElement)
@@ -141,13 +152,7 @@ describe('Upload boundary page', () => {
   })
 
   it('returns 429 once the session has hit the request limit', async () => {
-    const first = await getServer().inject({ method: 'GET', url: routePath })
-    const cookie = []
-      .concat(first.headers['set-cookie'])
-      .map((c) => c.split(';')[0])
-      .join('; ')
-
-    for (let i = 1; i < MAX; i++) {
+    for (let i = 0; i < MAX; i++) {
       await getServer().inject({
         method: 'GET',
         url: routePath,
@@ -160,6 +165,6 @@ describe('Upload boundary page', () => {
       url: routePath,
       headers: { cookie }
     })
-    expect(response.statusCode).toBe(429)
+    expect(response.statusCode).toBe(statusCodes.tooManyRequests)
   })
 })

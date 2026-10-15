@@ -7,8 +7,11 @@ import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { getResponse } from '../../../test-utils/get-response.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
 const inputLabel = 'Enter your email address'
 const missingMessage = 'Enter your email address'
@@ -18,9 +21,18 @@ const validEmail = fullQuote.email.address
 
 describe('Enter your email address page', () => {
   const getServer = setupTestServer()
+  let sessionCookie
+
+  beforeEach(async () => {
+    sessionCookie = await withValidRetrieveQuoteSession(getServer())
+  })
 
   const loadForm = () =>
-    loadPage({ requestUrl: routePath, server: getServer() })
+    loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
 
   it('should render all page elements', async () => {
     const document = await loadForm()
@@ -60,10 +72,27 @@ describe('Enter your email address page', () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { email: value }
+      formData: { email: value },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(emailConfirmationPath)
+  })
+
+  it('should redirect back to the start page after the email address is submitted', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { email: validEmail },
+      cookie: sessionCookie
+    })
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: routePath,
+      cookie
+    })
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPath)
   })
 
   it.each([
@@ -94,7 +123,8 @@ describe('Enter your email address page', () => {
       const { response, cookie } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData
+        formData,
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(routePath)
@@ -112,7 +142,8 @@ describe('Enter your email address page', () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { email: 'testemail.com' }
+      formData: { email: 'testemail.com' },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
@@ -120,5 +151,14 @@ describe('Enter your email address page', () => {
       cookie
     })
     expect(getByLabelText(document, inputLabel)).toHaveValue('testemail.com')
+  })
+
+  it('should redirect to the start page when there is no session', async () => {
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: routePath
+    })
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPath)
   })
 })

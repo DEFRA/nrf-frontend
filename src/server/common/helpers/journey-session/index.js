@@ -26,6 +26,15 @@ export const journeys = {
 }
 
 /**
+ * @param {object} params
+ * @param {import('@hapi/hapi').Request} params.request
+ * @param {string} params.journey - one of journeys
+ * @returns {boolean} whether the user chose this journey on the what would you like to do page
+ */
+export const isJourneySelected = ({ request, journey }) =>
+  manageSession.get(request)?.whatWouldYouLikeToDo === journey
+
+/**
  * @param {import('@hapi/hapi').Request} request
  */
 const clearQuoteJourneyData = (request) => {

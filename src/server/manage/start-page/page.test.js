@@ -1,4 +1,4 @@
-import { getByRole, getByLabelText, queryByRole } from '@testing-library/dom'
+import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -6,9 +6,12 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
+import { getResponse } from '../../../test-utils/get-response.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
-import { routePath as planningTypePath } from '../../quote/planning-type/route-path.js'
+import { routePath as checkYourAnswersPath } from '../../quote/check-your-answers/route-path.js'
 import { routePath as haveNrlReferencePath } from '../../request-to-use/have-nrl-reference/route-path.js'
+import { routePath as enterNrlReferencePath } from '../../request-to-use/enter-nrl-reference/route-path.js'
 
 describe('Start page', () => {
   const getServer = setupTestServer()
@@ -66,26 +69,19 @@ describe('Start page', () => {
         cookie
       })
 
-    it('should forget the quote answers', async () => {
-      const server = getServer()
-      const { cookie } = await submitForm({
-        requestUrl: planningTypePath,
-        server,
-        formData: { planningType: 'full-planning-permission' },
-        cookie: (await startAgain()).cookie
-      })
+    it('should leave no quote answers in the session', async () => {
+      const cookie = await withCompleteQuoteSession(getServer())
       const { cookie: restartedCookie } = await startAgain(cookie)
-      const document = await loadPage({
-        requestUrl: planningTypePath,
-        server,
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: checkYourAnswersPath,
         cookie: restartedCookie
       })
-      expect(
-        queryByRole(document, 'radio', { checked: true })
-      ).not.toBeInTheDocument()
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(routePath)
     })
 
-    it('should forget the request to use answers', async () => {
+    it('should show empty pages when the journey is restarted', async () => {
       const server = getServer()
       let { cookie } = await submitForm({
         requestUrl: haveNrlReferencePath,
@@ -106,6 +102,19 @@ describe('Start page', () => {
         cookie
       })
       expect(getByLabelText(document, 'Yes')).not.toBeChecked()
+    })
+
+    it('should not treat earlier pages as completed', async () => {
+      const server = getServer()
+      const cookie = await withValidRetrieveQuoteSession(server)
+      const { cookie: restartedCookie } = await startAgain(cookie)
+      const response = await getResponse({
+        server,
+        requestUrl: enterNrlReferencePath,
+        cookie: restartedCookie
+      })
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(routePath)
     })
   })
 })

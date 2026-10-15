@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   clearAllSessionData,
   clearJourneySessions,
+  isJourneySelected,
   journeys,
   selectJourney
 } from './index.js'
@@ -85,6 +86,27 @@ describe('journey session', () => {
         expect(request.yar.get(key)).toEqual(answers)
       }
     )
+  })
+
+  describe('isJourneySelected', () => {
+    it('is true for the journey in the manage session', () => {
+      const request = buildRequest({
+        manage: { whatWouldYouLikeToDo: journeys.requestToUse }
+      })
+
+      expect(
+        isJourneySelected({ request, journey: journeys.requestToUse })
+      ).toBe(true)
+      expect(isJourneySelected({ request, journey: journeys.quote })).toBe(
+        false
+      )
+    })
+
+    it('is false when nothing has been chosen', () => {
+      expect(
+        isJourneySelected({ request: buildRequest(), journey: journeys.quote })
+      ).toBe(false)
+    })
   })
 
   describe('quote upload state', () => {
