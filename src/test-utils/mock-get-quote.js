@@ -15,6 +15,15 @@ export const mockGetQuote = (
   )
 }
 
+export const mockReadQuote = (mswServer, quoteData = fullQuote) => {
+  mswServer.use(
+    http.get(
+      `${config.get('backend').apiUrl}/quotes/${quoteData.reference}`,
+      () => HttpResponse.json(quoteData)
+    )
+  )
+}
+
 export const mockGetQuoteStatus = (mswServer, reference, accessStatus) => {
   mswServer.use(
     http.get(`${config.get('backend').apiUrl}/quotes/${reference}`, () =>

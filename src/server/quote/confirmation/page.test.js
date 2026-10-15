@@ -4,7 +4,7 @@ import { routePath } from './routes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { mockGetQuote } from '../../../test-utils/mock-get-quote.js'
+import { mockReadQuote } from '../../../test-utils/mock-get-quote.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
 import { failIfBackendCalled } from '../../../test-utils/fail-if-backend-called.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -18,7 +18,7 @@ describe('Confirmation page', () => {
   const getServer = setupTestServer()
 
   it('should render the page heading and title', async () => {
-    mockGetQuote(mswServer, { reference })
+    mockReadQuote(mswServer, { reference })
     const document = await loadPage({
       requestUrl,
       server: getServer()
@@ -32,7 +32,7 @@ describe('Confirmation page', () => {
   })
 
   it('should show the reference number', async () => {
-    mockGetQuote(mswServer, { reference })
+    mockReadQuote(mswServer, { reference })
     const document = await loadPage({
       requestUrl,
       server: getServer()
@@ -43,7 +43,7 @@ describe('Confirmation page', () => {
   })
 
   it('should show contact details for help with the nature restoration levy', async () => {
-    mockGetQuote(mswServer, { reference })
+    mockReadQuote(mswServer, { reference })
     const document = await loadPage({
       requestUrl,
       server: getServer()

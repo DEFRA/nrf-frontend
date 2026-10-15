@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
+import { statusCodes } from '../../common/constants/status-codes.js'
 import { config } from '../../../config/config.js'
 import { confirmationGetController } from './controller-get.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -19,7 +20,7 @@ describe('confirmationGetController', () => {
   it('should render the confirmation view when the quote exists', async () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRL-123456`, () =>
-        HttpResponse.json({ accessStatus: 'invalid', quote: null })
+        HttpResponse.json({ reference: 'NRL-123456' })
       )
     )
 
@@ -36,7 +37,10 @@ describe('confirmationGetController', () => {
   it('should return not found when the quote does not exist', async () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRL-999999`, () =>
-        HttpResponse.json({ accessStatus: 'not_found', quote: null })
+        HttpResponse.json(
+          { message: 'Not found' },
+          { status: statusCodes.notFound }
+        )
       )
     )
 
@@ -46,13 +50,16 @@ describe('confirmationGetController', () => {
     const result = await controller.handler(request, buildH())
 
     expect(result.isBoom).toBe(true)
-    expect(result.output.statusCode).toBe(404)
+    expect(result.output.statusCode).toBe(statusCodes.notFound)
   })
 
   it('should propagate errors thrown by the backend', async () => {
     server.use(
       http.get(`${backendUrl}/quotes/NRL-FAIL`, () =>
-        HttpResponse.json({ message: 'Server error' }, { status: 500 })
+        HttpResponse.json(
+          { message: 'Server error' },
+          { status: statusCodes.internalServerError }
+        )
       )
     )
 
