@@ -11,18 +11,16 @@ const normalise = (email) => email.trim().toLowerCase()
  * @returns {Promise<boolean>}
  */
 export const quoteMatchesEmail = async ({ nrlReference, email }) => {
-  let quote
   try {
-    ;({ payload: quote } = await getQuoteFromBackend({
+    const { payload: quote } = await getQuoteFromBackend({
       reference: nrlReference
-    }))
+    })
+    const quoteEmail = quote?.email?.address
+    return Boolean(quoteEmail) && normalise(quoteEmail) === normalise(email)
   } catch (error) {
     if (error.output?.statusCode === statusCodes.notFound) {
       return false
     }
     throw error
   }
-
-  const quoteEmail = quote?.email?.address
-  return Boolean(quoteEmail) && normalise(quoteEmail) === normalise(email)
 }

@@ -1,11 +1,11 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
+import { JSDOM } from 'jsdom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
 import { routePath as emailConfirmationPath } from '../email-confirmation/route-path.js'
 import { routePath as quoteNotMatchedPath } from '../quote-not-matched/route-path.js'
 import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-path.js'
-import { routePath as enterNrlReferenceRoutePath } from '../enter-nrl-reference/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -43,7 +43,7 @@ describe('Enter your email address page', () => {
       cookie
     })
     const { cookie: referenceCookie } = await submitForm({
-      requestUrl: enterNrlReferenceRoutePath,
+      requestUrl: enterNrlReferencePath,
       server: getServer(),
       formData: { nrlReference: fullQuote.reference },
       cookie: haveReferenceCookie
@@ -149,7 +149,7 @@ describe('Enter your email address page', () => {
       expect(response.headers.location).toBe(quoteNotMatchedPath)
 
       const enterNrlReferenceDocument = await loadPage({
-        requestUrl: enterNrlReferenceRoutePath,
+        requestUrl: enterNrlReferencePath,
         server: getServer(),
         cookie
       })
@@ -182,7 +182,28 @@ describe('Enter your email address page', () => {
       formData: { email: validEmail },
       cookie
     })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(startPath)
+  })
+
+  it('should show the error page when the backend fails, not the quote not matched page', async () => {
+    mockGetQuoteError(
+      mswServer,
+      fullQuote.reference,
+      statusCodes.internalServerError
+    )
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { email: validEmail },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.internalServerError)
+    expect(response.headers.location).toBeUndefined()
+    const { window } = new JSDOM(response.result)
+    expect(
+      getByRole(window.document, 'heading', { level: 1 })
+    ).toHaveTextContent('Sorry, there is a problem with the service')
   })
 
   it.each([
