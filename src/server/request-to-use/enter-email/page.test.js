@@ -1,8 +1,11 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
+import { JSDOM } from 'jsdom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
 import { routePath as emailConfirmationPath } from '../email-confirmation/route-path.js'
+import { routePath as quoteNotMatchedPath } from '../quote-not-matched/route-path.js'
+import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -12,19 +15,41 @@ import { expectInputError } from '../../../test-utils/assertions.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
+import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+import {
+  mockReadQuote,
+  mockGetQuoteError
+} from '../../../test-utils/mock-get-quote.js'
 
 const inputLabel = 'Enter your email address'
 const missingMessage = 'Enter your email address'
 const formatMessage =
   'Enter an email address in the correct format, like name@example.com'
 const validEmail = fullQuote.email.address
+const otherEmail = 'other@example.com'
+
+const mswServer = setupMswServer()
 
 describe('Enter your email address page', () => {
   const getServer = setupTestServer()
   let sessionCookie
 
   beforeEach(async () => {
-    sessionCookie = await withValidRetrieveQuoteSession(getServer())
+    const cookie = await withValidRetrieveQuoteSession(getServer())
+    const { cookie: haveReferenceCookie } = await submitForm({
+      requestUrl: haveNrlReferencePath,
+      server: getServer(),
+      formData: { hasNrlReference: 'yes' },
+      cookie
+    })
+    const { cookie: referenceCookie } = await submitForm({
+      requestUrl: enterNrlReferencePath,
+      server: getServer(),
+      formData: { nrlReference: fullQuote.reference },
+      cookie: haveReferenceCookie
+    })
+    sessionCookie = referenceCookie
+    mockReadQuote(mswServer)
   })
 
   const loadForm = () =>
@@ -68,18 +93,21 @@ describe('Enter your email address page', () => {
   it.each([
     { scenario: 'a valid email address', value: validEmail },
     { scenario: 'an email address with whitespace', value: `  ${validEmail} ` }
-  ])('should redirect to the next page for $scenario', async ({ value }) => {
-    const { response } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: { email: value },
-      cookie: sessionCookie
-    })
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(emailConfirmationPath)
-  })
+  ])(
+    'should redirect to the email confirmation page when a quote matches $scenario',
+    async ({ value }) => {
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { email: value },
+        cookie: sessionCookie
+      })
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+      expect(response.headers.location).toBe(emailConfirmationPath)
+    }
+  )
 
-  it('should redirect back to the start page after the email address is submitted', async () => {
+  it('should clear the retrieve quote answers when a quote matches', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
@@ -93,6 +121,89 @@ describe('Enter your email address page', () => {
     })
     expect(response.statusCode).toBe(statusCodes.found)
     expect(response.headers.location).toBe(startPath)
+  })
+
+  it.each([
+    {
+      scenario: 'a different email',
+      arrange: () => undefined,
+      email: otherEmail
+    },
+    {
+      scenario: 'no quote for the reference',
+      arrange: () =>
+        mockGetQuoteError(mswServer, fullQuote.reference, statusCodes.notFound),
+      email: validEmail
+    }
+  ])(
+    'should redirect to the quote not matched page for $scenario and keep the answers',
+    async ({ arrange, email }) => {
+      arrange()
+      const { response, cookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { email },
+        cookie: sessionCookie
+      })
+      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+      expect(response.headers.location).toBe(quoteNotMatchedPath)
+
+      const enterNrlReferenceDocument = await loadPage({
+        requestUrl: enterNrlReferencePath,
+        server: getServer(),
+        cookie
+      })
+      expect(
+        getByLabelText(enterNrlReferenceDocument, 'Enter your NRL reference')
+      ).toHaveValue(fullQuote.reference)
+    }
+  )
+
+  it('should show the submitted email when returning from the quote not matched page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { email: otherEmail },
+      cookie: sessionCookie
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    expect(getByLabelText(document, inputLabel)).toHaveValue(otherEmail)
+  })
+
+  it('should redirect to the start page when there is no saved NRL reference', async () => {
+    const cookie = await withValidRetrieveQuoteSession(getServer())
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { email: validEmail },
+      cookie
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(startPath)
+  })
+
+  it('should show the error page when the backend fails, not the quote not matched page', async () => {
+    mockGetQuoteError(
+      mswServer,
+      fullQuote.reference,
+      statusCodes.internalServerError
+    )
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { email: validEmail },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(statusCodes.internalServerError)
+    expect(response.headers.location).toBeUndefined()
+    const { window } = new JSDOM(response.result)
+    expect(
+      getByRole(window.document, 'heading', { level: 1 })
+    ).toHaveTextContent('Sorry, there is a problem with the service')
   })
 
   it.each([
