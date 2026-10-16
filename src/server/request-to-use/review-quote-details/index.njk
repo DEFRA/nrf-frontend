@@ -1,0 +1,38 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {{ govukSummaryList({
+          classes: "govuk-!-margin-bottom-9",
+          rows: rows
+        }) }}
+
+        {# The message sits in a p inside the strong: global styles set p to a
+           normal font weight, so the text is not bold — matching the
+           prototype. html is safe here: the content is a static literal. #}
+        {{ govukWarningText({
+          html: "<p>Make sure the details of your development match your planning application. Updates may result in a recalculation of available capacity and the levy amount.</p>",
+          iconFallbackText: "Warning"
+        }) }}
+
+        {# The change links and the Continue button are placeholders: the edit
+           quote journey will wire them up. No back link, matching the
+           prototype: the page is entered from an email, so there is no
+           previous page. #}
+        <form method="post" novalidate data-disable-on-submit>
+          {% include "partials/csrf-token.njk" %}
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Continue"
+            }) }}
+          </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
