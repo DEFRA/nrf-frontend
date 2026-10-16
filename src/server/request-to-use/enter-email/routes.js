@@ -1,23 +1,12 @@
 import { requestToUseController } from '../controller-get.js'
 import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
-import { createPostController } from '../../common/controllers/post-controller.js'
-import getViewModel from './get-view-model.js'
+import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
+import { enterEmailPostController } from './controller-post.js'
 import formValidation from './form-validation.js'
-import getNextPage from './get-next-page.js'
+import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
 const routeId = 'enter-email'
-
-/**
- * The email is never stored in the session. Submitting ends the retrieve quote
- * journey, so its answers are cleared and going back redirects to the start page.
- * @param {import('@hapi/hapi').Request} request
- * @returns {null} no session data remains
- */
-const clearRetrieveQuoteData = (request) => {
-  retrieveQuoteSession.clear(request)
-  return null
-}
 
 export { routePath }
 
@@ -55,7 +44,7 @@ export { routePath }
  *                 example: name@example.com
  *     responses:
  *       303:
- *         description: Redirect to the next page on success, or back to the form on validation failure
+ *         description: Redirect to the email confirmation page when a quote matches the NRL reference and email, to the quote not matched page when none does, or back to the form on validation failure
  */
 export default [
   {
@@ -70,10 +59,12 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({
-      formValidation,
-      getNextPage,
-      saveToSession: clearRetrieveQuoteData
-    })
+    options: {
+      validate: {
+        payload: formValidation(),
+        failAction: redirectToFormWithValidationErrors
+      }
+    },
+    ...enterEmailPostController
   }
 ]

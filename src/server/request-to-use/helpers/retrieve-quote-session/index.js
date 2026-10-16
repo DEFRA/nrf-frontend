@@ -2,15 +2,18 @@ import joi from 'joi'
 import { createSessionNamespace } from '../../../common/helpers/session-namespace/index.js'
 import haveNrlReferenceValidation from '../../have-nrl-reference/form-validation.js'
 import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validation.js'
+import enterEmailValidation from '../../enter-email/form-validation.js'
 
 const hasNrlReference = haveNrlReferenceValidation().extract('hasNrlReference')
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
+const email = enterEmailValidation().extract('email')
 
 export const retrieveQuoteSession = createSessionNamespace({
   key: 'retrieveQuote',
   schema: joi.object({
     hasNrlReference: hasNrlReference.optional().allow(null),
-    nrlReference: nrlReference.optional().allow(null)
+    nrlReference: nrlReference.optional().allow(null),
+    email: email.optional().allow(null)
   })
 })
 
