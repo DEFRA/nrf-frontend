@@ -9,7 +9,7 @@ import {
 
 // Written by magic link redemption (NRF2-1256), which is not built yet; cleared
 // here so it never outlives a restart or a switch of journey.
-const requestToUseKey = 'requestToUse'
+export const requestToUseKey = 'requestToUse'
 
 // Quote journey state the upload controllers keep outside the quote key.
 const quoteUploadKeys = [
