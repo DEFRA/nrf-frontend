@@ -104,7 +104,11 @@ describe('Retrieve quote magic link', () => {
     mswServer.use(
       http.post(
         `${config.get('backend').apiUrl}/quotes/${reference}/redeem-token`,
-        () => HttpResponse.json({ ok: false }, { status: 500 })
+        () =>
+          HttpResponse.json(
+            { ok: false },
+            { status: statusCodes.internalServerError }
+          )
       )
     )
 

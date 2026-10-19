@@ -1,4 +1,8 @@
-import { clearAllSessionData } from '../../../common/helpers/journey-session/index.js'
+import {
+  clearAllSessionData,
+  journeys
+} from '../../../common/helpers/journey-session/index.js'
+import { manageSession } from '../../../manage/helpers/manage-session/index.js'
 import { saveQuoteDataToCache } from '../../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../request-to-use-session/index.js'
 
@@ -20,14 +24,16 @@ const toQuoteSessionData = (quote) => ({
 
 /**
  * Starts a fresh request to use session from a saved quote: clears everything
- * the user had, fills the quote answers from the record and keeps the NRL
- * reference, which belongs to the request rather than the quote answers.
+ * the user had, selects the request to use journey, fills the quote answers
+ * from the record and keeps the NRL reference, which belongs to the request
+ * rather than the quote answers.
  * @param {object} params
  * @param {import('@hapi/hapi').Request} params.request
  * @param {object} params.quote - quote record from the backend
  */
 export const seedSessionFromQuote = ({ request, quote }) => {
   clearAllSessionData(request)
+  manageSession.save(request, { whatWouldYouLikeToDo: journeys.requestToUse })
 
   saveQuoteDataToCache(request, toQuoteSessionData(quote))
   // Saved separately: changing the boundary entry type in the call above clears

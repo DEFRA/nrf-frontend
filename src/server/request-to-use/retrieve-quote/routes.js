@@ -14,7 +14,17 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Magic link from the retrieve your quote email
- *     description: Spends the single-use token, starts a request to use session from the saved quote and redirects to the review and amend your quote details page. An invalid or expired link redirects to the link expired page. Link previewers and scanners get an empty response and do not spend the token.
+ *     description: >
+ *       Spends the single-use token, starts a request to use session from the
+ *       saved quote and redirects to the review and amend your quote details
+ *       page. An invalid or expired link redirects to the link expired page.
+ *       The token and NRL reference are in the URL path because the link has to
+ *       be a clickable GET URL in an email. The token is a path segment rather
+ *       than a query string so it is not passed on in Referer headers, it is
+ *       never repeated in a redirect, and link previewers and scanners get an
+ *       empty response without spending it. The token is single-use and expires
+ *       after 24 hours, so a copy found in a log or browser history is of no
+ *       use. The backend call keeps it in the request body, not the URL.
  *     parameters:
  *       - in: path
  *         name: reference
@@ -28,7 +38,7 @@ export { routePath }
  *         schema:
  *           type: string
  *     responses:
- *       303:
+ *       302:
  *         description: Redirect to the review and amend page, or the link expired page
  */
 export default [

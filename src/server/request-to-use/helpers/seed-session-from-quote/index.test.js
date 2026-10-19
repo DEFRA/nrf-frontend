@@ -37,14 +37,16 @@ describe('seedSessionFromQuote', () => {
     })
   })
 
+  it('should select the request to use journey', () => {
+    expect(seed().yar.get('manage')).toEqual({
+      whatWouldYouLikeToDo: 'request-to-use'
+    })
+  })
+
   it('should clear everything else the user had', () => {
     const request = seed()
 
-    for (const key of [
-      'manage',
-      'retrieveQuote',
-      ...Object.keys(quoteUploadSession)
-    ]) {
+    for (const key of ['retrieveQuote', ...Object.keys(quoteUploadSession)]) {
       expect(request.yar.get(key), `${key} should be cleared`).toBeNull()
     }
   })
