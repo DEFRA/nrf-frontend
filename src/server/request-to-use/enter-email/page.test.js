@@ -107,20 +107,29 @@ describe('Enter your email address page', () => {
     }
   )
 
-  it('should clear the retrieve quote answers when a quote matches', async () => {
+  it('should keep only the email when a quote matches', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: { email: validEmail },
       cookie: sessionCookie
     })
-    const response = await getResponse({
-      server: getServer(),
+
+    const document = await loadPage({
       requestUrl: routePath,
+      server: getServer(),
       cookie
     })
-    expect(response.statusCode).toBe(statusCodes.found)
-    expect(response.headers.location).toBe(startPath)
+    expect(getByLabelText(document, inputLabel)).toHaveValue(validEmail)
+
+    const referenceDocument = await loadPage({
+      requestUrl: enterNrlReferencePath,
+      server: getServer(),
+      cookie
+    })
+    expect(
+      getByLabelText(referenceDocument, 'Enter your NRL reference')
+    ).toHaveValue('')
   })
 
   it.each([
