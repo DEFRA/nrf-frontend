@@ -1,4 +1,3 @@
-import { referencePattern, tokenPattern } from '@defra/nrf-library'
 import { routePath as applicationTypeNotAvailablePath } from '../../application-type-not-available/route-path.js'
 import { routePath as planningTypePath } from '../../planning-type/route-path.js'
 import { routePath as confirmationPath } from '../../confirmation/routes.js'
@@ -15,20 +14,7 @@ import {
 
 const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
 
-const quoteDetailsPattern = new RegExp(
-  `^\\/quote\\/${referencePattern.source}\\/` + `${tokenPattern.source}$`
-)
-
-// The quote-details GET link and the two resend POSTs are token/email-gated,
-// not session-gated, so they bypass the in-progress-session check.
-const resendPattern = new RegExp(
-  `^\\/quote\\/${referencePattern.source}\\/resend-(known|unknown)$`
-)
-
-const isExempt = (path) =>
-  exemptPaths.has(path) ||
-  quoteDetailsPattern.test(path) ||
-  resendPattern.test(path)
+const isExempt = (path) => exemptPaths.has(path)
 
 // The dropout redirects carry change=true when the intercepted request had
 // it, so a user editing from check-your-answers keeps change mode after being

@@ -168,16 +168,6 @@ describe('checkForValidQuoteSession', () => {
     expect(getQuoteDataFromCache).not.toHaveBeenCalled()
   })
 
-  it('continues without session check for quote details page', () => {
-    const request = makeRequest({ path: '/quote/NRL-123456/abc123token' })
-    const h = makeH()
-
-    const result = checkForValidQuoteSession(request, h)
-
-    expect(result).toBe(h.continue)
-    expect(getQuoteDataFromCache).not.toHaveBeenCalled()
-  })
-
   it('redirects to not-housing when isHousing is "no"', () => {
     vi.mocked(getQuoteDataFromCache).mockReturnValue({ isHousing: 'no' })
     const request = makeRequest({ path: '/quote/boundary-type' })
