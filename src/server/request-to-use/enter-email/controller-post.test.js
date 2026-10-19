@@ -3,7 +3,7 @@ import { enterEmailPostController } from './controller-post.js'
 import { createSessionRequest } from '../../../test-utils/create-session-request.js'
 import { createMockRedirectToolkit } from '../../../test-utils/create-mock-redirect-toolkit.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
-import { mockReadQuote } from '../../../test-utils/mock-get-quote.js'
+import { mockEmailQuoteLink } from '../../../test-utils/mock-get-quote.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { quoteUploadSession } from '../../../test-utils/fixtures/upload-session.js'
 
@@ -44,17 +44,21 @@ describe('enterEmailPostController', () => {
   const mswServer = setupMswServer()
 
   beforeEach(() => {
-    mockReadQuote(mswServer)
+    mockEmailQuoteLink(mswServer)
   })
 
-  it('should clear every journey key except manage when a quote matches', async () => {
+  it('should clear every journey key except manage and the submitted email when a quote matches', async () => {
     const request = buildRequest()
 
     await submitEmail({ request, email: matchingEmail })
 
-    for (const key of clearedKeys) {
+    const clearedKeysExceptRetrieveQuote = clearedKeys.filter(
+      (key) => key !== 'retrieveQuote'
+    )
+    for (const key of clearedKeysExceptRetrieveQuote) {
       expect(request.yar.get(key), `${key} should be cleared`).toBeNull()
     }
+    expect(request.yar.get('retrieveQuote')).toEqual({ email: matchingEmail })
     expect(request.yar.get('manage')).toEqual(manage)
   })
 
