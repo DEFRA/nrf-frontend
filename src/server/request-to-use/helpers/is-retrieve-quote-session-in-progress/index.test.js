@@ -18,6 +18,7 @@ import {
 } from '../../../../test-utils/fixtures/session.js'
 
 const validReference = fullQuote.reference
+const validEmail = fullQuote.email.address
 const guardedPaths = [
   haveNrlReferencePath,
   enterNrlReferencePath,
@@ -66,7 +67,7 @@ describe('checkForValidRetrieveQuoteSession', () => {
       scenario: 'only an email has been saved, with no NRL reference',
       session: {
         manage: requestToUseJourneySession.manage,
-        retrieveQuote: { email: 'test@example.com' }
+        retrieveQuote: { email: validEmail }
       }
     },
     {
@@ -83,6 +84,50 @@ describe('checkForValidRetrieveQuoteSession', () => {
 
     expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
+
+  it.each([haveNrlReferencePath, enterNrlReferencePath])(
+    'redirects %s to the start page when only an email remains after it was accepted',
+    (path) => {
+      const h = createMockRedirectToolkit()
+
+      checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({
+          path,
+          session: {
+            manage: requestToUseJourneySession.manage,
+            retrieveQuote: { email: validEmail }
+          }
+        }),
+        h
+      )
+
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
+
+  it.each([haveNrlReferencePath, enterNrlReferencePath])(
+    'continues on %s after a dropout, when the email sits alongside other answers',
+    (path) => {
+      const h = createMockRedirectToolkit()
+
+      const result = checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({
+          path,
+          session: {
+            manage: requestToUseJourneySession.manage,
+            retrieveQuote: {
+              hasNrlReference: 'yes',
+              nrlReference: validReference,
+              email: validEmail
+            }
+          }
+        }),
+        h
+      )
+
+      expect(result).toBe(h.continue)
+    }
+  )
 
   it.each([
     whatWouldYouLikeToDoPath,
