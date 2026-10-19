@@ -30,22 +30,11 @@ export const getRequestFromBackend = async ({
   })
 
 /**
- * @param {{ reference: string, bearerToken?: string, redeem?: boolean }} options
+ * Reads a quote. This does not check or spend a magic link token.
+ * @param {{ reference: string }} options
  */
-export const getQuoteFromBackend = async ({
-  reference,
-  bearerToken,
-  redeem = true
-}) => {
-  const headers = bearerToken
-    ? { Authorization: `Bearer ${bearerToken}` }
-    : undefined
-  const query = redeem ? '' : '?redeem=false'
-  return getRequestFromBackend({
-    endpointPath: `/quotes/${reference}${query}`,
-    headers
-  })
-}
+export const getQuoteFromBackend = async ({ reference }) =>
+  getRequestFromBackend({ endpointPath: `/quotes/${reference}` })
 
 /**
  * Fetches a user's full details (including their linked organisations) from the backend.
@@ -58,6 +47,37 @@ export const getUserFromBackend = async ({ defraId }) => {
     headers: { 'x-defra-id': defraId }
   })
   return response.payload
+}
+
+/**
+ * Asks the backend to email a magic link for the quote with this NRL reference
+ * and email address. The backend sends nothing unless both match.
+ * @param {{ nrlReference: string, email: string }} params
+ * @returns {Promise<boolean>} whether a quote matched, so a link was sent
+ */
+export const requestEmailQuoteLinkFromBackend = async ({
+  nrlReference,
+  email
+}) => {
+  const { payload } = await postRequestToBackend({
+    endpointPath: '/quotes/email-quote-link',
+    payload: { reference: nrlReference, email }
+  })
+  return payload.matched
+}
+
+/**
+ * Spends a single-use magic link token. The token goes in the body so it is not
+ * recorded in access logs.
+ * @param {{ reference: string, token: string }} params
+ * @returns {Promise<string>} the access status: valid, invalid, expired or not_found
+ */
+export const redeemEmailQuoteLinkToken = async ({ reference, token }) => {
+  const { payload } = await postRequestToBackend({
+    endpointPath: `/quotes/${reference}/redeem-token`,
+    payload: { token }
+  })
+  return payload.accessStatus
 }
 
 export const postRequestToBackend = async ({ endpointPath, payload }) => {

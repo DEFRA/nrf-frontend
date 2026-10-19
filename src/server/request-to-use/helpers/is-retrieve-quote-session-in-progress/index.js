@@ -26,12 +26,24 @@ const hasValidPrefillReference = ({ path, query }) =>
   nrlReferenceField.validate(query.nrlReference).error === undefined
 
 /**
+ * The enter your email address page is only reachable with a saved NRL
+ * reference, which a submitted email alone does not provide.
  * @param {import('@hapi/hapi').Request} request
- * @returns {boolean} whether request to use was chosen and retrieve quote answers exist
+ * @returns {boolean} whether the retrieve quote answers hold what this page needs
+ */
+const hasRequiredAnswers = (request) => {
+  const answers = retrieveQuoteSession.get(request)
+  if (answers === null) return false
+  return request.path !== enterEmailPath || Boolean(answers.nrlReference)
+}
+
+/**
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {boolean} whether request to use was chosen and the retrieve quote answers exist
  */
 const isRetrieveQuoteSessionValid = (request) =>
   isJourneySelected({ request, journey: journeys.requestToUse }) &&
-  retrieveQuoteSession.get(request) !== null
+  hasRequiredAnswers(request)
 
 /**
  * Redirects to the start page when a retrieve quote page is requested without

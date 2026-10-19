@@ -17,8 +17,8 @@ import { getResponse } from '../../../test-utils/get-response.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import {
-  mockReadQuote,
-  mockGetQuoteError
+  mockEmailQuoteLink,
+  mockEmailQuoteLinkError
 } from '../../../test-utils/mock-get-quote.js'
 
 const inputLabel = 'Enter your email address'
@@ -49,7 +49,7 @@ describe('Enter your email address page', () => {
       cookie: haveReferenceCookie
     })
     sessionCookie = referenceCookie
-    mockReadQuote(mswServer)
+    mockEmailQuoteLink(mswServer)
   })
 
   const loadForm = () =>
@@ -107,7 +107,7 @@ describe('Enter your email address page', () => {
     }
   )
 
-  it('should keep only the email when a quote matches', async () => {
+  it('should keep only the email when a quote matches, so the email page redirects to the start page', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
@@ -115,12 +115,13 @@ describe('Enter your email address page', () => {
       cookie: sessionCookie
     })
 
-    const document = await loadPage({
-      requestUrl: routePath,
+    const emailResponse = await getResponse({
       server: getServer(),
+      requestUrl: routePath,
       cookie
     })
-    expect(getByLabelText(document, inputLabel)).toHaveValue(validEmail)
+    expect(emailResponse.statusCode).toBe(statusCodes.found)
+    expect(emailResponse.headers.location).toBe(startPath)
 
     const referenceDocument = await loadPage({
       requestUrl: enterNrlReferencePath,
@@ -139,9 +140,12 @@ describe('Enter your email address page', () => {
       email: otherEmail
     },
     {
-      scenario: 'no quote for the reference',
+      scenario: 'a reference with no quote',
       arrange: () =>
-        mockGetQuoteError(mswServer, fullQuote.reference, statusCodes.notFound),
+        mockEmailQuoteLink(mswServer, {
+          ...fullQuote,
+          reference: 'NRL-999999'
+        }),
       email: validEmail
     }
   ])(
@@ -196,11 +200,7 @@ describe('Enter your email address page', () => {
   })
 
   it('should show the error page when the backend fails, not the quote not matched page', async () => {
-    mockGetQuoteError(
-      mswServer,
-      fullQuote.reference,
-      statusCodes.internalServerError
-    )
+    mockEmailQuoteLinkError(mswServer, statusCodes.internalServerError)
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),

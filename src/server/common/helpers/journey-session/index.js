@@ -1,14 +1,13 @@
 import { manageSession } from '../../../manage/helpers/manage-session/index.js'
 import { clearValidationFlashFromCache } from '../form-validation-session/index.js'
 import { retrieveQuoteSession } from '../../../request-to-use/helpers/retrieve-quote-session/index.js'
+import { requestToUseSession } from '../../../request-to-use/helpers/request-to-use-session/index.js'
 import {
   clearQuoteDataFromCache,
   getQuoteDataFromCache,
   initQuoteSession
 } from '../../../quote/helpers/quote-session-cache/index.js'
 
-// Written by magic link redemption (NRF2-1256), which is not built yet; cleared
-// here so it never outlives a restart or a switch of journey.
 export const requestToUseKey = 'requestToUse'
 
 // Quote journey state the upload controllers keep outside the quote key.
@@ -52,7 +51,7 @@ const clearQuoteJourneyData = (request) => {
 export const clearJourneySessions = (request) => {
   clearQuoteJourneyData(request)
   retrieveQuoteSession.clear(request)
-  request.yar.clear(requestToUseKey)
+  requestToUseSession.clear(request)
 }
 
 /**
@@ -74,7 +73,7 @@ const initialiseQuote = (request) => {
     initQuoteSession(request)
   }
   retrieveQuoteSession.clear(request)
-  request.yar.clear(requestToUseKey)
+  requestToUseSession.clear(request)
 }
 
 /**
@@ -85,7 +84,7 @@ const initialiseRetrieveQuote = (request) => {
     retrieveQuoteSession.init(request)
   }
   clearQuoteJourneyData(request)
-  request.yar.clear(requestToUseKey)
+  requestToUseSession.clear(request)
 }
 
 /**

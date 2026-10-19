@@ -95,23 +95,6 @@ describe('nrf-backend service', () => {
       )
     })
 
-    it('should include Authorization header when bearerToken is provided', async () => {
-      vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
-      await getQuoteFromBackend({
-        reference: 'NRL-123',
-        bearerToken: 'my-secret-token'
-      })
-
-      expect(Wreck.get).toHaveBeenCalledWith(
-        `${backendUrl}/quotes/NRL-123`,
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer my-secret-token'
-          })
-        })
-      )
-    })
-
     it('should not include Authorization header when bearerToken is not provided', async () => {
       vi.mocked(Wreck.get).mockResolvedValue({ payload: {} })
       await getQuoteFromBackend({ reference: 'NRL-123' })

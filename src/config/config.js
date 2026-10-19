@@ -6,7 +6,7 @@ import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const fourHoursMs = 14400000
+const oneDayMs = 86400000
 const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
 const oneDaySeconds = 86400
@@ -177,7 +177,7 @@ export const config = convict({
       ttl: {
         doc: 'server side session cache ttl',
         format: Number,
-        default: fourHoursMs,
+        default: oneDayMs,
         env: 'SESSION_CACHE_TTL'
       }
     },
@@ -185,7 +185,7 @@ export const config = convict({
       ttl: {
         doc: 'Session cookie ttl',
         format: Number,
-        default: fourHoursMs,
+        default: oneDayMs,
         env: 'SESSION_COOKIE_TTL'
       },
       password: {
