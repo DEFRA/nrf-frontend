@@ -47,15 +47,21 @@ describe('enterEmailPostController', () => {
     mockReadQuote(mswServer)
   })
 
-  it('should clear every journey key except manage when a quote matches', async () => {
+  it('should clear every journey key except manage and the email when a quote matches', async () => {
     const request = buildRequest()
 
     await submitEmail({ request, email: matchingEmail })
 
-    for (const key of clearedKeys) {
+    const clearedKeysExceptEmail = clearedKeys.filter(
+      (key) => key !== 'retrieveQuote'
+    )
+    for (const key of clearedKeysExceptEmail) {
       expect(request.yar.get(key), `${key} should be cleared`).toBeNull()
     }
     expect(request.yar.get('manage')).toEqual(manage)
+    expect(request.yar.get('retrieveQuote')).toEqual({
+      email: matchingEmail
+    })
   })
 
   it('should keep every journey key when no quote matches', async () => {

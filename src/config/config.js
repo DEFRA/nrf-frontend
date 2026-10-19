@@ -6,7 +6,6 @@ import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const thirtyMinutesMs = 1800000
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
@@ -210,29 +209,6 @@ export const config = convict({
       format: Number,
       default: isTest ? SESSION_RATE_LIMIT_MAX_TEST : SESSION_RATE_LIMIT_MAX,
       env: 'SESSION_RATE_LIMIT_MAX_REQUESTS'
-    }
-  },
-  quoteDetailsSession: {
-    cookie: {
-      ttl: {
-        doc: 'Quote details (magic link) session cookie ttl',
-        format: Number,
-        default: thirtyMinutesMs,
-        env: 'QUOTE_DETAILS_SESSION_COOKIE_TTL'
-      },
-      password: {
-        doc: 'Quote details session cookie password (32+ characters)',
-        format: String,
-        default: 'the-quote-details-session-password-at-least-32-chars',
-        env: 'QUOTE_DETAILS_SESSION_COOKIE_PASSWORD',
-        sensitive: true
-      },
-      secure: {
-        doc: 'set secure flag on the quote details session cookie',
-        format: Boolean,
-        default: isProduction,
-        env: 'QUOTE_DETAILS_SESSION_COOKIE_SECURE'
-      }
     }
   },
   redis: {
