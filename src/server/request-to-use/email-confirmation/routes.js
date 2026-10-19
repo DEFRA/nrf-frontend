@@ -1,6 +1,6 @@
 import { requestToUseController } from '../controller-get.js'
-import getViewModel from './get-view-model.js'
 import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
+import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
 const routeId = 'email-confirmation'

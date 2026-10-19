@@ -21,8 +21,10 @@ export const enterEmailPostController = {
     if (quoteMatched) {
       clearJourneySessions(request)
     }
-    // Kept so the confirmation page can show it, and the email page can show it
-    // again from the back link on the dropout page.
+
+    // Saved after any clear so the email confirmation page can show the
+    // address the link was sent to; when no quote matched it also re-displays
+    // on the email page from the dropout page's back link.
     retrieveQuoteSession.save(request, { email })
 
     return h

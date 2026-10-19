@@ -107,37 +107,30 @@ describe('Enter your email address page', () => {
     }
   )
 
-  it('should show the email address on the email confirmation page when a quote matches', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: { email: `  ${validEmail} ` },
-      cookie: sessionCookie
-    })
-    const document = await loadPage({
-      requestUrl: emailConfirmationPath,
-      server: getServer(),
-      cookie
-    })
-    expect(getByRole(document, 'main')).toHaveTextContent(
-      `We’ve sent an email to ${validEmail}.`
-    )
-  })
-
-  it('should clear the retrieve quote answers when a quote matches', async () => {
+  it('should keep only the email when a quote matches, so the email page redirects to the start page', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
       formData: { email: validEmail },
       cookie: sessionCookie
     })
-    const response = await getResponse({
+
+    const emailResponse = await getResponse({
       server: getServer(),
       requestUrl: routePath,
       cookie
     })
-    expect(response.statusCode).toBe(statusCodes.found)
-    expect(response.headers.location).toBe(startPath)
+    expect(emailResponse.statusCode).toBe(statusCodes.found)
+    expect(emailResponse.headers.location).toBe(startPath)
+
+    const referenceDocument = await loadPage({
+      requestUrl: enterNrlReferencePath,
+      server: getServer(),
+      cookie
+    })
+    expect(
+      getByLabelText(referenceDocument, 'Enter your NRL reference')
+    ).toHaveValue('')
   })
 
   it.each([
