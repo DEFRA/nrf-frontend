@@ -9,7 +9,7 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
-import { mockReadQuote } from '../../../test-utils/mock-get-quote.js'
+import { mockEmailQuoteLink } from '../../../test-utils/mock-get-quote.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
 
@@ -59,7 +59,7 @@ describe('We have sent you an email page', () => {
   })
 
   it('should show the email address the link was sent to', async () => {
-    mockReadQuote(mswServer)
+    mockEmailQuoteLink(mswServer)
     const cookie = await withValidRetrieveQuoteSession(getServer())
     const { cookie: haveReferenceCookie } = await submitForm({
       requestUrl: haveNrlReferencePath,

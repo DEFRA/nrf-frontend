@@ -4,6 +4,7 @@ import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesEnterEmail from './enter-email/routes.js'
 import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
+import routesRetrieveQuote from './retrieve-quote/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
 
 export const requestToUse = {
@@ -20,7 +21,8 @@ export const requestToUse = {
         ...routesNoNrlReference,
         ...routesEnterEmail,
         ...routesEmailConfirmation,
-        ...routesQuoteNotMatched
+        ...routesQuoteNotMatched,
+        ...routesRetrieveQuote
       ])
     }
   }

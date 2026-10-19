@@ -29,7 +29,13 @@ describe('checkForValidRetrieveQuoteSession', () => {
     const h = createMockRedirectToolkit()
 
     const result = checkForValidRetrieveQuoteSession(
-      createRetrieveQuoteRequest({ path }),
+      createRetrieveQuoteRequest({
+        path,
+        session: {
+          ...requestToUseJourneySession,
+          retrieveQuote: { nrlReference: validReference }
+        }
+      }),
       h
     )
 
@@ -55,6 +61,13 @@ describe('checkForValidRetrieveQuoteSession', () => {
     {
       scenario: 'the quote journey was chosen',
       session: { ...quoteJourneySession, retrieveQuote: {} }
+    },
+    {
+      scenario: 'only an email has been saved, with no NRL reference',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { email: 'test@example.com' }
+      }
     },
     {
       scenario: 'the retrieve quote answers have been cleared',

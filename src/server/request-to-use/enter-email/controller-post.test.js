@@ -3,7 +3,7 @@ import { enterEmailPostController } from './controller-post.js'
 import { createSessionRequest } from '../../../test-utils/create-session-request.js'
 import { createMockRedirectToolkit } from '../../../test-utils/create-mock-redirect-toolkit.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
-import { mockReadQuote } from '../../../test-utils/mock-get-quote.js'
+import { mockEmailQuoteLink } from '../../../test-utils/mock-get-quote.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { quoteUploadSession } from '../../../test-utils/fixtures/upload-session.js'
 
@@ -44,7 +44,7 @@ describe('enterEmailPostController', () => {
   const mswServer = setupMswServer()
 
   beforeEach(() => {
-    mockReadQuote(mswServer)
+    mockEmailQuoteLink(mswServer)
   })
 
   it('should clear every journey key except manage and the email when a quote matches', async () => {
