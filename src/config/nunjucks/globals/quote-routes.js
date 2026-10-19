@@ -14,7 +14,6 @@ import { routePath as checkYourAnswers } from '../../../server/quote/check-your-
 import { routePath as confirmation } from '../../../server/quote/confirmation/routes.js'
 import { routePath as deleteQuote } from '../../../server/quote/delete-quote/routes.js'
 import { routePath as deleteQuoteConfirmation } from '../../../server/quote/delete-quote-confirmation/routes.js'
-import { routePath as quoteDetails } from '../../../server/quote/quote-details/routes.js'
 import { routePath as excludedArea } from '../../../server/quote/excluded-area/routes.js'
 
 export const quoteRoutes = {
@@ -34,6 +33,5 @@ export const quoteRoutes = {
   confirmation,
   deleteQuote,
   deleteQuoteConfirmation,
-  quoteDetails,
   excludedArea
 }
