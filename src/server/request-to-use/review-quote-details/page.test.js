@@ -95,7 +95,7 @@ describe('Review and amend your quote details page', () => {
     expect(
       document.querySelector('.govuk-warning-text__text p')
     ).toHaveTextContent(
-      'Make sure the details of your development match your planning application. Updates may result in a recalculation of available capacity and the levy amount.'
+      'Updates may result in a recalculation of available capacity and the levy amount.'
     )
   })
 
