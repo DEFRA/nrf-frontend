@@ -29,6 +29,16 @@ export const agentClaims = {
   ]
 }
 
+export const multiOrgAgentClaims = {
+  currentRelationshipId,
+  relationships: [
+    `${currentRelationshipId}:${firstOrgId}:CDP Beneficiary Org:0:Agent:0`,
+    '91d48d6c-6e94-f011-b4cc-000d3ac28f39:37d48d6c-6e94-f011-b4cc-000d3ac28f39:CDP Beneficiary Org 2:0:Agent:0'
+  ],
+  enrolmentCount: 2,
+  roles: ['role1', 'role2']
+}
+
 export const citizenClaims = {
   ...singleOrgEmployeeClaims,
   relationships: [`${currentRelationshipId}:${firstOrgId}:CDP Org:0:Citizen:0`]

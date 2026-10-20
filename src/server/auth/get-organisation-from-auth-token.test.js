@@ -4,6 +4,7 @@ import {
   citizenClaims,
   firstOrgId,
   firstOrgName,
+  multiOrgAgentClaims,
   multiOrgEmployeeClaims,
   singleOrgEmployeeClaims
 } from '../../test-utils/fixtures/defra-id-org-claims.js'
@@ -64,6 +65,17 @@ describe('#getOrganisationFromToken', () => {
           userRelationshipType: 'Agent',
           hasMultipleOrgPickerEntries: false,
           shouldShowOrgOrUserName: false,
+          shouldShowCitizenName: false
+        }
+      ],
+      [
+        'an Agent linked to several organisations',
+        multiOrgAgentClaims,
+        {
+          organisationName: 'CDP Beneficiary Org',
+          userRelationshipType: 'Agent',
+          hasMultipleOrgPickerEntries: true,
+          shouldShowOrgOrUserName: true,
           shouldShowCitizenName: false
         }
       ],
