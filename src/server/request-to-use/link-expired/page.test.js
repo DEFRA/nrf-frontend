@@ -59,10 +59,10 @@ describe('This link has expired page', () => {
   it('should offer a way to request a new link without using a GET link', async () => {
     const { document } = await loadExpiredPage()
 
-    const button = getByRole(document, 'button', { name: 'request a new link' })
+    const button = getByRole(document, 'button', { name: 'Get a new link' })
     expect(button.closest('form')).toHaveAttribute('method', 'post')
     expect(
-      queryByRole(document, 'link', { name: 'request a new link' })
+      queryByRole(document, 'link', { name: 'Get a new link' })
     ).not.toBeInTheDocument()
   })
 

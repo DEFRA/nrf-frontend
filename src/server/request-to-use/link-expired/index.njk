@@ -13,7 +13,7 @@
     <form method="post" novalidate>
       {% include "partials/csrf-token.njk" %}
 
-      <p class="govuk-body">You can <button type="submit" class="govuk-link app-link-button">request a new link</button>.</p>
+      {{ govukButton({ text: "Get a new link" }) }}
     </form>
 
   </div>
