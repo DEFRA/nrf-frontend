@@ -80,6 +80,24 @@ export const redeemEmailQuoteLinkToken = async ({ reference, token }) => {
   return payload.accessStatus
 }
 
+/**
+ * Exchanges a spent magic link token for a new magic link, emailed to the
+ * quote owner. Holding the old token is what allows the address to be returned.
+ * @param {{ reference: string, token: string }} params
+ * @returns {Promise<{ matched: boolean, email?: string }>} matched is false when
+ * the token is not a spent token for this quote
+ */
+export const requestNewEmailQuoteLinkFromBackend = async ({
+  reference,
+  token
+}) => {
+  const { payload } = await postRequestToBackend({
+    endpointPath: `/quotes/${reference}/resend-link`,
+    payload: { token }
+  })
+  return payload
+}
+
 export const postRequestToBackend = async ({ endpointPath, payload }) => {
   try {
     const url = `${config.get('backend').apiUrl}${endpointPath}`
