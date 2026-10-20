@@ -46,15 +46,24 @@ describe('Retrieve quote magic link', () => {
     expect(response.headers.location).not.toContain(token)
   })
 
-  it.each(['invalid', 'expired', 'not_found'])(
-    'should redirect to the link expired page when the link is %s',
+  it('should redirect to the link expired page, without the token in the URL, when the link has been used or timed out', async () => {
+    mockRedeemToken(mswServer, { accessStatus: 'expired' })
+
+    const response = await openLink()
+
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(linkExpiredPath)
+    expect(response.headers.location).not.toContain(token)
+  })
+
+  it.each(['invalid', 'not_found'])(
+    'should show the page not found page when the link is %s',
     async (accessStatus) => {
       mockRedeemToken(mswServer, { accessStatus })
 
       const response = await openLink()
 
-      expect(response.statusCode).toBe(statusCodes.found)
-      expect(response.headers.location).toBe(linkExpiredPath)
+      expect(response.statusCode).toBe(statusCodes.notFound)
     }
   )
 
@@ -89,13 +98,13 @@ describe('Retrieve quote magic link', () => {
     ['the reference', `/request-to-use/retrieve/NRL-12/${token}`],
     ['the token', `/request-to-use/retrieve/${reference}/bad%20token`]
   ])(
-    'should redirect to the link expired page without calling the backend when %s is malformed',
+    'should show the page not found page without calling the backend when %s is malformed',
     async (_name, requestUrl) => {
       const redeemRequests = mockRedeemToken(mswServer)
 
       const response = await openLink({ requestUrl })
 
-      expect(response.headers.location).toBe(linkExpiredPath)
+      expect(response.statusCode).toBe(statusCodes.notFound)
       expect(redeemRequests).toEqual([])
     }
   )

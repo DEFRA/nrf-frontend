@@ -20,6 +20,11 @@ const retrieveQuoteAnswers = {
   nrlReference: 'NRL-123456'
 }
 const requestToUseAnswers = { nrlReference: 'NRL-123456' }
+const expiredLinkAnswers = {
+  reference: 'NRL-123456',
+  token: 'abc123_TOKEN-xyz'
+}
+const EXPIRED_LINK_KEY = 'expiredLink'
 
 const buildRequest = (session = {}) => createSessionRequest({ session })
 
@@ -150,13 +155,14 @@ describe('journey session', () => {
   })
 
   describe('clearJourneySessions', () => {
-    it('clears the quote, retrieve quote and request to use data but keeps manage', () => {
+    it('clears the quote, retrieve quote, request to use and expired link data but keeps manage', () => {
       const manage = { whatWouldYouLikeToDo: journeys.requestToUse }
       const request = buildRequest({
         manage,
         quote: quoteAnswers,
         retrieveQuote: retrieveQuoteAnswers,
-        requestToUse: requestToUseAnswers
+        requestToUse: requestToUseAnswers,
+        expiredLink: expiredLinkAnswers
       })
 
       clearJourneySessions(request)
@@ -164,6 +170,7 @@ describe('journey session', () => {
       expect(request.yar.get(QUOTE_KEY)).toBeNull()
       expect(request.yar.get(RETRIEVE_QUOTE_KEY)).toBeNull()
       expect(request.yar.get(REQUEST_TO_USE_KEY)).toBeNull()
+      expect(request.yar.get(EXPIRED_LINK_KEY)).toBeNull()
       expect(request.yar.get(MANAGE_KEY)).toEqual(manage)
     })
   })

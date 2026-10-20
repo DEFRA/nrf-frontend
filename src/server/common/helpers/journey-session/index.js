@@ -2,6 +2,7 @@ import { manageSession } from '../../../manage/helpers/manage-session/index.js'
 import { clearValidationFlashFromCache } from '../form-validation-session/index.js'
 import { retrieveQuoteSession } from '../../../request-to-use/helpers/retrieve-quote-session/index.js'
 import { requestToUseSession } from '../../../request-to-use/helpers/request-to-use-session/index.js'
+import { expiredLinkSession } from '../../../request-to-use/helpers/expired-link-session/index.js'
 import {
   clearQuoteDataFromCache,
   getQuoteDataFromCache,
@@ -50,6 +51,7 @@ export const clearJourneySessions = (request) => {
   clearQuoteJourneyData(request)
   retrieveQuoteSession.clear(request)
   requestToUseSession.clear(request)
+  expiredLinkSession.clear(request)
 }
 
 /**
