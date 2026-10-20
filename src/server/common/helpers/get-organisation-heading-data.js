@@ -20,12 +20,10 @@ export const getOrganisationHeadingData = (request) => {
     profile?.name ||
     [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
 
-  let orgOrUserName = null
-  if (shouldShowOrgOrUserName) {
-    orgOrUserName = organisationName || displayName
-  } else if (shouldShowCitizenName) {
-    orgOrUserName = displayName
-  }
+  const nameToShow = shouldShowOrgOrUserName
+    ? organisationName || displayName
+    : null
+  const orgOrUserName = shouldShowCitizenName ? displayName : nameToShow
 
   const returnPath = `${request.path}${request.url.search}`
   const changeOrganisationUrl = hasMultipleOrgPickerEntries
