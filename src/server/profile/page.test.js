@@ -9,10 +9,16 @@ import {
 } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import Jwt from '@hapi/jwt'
+import { within } from '@testing-library/dom'
 
 import { config } from '../../config/config.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { mockUser } from '../../test-utils/fixtures/mock-user.js'
+import { loadPage } from '../../test-utils/load-page.js'
+import {
+  firstOrgName,
+  multiOrgEmployeeClaims
+} from '../../test-utils/fixtures/defra-id-org-claims.js'
 
 const PROFILE_PATH = '/profile'
 const SIGN_IN_PATH = '/login'
@@ -125,9 +131,6 @@ describe('Profile page', () => {
     expect(profile.result).toContain(
       `${mockUser.firstName} ${mockUser.lastName}`
     )
-
-    // The backend user has no linked organisations, so the empty state must be shown
-    expect(profile.result).toContain('You are not linked to any organisations.')
   })
 
   it('sends a user to the home page when they sign in without requesting a protected page first', async () => {
@@ -164,5 +167,119 @@ describe('Profile page', () => {
       firstName: mockUser.firstName,
       lastName: mockUser.lastName
     })
+  })
+
+  describe('organisation heading', () => {
+    const changeLinkName = 'Change who you’re representing'
+
+    const loadSignedInProfile = async () => {
+      const { cookie } = await completeDefraSignIn({ server })
+      const document = await loadPage({
+        requestUrl: PROFILE_PATH,
+        server,
+        cookie
+      })
+      return document.body
+    }
+
+    it('shows the organisation name and a link back to this page for a user who can switch organisation', async () => {
+      tokenClaims = { ...mockUser, ...multiOrgEmployeeClaims }
+
+      const body = await loadSignedInProfile()
+
+      expect(
+        within(body).getByTestId('app-organisation-heading')
+      ).toHaveTextContent(firstOrgName)
+      expect(
+        within(body).getByRole('link', { name: changeLinkName })
+      ).toHaveAttribute(
+        'href',
+        '/auth/change-organisation?redirectTo=%2Fprofile'
+      )
+    })
+
+    it('shows the user name without a change link when the user has no other organisation to switch to', async () => {
+      const body = await loadSignedInProfile()
+
+      expect(
+        within(body).getByTestId('app-organisation-heading')
+      ).toHaveTextContent(`${mockUser.name}`)
+      expect(
+        within(body).queryByRole('link', { name: changeLinkName })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('changing organisation', () => {
+    const changeOrganisationSignIn = '/auth/sign-in?change-organisation=true'
+
+    it('asks Defra ID to show the organisation picker again', async () => {
+      const change = await server.inject({
+        method: 'GET',
+        url: '/auth/change-organisation?redirectTo=%2Fprofile'
+      })
+
+      expect(change.statusCode).toBe(statusCodes.found)
+      expect(change.headers.location).toBe(changeOrganisationSignIn)
+
+      const signIn = await server.inject({
+        method: 'GET',
+        url: change.headers.location,
+        headers: { cookie: getYarCookie(change) }
+      })
+
+      expect(
+        new URL(signIn.headers.location).searchParams.get('forceReselection')
+      ).toBe('true')
+    })
+
+    it.each([
+      ['the page the user clicked the link on', '%2Fprofile', '/profile'],
+      [
+        'another page, including its query string',
+        '%2Fquote%2Fsummary%3Ftab%3Da',
+        '/quote/summary?tab=a'
+      ]
+    ])(
+      'returns the user to %s after they pick an organisation',
+      async (_, redirectTo, expected) => {
+        const change = await server.inject({
+          method: 'GET',
+          url: `/auth/change-organisation?redirectTo=${redirectTo}`
+        })
+
+        const { response: callback } = await completeDefraSignIn({
+          server,
+          cookie: getYarCookie(change),
+          signInUrl: changeOrganisationSignIn
+        })
+
+        expect(callback.headers.location).toBe(expected)
+      }
+    )
+
+    it.each([
+      ['an absolute URL', 'https%3A%2F%2Fevil.example.com'],
+      ['a protocol-relative URL', '%2F%2Fevil.example.com'],
+      ['a missing return page', undefined]
+    ])(
+      'sends the user to the start page instead of %s',
+      async (_, redirectTo) => {
+        const change = await server.inject({
+          method: 'GET',
+          url: redirectTo
+            ? `/auth/change-organisation?redirectTo=${redirectTo}`
+            : '/auth/change-organisation'
+        })
+
+        const { response: callback } = await completeDefraSignIn({
+          server,
+          cookie: getYarCookie(change),
+          signInUrl: changeOrganisationSignIn
+        })
+
+        expect(callback.headers.location).toBe(startPath)
+      }
+    )
   })
 })

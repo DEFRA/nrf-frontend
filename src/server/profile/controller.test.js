@@ -26,7 +26,11 @@ describe('profileController', () => {
     email: 'session@example.com'
   }
 
-  const buildRequest = (profile) => ({ auth: { credentials: { profile } } })
+  const buildRequest = (profile) => ({
+    auth: { credentials: { profile } },
+    path: '/profile',
+    url: new URL('http://localhost/profile')
+  })
 
   const stubBackendUser = (body, status = 200) =>
     server.use(
