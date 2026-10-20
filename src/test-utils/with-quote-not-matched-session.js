@@ -1,10 +1,6 @@
-import { submitForm } from './submit-form.js'
-import { withValidRetrieveQuoteSession } from './with-valid-retrieve-quote-session.js'
+import { submitRetrieveQuoteAnswers } from './submit-retrieve-quote-answers.js'
 import { mockEmailQuoteLink } from './mock-get-quote.js'
 import { fullQuote } from './fixtures/quote.js'
-import { routePath as haveNrlReferencePath } from '../server/request-to-use/have-nrl-reference/route-path.js'
-import { routePath as enterNrlReferencePath } from '../server/request-to-use/enter-nrl-reference/route-path.js'
-import { routePath as enterEmailPath } from '../server/request-to-use/enter-email/route-path.js'
 
 /**
  * Prime the session left after an email that matches no quote, by driving the
@@ -15,14 +11,5 @@ import { routePath as enterEmailPath } from '../server/request-to-use/enter-emai
  */
 export async function withQuoteNotMatchedSession(server, mswServer) {
   mockEmailQuoteLink(mswServer, { ...fullQuote, reference: 'NRL-999999' })
-  let cookie = await withValidRetrieveQuoteSession(server)
-  const steps = [
-    [haveNrlReferencePath, { hasNrlReference: 'yes' }],
-    [enterNrlReferencePath, { nrlReference: fullQuote.reference }],
-    [enterEmailPath, { email: fullQuote.email.address }]
-  ]
-  for (const [requestUrl, formData] of steps) {
-    ;({ cookie } = await submitForm({ requestUrl, server, formData, cookie }))
-  }
-  return cookie
+  return submitRetrieveQuoteAnswers(server)
 }

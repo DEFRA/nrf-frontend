@@ -5,9 +5,12 @@ import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as emailConfirmationPath } from '../../email-confirmation/route-path.js'
 import { routePath as noNrlReferencePath } from '../../no-nrl-reference/route-path.js'
 import { routePath as quoteNotMatchedPath } from '../../quote-not-matched/route-path.js'
-import { routePath as whatWouldYouLikeToDoPath } from '../../../manage/what-would-you-like-to-do/route-path.js'
 import { nrlReferenceField } from '../../enter-nrl-reference/form-validation.js'
 import { retrieveQuoteSession } from '../retrieve-quote-session/index.js'
+import {
+  isRetrieveQuoteEmailSent,
+  isRetrieveQuoteEmailSentSession
+} from '../retrieve-quote-email-sent/index.js'
 import {
   isJourneySelected,
   journeys,
@@ -30,13 +33,6 @@ const guardedPaths = new Set([
 const hasValidPrefillReference = ({ path, query }) =>
   path === enterNrlReferencePath &&
   nrlReferenceField.validate(query.nrlReference).error === undefined
-
-/**
- * @param {object} answers - the saved retrieve quote answers
- * @returns {boolean} whether only an email remains, which is the state after the email was accepted
- */
-const isRetrieveQuoteEmailSent = (answers) =>
-  !answers.hasNrlReference && !answers.nrlReference && Boolean(answers.email)
 
 /**
  * A saved email with no other answer is what remains after the email was
@@ -66,22 +62,10 @@ const isRetrieveQuoteSessionValid = (request) =>
   hasRequiredAnswers(request)
 
 /**
- * @param {import('@hapi/hapi').Request} request
- * @returns {boolean} whether the email was accepted, the only state in which the confirmation page is reachable
- */
-const isRetrieveQuoteEmailSentSession = (request) => {
-  const answers = retrieveQuoteSession.get(request)
-  return (
-    isJourneySelected({ request, journey: journeys.requestToUse }) &&
-    answers !== null &&
-    isRetrieveQuoteEmailSent(answers)
-  )
-}
-
-/**
- * Redirects to the start page when a retrieve quote page is requested without
- * a retrieve quote session. A link from the quote email to the enter your NRL
- * reference page with a valid reference starts the session itself.
+ * Redirects to the start page when a guarded retrieve quote page is requested
+ * without the answers it needs, and when the confirmation page is requested
+ * before the email was accepted. A link from the quote email to the enter your
+ * NRL reference page with a valid reference starts the session itself.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidRetrieveQuoteSession = (request, h) => {
@@ -109,20 +93,4 @@ export const checkForValidRetrieveQuoteSession = (request, h) => {
   }
 
   return h.continue
-}
-
-/**
- * The what would you like to do page is the entry point after the start page,
- * so it is only closed once the email has been accepted. Registered by the
- * manage plugin, because the guard above only covers request to use routes.
- * @type {import('@hapi/hapi').Lifecycle.Method}
- */
-export const checkForAcceptedEmail = (request, h) => {
-  if (request.method !== 'get' || request.path !== whatWouldYouLikeToDoPath) {
-    return h.continue
-  }
-
-  return isRetrieveQuoteEmailSentSession(request)
-    ? h.redirect(startPath).takeover()
-    : h.continue
 }

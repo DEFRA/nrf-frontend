@@ -52,12 +52,8 @@ describe('You need a quote before you can request to use the nature restoration 
       getByRole(document, 'link', { name: 'get a quote at any time' })
     ).toHaveAttribute('href', '/')
   })
-})
 
-describe('You need a quote page without a retrieve quote session', () => {
-  const getServer = setupTestServer()
-
-  it('should redirect to the start page', async () => {
+  it('should redirect to the start page without a retrieve quote session', async () => {
     const response = await getServer().inject({ method: 'GET', url: routePath })
 
     expect(response.statusCode).toBe(302)

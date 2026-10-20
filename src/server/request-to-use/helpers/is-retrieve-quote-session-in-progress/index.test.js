@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  checkForAcceptedEmail,
-  checkForValidRetrieveQuoteSession
-} from './index.js'
+import { checkForValidRetrieveQuoteSession } from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../../../manage/what-would-you-like-to-do/route-path.js'
 import { routePath as haveNrlReferencePath } from '../../have-nrl-reference/route-path.js'
@@ -317,82 +314,5 @@ describe('checkForValidRetrieveQuoteSession on the confirmation page', () => {
     )
 
     expect(h.redirect).toHaveBeenCalledWith(startPath)
-  })
-})
-
-describe('checkForAcceptedEmail', () => {
-  const emailAcceptedSession = {
-    manage: requestToUseJourneySession.manage,
-    retrieveQuote: { email: validEmail }
-  }
-
-  it('redirects the what would you like to do page to the start page once the email was accepted', () => {
-    const h = createMockRedirectToolkit()
-
-    checkForAcceptedEmail(
-      createRetrieveQuoteRequest({
-        path: whatWouldYouLikeToDoPath,
-        session: emailAcceptedSession
-      }),
-      h
-    )
-
-    expect(h.redirect).toHaveBeenCalledWith(startPath)
-  })
-
-  it.each([
-    { scenario: 'there is no session', session: {} },
-    {
-      scenario: 'retrieve quote answers exist without an accepted email',
-      session: {
-        manage: requestToUseJourneySession.manage,
-        retrieveQuote: { hasNrlReference: 'yes' }
-      }
-    },
-    {
-      scenario: 'the email sits alongside other answers after a dropout',
-      session: {
-        manage: requestToUseJourneySession.manage,
-        retrieveQuote: {
-          hasNrlReference: 'yes',
-          nrlReference: validReference,
-          email: validEmail
-        }
-      }
-    },
-    { scenario: 'the quote journey was chosen', session: quoteJourneySession }
-  ])('continues when $scenario', ({ session }) => {
-    const h = createMockRedirectToolkit()
-
-    const result = checkForAcceptedEmail(
-      createRetrieveQuoteRequest({ path: whatWouldYouLikeToDoPath, session }),
-      h
-    )
-
-    expect(result).toBe(h.continue)
-  })
-
-  it('ignores other pages and non-GET requests', () => {
-    const h = createMockRedirectToolkit()
-
-    expect(
-      checkForAcceptedEmail(
-        createRetrieveQuoteRequest({
-          path: startPath,
-          session: emailAcceptedSession
-        }),
-        h
-      )
-    ).toBe(h.continue)
-    expect(
-      checkForAcceptedEmail(
-        createRetrieveQuoteRequest({
-          path: whatWouldYouLikeToDoPath,
-          method: 'post',
-          session: emailAcceptedSession
-        }),
-        h
-      )
-    ).toBe(h.continue)
   })
 })
