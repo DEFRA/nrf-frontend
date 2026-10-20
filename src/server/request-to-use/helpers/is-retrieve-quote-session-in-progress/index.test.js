@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { checkForValidRetrieveQuoteSession } from './index.js'
+import {
+  checkForAcceptedEmail,
+  checkForValidRetrieveQuoteSession
+} from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../../../manage/what-would-you-like-to-do/route-path.js'
 import { routePath as haveNrlReferencePath } from '../../have-nrl-reference/route-path.js'
@@ -22,7 +25,8 @@ const validEmail = fullQuote.email.address
 const guardedPaths = [
   haveNrlReferencePath,
   enterNrlReferencePath,
-  enterEmailPath
+  enterEmailPath,
+  noNrlReferencePath
 ]
 
 describe('checkForValidRetrieveQuoteSession', () => {
@@ -85,7 +89,7 @@ describe('checkForValidRetrieveQuoteSession', () => {
     expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
 
-  it.each([haveNrlReferencePath, enterNrlReferencePath])(
+  it.each([haveNrlReferencePath, enterNrlReferencePath, noNrlReferencePath])(
     'redirects %s to the start page when only an email remains after it was accepted',
     (path) => {
       const h = createMockRedirectToolkit()
@@ -129,22 +133,19 @@ describe('checkForValidRetrieveQuoteSession', () => {
     }
   )
 
-  it.each([
-    whatWouldYouLikeToDoPath,
-    noNrlReferencePath,
-    emailConfirmationPath,
-    quoteNotMatchedPath,
-    planningTypePath
-  ])('does not guard %s', (path) => {
-    const h = createMockRedirectToolkit()
+  it.each([whatWouldYouLikeToDoPath, quoteNotMatchedPath, planningTypePath])(
+    'does not guard %s',
+    (path) => {
+      const h = createMockRedirectToolkit()
 
-    const result = checkForValidRetrieveQuoteSession(
-      createRetrieveQuoteRequest({ path, session: {} }),
-      h
-    )
+      const result = checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({ path, session: {} }),
+        h
+      )
 
-    expect(result).toBe(h.continue)
-  })
+      expect(result).toBe(h.continue)
+    }
+  )
 
   it('does not guard non-GET requests', () => {
     const h = createMockRedirectToolkit()
@@ -226,5 +227,121 @@ describe('checkForValidRetrieveQuoteSession', () => {
 
       expect(h.redirect).toHaveBeenCalledWith(startPath)
     })
+  })
+})
+
+describe('checkForValidRetrieveQuoteSession on the confirmation page', () => {
+  it('continues once the email was accepted', () => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidRetrieveQuoteSession(
+      createRetrieveQuoteRequest({
+        path: emailConfirmationPath,
+        session: {
+          manage: requestToUseJourneySession.manage,
+          retrieveQuote: { email: validEmail }
+        }
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+  })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'the email was not accepted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { hasNrlReference: 'yes', nrlReference: validReference }
+      }
+    }
+  ])('redirects to the start page when $scenario', ({ session }) => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidRetrieveQuoteSession(
+      createRetrieveQuoteRequest({ path: emailConfirmationPath, session }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+})
+
+describe('checkForAcceptedEmail', () => {
+  const emailAcceptedSession = {
+    manage: requestToUseJourneySession.manage,
+    retrieveQuote: { email: validEmail }
+  }
+
+  it('redirects the what would you like to do page to the start page once the email was accepted', () => {
+    const h = createMockRedirectToolkit()
+
+    checkForAcceptedEmail(
+      createRetrieveQuoteRequest({
+        path: whatWouldYouLikeToDoPath,
+        session: emailAcceptedSession
+      }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'retrieve quote answers exist without an accepted email',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { hasNrlReference: 'yes' }
+      }
+    },
+    {
+      scenario: 'the email sits alongside other answers after a dropout',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: {
+          hasNrlReference: 'yes',
+          nrlReference: validReference,
+          email: validEmail
+        }
+      }
+    },
+    { scenario: 'the quote journey was chosen', session: quoteJourneySession }
+  ])('continues when $scenario', ({ session }) => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForAcceptedEmail(
+      createRetrieveQuoteRequest({ path: whatWouldYouLikeToDoPath, session }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+  })
+
+  it('ignores other pages and non-GET requests', () => {
+    const h = createMockRedirectToolkit()
+
+    expect(
+      checkForAcceptedEmail(
+        createRetrieveQuoteRequest({
+          path: startPath,
+          session: emailAcceptedSession
+        }),
+        h
+      )
+    ).toBe(h.continue)
+    expect(
+      checkForAcceptedEmail(
+        createRetrieveQuoteRequest({
+          path: whatWouldYouLikeToDoPath,
+          method: 'post',
+          session: emailAcceptedSession
+        }),
+        h
+      )
+    ).toBe(h.continue)
   })
 })
