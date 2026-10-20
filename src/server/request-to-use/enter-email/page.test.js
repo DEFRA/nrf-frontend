@@ -107,31 +107,25 @@ describe('Enter your email address page', () => {
     }
   )
 
-  it('should keep only the email when a quote matches, so the email page redirects to the start page', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: routePath,
-      server: getServer(),
-      formData: { email: validEmail },
-      cookie: sessionCookie
-    })
+  it.each([routePath, enterNrlReferencePath, haveNrlReferencePath])(
+    'should redirect %s to the start page once a quote matches',
+    async (requestUrl) => {
+      const { cookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { email: validEmail },
+        cookie: sessionCookie
+      })
 
-    const emailResponse = await getResponse({
-      server: getServer(),
-      requestUrl: routePath,
-      cookie
-    })
-    expect(emailResponse.statusCode).toBe(statusCodes.found)
-    expect(emailResponse.headers.location).toBe(startPath)
-
-    const referenceDocument = await loadPage({
-      requestUrl: enterNrlReferencePath,
-      server: getServer(),
-      cookie
-    })
-    expect(
-      getByLabelText(referenceDocument, 'Enter your NRL reference')
-    ).toHaveValue('')
-  })
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl,
+        cookie
+      })
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPath)
+    }
+  )
 
   it.each([
     {
