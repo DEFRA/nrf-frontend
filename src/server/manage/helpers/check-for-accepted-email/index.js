@@ -13,7 +13,9 @@ export const checkForAcceptedEmail = (request, h) => {
     return h.continue
   }
 
-  return isRetrieveQuoteEmailSentSession(request)
-    ? h.redirect(startPath).takeover()
-    : h.continue
+  if (isRetrieveQuoteEmailSentSession(request)) {
+    return h.redirect(startPath).takeover()
+  }
+
+  return h.continue
 }
