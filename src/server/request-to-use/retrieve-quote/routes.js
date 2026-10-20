@@ -19,11 +19,12 @@ export { routePath }
  *       page. A used or timed out link redirects to the link expired page, where
  *       the user can ask for a new one. A link that is malformed, for an unknown
  *       quote or has a wrong token shows the page not found page, the same for
- *       all three so a visitor cannot tell whether a quote exists. The token and NRL reference are in the URL path because the link has to
- *       be a clickable GET URL in an email. The token is a path segment rather
- *       than a query string so it is not passed on in Referer headers, it is
- *       never repeated in a redirect, and link previewers and scanners get an
- *       empty response without spending it. The token is single-use and expires
+ *       all three so a visitor cannot tell whether a quote exists. The token
+ *       and NRL reference are in the URL path because the link has to be a
+ *       clickable GET URL in an email. The token is a path segment rather than
+ *       a query string so it is not passed on in Referer headers, it is never
+ *       repeated in a redirect, and link previewers and scanners get an empty
+ *       response without spending it. The token is single-use and expires
  *       after 24 hours, so a copy found in a log or browser history is of no
  *       use. The backend call keeps it in the request body, not the URL.
  *     parameters:
