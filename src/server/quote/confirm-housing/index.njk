@@ -35,16 +35,7 @@
           },
           errorMessage: validationErrors.messagesByFormField.isHousing,
           value: formSubmitData.isHousing,
-          items: [
-              {
-                  value: "yes",
-                  text: "Yes"
-              },
-              {
-                  value: "no",
-                  text: "No"
-              }
-          ]
+          items: housingOptions
       }) }}
 
       {{ govukButton({

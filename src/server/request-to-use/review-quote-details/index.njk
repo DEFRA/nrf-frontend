@@ -1,0 +1,30 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+        {{ govukSummaryList({
+          classes: "govuk-!-margin-bottom-9",
+          rows: rows
+        }) }}
+        {{ govukWarningText({
+          html: 'Updates may result in a recalculation of available capacity and the levy amount.',
+          iconFallbackText: "Warning"
+        }) }}
+
+        <form method="post" novalidate data-disable-on-submit>
+          {% include "partials/csrf-token.njk" %}
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Continue"
+            }) }}
+          </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
