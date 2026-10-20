@@ -5,7 +5,7 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 
-describe('Review and amend your quote details page accessibility checks', () => {
+describe('Review and amend the quote details page accessibility checks', () => {
   const getSeededServer = setupSeededRequestToUseServer()
 
   it('should have no HTML accessibility issues', async () => {

@@ -1,4 +1,5 @@
 import { fullQuote } from './quote.js'
+import { boundaryGeojson } from './boundary-geojson.js'
 
 export const requestToUseJourneySession = {
   manage: { whatWouldYouLikeToDo: 'request-to-use' },
@@ -9,15 +10,13 @@ export const quoteJourneySession = {
   manage: { whatWouldYouLikeToDo: 'quote' }
 }
 
-// What the review quote details page needs: a saved quote plus the
-// requestToUse key magic link redemption (NRF2-1256) will write. housingUnits
-// is a number because the quote schema's integer validator converts it.
 export const reviewQuoteSession = {
   quote: {
     planningType: 'full-planning-permission',
     isHousing: 'yes',
     housingUnits: 42,
     boundaryEntryType: 'draw',
+    boundaryGeojson,
     boundaryFilename: null,
     email: 'test@example.com'
   },

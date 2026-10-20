@@ -1,21 +1,19 @@
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
-import { getQuoteDataFromCache } from '../../../quote/helpers/quote-session-cache/index.js'
-import { requestToUseKey } from '../../../common/helpers/journey-session/index.js'
+import { isQuoteDataComplete } from '../../../quote/helpers/quote-session-cache/index.js'
+import { requestToUseSession } from '../request-to-use-session/index.js'
 
 /**
  * @param {import('@hapi/hapi').Request} request
- * @returns {boolean} whether saved quote answers and a request to use session both exist
+ * @returns {boolean} whether a complete set of saved quote answers and a request to use session both exist
  */
 const isReviewQuoteSessionValid = (request) =>
-  getQuoteDataFromCache(request) !== null &&
-  request.yar.get(requestToUseKey) !== null
+  isQuoteDataComplete(request) && requestToUseSession.get(request) !== null
 
 /**
  * Redirects to the start page when the review quote details page is requested
- * without both a saved quote and a request to use session. The requestToUse
- * key is what magic link redemption (NRF2-1256) will set; until that is
- * built, no real user journey can reach the page.
+ * without both a complete saved quote and a request to use session, which
+ * magic link redemption (NRF2-1256) sets.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {

@@ -21,24 +21,14 @@ describe('checkForValidReviewQuoteSession', () => {
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
-  it('continues when the quote session is initialised but empty', () => {
-    const h = createMockRedirectToolkit()
-
-    const result = checkForValidReviewQuoteSession(
-      createReviewQuoteRequest({
-        path: reviewQuoteDetailsPath,
-        session: { quote: {}, requestToUse: reviewQuoteSession.requestToUse }
-      }),
-      h
-    )
-
-    expect(result).toBe(h.continue)
-  })
-
   it.each([
     {
       scenario: 'the quote session is missing',
       session: { requestToUse: reviewQuoteSession.requestToUse }
+    },
+    {
+      scenario: 'the quote session is initialised but empty',
+      session: { quote: {}, requestToUse: reviewQuoteSession.requestToUse }
     },
     {
       scenario: 'the request to use session is missing',

@@ -8,12 +8,21 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { failIfBackendCalled } from '../../../test-utils/fail-if-backend-called.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { mergeCookies } from '../../../test-utils/merge-cookies.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import {
+  mockReadQuote,
+  mockRedeemToken
+} from '../../../test-utils/mock-get-quote.js'
+import { savedQuote } from '../../../test-utils/fixtures/saved-quote.js'
 
 const mswServer = setupMswServer()
 
-describe('Review and amend your quote details page', () => {
+const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/abc123_TOKEN-xyz`
+
+describe('Review and amend the quote details page', () => {
   const getServer = setupTestServer()
   const getSeededServer = setupSeededRequestToUseServer()
 
@@ -51,6 +60,19 @@ describe('Review and amend your quote details page', () => {
     expect(response.headers.location).toBe(startPath)
   })
 
+  it('should redirect to the start page when the quote session is initialised but empty', async () => {
+    const cookie = await withValidQuoteSession(getSeededServer())
+
+    const response = await getResponse({
+      server: getSeededServer(),
+      requestUrl: routePath,
+      cookie
+    })
+
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPath)
+  })
+
   it('should show the saved quote details from the session without fetching the quote from the backend', async () => {
     failIfBackendCalled(mswServer, ['/quotes'])
     const cookie = await withCompleteQuoteSession(getSeededServer())
@@ -62,10 +84,10 @@ describe('Review and amend your quote details page', () => {
     })
 
     expect(document.title).toBe(
-      'Review and amend your quote details - Nature restoration levy - GOV.UK'
+      'Review and amend the quote details for NRL-123456 - Nature restoration levy - GOV.UK'
     )
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Review and amend your quote details'
+      'Review and amend the quote details for NRL-123456'
     )
 
     const keys = [...document.querySelectorAll('.govuk-summary-list__key')].map(
@@ -90,10 +112,8 @@ describe('Review and amend your quote details page', () => {
       'test@example.com'
     ])
 
-    // The message sits in a p inside the strong: global styles render it in a
-    // normal font weight, matching the prototype.
     expect(
-      document.querySelector('.govuk-warning-text__text p')
+      document.querySelector('.govuk-warning-text__text')
     ).toHaveTextContent(
       'Updates may result in a recalculation of available capacity and the levy amount.'
     )
@@ -112,7 +132,7 @@ describe('Review and amend your quote details page', () => {
       'Changeplanning permission type',
       'Changewhether you are developing housing',
       'Changenumber of housing units',
-      'Changedrawn red line boundary'
+      'Changered line boundary'
     ]) {
       expect(getByRole(document, 'link', { name })).toHaveAttribute('href', '#')
     }
@@ -125,6 +145,36 @@ describe('Review and amend your quote details page', () => {
     expect(
       document.querySelector('input[name="csrfToken"]')
     ).toBeInTheDocument()
+  })
+
+  it('should render a boundary filename containing HTML as escaped text', async () => {
+    // The real magic link flow (NRF2-1256) writes the session this page reads,
+    // so it is used here to seed a hostile uploaded filename.
+    const hostileFilename = 'x<script>alert(1)</script>.geojson'
+    mockRedeemToken(mswServer)
+    mockReadQuote(mswServer, {
+      ...savedQuote,
+      boundary: { ...savedQuote.boundary, filename: hostileFilename }
+    })
+
+    const { headers } = await getResponse({
+      server: getServer(),
+      requestUrl: magicLink
+    })
+    const cookie = mergeCookies(null, headers['set-cookie'])
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    const boundaryValue = [
+      ...document.querySelectorAll('.govuk-summary-list__value')
+    ].find((value) => value.textContent.includes(hostileFilename))
+    expect(boundaryValue).toBeDefined()
+    expect(boundaryValue).toHaveTextContent(hostileFilename)
+    expect(boundaryValue.querySelector('script')).toBeNull()
   })
 
   it('should not render a back link or a delete link', async () => {

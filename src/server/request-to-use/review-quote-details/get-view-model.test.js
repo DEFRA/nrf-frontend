@@ -3,7 +3,12 @@ import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
 import { reviewQuoteSession } from '../../../test-utils/fixtures/session.js'
 
-const completeQuote = reviewQuoteSession.quote
+// What the page controller hands the view model: quote session data merged
+// with the NRL reference from the request to use session.
+const completeQuote = {
+  ...reviewQuoteSession.quote,
+  nrlReference: reviewQuoteSession.requestToUse.nrlReference
+}
 
 // Row keys and change link hidden texts are the user-visible summary list
 // contract; consts keep each literal to one occurrence (SonarQube S1192).
@@ -23,16 +28,18 @@ const expectedRowKeys = [
   rowKeys.email
 ]
 
-const drawnBoundaryHiddenText = 'drawn red line boundary'
+const boundaryHiddenText = 'red line boundary'
 const uploadedBoundaryHiddenText = 'uploaded red line boundary'
 
 describe('Review and amend your quote details view model', () => {
   it('returns the page heading and title', () => {
     const view = getViewModel(completeQuote)
 
-    expect(view.pageHeading).toBe('Review and amend your quote details')
+    expect(view.pageHeading).toBe(
+      'Review and amend the quote details for NRL-123456'
+    )
     expect(view.pageTitle).toBe(
-      'Review and amend your quote details - Nature restoration levy - GOV.UK'
+      'Review and amend the quote details for NRL-123456 - Nature restoration levy - GOV.UK'
     )
   })
 
@@ -53,7 +60,7 @@ describe('Review and amend your quote details view model', () => {
     [rowKeys.planningType, 'planning permission type'],
     [rowKeys.housing, 'whether you are developing housing'],
     [rowKeys.housingUnits, 'number of housing units'],
-    [rowKeys.boundary, drawnBoundaryHiddenText]
+    [rowKeys.boundary, boundaryHiddenText]
   ])('gives the %s row a placeholder change link', (key, hiddenText) => {
     const row = findSummaryListRow(getViewModel(completeQuote), key)
 
@@ -85,10 +92,13 @@ describe('Review and amend your quote details view model', () => {
     )
   })
 
-  it('shows No when the development has no housing', () => {
+  it('shows No and omits the housing units row when there is no housing', () => {
     const view = getViewModel({ ...completeQuote, isHousing: 'no' })
 
     expect(findSummaryListRow(view, rowKeys.housing).value.text).toBe('No')
+    expect(view.rows.map((row) => row.key.text)).not.toContain(
+      rowKeys.housingUnits
+    )
   })
 
   it.each([
@@ -116,13 +126,13 @@ describe('Review and amend your quote details view model', () => {
       scenario: 'a drawn boundary',
       quote: completeQuote,
       text: 'Added',
-      hiddenText: drawnBoundaryHiddenText
+      hiddenText: boundaryHiddenText
     },
     {
       scenario: 'no boundary added',
       quote: { ...completeQuote, boundaryEntryType: null },
       text: 'Not added',
-      hiddenText: drawnBoundaryHiddenText
+      hiddenText: boundaryHiddenText
     }
   ])('shows "$text" for $scenario', ({ quote, text, hiddenText }) => {
     const row = findSummaryListRow(getViewModel(quote), rowKeys.boundary)

@@ -8,8 +8,6 @@ import {
   initQuoteSession
 } from '../../../quote/helpers/quote-session-cache/index.js'
 
-export const requestToUseKey = 'requestToUse'
-
 // Quote journey state the upload controllers keep outside the quote key.
 const quoteUploadKeys = [
   'boundaryFailureReason',

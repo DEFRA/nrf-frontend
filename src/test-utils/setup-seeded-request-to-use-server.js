@@ -1,6 +1,6 @@
 import { createServer } from '../server/server.js'
 import { ensureRedis } from './ensure-redis.js'
-import { requestToUseKey } from '../server/common/helpers/journey-session/index.js'
+import { requestToUseSession } from '../server/request-to-use/helpers/request-to-use-session/index.js'
 import { fullQuote } from './fixtures/quote.js'
 
 let seededServer = null
@@ -13,13 +13,11 @@ async function getSeededServer() {
   initPromise = (async () => {
     await ensureRedis()
     const server = await createServer()
-    // Stand-in for the magic link redemption writer (NRF2-1256, not built
-    // yet): seeds the requestToUse session key after every response so pages
-    // guarded on it render. The write lands before the session is committed,
-    // so it persists to the next request. Delete this module when that ticket
-    // lands.
+    // Seeds requestToUse after every response, so tests using this server can
+    // never exercise the missing-requestToUse path: that runs against
+    // setupTestServer instead (see the redirect tests in review-quote-details).
     server.ext('onPostHandler', (request, h) => {
-      request.yar.set(requestToUseKey, { nrlReference: fullQuote.reference })
+      requestToUseSession.save(request, { nrlReference: fullQuote.reference })
       return h.continue
     })
     await server.initialize()

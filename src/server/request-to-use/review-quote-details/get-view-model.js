@@ -1,9 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { planningTypeOptions } from '../../quote/planning-type/options.js'
-
-export const pageHeading = 'Review and amend your quote details'
-
-const housingAnswers = { yes: 'Yes', no: 'No' }
+import { housingOptions } from '../../quote/confirm-housing/options.js'
 
 /**
  * Change actions are placeholders: the edit quote journey will give each row
@@ -32,16 +29,18 @@ const boundaryAnswer = (data) => {
 
   return {
     text: data?.boundaryEntryType === 'draw' ? 'Added' : 'Not added',
-    visuallyHiddenText: 'drawn red line boundary'
+    visuallyHiddenText: 'red line boundary'
   }
 }
 
 /**
- * @param {object} [data] - the quote session data saved when the quote was created
+ * @param {object} [data] - the quote session data saved when the quote was
+ * created, merged with the NRL reference from the request to use session
  * @param {object} [_query] - unused: the parsed request query
- * @returns {object} view model for the review and amend your quote details page
+ * @returns {object} view model for the review and amend the quote details page
  */
 export default function getViewModel(data = {}, _query = {}) {
+  const pageHeading = `Review and amend the quote details for ${data?.nrlReference}`
   const boundary = boundaryAnswer(data)
 
   const rows = [
@@ -56,14 +55,22 @@ export default function getViewModel(data = {}, _query = {}) {
     },
     {
       key: { text: 'Housing' },
-      value: { text: housingAnswers[data?.isHousing] },
+      value: {
+        text: housingOptions.find((option) => option.value === data?.isHousing)
+          ?.text
+      },
       actions: changeAction('whether you are developing housing')
     },
-    {
-      key: { text: 'Number of housing units' },
-      value: { text: data?.housingUnits },
-      actions: changeAction('number of housing units')
-    },
+    // Housing units only apply when the development has housing.
+    ...(data?.isHousing === 'yes'
+      ? [
+          {
+            key: { text: 'Number of housing units' },
+            value: { text: data?.housingUnits },
+            actions: changeAction('number of housing units')
+          }
+        ]
+      : []),
     {
       key: { text: 'Red line boundary' },
       value: { text: boundary.text },

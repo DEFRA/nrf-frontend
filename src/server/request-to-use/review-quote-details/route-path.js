@@ -1,4 +1,4 @@
-const routeId = 'review-quote-details'
+export const routeId = 'review-quote-details'
 
 // Leaf module: other pages import this path to avoid circular imports through
 // routes.js. Must stay import-free.
