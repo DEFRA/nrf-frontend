@@ -133,7 +133,58 @@ describe('checkForValidRetrieveQuoteSession', () => {
     }
   )
 
-  it.each([whatWouldYouLikeToDoPath, quoteNotMatchedPath, planningTypePath])(
+  it('continues on the details do not match page when a quote failed to match', () => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidRetrieveQuoteSession(
+      createRetrieveQuoteRequest({
+        path: quoteNotMatchedPath,
+        session: {
+          manage: requestToUseJourneySession.manage,
+          retrieveQuote: {
+            hasNrlReference: 'yes',
+            nrlReference: validReference,
+            email: validEmail
+          }
+        }
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+  })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'no email was submitted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { hasNrlReference: 'yes', nrlReference: validReference }
+      }
+    },
+    {
+      scenario: 'the email was accepted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { email: validEmail }
+      }
+    }
+  ])(
+    'redirects the details do not match page to the start page when $scenario',
+    ({ session }) => {
+      const h = createMockRedirectToolkit()
+
+      checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({ path: quoteNotMatchedPath, session }),
+        h
+      )
+
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
+
+  it.each([whatWouldYouLikeToDoPath, planningTypePath])(
     'does not guard %s',
     (path) => {
       const h = createMockRedirectToolkit()
