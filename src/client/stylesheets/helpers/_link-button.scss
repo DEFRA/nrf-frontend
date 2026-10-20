@@ -1,0 +1,10 @@
+// A submit button that looks like an inline link, for actions that must be a
+// POST (such as sending an email) but read as part of a sentence.
+.app-link-button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}

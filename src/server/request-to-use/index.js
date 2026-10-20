@@ -6,6 +6,7 @@ import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
+import routesLinkExpired from './link-expired/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
 import { checkForValidReviewQuoteSession } from './helpers/is-review-quote-session-in-progress/index.js'
 
@@ -28,7 +29,8 @@ export const requestToUse = {
         ...routesEmailConfirmation,
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
-        ...routesRetrieveQuote
+        ...routesRetrieveQuote,
+        ...routesLinkExpired
       ])
     }
   }

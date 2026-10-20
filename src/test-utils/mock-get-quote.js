@@ -58,3 +58,24 @@ export const mockRedeemToken = (
   )
   return requests
 }
+
+export const mockResendLink = (
+  mswServer,
+  {
+    reference = fullQuote.reference,
+    matched = true,
+    email = fullQuote.email.address
+  } = {}
+) => {
+  const requests = []
+  mswServer.use(
+    http.post(
+      `${config.get('backend').apiUrl}/quotes/${reference}/resend-link`,
+      async ({ request }) => {
+        requests.push(await request.json())
+        return HttpResponse.json(matched ? { matched, email } : { matched })
+      }
+    )
+  )
+  return requests
+}
