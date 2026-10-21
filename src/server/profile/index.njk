@@ -1,6 +1,12 @@
 {% extends "layouts/page.njk" %}
+{% from "organisation-heading/macro.njk" import appOrganisationHeading %}
 
 {% block content %}
+  {{ appOrganisationHeading({
+    orgOrUserName: orgOrUserName,
+    changeOrganisationUrl: changeOrganisationUrl
+  }) }}
+
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">{{ pageTitle }}</h1>
@@ -23,26 +29,6 @@
           </dd>
         </div>
       </dl>
-
-      <h2 class="govuk-heading-m">Organisations</h2>
-      {% if organisations.length %}
-        {% set rows = [] %}
-        {% for organisation in organisations %}
-          {% set _ = rows.push([
-            { text: organisation.name },
-            { text: organisation.relationshipType or 'Unknown' }
-          ]) %}
-        {% endfor %}
-        {{ govukTable({
-          head: [
-            { text: 'Organisation' },
-            { text: 'Relationship type' }
-          ],
-          rows: rows
-        }) }}
-      {% else %}
-        <p class="govuk-body">You are not linked to any organisations.</p>
-      {% endif %}
 
       <p class="govuk-body govuk-!-margin-top-6">
         <a href="{{ defraAccountUrl }}" class="govuk-link govuk-!-margin-right-4">Defra account</a>

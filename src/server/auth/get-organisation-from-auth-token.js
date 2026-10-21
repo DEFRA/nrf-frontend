@@ -15,7 +15,10 @@ export const getOrganisationFromToken = (decodedToken) => {
     !Array.isArray(roles)
   ) {
     return {
-      userRelationshipType: defaultUserRelationshipType
+      userRelationshipType: defaultUserRelationshipType,
+      hasMultipleOrgPickerEntries: false,
+      shouldShowOrgOrUserName: false,
+      shouldShowCitizenName: true
     }
   }
   const relationship = relationships.find((r) =>
@@ -38,9 +41,21 @@ export const getOrganisationFromToken = (decodedToken) => {
     userRelationshipType = defaultUserRelationshipType
   }
 
+  const hasMultipleOrgPickerEntries =
+    enrolmentCount > roles.length || relationships.length > 1
+
+  const shouldShowOrgOrUserName =
+    hasMultipleOrgPickerEntries || userRelationshipType === 'Employee'
+
+  const shouldShowCitizenName =
+    !shouldShowOrgOrUserName && userRelationshipType === 'Citizen'
+
   return {
     organisationId,
     organisationName,
-    userRelationshipType
+    userRelationshipType,
+    hasMultipleOrgPickerEntries,
+    shouldShowOrgOrUserName,
+    shouldShowCitizenName
   }
 }

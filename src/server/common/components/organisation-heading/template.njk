@@ -1,0 +1,8 @@
+{% if params.orgOrUserName %}
+  <div class="app-organisation-heading govuk-!-padding-top-2 govuk-!-padding-bottom-2" data-testid="app-organisation-heading">
+    <span class="govuk-body-s govuk-!-font-weight-bold govuk-!-padding-right-1">{{ params.orgOrUserName }}</span>
+    {% if params.changeOrganisationUrl %}
+      <a href="{{ params.changeOrganisationUrl }}" class="govuk-link govuk-link--no-visited-state">Change who you’re representing</a>
+    {% endif %}
+  </div>
+{% endif %}

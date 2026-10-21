@@ -109,6 +109,7 @@ describe('Auth Controllers', () => {
       })
 
       const request = {
+        query: {},
         yar: {
           set: vi.fn()
         }
@@ -136,6 +137,26 @@ describe('Auth Controllers', () => {
       )
       expect(url.searchParams.get('scope')).toBe('openid profile email')
       expect(url.searchParams.get('serviceId')).toBe('mock-service-id')
+      expect(url.searchParams.has('forceReselection')).toBe(false)
+    })
+
+    it('should ask Defra ID to show the organisation picker again when changing organisation', async () => {
+      mockGetOidcConfig.mockResolvedValue({
+        authorization_endpoint: 'https://auth.example.com/authorize'
+      })
+
+      const request = {
+        query: { 'change-organisation': 'true' },
+        yar: { set: vi.fn() }
+      }
+      const h = {
+        redirect: vi.fn((url) => ({ redirect: url }))
+      }
+
+      await signInController.handler(request, h)
+
+      const url = new URL(h.redirect.mock.calls[0][0])
+      expect(url.searchParams.get('forceReselection')).toBe('true')
     })
 
     it('should generate and store state token for CSRF protection', async () => {
@@ -144,6 +165,7 @@ describe('Auth Controllers', () => {
       })
 
       const request = {
+        query: {},
         yar: {
           set: vi.fn()
         }

@@ -16,8 +16,9 @@ export function getSafeRedirect(redirect) {
     return startPath
   }
 
-  // Prevent protocol-relative URLs (//example.com)
-  if (redirect.startsWith('//')) {
+  // Prevent protocol-relative URLs (//example.com), including the backslash
+  // form browsers normalise to the same thing (/\example.com)
+  if (redirect.startsWith('//') || redirect.startsWith('/\\')) {
     return startPath
   }
 

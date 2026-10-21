@@ -7,13 +7,19 @@ import { getYarCookie } from './yar-cookie.js'
  * @param {import('@hapi/hapi').Server} options.server - Initialised Hapi server
  * @param {string} [options.cookie] - Existing session cookie (e.g. one that already
  *   holds the requested return path) to carry through the flow
+ * @param {string} [options.signInUrl] - Sign-in URL to start from, e.g. one with
+ *   the change-organisation query parameter
  * @returns {Promise<{response: import('@hapi/hapi').Response, cookie: string}>} The
  *   /login/return response and the session cookie to use for subsequent requests
  */
-export async function completeDefraSignIn({ server, cookie }) {
+export async function completeDefraSignIn({
+  server,
+  cookie,
+  signInUrl = '/auth/sign-in'
+}) {
   const signIn = await server.inject({
     method: 'GET',
-    url: '/auth/sign-in',
+    url: signInUrl,
     headers: cookie ? { cookie } : {}
   })
   const state = new URL(signIn.headers.location).searchParams.get('state')

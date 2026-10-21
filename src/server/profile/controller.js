@@ -1,6 +1,7 @@
 import { config } from '../../config/config.js'
 import { DEFRA_ID_ACCOUNT_PATH } from '../auth/auth-urls.js'
 import { getUserFromBackend } from '../common/services/nrf-backend.js'
+import { getOrganisationHeadingData } from '../common/helpers/get-organisation-heading-data.js'
 
 /**
  * User profile controller
@@ -39,7 +40,8 @@ export const profileController = {
         email: backendUser?.email ?? profile.email
       },
       organisations: backendUser?.organisations ?? [],
-      defraAccountUrl
+      defraAccountUrl,
+      ...getOrganisationHeadingData(request)
     })
   }
 }
