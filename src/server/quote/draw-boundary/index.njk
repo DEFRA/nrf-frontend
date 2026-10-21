@@ -7,7 +7,7 @@
 
 {% block head %}
   {{ super() }}
-  <script src="{{ getAssetPath('draw-boundary-map.js') }}" defer nonce="{{ nonce }}"></script>
+  <script type="module" src="{{ getAssetPath('draw-boundary-map.js') }}" nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/datasets/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/map-styles/index.css') }}" rel="stylesheet">
