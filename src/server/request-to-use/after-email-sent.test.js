@@ -2,6 +2,7 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { getResponse } from '../../test-utils/get-response.js'
+import { submitForm } from '../../test-utils/submit-form.js'
 import { mockResendLink } from '../../test-utils/mock-get-quote.js'
 import { withEmailAcceptedSession } from '../../test-utils/with-email-accepted-session.js'
 import { submitRequestNewLink } from '../../test-utils/with-expired-link-session.js'
@@ -14,6 +15,8 @@ import { routePath as enterEmailPath } from './enter-email/route-path.js'
 import { routePath as noNrlReferencePath } from './no-nrl-reference/route-path.js'
 import { routePath as quoteNotMatchedPath } from './quote-not-matched/route-path.js'
 import { routePath as emailConfirmationPath } from './email-confirmation/route-path.js'
+import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
+import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
 
@@ -88,6 +91,76 @@ describe('After the retrieve quote email is sent', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.ok)
+    })
+
+    it('should redirect the review quote details page to the start page', async () => {
+      const cookie = await createSession(getServer())
+
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: reviewQuoteDetailsPath,
+        cookie
+      })
+
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPath)
+    })
+
+    it('should show the page not found page for the link expired page', async () => {
+      const cookie = await createSession(getServer())
+
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: linkExpiredPath,
+        cookie
+      })
+
+      expect(response.statusCode).toBe(statusCodes.notFound)
+    })
+
+    describe('after starting again from the start page', () => {
+      it('should redirect the email confirmation page to the start page', async () => {
+        const { cookie } = await submitForm({
+          requestUrl: startPath,
+          server: getServer(),
+          formData: {},
+          cookie: await createSession(getServer())
+        })
+
+        const response = await getResponse({
+          server: getServer(),
+          requestUrl: emailConfirmationPath,
+          cookie
+        })
+
+        expect(response.statusCode).toBe(statusCodes.found)
+        expect(response.headers.location).toBe(startPath)
+      })
+
+      it('should redirect the email confirmation page to the start page once request to use is chosen again', async () => {
+        const server = getServer()
+        let { cookie } = await submitForm({
+          requestUrl: startPath,
+          server,
+          formData: {},
+          cookie: await createSession(server)
+        })
+        ;({ cookie } = await submitForm({
+          requestUrl: whatWouldYouLikeToDoPath,
+          server,
+          formData: { whatWouldYouLikeToDo: 'request-to-use' },
+          cookie
+        }))
+
+        const response = await getResponse({
+          server,
+          requestUrl: emailConfirmationPath,
+          cookie
+        })
+
+        expect(response.statusCode).toBe(statusCodes.found)
+        expect(response.headers.location).toBe(startPath)
+      })
     })
   })
 

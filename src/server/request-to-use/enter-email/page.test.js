@@ -107,26 +107,6 @@ describe('Enter your email address page', () => {
     }
   )
 
-  it.each([routePath, enterNrlReferencePath, haveNrlReferencePath])(
-    'should redirect %s to the start page once a quote matches',
-    async (requestUrl) => {
-      const { cookie } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { email: validEmail },
-        cookie: sessionCookie
-      })
-
-      const response = await getResponse({
-        server: getServer(),
-        requestUrl,
-        cookie
-      })
-      expect(response.statusCode).toBe(statusCodes.found)
-      expect(response.headers.location).toBe(startPath)
-    }
-  )
-
   it.each([
     {
       scenario: 'a different email',
