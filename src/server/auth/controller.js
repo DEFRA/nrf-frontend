@@ -5,7 +5,11 @@ import { getSafeRedirect } from './get-safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
-import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
+import {
+  CHANGE_ORGANISATION_QUERY_PARAM,
+  RETURN_PATH,
+  SIGNED_OUT_PATH
+} from './auth-urls.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/routes.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
@@ -50,6 +54,9 @@ export const signInController = {
     authUrl.searchParams.set('redirect_uri', buildFrontendUrl(RETURN_PATH))
     authUrl.searchParams.set('scope', scope)
     authUrl.searchParams.set('serviceId', config.get('defraId.serviceId'))
+    if (request.query[CHANGE_ORGANISATION_QUERY_PARAM] === 'true') {
+      authUrl.searchParams.set('forceReselection', 'true')
+    }
 
     // Generate and store state for CSRF protection
     const state = crypto.randomBytes(16).toString('base64url')
@@ -137,8 +144,7 @@ export const signInOidcController = {
       const decoded = Jwt.token.decode(tokenResponse.id_token)
       const { payload } = decoded.decoded
 
-      const { organisationId, organisationName, userRelationshipType } =
-        getOrganisationFromToken(payload)
+      const organisation = getOrganisationFromToken(payload)
 
       // Create Bell-compatible credentials structure
       const credentials = {
@@ -157,11 +163,7 @@ export const signInOidcController = {
           crn: payload.contactId || payload.uniqueReference,
           contactId: payload.contactId,
           uniqueReference: payload.uniqueReference,
-          organisation: {
-            organisationId,
-            organisationName,
-            userRelationshipType
-          },
+          organisation,
           currentRelationshipId: payload.currentRelationshipId,
           roles: payload.roles,
           serviceRoles: payload.serviceRoles

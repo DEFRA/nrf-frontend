@@ -5,7 +5,13 @@ import {
   signOutController,
   signOutOidcController
 } from './controller.js'
-import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
+import { changeOrganisationController } from './change-organisation.js'
+import {
+  CHANGE_ORGANISATION_PATH,
+  RETURN_PATH,
+  AUTH_SIGN_IN_PATH,
+  SIGNED_OUT_PATH
+} from './auth-urls.js'
 
 /**
  * @openapi
@@ -28,9 +34,30 @@ import { RETURN_PATH, SIGNED_OUT_PATH } from './auth-urls.js'
  *       - Auth
  *     summary: Initiate sign-in
  *     description: Redirects to DEFRA Identity OAuth authorization endpoint
+ *     parameters:
+ *       - in: query
+ *         name: change-organisation
+ *         schema:
+ *           type: string
+ *         description: When "true", asks Defra ID to show the organisation picker again
  *     responses:
  *       303:
  *         description: Redirect to OAuth provider
+ * /auth/change-organisation:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Change organisation
+ *     description: Remembers the page to return to, then starts a sign-in that forces the Defra ID organisation picker
+ *     parameters:
+ *       - in: query
+ *         name: redirectTo
+ *         schema:
+ *           type: string
+ *         description: Relative path to return to after the user picks an organisation. Anything else returns the user to the start page.
+ *     responses:
+ *       302:
+ *         description: Redirect to sign-in
  * /login/return:
  *   get:
  *     tags:
@@ -113,8 +140,13 @@ export const auth = {
         server.route([
           {
             method: 'GET',
-            path: '/auth/sign-in',
+            path: AUTH_SIGN_IN_PATH,
             ...signInController
+          },
+          {
+            method: 'GET',
+            path: CHANGE_ORGANISATION_PATH,
+            ...changeOrganisationController
           },
           {
             method: 'GET',
