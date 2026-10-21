@@ -8,7 +8,7 @@
      the queue in insertion order, so consent applies to this event. #}
   {{ super() }}
   {% include "partials/gtm-upload-result.njk" %}
-  <script src="{{ getAssetPath('upload-preview-map.js') }}" defer nonce="{{ nonce }}"></script>
+  <script type="module" src="{{ getAssetPath('upload-preview-map.js') }}" nonce="{{ nonce }}"></script>
   <link href="{{ getAssetPath('interactive-map/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/datasets/index.css') }}" rel="stylesheet">
   <link href="{{ getAssetPath('interactive-map/plugins/map-styles/index.css') }}" rel="stylesheet">
