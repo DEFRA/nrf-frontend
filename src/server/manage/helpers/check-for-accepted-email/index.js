@@ -8,6 +8,8 @@ import { isRetrieveQuoteEmailSentSession } from '../../../request-to-use/helpers
  * lives in the manage plugin, so the request to use guard cannot cover it.
  * Untyped on purpose: Sonar S3800 flags a typed guard that returns both
  * `h.continue` and a redirect, as the quote guard does untyped.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {import('@hapi/hapi').ResponseToolkit} h
  */
 export const checkForAcceptedEmail = (request, h) => {
   if (request.method !== 'get' || request.path !== whatWouldYouLikeToDoPath) {

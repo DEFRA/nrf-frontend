@@ -5,6 +5,8 @@ import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-p
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
 describe('You need a quote before you can request to use the nature restoration levy page', () => {
   const getServer = setupTestServer()
@@ -56,7 +58,7 @@ describe('You need a quote before you can request to use the nature restoration 
   it('should redirect to the start page without a retrieve quote session', async () => {
     const response = await getServer().inject({ method: 'GET', url: routePath })
 
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/manage/start-page')
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPath)
   })
 })
