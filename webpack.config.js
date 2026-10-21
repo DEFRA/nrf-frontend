@@ -175,12 +175,12 @@ export default {
   plugins: [
     new CleanWebpackPlugin(),
     new WebpackAssetsManifest(),
-    // @defra/interactive-map's datasets plugin lazily loads an ESRI adapter
-    // chunk that we never trigger (we only ever configure the maplibre
-    // provider), but webpack still needs to resolve it to build that chunk.
-    // @arcgis/core is a huge, unused peer dependency we don't want to
-    // install just to satisfy that resolution.
-    new webpack.IgnorePlugin({ resourceRegExp: /^@arcgis\/core/ }),
+    // @defra/interactive-map's datasets plugin lazily loads ESRI and
+    // OpenLayers adapter chunks that we never trigger (we only ever
+    // configure the maplibre provider), but webpack still needs to resolve
+    // them to build those chunks. @arcgis/core and ol are huge, unused peer
+    // dependencies we don't want to install just to satisfy that resolution.
+    new webpack.IgnorePlugin({ resourceRegExp: /^(ol(\/|$)|@arcgis\/core)/ }),
     new CopyPlugin({
       patterns: [
         {
