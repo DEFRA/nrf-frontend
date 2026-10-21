@@ -7,8 +7,6 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { withEmailAcceptedSession } from '../../../test-utils/with-email-accepted-session.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
-import { statusCodes } from '../../common/constants/status-codes.js'
-import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
 const mswServer = setupMswServer()
 
@@ -88,7 +86,7 @@ describe('We have sent you an email page', () => {
   it('should redirect to the start page without an accepted email', async () => {
     const response = await getServer().inject({ method: 'GET', url: routePath })
 
-    expect(response.statusCode).toBe(statusCodes.found)
-    expect(response.headers.location).toBe(startPath)
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/manage/start-page')
   })
 })
