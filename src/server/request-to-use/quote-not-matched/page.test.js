@@ -2,6 +2,8 @@ import { getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
 import { routePath as enterEmailPath } from '../enter-email/route-path.js'
+import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
+import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -38,6 +40,21 @@ describe('These details do not match our records page', () => {
       enterEmailPath
     )
   })
+
+  it.each([enterEmailPath, enterNrlReferencePath, haveNrlReferencePath])(
+    'should load %s, not redirect, when going back from the page',
+    async (requestUrl) => {
+      const cookie = await withQuoteNotMatchedSession(getServer(), mswServer)
+
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl,
+        cookie
+      })
+
+      expect(response.statusCode).toBe(statusCodes.ok)
+    }
+  )
 
   it('should link the get a quote link to the root redirect', async () => {
     const document = await loadNotMatchedPage()
