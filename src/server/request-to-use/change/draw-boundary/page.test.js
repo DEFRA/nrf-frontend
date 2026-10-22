@@ -1,8 +1,10 @@
+import { http, HttpResponse } from 'msw'
 import { getByRole } from '@testing-library/dom'
-import { checkBoundaryGeometry } from '../../../common/services/boundary.js'
 import { routePath, checkPath, savePath } from './routes.js'
+import { config } from '../../../../config/config.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
+import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
@@ -12,7 +14,7 @@ import {
   boundaryGeojsonWithExcludedArea
 } from '../../../../test-utils/fixtures/boundary-geojson.js'
 
-vi.mock('../../../common/services/boundary.js')
+const mswServer = setupMswServer()
 
 describe('Change draw boundary page', () => {
   const getServer = setupTestServer()
@@ -88,12 +90,12 @@ describe('Change draw boundary page', () => {
   })
 
   it('should validate drawn geometry through the check endpoint', async () => {
-    const mockGeojson = {
-      boundaryGeometryOriginal: { type: 'Polygon', coordinates: [] },
-      boundaryGeometryWgs84: { type: 'Polygon', coordinates: [] },
-      intersectingEdps: []
-    }
-    vi.mocked(checkBoundaryGeometry).mockResolvedValue({ geojson: mockGeojson })
+    const backendUrl = config.get('backend').apiUrl
+    mswServer.use(
+      http.post(`${backendUrl}/boundary/check`, () =>
+        HttpResponse.json(boundaryGeojsonWithEdp)
+      )
+    )
     const cookie = await withCompleteQuoteSession(getSeededServer())
 
     const response = await getSeededServer().inject({
@@ -116,6 +118,6 @@ describe('Change draw boundary page', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(JSON.parse(response.payload)).toEqual(mockGeojson)
+    expect(JSON.parse(response.payload)).toEqual(boundaryGeojsonWithEdp)
   })
 })

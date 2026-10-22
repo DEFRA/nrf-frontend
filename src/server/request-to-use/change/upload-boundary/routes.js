@@ -1,24 +1,10 @@
 import { createUploadBoundaryHandler } from '../../../quote/upload-boundary/controller.js'
-import getUploadBoundaryViewModel from '../../../quote/upload-boundary/get-view-model.js'
 import { fileUploadRateLimitPre } from '../../../quote/helpers/session-rate-limit/index.js'
-import { routePath as changeBoundaryTypePath } from '../boundary-type/route-path.js'
 import { routePath as changeCheckingFilePath } from '../checking-file/route-path.js'
+import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
-
-/**
- * The alias serves the quote upload boundary page's own template, so the view
- * model spreads the quote page's and only swaps the back link: an edit from
- * the review page returns to the change boundary type page.
- * @param {object} quoteData - the quote session data
- * @param {object} query - the parsed request query
- * @returns {object} view model for the change upload boundary page
- */
-const getViewModel = (quoteData, query) => ({
-  ...getUploadBoundaryViewModel(quoteData, query),
-  backLinkPath: changeBoundaryTypePath
-})
 
 const handler = createUploadBoundaryHandler({
   // Baked into the CDP upload session as the return URL, so the uploader hop

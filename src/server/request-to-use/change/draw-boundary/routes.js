@@ -1,29 +1,13 @@
 import { quoteController } from '../../../quote/controller-get.js'
-import getDrawBoundaryViewModel from '../../../quote/draw-boundary/get-view-model.js'
 import { createDrawBoundaryApiRoutes } from '../../../quote/draw-boundary/routes.js'
 import { createSaveBoundaryHandler } from '../../../quote/draw-boundary/controller.js'
-import { routePath as changeBoundaryTypePath } from '../boundary-type/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
 export const checkPath = '/request-to-use/change/draw-boundary/check'
 export const savePath = '/request-to-use/change/draw-boundary/save'
-
-/**
- * The alias serves the quote draw boundary page's own template, so the view
- * model spreads the quote page's and repoints the map's endpoints and back
- * link at the change alias: geometry checks, saves and the back link all stay
- * inside the request to use journey.
- * @param {object} quoteData - the quote session data
- * @returns {object} view model for the change draw boundary page
- */
-const getViewModel = (quoteData) => ({
-  ...getDrawBoundaryViewModel(quoteData),
-  boundaryValidationUrl: checkPath,
-  saveAndContinueUrl: savePath,
-  backLinkPath: changeBoundaryTypePath
-})
 
 /**
  * @openapi

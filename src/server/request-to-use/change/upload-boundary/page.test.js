@@ -9,21 +9,25 @@ import { getResponse } from '../../../../test-utils/get-response.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
-
-const uploadId = '22222222-2222-2222-2222-222222222222'
+import { uploadId } from '../../../../test-utils/fixtures/upload-id.js'
 
 const mswServer = setupMswServer()
 
+// Stub the backend initiate endpoint, recording the request bodies so a test
+// can assert the return URL baked into the CDP uploader session.
 const stubInitiateUpload = () => {
   const backendUrl = config.get('backend').apiUrl
+  const initiateBodies = []
   mswServer.use(
-    http.post(`${backendUrl}/upload/initiate`, () =>
-      HttpResponse.json({
+    http.post(`${backendUrl}/upload/initiate`, async ({ request }) => {
+      initiateBodies.push(await request.json())
+      return HttpResponse.json({
         uploadId,
         uploadUrl: `/upload-and-scan/${uploadId}`
       })
-    )
+    })
   )
+  return initiateBodies
 }
 
 describe('Change upload boundary page', () => {
@@ -42,19 +46,7 @@ describe('Change upload boundary page', () => {
   })
 
   it('should render the upload form and bake the change checking file path into the uploader session', async () => {
-    // Capture the body sent to the backend so the test can assert the return
-    // URL baked into the CDP uploader session.
-    let initiateBody
-    const backendUrl = config.get('backend').apiUrl
-    mswServer.use(
-      http.post(`${backendUrl}/upload/initiate`, async ({ request }) => {
-        initiateBody = await request.json()
-        return HttpResponse.json({
-          uploadId,
-          uploadUrl: `/upload-and-scan/${uploadId}`
-        })
-      })
-    )
+    const initiateBodies = stubInitiateUpload()
 
     const cookie = await withCompleteQuoteSession(getSeededServer())
     const document = await loadPage({
@@ -74,9 +66,11 @@ describe('Change upload boundary page', () => {
       'href',
       '/request-to-use/change/boundary-type'
     )
-    expect(initiateBody).toEqual({
-      redirect: '/request-to-use/change/checking-file'
-    })
+    expect(initiateBodies).toEqual([
+      {
+        redirect: '/request-to-use/change/checking-file'
+      }
+    ])
   })
 
   it('should stay reachable after choosing a different boundary entry type', async () => {

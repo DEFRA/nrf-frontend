@@ -9,11 +9,12 @@ import {
   mockRedeemToken
 } from '../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../test-utils/fixtures/saved-quote.js'
+import { magicLinkToken } from '../../../test-utils/fixtures/magic-link-token.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
 import { routePath as linkExpiredPath } from '../link-expired/route-path.js'
 
 const reference = savedQuote.reference
-const token = 'abc123_TOKEN-xyz'
+const token = magicLinkToken
 const magicLink = `/request-to-use/retrieve/${reference}/${token}`
 const botUserAgent =
   'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)'

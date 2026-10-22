@@ -17,10 +17,11 @@ import {
   mockRedeemToken
 } from '../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../test-utils/fixtures/saved-quote.js'
+import { magicLinkToken } from '../../../test-utils/fixtures/magic-link-token.js'
 
 const mswServer = setupMswServer()
 
-const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/abc123_TOKEN-xyz`
+const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/${magicLinkToken}`
 
 describe('Review and amend the quote details page', () => {
   const getServer = setupTestServer()
@@ -119,7 +120,7 @@ describe('Review and amend the quote details page', () => {
     )
   })
 
-  it('should link the planning type and boundary changes to their change pages and keep the other change links as placeholders', async () => {
+  it('should link each changeable answer to its change page', async () => {
     const cookie = await withCompleteQuoteSession(getSeededServer())
 
     const document = await loadPage({

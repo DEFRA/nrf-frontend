@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 import { http, HttpResponse } from 'msw'
 import { routePath } from './routes.js'
+import { routePath as changeUploadBoundaryPath } from '../upload-boundary/route-path.js'
 import { config } from '../../../../config/config.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { runAxeChecks } from '../../../../test-utils/axe-helper.js'
+import { primeUploadSession } from '../../../../test-utils/prime-upload-session.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
+import { uploadId } from '../../../../test-utils/fixtures/upload-id.js'
 
 const mswServer = setupMswServer()
 
@@ -16,7 +19,6 @@ describe('Change checking file page accessibility checks', () => {
   it('should have no HTML accessibility issues', async () => {
     // A pending upload still being processed renders the polling page.
     const backendUrl = config.get('backend').apiUrl
-    const uploadId = '22222222-2222-2222-2222-222222222222'
     mswServer.use(
       http.post(`${backendUrl}/upload/initiate`, () =>
         HttpResponse.json({
@@ -29,11 +31,10 @@ describe('Change checking file page accessibility checks', () => {
       )
     )
 
-    const cookie = await withCompleteQuoteSession(getSeededServer())
-    await getSeededServer().inject({
-      method: 'GET',
-      url: '/request-to-use/change/upload-boundary',
-      headers: { cookie }
+    const cookie = await primeUploadSession({
+      server: getSeededServer(),
+      uploadPagePath: changeUploadBoundaryPath,
+      primeSession: withCompleteQuoteSession
     })
     const document = await loadPage({
       requestUrl: routePath,

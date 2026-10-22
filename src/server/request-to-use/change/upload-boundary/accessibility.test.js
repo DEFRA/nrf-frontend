@@ -7,6 +7,7 @@ import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { runAxeChecks } from '../../../../test-utils/axe-helper.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
+import { uploadId } from '../../../../test-utils/fixtures/upload-id.js'
 
 const mswServer = setupMswServer()
 
@@ -18,8 +19,8 @@ describe('Change upload boundary page accessibility checks', () => {
     mswServer.use(
       http.post(`${backendUrl}/upload/initiate`, () =>
         HttpResponse.json({
-          uploadId: '22222222-2222-2222-2222-222222222222',
-          uploadUrl: '/upload-and-scan/22222222-2222-2222-2222-222222222222'
+          uploadId,
+          uploadUrl: `/upload-and-scan/${uploadId}`
         })
       )
     )

@@ -7,10 +7,10 @@ import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
+import { primeUploadSession } from '../../../../test-utils/prime-upload-session.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 import { boundaryGeojson } from '../../../../test-utils/fixtures/boundary-geojson.js'
-
-const uploadId = '22222222-2222-2222-2222-222222222222'
+import { uploadId } from '../../../../test-utils/fixtures/upload-id.js'
 
 const mswServer = setupMswServer()
 
@@ -32,22 +32,6 @@ const stubSuccessfulCheck = () => {
       HttpResponse.json(boundaryGeojson)
     )
   )
-}
-
-// Prime a review session and visit the change upload page so a CDP Uploader
-// session is minted and the pending upload id is stored against the session,
-// exactly as a real user changing their boundary would.
-const primeChangeUploadSession = async (server) => {
-  const cookie = await withCompleteQuoteSession(server)
-  const uploadPage = await server.inject({
-    method: 'GET',
-    url: changeUploadBoundaryPath,
-    headers: { cookie }
-  })
-  return []
-    .concat(uploadPage.headers['set-cookie'] ?? cookie)
-    .map((c) => c.split(';')[0])
-    .join('; ')
 }
 
 describe('Change checking file page', () => {
@@ -78,7 +62,11 @@ describe('Change checking file page', () => {
 
   it('should redirect to the change file preview once the boundary check succeeds', async () => {
     stubSuccessfulCheck()
-    const cookie = await primeChangeUploadSession(getSeededServer())
+    const cookie = await primeUploadSession({
+      server: getSeededServer(),
+      uploadPagePath: changeUploadBoundaryPath,
+      primeSession: withCompleteQuoteSession
+    })
 
     const response = await getSeededServer().inject({
       method: 'GET',

@@ -13,6 +13,8 @@ import {
   mockRedeemToken
 } from '../../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../../test-utils/fixtures/saved-quote.js'
+import { magicLinkToken } from '../../../../test-utils/fixtures/magic-link-token.js'
+import { getYarCookie } from '../../../../test-utils/yar-cookie.js'
 
 const mswServer = setupMswServer()
 
@@ -80,12 +82,9 @@ describe('Change boundary type page', () => {
     mockReadQuote(mswServer, savedQuote)
     const redeem = await getServer().inject({
       method: 'GET',
-      url: `/request-to-use/retrieve/${savedQuote.reference}/abc123_TOKEN-xyz`
+      url: `/request-to-use/retrieve/${savedQuote.reference}/${magicLinkToken}`
     })
-    const cookie = []
-      .concat(redeem.headers['set-cookie'] ?? [])
-      .map((c) => c.split(';')[0])
-      .join('; ')
+    const cookie = getYarCookie(redeem)
 
     const { response } = await submitForm({
       requestUrl: routePath,

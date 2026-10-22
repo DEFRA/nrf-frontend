@@ -13,7 +13,13 @@ import { appendChangeParam } from '../helpers/change-mode/index.js'
 
 const routeId = 'upload-boundary'
 
-async function getUploadSession(request, redirectPath) {
+/**
+ * @param {object} params
+ * @param {object} params.request
+ * @param {string} params.redirectPath - the checking file page the CDP
+ *   uploader redirects back to
+ */
+async function getUploadSession({ request, redirectPath }) {
   const existingUploadId = request.yar.get('pendingUploadId')
   const existingUploadUrl = request.yar.get('pendingUploadUrl')
 
@@ -74,7 +80,7 @@ export const createUploadBoundaryHandler = ({
       request.yar.clear('uploadRejectionReason')
     }
 
-    const uploadSession = await getUploadSession(request, redirectPath)
+    const uploadSession = await getUploadSession({ request, redirectPath })
 
     if (uploadSession.error) {
       return h.view(`quote/${routeId}/index`, {

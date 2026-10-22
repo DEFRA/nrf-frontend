@@ -39,7 +39,7 @@ describe('Upload rejected before geometry parsing', () => {
     async (errorCode) => {
       stubRejection(errorCode)
 
-      const cookie = await primeUploadSession(getServer())
+      const cookie = await primeUploadSession({ server: getServer() })
 
       const redirect = await getServer().inject({
         method: 'GET',
@@ -62,7 +62,7 @@ describe('Upload rejected before geometry parsing', () => {
 
   it('shows the too-large message in the summary and against the file field', async () => {
     stubRejection('file_size_too_large', statusCodes.payloadTooLarge)
-    const cookie = await primeUploadSession(getServer())
+    const cookie = await primeUploadSession({ server: getServer() })
     const document = await followUploadRejection({
       server: getServer(),
       cookie
@@ -76,7 +76,7 @@ describe('Upload rejected before geometry parsing', () => {
 
   it('shows a virus message when the file contains a virus', async () => {
     stubRejection('file_contains_virus')
-    const cookie = await primeUploadSession(getServer())
+    const cookie = await primeUploadSession({ server: getServer() })
     const document = await followUploadRejection({
       server: getServer(),
       cookie
@@ -89,7 +89,7 @@ describe('Upload rejected before geometry parsing', () => {
 
   it('shows a select-a-file message when no file was uploaded', async () => {
     stubRejection('upload_file_missing')
-    const cookie = await primeUploadSession(getServer())
+    const cookie = await primeUploadSession({ server: getServer() })
     const document = await followUploadRejection({
       server: getServer(),
       cookie
@@ -113,7 +113,7 @@ describe('Upload rejected before geometry parsing', () => {
 
     it('pushes rlb_status fail and the raw error code on the redirected-to upload page', async () => {
       stubRejection('file_size_too_large')
-      const sessionCookie = await primeUploadSession(getServer())
+      const sessionCookie = await primeUploadSession({ server: getServer() })
       const { cookie } = await submitForm({
         requestUrl: COOKIE_ROUTE,
         server: getServer(),
@@ -137,7 +137,7 @@ describe('Upload rejected before geometry parsing', () => {
     it('does not push when analytics/GTM is disabled', async () => {
       config.set('gtmId', null)
       stubRejection('file_size_too_large')
-      const cookie = await primeUploadSession(getServer())
+      const cookie = await primeUploadSession({ server: getServer() })
       const document = await followUploadRejection({
         server: getServer(),
         cookie
