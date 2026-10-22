@@ -27,7 +27,17 @@ describe('seedSessionFromQuote', () => {
       email: savedQuote.email.address,
       boundaryEntryType: 'upload',
       boundaryFilename: 'site-plan.geojson',
-      boundaryGeojson
+      // The quote record's geometry is nested in the check-response shape the
+      // map pages read, so the saved boundary loads into the draw map. The
+      // intersecting EDPs are rebuilt from the quote's own EDP list so the
+      // file preview can render without a fresh boundary check.
+      boundaryGeojson: {
+        boundaryGeometryWgs84: boundaryGeojson.boundaryGeometryWgs84,
+        intersectingEdps: [
+          { label: 'Norfolk Fens East' },
+          { label: 'Broadland Rivers' }
+        ]
+      }
     })
   })
 

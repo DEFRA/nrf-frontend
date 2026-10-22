@@ -8,6 +8,11 @@ import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesChangePlanningType from './change/planning-type/routes.js'
 import routesChangeConfirmHousing from './change/confirm-housing/routes.js'
 import routesChangeUnitNumber from './change/unit-number/routes.js'
+import routesChangeBoundaryType from './change/boundary-type/routes.js'
+import routesChangeDrawBoundary from './change/draw-boundary/routes.js'
+import routesChangeUploadBoundary from './change/upload-boundary/routes.js'
+import routesChangeCheckingFile from './change/checking-file/routes.js'
+import routesChangeFilePreview from './change/file-preview/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
@@ -35,6 +40,11 @@ export const requestToUse = {
         ...routesChangePlanningType,
         ...routesChangeConfirmHousing,
         ...routesChangeUnitNumber,
+        ...routesChangeBoundaryType,
+        ...routesChangeDrawBoundary,
+        ...routesChangeUploadBoundary,
+        ...routesChangeCheckingFile,
+        ...routesChangeFilePreview,
         ...routesRetrieveQuote,
         ...routesLinkExpired
       ])

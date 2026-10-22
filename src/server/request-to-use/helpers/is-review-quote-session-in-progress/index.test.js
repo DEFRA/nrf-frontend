@@ -5,6 +5,8 @@ import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeBoundaryTypeAliasPath } from '../../change/boundary-type/route-path.js'
+import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
@@ -88,6 +90,53 @@ describe('checkForValidReviewQuoteSession', () => {
 
     checkForValidReviewQuoteSession(
       createReviewQuoteRequest({ path, session: {} }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+
+  // Mid-edit state: choosing a different boundary entry type clears the saved
+  // boundary until a new one is drawn or uploaded, so the change pages must
+  // not require a complete quote — the user needs them to finish the swap.
+  it.each([
+    {
+      scenario: 'the upload page, reached by switching from a drawn boundary',
+      path: changeUploadBoundaryPath
+    },
+    {
+      scenario: 'the boundary type page, reached with the browser back button',
+      path: changeBoundaryTypeAliasPath
+    }
+  ])('continues on $scenario while the boundary is cleared', ({ path }) => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({
+        path,
+        session: {
+          quote: { ...reviewQuoteSession.quote, boundaryGeojson: null },
+          requestToUse: reviewQuoteSession.requestToUse
+        }
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it('redirects the review page to the start page when the boundary is cleared mid-edit', () => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({
+        path: reviewQuoteDetailsPath,
+        session: {
+          quote: { ...reviewQuoteSession.quote, boundaryGeojson: null },
+          requestToUse: reviewQuoteSession.requestToUse
+        }
+      }),
       h
     )
 

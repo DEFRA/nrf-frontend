@@ -1,6 +1,7 @@
 import { handler, checkBoundaryHandler } from './controller.js'
+import { routePath } from './route-path.js'
 
-export const routePath = '/quote/checking-file'
+export { routePath }
 export const checkBoundaryPath = '/quote/check-boundary/{id}'
 
 /**

@@ -3,7 +3,7 @@ import { getBoundaryErrorMessage } from '../../common/constants/boundary-error-m
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
-import { routePath as emailPath } from '../email/routes.js'
+import { routePath as emailPath } from '../email/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
 
@@ -40,50 +40,62 @@ export async function checkBoundaryHandler(request, h) {
   return h.response(result.geojson)
 }
 
-export function saveBoundaryHandler(request, h) {
-  const {
-    boundaryGeojson: {
-      intersectingEdps,
-      intersectingExcludedAreas,
+/**
+ * Builds the save handler for a drawn boundary. The success target is a
+ * parameter because the request to use change alias returns to the review and
+ * amend page instead of asking for the email again.
+ * @param {object} [params]
+ * @param {string} [params.successPath=emailPath] - where a boundary that
+ *   intersects an EDP continues to
+ * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
+ */
+export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
+  function saveBoundaryHandler(request, h) {
+    const {
+      boundaryGeojson: {
+        intersectingEdps,
+        intersectingExcludedAreas,
+        boundaryGeometryWgs84,
+        boundaryMetadata,
+        boundaryGeometryOriginal
+      }
+    } = request.payload
+
+    const intersectsEdp = intersectingEdps.length > 0
+    const intersectsExcludedArea = intersectingExcludedAreas.length > 0
+
+    const boundaryGeojsonToCache = {
       boundaryGeometryWgs84,
       boundaryMetadata,
-      boundaryGeometryOriginal
+      boundaryGeometryOriginal,
+      intersectingEdps,
+      intersectingExcludedAreas
     }
-  } = request.payload
 
-  const intersectsEdp = intersectingEdps.length > 0
-  const intersectsExcludedArea = intersectingExcludedAreas.length > 0
+    // Explicitly clear boundaryFilename — drawn boundaries never have one, but
+    // saveQuoteDataToCache only merges keys it's given, so a filename left
+    // over from a previously abandoned upload would otherwise stick around.
+    saveQuoteDataToCache(request, {
+      boundaryGeojson: boundaryGeojsonToCache,
+      boundaryFilename: null
+    })
 
-  const boundaryGeojsonToCache = {
-    boundaryGeometryWgs84,
-    boundaryMetadata,
-    boundaryGeometryOriginal,
-    intersectingEdps,
-    intersectingExcludedAreas
+    logger.info('draw-boundary boundary saved to quote cache')
+
+    // Excluded-area takes precedence: when the boundary overlaps an EDP
+    // exclusion zone it is ineligible for the EDP, so the user must use the
+    // Habitat Regulations instead. The impact assessor still populates
+    // intersectingEdps in this case (the exclusion zones sit inside the EDP),
+    // so this check must come first.
+    if (intersectsExcludedArea) {
+      return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
+    }
+
+    if (intersectsEdp) {
+      return h.redirect(successPath).code(statusCodes.redirectAfterPost)
+    }
+
+    return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
   }
 
-  // Explicitly clear boundaryFilename — drawn boundaries never have one, but
-  // saveQuoteDataToCache only merges keys it's given, so a filename left
-  // over from a previously abandoned upload would otherwise stick around.
-  saveQuoteDataToCache(request, {
-    boundaryGeojson: boundaryGeojsonToCache,
-    boundaryFilename: null
-  })
-
-  logger.info('draw-boundary boundary saved to quote cache')
-
-  // Excluded-area takes precedence: when the boundary overlaps an EDP
-  // exclusion zone it is ineligible for the EDP, so the user must use the
-  // Habitat Regulations instead. The impact assessor still populates
-  // intersectingEdps in this case (the exclusion zones sit inside the EDP),
-  // so this check must come first.
-  if (intersectsExcludedArea) {
-    return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
-  }
-
-  if (intersectsEdp) {
-    return h.redirect(emailPath).code(statusCodes.redirectAfterPost)
-  }
-
-  return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
-}
+export const saveBoundaryHandler = createSaveBoundaryHandler()

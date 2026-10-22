@@ -3,44 +3,61 @@ import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeBoundaryTypePath } from '../../change/boundary-type/route-path.js'
+import { routePath as changeDrawBoundaryPath } from '../../change/draw-boundary/route-path.js'
+import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
+import { routePath as changeCheckingFilePath } from '../../change/checking-file/route-path.js'
+import { routePath as changeFilePreviewPath } from '../../change/file-preview/route-path.js'
 import { isQuoteDataComplete } from '../../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../request-to-use-session/index.js'
 
 /**
  * @param {import('@hapi/hapi').Request} request
- * @returns {boolean} whether a complete set of saved quote answers and a request to use session both exist
+ * @returns {boolean} whether a request to use session exists
  */
-const isReviewQuoteSessionValid = (request) =>
-  isQuoteDataComplete(request) && requestToUseSession.get(request) !== null
+const hasRequestToUseSession = (request) =>
+  requestToUseSession.get(request) !== null
 
-// The review page and the change pages its change links open all need the
-// complete saved quote and the request to use session magic link redemption
-// (NRF2-1256) sets: editing one of these answers cannot break the quote's
-// completeness.
-const guardedPaths = new Set([
-  reviewQuoteDetailsPath,
+// The change pages reached from the review page's change links need only the
+// request to use session a magic link redemption sets: mid-edit the quote
+// cache is legitimately incomplete, because choosing a different boundary
+// entry type clears the saved boundary until a new one is drawn or uploaded.
+const changePaths = new Set([
   changePlanningTypePath,
   changeConfirmHousingPath,
-  changeUnitNumberPath
+  changeUnitNumberPath,
+  changeBoundaryTypePath,
+  changeDrawBoundaryPath,
+  changeUploadBoundaryPath,
+  changeCheckingFilePath,
+  changeFilePreviewPath
 ])
 
 /**
- * Redirects to the start page when the review quote details page or one of its
- * change pages is requested without both a complete saved quote and a request
- * to use session, which magic link redemption (NRF2-1256) sets.
+ * Redirects to the start page when the review quote details page or a change
+ * page reached from its change links is requested without the session state
+ * magic link redemption (NRF2-1256) sets. The review page needs the complete
+ * saved quote it renders; the change pages only the request to use session.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {
   // HEAD requests are routed to GET routes but keep their own method, so they
   // must be guarded too or the page handler runs unguarded.
-  if (
-    (request.method !== 'get' && request.method !== 'head') ||
-    !guardedPaths.has(request.path)
-  ) {
+  if (request.method !== 'get' && request.method !== 'head') {
     return h.continue
   }
 
-  if (!isReviewQuoteSessionValid(request)) {
+  const isChangePage = changePaths.has(request.path)
+
+  if (!isChangePage && request.path !== reviewQuoteDetailsPath) {
+    return h.continue
+  }
+
+  if (!hasRequestToUseSession(request)) {
+    return h.redirect(startPath).takeover()
+  }
+
+  if (!isChangePage && !isQuoteDataComplete(request)) {
     return h.redirect(startPath).takeover()
   }
 

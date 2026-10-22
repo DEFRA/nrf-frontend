@@ -4,6 +4,7 @@ import { housingOptions } from '../../quote/confirm-housing/options.js'
 import { routePath as changePlanningTypePath } from '../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../change/unit-number/route-path.js'
+import { routePath as changeBoundaryTypePath } from '../change/boundary-type/route-path.js'
 
 /**
  * Change actions link to the change alias for that answer; rows without one
@@ -84,7 +85,7 @@ export default function getViewModel(data = {}, _query = {}) {
     {
       key: { text: 'Red line boundary' },
       value: { text: boundary.text },
-      actions: changeAction(boundary.visuallyHiddenText)
+      actions: changeAction(boundary.visuallyHiddenText, changeBoundaryTypePath)
     },
     // No change action: the email address cannot be changed from this page.
     {

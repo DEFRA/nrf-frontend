@@ -119,7 +119,7 @@ describe('Review and amend the quote details page', () => {
     )
   })
 
-  it('should link the question answer changes to their change pages and keep the boundary change link as a placeholder', async () => {
+  it('should link the planning type and boundary changes to their change pages and keep the other change links as placeholders', async () => {
     const cookie = await withCompleteQuoteSession(getSeededServer())
 
     const document = await loadPage({
@@ -134,7 +134,7 @@ describe('Review and amend the quote details page', () => {
 
     expect(
       getByRole(document, 'link', { name: 'Changered line boundary' })
-    ).toHaveAttribute('href', '#')
+    ).toHaveAttribute('href', '/request-to-use/change/boundary-type')
 
     expect(
       getByRole(document, 'link', {

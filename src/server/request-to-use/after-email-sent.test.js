@@ -19,6 +19,11 @@ import { routePath as reviewQuoteDetailsPath } from './review-quote-details/rout
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
+import { routePath as changeBoundaryTypePath } from './change/boundary-type/route-path.js'
+import { routePath as changeDrawBoundaryPath } from './change/draw-boundary/route-path.js'
+import { routePath as changeUploadBoundaryPath } from './change/upload-boundary/route-path.js'
+import { routePath as changeCheckingFilePath } from './change/checking-file/route-path.js'
+import { routePath as changeFilePreviewPath } from './change/file-preview/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
@@ -64,6 +69,11 @@ const pathsWithOwnSessionChecks = [
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
+  changeBoundaryTypePath,
+  changeDrawBoundaryPath,
+  changeUploadBoundaryPath,
+  changeCheckingFilePath,
+  changeFilePreviewPath,
   '/request-to-use/link-expired'
 ]
 

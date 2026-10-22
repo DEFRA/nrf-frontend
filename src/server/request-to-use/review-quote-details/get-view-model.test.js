@@ -163,7 +163,11 @@ describe('Review and amend your quote details view model', () => {
 
     expect(row.value.text).toBe(text)
     expect(row.actions.items).toEqual([
-      { href: '#', text: 'Change', visuallyHiddenText: hiddenText }
+      {
+        href: '/request-to-use/change/boundary-type',
+        text: 'Change',
+        visuallyHiddenText: hiddenText
+      }
     ])
   })
 })
