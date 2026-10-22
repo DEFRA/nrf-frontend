@@ -45,8 +45,8 @@ describe('Change confirm housing page', () => {
     ).toBeInTheDocument()
   })
 
-  it('should return to the review page when housing is confirmed on a change', async () => {
-    const { response } = await submitForm({
+  it('should return to the review page with the unchanged answer when housing is confirmed on a change', async () => {
+    const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
       formData: { isHousing: 'yes' },
@@ -55,6 +55,17 @@ describe('Change confirm housing page', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(reviewQuoteDetailsPath)
+
+    const document = await loadPage({
+      requestUrl: reviewQuoteDetailsPath,
+      server: getSeededServer(),
+      cookie
+    })
+
+    const housingValue = [
+      ...document.querySelectorAll('.govuk-summary-list__value')
+    ][1]
+    expect(housingValue).toHaveTextContent('Yes')
   })
 
   it('should show a validation error and keep the review back link when a change is submitted with no answer', async () => {
