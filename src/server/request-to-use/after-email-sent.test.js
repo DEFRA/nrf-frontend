@@ -16,6 +16,9 @@ import { routePath as noNrlReferencePath } from './no-nrl-reference/route-path.j
 import { routePath as quoteNotMatchedPath } from './quote-not-matched/route-path.js'
 import { routePath as emailConfirmationPath } from './email-confirmation/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
+import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
+import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
+import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
@@ -58,6 +61,9 @@ const reachablePaths = [
 const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
+  changePlanningTypePath,
+  changeConfirmHousingPath,
+  changeUnitNumberPath,
   '/request-to-use/link-expired'
 ]
 

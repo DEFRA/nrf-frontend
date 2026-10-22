@@ -119,7 +119,7 @@ describe('Review and amend the quote details page', () => {
     )
   })
 
-  it('should render the change links and Continue button as placeholders', async () => {
+  it('should link the question answer changes to their change pages and keep the boundary change link as a placeholder', async () => {
     const cookie = await withCompleteQuoteSession(getSeededServer())
 
     const document = await loadPage({
@@ -128,14 +128,23 @@ describe('Review and amend the quote details page', () => {
       cookie
     })
 
-    for (const name of [
-      'Changeplanning permission type',
-      'Changewhether you are developing housing',
-      'Changenumber of housing units',
-      'Changered line boundary'
-    ]) {
-      expect(getByRole(document, 'link', { name })).toHaveAttribute('href', '#')
-    }
+    expect(
+      getByRole(document, 'link', { name: 'Changeplanning permission type' })
+    ).toHaveAttribute('href', '/request-to-use/change/planning-type')
+
+    expect(
+      getByRole(document, 'link', { name: 'Changered line boundary' })
+    ).toHaveAttribute('href', '#')
+
+    expect(
+      getByRole(document, 'link', {
+        name: 'Changewhether you are developing housing'
+      })
+    ).toHaveAttribute('href', '/request-to-use/change/confirm-housing')
+
+    expect(
+      getByRole(document, 'link', { name: 'Changenumber of housing units' })
+    ).toHaveAttribute('href', '/request-to-use/change/unit-number')
     expect(
       queryByRole(document, 'link', { name: 'Changeemail address' })
     ).not.toBeInTheDocument()
