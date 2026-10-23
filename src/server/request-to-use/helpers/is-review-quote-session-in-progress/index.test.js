@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { checkForValidReviewQuoteSession } from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
+import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
+import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
@@ -59,6 +62,37 @@ describe('checkForValidReviewQuoteSession', () => {
       expect(result).toBe(h.continue)
     }
   )
+
+  it.each([
+    changePlanningTypePath,
+    changeConfirmHousingPath,
+    changeUnitNumberPath
+  ])('continues on %s when the session is valid', (path) => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    changePlanningTypePath,
+    changeConfirmHousingPath,
+    changeUnitNumberPath
+  ])('redirects %s to the start page when the session is missing', (path) => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path, session: {} }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
 
   it('redirects HEAD requests to the start page when there is no session', () => {
     const h = createMockRedirectToolkit()

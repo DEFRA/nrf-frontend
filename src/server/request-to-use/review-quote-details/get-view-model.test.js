@@ -56,18 +56,42 @@ describe('Review and amend your quote details view model', () => {
     ])
   })
 
-  it.each([
-    [rowKeys.planningType, 'planning permission type'],
-    [rowKeys.housing, 'whether you are developing housing'],
-    [rowKeys.housingUnits, 'number of housing units'],
-    [rowKeys.boundary, boundaryHiddenText]
-  ])('gives the %s row a placeholder change link', (key, hiddenText) => {
-    const row = findSummaryListRow(getViewModel(completeQuote), key)
+  it('links the planning permission type change to the change planning type page', () => {
+    const row = findSummaryListRow(
+      getViewModel(completeQuote),
+      rowKeys.planningType
+    )
 
     expect(row.actions.items).toEqual([
-      { href: '#', text: 'Change', visuallyHiddenText: hiddenText }
+      {
+        href: '/request-to-use/change/planning-type',
+        text: 'Change',
+        visuallyHiddenText: 'planning permission type'
+      }
     ])
   })
+
+  it.each([
+    [
+      rowKeys.housing,
+      'whether you are developing housing',
+      '/request-to-use/change/confirm-housing'
+    ],
+    [
+      rowKeys.housingUnits,
+      'number of housing units',
+      '/request-to-use/change/unit-number'
+    ]
+  ])(
+    'links the %s change to the change alias page',
+    (key, hiddenText, href) => {
+      const row = findSummaryListRow(getViewModel(completeQuote), key)
+
+      expect(row.actions.items).toEqual([
+        { href, text: 'Change', visuallyHiddenText: hiddenText }
+      ])
+    }
+  )
 
   it('gives the email address row no change link', () => {
     const row = findSummaryListRow(getViewModel(completeQuote), rowKeys.email)

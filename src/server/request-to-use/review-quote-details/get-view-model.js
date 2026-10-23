@@ -1,15 +1,19 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { planningTypeOptions } from '../../quote/planning-type/options.js'
 import { housingOptions } from '../../quote/confirm-housing/options.js'
+import { routePath as changePlanningTypePath } from '../change/planning-type/route-path.js'
+import { routePath as changeConfirmHousingPath } from '../change/confirm-housing/route-path.js'
+import { routePath as changeUnitNumberPath } from '../change/unit-number/route-path.js'
 
 /**
- * Change actions are placeholders: the edit quote journey will give each row
- * a real target.
+ * Change actions link to the change alias for that answer; rows without one
+ * yet keep the placeholder href.
  * @param {string} visuallyHiddenText - row name announced to screen readers
+ * @param {string} [href='#'] - the change page for this row
  * @returns {object} summary list actions for one row
  */
-const changeAction = (visuallyHiddenText) => ({
-  items: [{ href: '#', text: 'Change', visuallyHiddenText }]
+const changeAction = (visuallyHiddenText, href = '#') => ({
+  items: [{ href, text: 'Change', visuallyHiddenText }]
 })
 
 /**
@@ -51,7 +55,7 @@ export default function getViewModel(data = {}, _query = {}) {
           (option) => option.value === data?.planningType
         )?.text
       },
-      actions: changeAction('planning permission type')
+      actions: changeAction('planning permission type', changePlanningTypePath)
     },
     {
       key: { text: 'Housing' },
@@ -59,7 +63,10 @@ export default function getViewModel(data = {}, _query = {}) {
         text: housingOptions.find((option) => option.value === data?.isHousing)
           ?.text
       },
-      actions: changeAction('whether you are developing housing')
+      actions: changeAction(
+        'whether you are developing housing',
+        changeConfirmHousingPath
+      )
     },
     // Housing units only apply when the development has housing.
     ...(data?.isHousing === 'yes'
@@ -67,7 +74,10 @@ export default function getViewModel(data = {}, _query = {}) {
           {
             key: { text: 'Number of housing units' },
             value: { text: data?.housingUnits },
-            actions: changeAction('number of housing units')
+            actions: changeAction(
+              'number of housing units',
+              changeUnitNumberPath
+            )
           }
         ]
       : []),
