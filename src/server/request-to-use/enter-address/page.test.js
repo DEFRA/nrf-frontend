@@ -13,17 +13,9 @@ import {
 import { loadPage } from '../../../test-utils/load-page.js'
 
 const ROUTE_PATH = '/request-to-use/enter-address'
-let tokenClaims = { ...mockUser }
-
-const { getServer, signIn } = setupSignedInTestServer({
-  getClaims: () => tokenClaims
-})
+const { getServer, signIn } = setupSignedInTestServer()
 
 describe('Enter address page', () => {
-  afterEach(() => {
-    tokenClaims = { ...mockUser }
-  })
-
   it('redirects a signed-out visitor to sign in', async () => {
     const response = await getServer().inject({
       method: 'GET',
@@ -75,8 +67,8 @@ describe('Enter address page', () => {
   })
 
   describe('organisation', () => {
-    const loadSignedInPage = async () => {
-      const { cookie } = await signIn()
+    const loadSignedInPage = async (claims) => {
+      const { cookie } = await signIn({ claims })
       return loadPage({ requestUrl: ROUTE_PATH, server: getServer(), cookie })
     }
 
@@ -86,9 +78,7 @@ describe('Enter address page', () => {
     ])(
       'says which organisation a user signed in as %s is representing',
       async (_, claims, orgName, relationship) => {
-        tokenClaims = { ...mockUser, ...claims }
-
-        const document = await loadSignedInPage()
+        const document = await loadSignedInPage(claims)
 
         expect(getByRole(document, 'main')).toHaveTextContent(
           `You are representing ${orgName} as an ${relationship}.`
@@ -97,9 +87,7 @@ describe('Enter address page', () => {
     )
 
     it('does not mention an organisation for a user signed in as themselves', async () => {
-      tokenClaims = { ...mockUser, ...citizenClaims }
-
-      const document = await loadSignedInPage()
+      const document = await loadSignedInPage(citizenClaims)
 
       expect(getByRole(document, 'main')).not.toHaveTextContent(
         'You are representing'
@@ -107,9 +95,7 @@ describe('Enter address page', () => {
     })
 
     it('shows the organisation switcher above the page heading', async () => {
-      tokenClaims = { ...mockUser, ...multiOrgEmployeeClaims }
-
-      const document = await loadSignedInPage()
+      const document = await loadSignedInPage(multiOrgEmployeeClaims)
 
       expect(
         getByTestId(document, 'app-organisation-heading')
