@@ -1,5 +1,4 @@
 import {
-  loginController,
   signInController,
   signInOidcController,
   signOutController,
@@ -61,47 +60,6 @@ const mockGetOidcConfig = vi.mocked(getOidcConfig)
 const mswServer = setupMswServer()
 
 describe('Auth Controllers', () => {
-  describe('loginController', () => {
-    it('should render login page', () => {
-      const request = {
-        server: {
-          app: {
-            authEnabled: true
-          }
-        }
-      }
-      const h = {
-        view: (template, context) => ({ template, context })
-      }
-
-      const result = loginController.handler(request, h)
-
-      expect(result.template).toBe('auth/login')
-      expect(result.context.pageTitle).toBe('Sign in')
-      expect(result.context.heading).toBe('Sign in to continue')
-    })
-
-    it('should redirect authenticated users to home', () => {
-      const request = {
-        auth: {
-          isAuthenticated: true
-        },
-        server: {
-          app: {
-            authEnabled: true
-          }
-        }
-      }
-      const h = {
-        redirect: vi.fn((url) => ({ redirect: url }))
-      }
-
-      loginController.handler(request, h)
-
-      expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
-    })
-  })
-
   describe('signInController', () => {
     it('should redirect to OAuth authorization URL with correct parameters', async () => {
       mockGetOidcConfig.mockResolvedValue({
@@ -222,7 +180,17 @@ describe('Auth Controllers', () => {
       }
 
       h = {
-        view: vi.fn((template, context) => ({ template, context })),
+        view: vi.fn((template, context) => {
+          const response = {
+            template,
+            context,
+            code: vi.fn((statusCode) => {
+              response.statusCode = statusCode
+              return response
+            })
+          }
+          return response
+        }),
         redirect: vi.fn((url) => ({ redirect: url }))
       }
     })
@@ -233,12 +201,13 @@ describe('Auth Controllers', () => {
 
       await signInOidcController.handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
         error: 'User denied access'
       })
+      expect(h.view.mock.results[0].value.statusCode).toBe(400)
     })
 
     it('should render error view with default message when OAuth error has no description', async () => {
@@ -246,10 +215,10 @@ describe('Auth Controllers', () => {
 
       await signInOidcController.handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
         error: 'Authentication failed. Please try again.'
       })
     })
@@ -261,10 +230,10 @@ describe('Auth Controllers', () => {
 
       await signInOidcController.handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
         error: 'Invalid authentication state. Please try again.'
       })
     })
@@ -276,22 +245,27 @@ describe('Auth Controllers', () => {
 
       await signInOidcController.handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
         error: 'Invalid authentication state. Please try again.'
       })
     })
 
-    it('should redirect to login when authorization code is missing', async () => {
+    it('should render error view when authorization code is missing', async () => {
       request.query.state = 'matching-state'
       request.yar.get.mockReturnValue('matching-state')
       // No code in query
 
       await signInOidcController.handler(request, h)
 
-      expect(h.redirect).toHaveBeenCalledWith('/login')
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
+        error: 'Authentication failed. Please try again.'
+      })
     })
 
     it('should render error view when token exchange fails', async () => {
@@ -303,12 +277,13 @@ describe('Auth Controllers', () => {
 
       await signInOidcController.handler(request, h)
 
-      expect(h.view).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
+      expect(h.view).toHaveBeenCalledWith('auth/sign-in-error', {
+        pageTitle: 'Authentication error',
+        heading: 'Authentication error',
+        signInPath: '/auth/sign-in',
         error: 'Authentication failed during token exchange. Please try again.'
       })
+      expect(h.view.mock.results[0].value.statusCode).toBe(500)
     })
 
     it('should successfully complete authentication flow', async () => {

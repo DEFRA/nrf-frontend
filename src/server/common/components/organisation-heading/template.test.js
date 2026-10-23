@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom'
 import { within } from '@testing-library/dom'
 import { renderComponent } from '../../test-helpers/component-helpers.js'
 
-const changeOrganisationLinkName = 'Change who you’re representing'
+const changeOrganisationLinkName = 'Change organisation'
 
 const render = (params) =>
   within(

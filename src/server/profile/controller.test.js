@@ -44,10 +44,10 @@ describe('profileController', () => {
       )
     )
 
-  it('should redirect to login when there are no credentials', async () => {
+  it('should redirect to sign-in when there are no credentials', async () => {
     const result = await profileController.handler({ auth: {} }, buildH())
 
-    expect(result.redirectTo).toBe('/login')
+    expect(result.redirectTo).toBe('/auth/sign-in')
   })
 
   it('should render the user details and organisations from nrf-backend', async () => {

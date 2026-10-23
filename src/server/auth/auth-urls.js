@@ -1,6 +1,8 @@
+export const AUTH_STRATEGY_NAME = 'defra-session'
 export const RETURN_PATH = '/login/return'
 export const SIGNED_OUT_PATH = '/login/signed-out'
 export const AUTH_SIGN_IN_PATH = '/auth/sign-in'
+export const AUTH_SIGN_OUT_PATH = '/auth/sign-out'
 export const CHANGE_ORGANISATION_PATH = '/auth/change-organisation'
 export const CHANGE_ORGANISATION_QUERY_PARAM = 'change-organisation'
 

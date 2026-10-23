@@ -3,6 +3,7 @@ import { planningTypeOptions } from '../../quote/planning-type/options.js'
 import { housingOptions } from '../../quote/confirm-housing/options.js'
 import { routePath as changePlanningTypePath } from '../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../change/confirm-housing/route-path.js'
+import { routePath as enterAddressPath } from '../enter-address/route-path.js'
 import { routePath as changeUnitNumberPath } from '../change/unit-number/route-path.js'
 
 /**
@@ -96,6 +97,7 @@ export default function getViewModel(data = {}, _query = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    rows
+    rows,
+    enterAddressPath
   }
 }
