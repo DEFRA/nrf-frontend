@@ -64,7 +64,8 @@ const pathsWithOwnSessionChecks = [
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
-  '/request-to-use/link-expired'
+  '/request-to-use/link-expired',
+  '/request-to-use/enter-address'
 ]
 
 describe('After the retrieve quote email is sent', () => {

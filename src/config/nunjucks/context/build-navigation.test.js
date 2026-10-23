@@ -1,50 +1,13 @@
 import { buildNavigation } from './build-navigation.js'
-import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
-
-function mockRequest(options) {
-  return { ...options }
-}
 
 describe('#buildNavigation', () => {
-  test('Should provide expected navigation details', () => {
-    expect(
-      buildNavigation(mockRequest({ path: '/non-existent-path' }))
-    ).toEqual([
-      {
-        current: false,
-        text: 'Home',
-        href: startPagePath
-      },
-      {
-        current: false,
-        text: 'About',
-        href: '/about'
-      },
-      {
-        current: false,
-        text: 'Sign in',
-        href: '/login'
-      }
-    ])
+  test('Should provide no navigation items when signed out', () => {
+    expect(buildNavigation({ path: '/non-existent-path' })).toEqual([])
   })
 
-  test('Should provide expected highlighted navigation details', () => {
-    expect(buildNavigation(mockRequest({ path: startPagePath }))).toEqual([
-      {
-        current: true,
-        text: 'Home',
-        href: startPagePath
-      },
-      {
-        current: false,
-        text: 'About',
-        href: '/about'
-      },
-      {
-        current: false,
-        text: 'Sign in',
-        href: '/login'
-      }
-    ])
+  test('Should provide a sign out link when signed in', () => {
+    expect(
+      buildNavigation({ auth: { credentials: { isAuthenticated: true } } })
+    ).toEqual([{ text: 'Sign out', href: '/auth/sign-out' }])
   })
 })

@@ -1,5 +1,5 @@
-import { config } from '../../config/config.js'
-import { DEFRA_ID_ACCOUNT_PATH } from '../auth/auth-urls.js'
+import { AUTH_SIGN_IN_PATH, AUTH_SIGN_OUT_PATH } from '../auth/auth-urls.js'
+import { getDefraAccountUrl } from '../auth/get-defra-account-url.js'
 import { getUserFromBackend } from '../common/services/nrf-backend.js'
 import { getOrganisationHeadingData } from '../common/helpers/get-organisation-heading-data.js'
 
@@ -12,7 +12,7 @@ export const profileController = {
     const auth = request.auth
 
     if (!auth || !auth.credentials || !auth.credentials.profile) {
-      return h.redirect('/login')
+      return h.redirect(AUTH_SIGN_IN_PATH)
     }
 
     const { profile } = auth.credentials
@@ -27,11 +27,6 @@ export const profileController = {
       backendUser = null
     }
 
-    const defraAccountUrl = new URL(
-      DEFRA_ID_ACCOUNT_PATH,
-      config.get('defraId.baseUrl')
-    ).toString()
-
     return h.view('profile/index', {
       pageTitle: 'My Profile',
       user: {
@@ -40,7 +35,8 @@ export const profileController = {
         email: backendUser?.email ?? profile.email
       },
       organisations: backendUser?.organisations ?? [],
-      defraAccountUrl,
+      defraAccountUrl: getDefraAccountUrl(),
+      signOutPath: AUTH_SIGN_OUT_PATH,
       ...getOrganisationHeadingData(request)
     })
   }

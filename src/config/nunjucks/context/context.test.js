@@ -56,23 +56,7 @@ describe('context and cache', () => {
           getAssetPath: expect.any(Function),
           gtmId: null,
           isAuthenticated: false,
-          navigation: [
-            {
-              current: true,
-              text: 'Home',
-              href: startPagePath
-            },
-            {
-              current: false,
-              text: 'About',
-              href: '/about'
-            },
-            {
-              current: false,
-              text: 'Sign in',
-              href: '/login'
-            }
-          ],
+          navigation: [],
           serviceName: 'Manage the nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
@@ -210,23 +194,7 @@ describe('context and cache', () => {
           getAssetPath: expect.any(Function),
           gtmId: null,
           isAuthenticated: false,
-          navigation: [
-            {
-              current: true,
-              text: 'Home',
-              href: startPagePath
-            },
-            {
-              current: false,
-              text: 'About',
-              href: '/about'
-            },
-            {
-              current: false,
-              text: 'Sign in',
-              href: '/login'
-            }
-          ],
+          navigation: [],
           serviceName: 'Manage the nature restoration levy',
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
