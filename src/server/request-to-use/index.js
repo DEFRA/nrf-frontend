@@ -8,6 +8,8 @@ import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesChangePlanningType from './change/planning-type/routes.js'
 import routesChangeConfirmHousing from './change/confirm-housing/routes.js'
 import routesChangeUnitNumber from './change/unit-number/routes.js'
+import routesChangeApplicationTypeNotAvailable from './change/application-type-not-available/routes.js'
+import routesChangeNotHousing from './change/not-housing/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
@@ -35,6 +37,8 @@ export const requestToUse = {
         ...routesChangePlanningType,
         ...routesChangeConfirmHousing,
         ...routesChangeUnitNumber,
+        ...routesChangeApplicationTypeNotAvailable,
+        ...routesChangeNotHousing,
         ...routesRetrieveQuote,
         ...routesLinkExpired
       ])

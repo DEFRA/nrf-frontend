@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
+import { routePath as notInEdpPath } from '../../../quote/not-in-edp/route-path.js'
 import { routePath as quotePlanningTypePath } from '../../../quote/planning-type/route-path.js'
 import { redirectToReviewPageUnlessDropout, withBackLink } from './index.js'
 
@@ -31,10 +33,21 @@ describe('change answer helpers', () => {
       ).toBe('/request-to-use/review-quote-details')
     })
 
-    it('still returns a dropout page so an ineligible answer is shown', () => {
+    it('returns the change alias of a dropout page so an ineligible answer is shown under the request to use prefix', () => {
       expect(
         redirectToReviewPageUnlessDropout({ nextPage: notHousingPath })
-      ).toBe('/quote/not-housing')
+      ).toBe('/request-to-use/change/not-housing')
+      expect(
+        redirectToReviewPageUnlessDropout({
+          nextPage: applicationTypeNotAvailablePath
+        })
+      ).toBe('/request-to-use/change/application-type-not-available')
+    })
+
+    it('still returns a dropout page without an alias unchanged (the boundary dropouts until NRF2-1315)', () => {
+      expect(
+        redirectToReviewPageUnlessDropout({ nextPage: notInEdpPath })
+      ).toBe(notInEdpPath)
     })
   })
 })

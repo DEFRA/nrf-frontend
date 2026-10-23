@@ -96,7 +96,7 @@ describe('Change confirm housing page', () => {
   })
 
   it('should redirect to the not housing page when a change selects No', async () => {
-    const { response } = await submitForm({
+    const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
       formData: { isHousing: 'no' },
@@ -104,6 +104,20 @@ describe('Change confirm housing page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/not-housing')
+    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
+
+    const document = await loadPage({
+      requestUrl: '/request-to-use/change/not-housing',
+      server: getSeededServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      'Nature restoration levy is only available for housing units'
+    )
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      routePath
+    )
   })
 })
