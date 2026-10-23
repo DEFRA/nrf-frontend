@@ -3,6 +3,8 @@ import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { isQuoteDataComplete } from '../../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../request-to-use-session/index.js'
 
@@ -13,15 +15,17 @@ import { requestToUseSession } from '../request-to-use-session/index.js'
 const isReviewQuoteSessionValid = (request) =>
   isQuoteDataComplete(request) && requestToUseSession.get(request) !== null
 
-// The review page and the change pages its change links open all need the
-// complete saved quote and the request to use session magic link redemption
-// (NRF2-1256) sets: editing one of these answers cannot break the quote's
-// completeness.
+// The review page, the change pages its change links open, and the dropout
+// pages an ineligible change leads to all need the complete saved quote and
+// the request to use session magic link redemption (NRF2-1256) sets: editing
+// one of these answers cannot break the quote's completeness.
 const guardedPaths = new Set([
   reviewQuoteDetailsPath,
   changePlanningTypePath,
   changeConfirmHousingPath,
-  changeUnitNumberPath
+  changeUnitNumberPath,
+  changeApplicationTypeNotAvailablePath,
+  changeNotHousingPath
 ])
 
 /**
