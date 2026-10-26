@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { checkForValidReviewQuoteSession } from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -9,7 +10,10 @@ import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
 import { createMockRedirectToolkit } from '../../../../test-utils/create-mock-redirect-toolkit.js'
-import { reviewQuoteSession } from '../../../../test-utils/fixtures/session.js'
+import {
+  acceptLevySession,
+  reviewQuoteSession
+} from '../../../../test-utils/fixtures/session.js'
 
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
@@ -93,6 +97,41 @@ describe('checkForValidReviewQuoteSession', () => {
 
     expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
+
+  it('continues on the accept levy page when the session is valid', () => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({
+        path: acceptLevyPath,
+        session: acceptLevySession
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'the quote session is missing',
+      session: { requestToUse: acceptLevySession.requestToUse }
+    }
+  ])(
+    'redirects the accept levy page to the start page when $scenario',
+    ({ session }) => {
+      const h = createMockRedirectToolkit()
+
+      checkForValidReviewQuoteSession(
+        createReviewQuoteRequest({ path: acceptLevyPath, session }),
+        h
+      )
+
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
 
   it('redirects HEAD requests to the start page when there is no session', () => {
     const h = createMockRedirectToolkit()

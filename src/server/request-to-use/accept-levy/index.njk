@@ -1,0 +1,72 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate data-disable-on-submit>
+      {% include "partials/csrf-token.njk" %}
+
+      {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+      <p class="govuk-body">The amount of the levy may have changed since your quote. You might have updated the development details, the charging schedule may have been updated or inflation might have been applied.</p>
+
+      <h2 class="govuk-heading-m">Details of the levy amount</h2>
+
+      <p class="govuk-body">Your relevant development is planned in: {{ edpName }}.</p>
+
+      <h3 class="govuk-heading-s">Provisional nature restoration levy amount: {{ provisionalAmount }} (excluding VAT)</h3>
+
+      <p class="govuk-body">The provisional amount is calculated from the charging schedule in the relevant EDP.</p>
+
+      <h3 class="govuk-heading-s">Inflation-adjusted nature restoration levy amount: {{ inflationAdjustedAmount }} (excluding VAT)</h3>
+
+      <p class="govuk-body">The inflation-adjusted amount shows the indicative levy amount for the year this commitment was issued. Inflation adjustments will continue to apply until the total levy amount has been paid.</p>
+
+      <h2 class="govuk-heading-m">When to pay the nature restoration levy</h2>
+
+      <p class="govuk-body">If planning permission has been granted and you are ready to commence your development, you must assume liability to pay the levy.</p>
+
+      {% set calculationDetailsHtml %}
+        <p class="govuk-body">The levy has been calculated from the details you submitted and the charging schedule for the relevant EDP. <a href="#" class="govuk-link" target="_blank" rel="noreferrer noopener">Read about the charging schedule for the EDP (opens in new tab)</a>.</p>
+      {% endset %}
+
+      {{ govukDetails({
+        summaryText: "How the nature restoration levy was calculated",
+        html: calculationDetailsHtml
+      }) }}
+
+      {{ govukRadios({
+        name: "acceptLevy",
+        fieldset: {
+          legend: {
+            text: pageHeading,
+            classes: "govuk-visually-hidden"
+          }
+        },
+        errorMessage: validationErrors.messagesByFormField.acceptLevy,
+        value: formSubmitData.acceptLevy,
+        items: acceptLevyOptions
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
