@@ -38,7 +38,8 @@ const dropoutAliasPaths = new Set([
   changeNotHousingPath
 ])
 
-const dropoutAccessKey = 'dropoutJustReached'
+// Shared with clearJourneySessions so the grant never outlives the journeys.
+export const dropoutAccessKey = 'dropoutJustReached'
 
 /**
  * Grants the dropout page at `path` one render, consumed by

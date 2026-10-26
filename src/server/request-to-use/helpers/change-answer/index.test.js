@@ -4,8 +4,10 @@ import { routePath as notHousingPath } from '../../../quote/not-housing/route-pa
 import { routePath as notInEdpPath } from '../../../quote/not-in-edp/route-path.js'
 import { routePath as quotePlanningTypePath } from '../../../quote/planning-type/route-path.js'
 import getNextPage from '../../../quote/planning-type/get-next-page.js'
+import { dropoutPaths } from '../../../quote/helpers/change-mode/index.js'
 import { createMockYar } from '../../../../test-utils/create-mock-yar.js'
 import {
+  dropoutPageAliases,
   redirectToReviewPageUnlessDropout,
   saveToSessionUnlessDropout,
   withBackLink
@@ -100,6 +102,22 @@ describe('change answer helpers', () => {
         redirectToReviewPageUnlessDropout({ nextPage: notInEdpPath, request })
       ).toBe(notInEdpPath)
       expect(request.yar.get('dropoutJustReached')).toBe(notInEdpPath)
+    })
+  })
+
+  describe('dropoutPageAliases', () => {
+    // A new quote dropout page without a change alias would redirect a
+    // request to use session to the /quote/ page its guard bounces to the
+    // start page — this fails so the alias (or a boundary entry) is added.
+    it('maps every quote dropout page to a change alias except the boundary dropouts reserved for NRF2-1315', () => {
+      const unmappedDropoutPaths = [...dropoutPaths].filter(
+        (path) => !dropoutPageAliases.has(path)
+      )
+
+      expect(unmappedDropoutPaths).toEqual([
+        '/quote/not-in-edp',
+        '/quote/excluded-area'
+      ])
     })
   })
 })

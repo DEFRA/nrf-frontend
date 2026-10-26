@@ -29,7 +29,7 @@ export const withBackLink =
 // render at its alias, guarded by the review quote session instead. The
 // boundary dropouts have no alias yet (NRF2-1315) and no change page can reach
 // them today, so they pass through bare.
-const dropoutPageAliases = new Map([
+export const dropoutPageAliases = new Map([
   [applicationTypeNotAvailablePath, changeApplicationTypeNotAvailablePath],
   [notHousingPath, changeNotHousingPath]
 ])

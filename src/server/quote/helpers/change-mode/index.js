@@ -8,7 +8,7 @@ import { routePath as excludedAreaPath } from '../../excluded-area/route-path.js
 // see why they can't continue), and they link back into the journey carrying
 // change=true so a corrected answer returns to check-your-answers instead of
 // restarting the whole journey.
-const dropoutPaths = new Set([
+export const dropoutPaths = new Set([
   applicationTypeNotAvailablePath,
   notHousingPath,
   notInEdpPath,
