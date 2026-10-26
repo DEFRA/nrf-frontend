@@ -28,6 +28,29 @@ const guardedPaths = new Set([
   changeNotHousingPath
 ])
 
+// The dropout pages are reachable only as the redirect that follows
+// submitting an ineligible change: the change POST grants exactly one render
+// of the dropout page it redirects to, and the check below consumes it.
+// Anything else — back button, pasted URL, refresh — goes back to the review
+// page.
+const dropoutAliasPaths = new Set([
+  changeApplicationTypeNotAvailablePath,
+  changeNotHousingPath
+])
+
+const dropoutAccessKey = 'dropoutJustReached'
+
+/**
+ * Grants the dropout page at `path` one render, consumed by
+ * checkForValidReviewQuoteSession. Only a change POST redirecting to a
+ * dropout page should call this.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {string} path - the dropout page path being redirected to
+ */
+export const grantDropoutAccess = (request, path) => {
+  request.yar.set(dropoutAccessKey, path)
+}
+
 /**
  * Redirects to the start page when the review quote details page or one of its
  * change pages is requested without both a complete saved quote and a request
@@ -46,6 +69,18 @@ export const checkForValidReviewQuoteSession = (request, h) => {
 
   if (!isReviewQuoteSessionValid(request)) {
     return h.redirect(startPath).takeover()
+  }
+
+  if (dropoutAliasPaths.has(request.path)) {
+    if (request.yar.get(dropoutAccessKey) !== request.path) {
+      return h.redirect(reviewQuoteDetailsPath).takeover()
+    }
+
+    // HEAD is served from the grant too but must not consume it, or a
+    // prefetch could eat the one render the change POST granted.
+    if (request.method === 'get') {
+      request.yar.clear(dropoutAccessKey)
+    }
   }
 
   return h.continue

@@ -1,4 +1,5 @@
 import { isDropoutPage } from '../../../quote/helpers/change-mode/index.js'
+import { grantDropoutAccess } from '../is-review-quote-session-in-progress/index.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
@@ -36,13 +37,21 @@ const dropoutPageAliases = new Map([
 /**
  * A saved edit returns to the review page rather than continuing the quote
  * journey. Dropout pages still win: an ineligible answer must show its dropout
- * page, at its change alias when one exists.
- * @param {{ nextPage: string }} params
+ * page, at its change alias when one exists — and that redirect grants the
+ * dropout page exactly one render, so the back button, a pasted URL or a
+ * refresh cannot reach it afterwards (see grantDropoutAccess).
+ * @param {{ nextPage: string, request: import('@hapi/hapi').Request }} params
  * @returns {string} redirect path
  */
-export const redirectToReviewPageUnlessDropout = ({ nextPage }) =>
-  dropoutPageAliases.get(nextPage) ??
-  (isDropoutPage(nextPage) ? nextPage : reviewQuoteDetailsPath)
+export const redirectToReviewPageUnlessDropout = ({ nextPage, request }) => {
+  if (isDropoutPage(nextPage)) {
+    const dropoutPath = dropoutPageAliases.get(nextPage) ?? nextPage
+    grantDropoutAccess(request, dropoutPath)
+    return dropoutPath
+  }
+
+  return reviewQuoteDetailsPath
+}
 
 /**
  * Wraps a change page's save so an ineligible answer never reaches the quote

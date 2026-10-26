@@ -34,8 +34,13 @@ describe('Change application type not available page', () => {
     expect(response.headers.location).toBe('/manage/start-page')
   })
 
-  it('should render the dropout page with a back link to the change page', async () => {
-    const cookie = await withCompleteQuoteSession(getSeededServer())
+  it('should render the dropout page with a back link to the change page after a change selects Other', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: changePlanningTypePath,
+      server: getSeededServer(),
+      formData: { planningType: 'other' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
 
     const document = await loadPage({
       requestUrl: routePath,
@@ -49,6 +54,19 @@ describe('Change application type not available page', () => {
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
       changePlanningTypePath
+    )
+  })
+
+  it('should redirect to the review page when reached without a change just submitted', async () => {
+    const response = await getResponse({
+      server: getSeededServer(),
+      requestUrl: routePath,
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(
+      '/request-to-use/review-quote-details'
     )
   })
 
