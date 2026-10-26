@@ -380,19 +380,6 @@ export const config = convict({
       sensitive: true,
       env: 'OS_API_KEY'
     },
-    impactAssessorBaseUrl: {
-      doc: 'Base URL for the impact assessor tile and validation APIs.',
-      format: String,
-      default: 'http://localhost:8085',
-      env: 'IMPACT_ASSESSOR_BASE_URL'
-    },
-    impactAssessorApiKey: {
-      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor (e.g. map tile proxy).',
-      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
-      default: '',
-      sensitive: true,
-      env: 'IMPACT_ASSESSOR_API_KEY'
-    },
     impactAssessorLayers: {
       doc: 'Comma-separated list of impact assessor tile layer params shown in the Layers panel.',
       format: String,
@@ -435,6 +422,21 @@ export const config = convict({
       format: Number,
       default: thirtyDaysSeconds,
       env: 'MAP_AERIAL_TILE_CACHE_CONTROL_MAX_AGE'
+    }
+  },
+  impactAssessor: {
+    baseUrl: {
+      doc: 'Base URL for the impact assessor API (map tiles, boundary validation, levy recalculation).',
+      format: String,
+      default: 'http://localhost:8085',
+      env: 'IMPACT_ASSESSOR_BASE_URL'
+    },
+    apiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor.',
+      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
+      default: '',
+      sensitive: true,
+      env: 'IMPACT_ASSESSOR_API_KEY'
     }
   },
   gtmId: {
