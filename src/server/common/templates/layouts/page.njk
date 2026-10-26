@@ -23,6 +23,7 @@
 
 {# Import custom components globally #}
 {% from "heading/macro.njk" import appHeading %}
+{% from "organisation-heading/macro.njk" import appOrganisationHeading %}
 
 {% set mainClasses = mainClasses or "app-main-wrapper" %}
 {% set bodyAttributes = { "data-service-version": serviceVersion | default("unknown", true) } %}
@@ -75,7 +76,18 @@
       }
     }) }}
   {% endif %}
+  {% block organisationHeading %}{% endblock %}
   {{ super() }}
+{% endblock %}
+
+{% block govukServiceNavigation %}
+  {% if serviceName %}
+    {{ govukServiceNavigation({
+      serviceName: serviceName,
+      serviceUrl: serviceUrl,
+      navigation: navigation
+    }) }}
+  {% endif %}
 {% endblock %}
 
 {% block beforeContent %}

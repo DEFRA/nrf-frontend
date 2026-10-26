@@ -1,40 +1,11 @@
-import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
+import { AUTH_SIGN_OUT_PATH } from '../../../server/auth/auth-urls.js'
 
+/**
+ * @param {import('@hapi/hapi').Request} [request]
+ * @returns {{ text: string, href: string }[]} service navigation items; a sign out link when signed in
+ */
 export function buildNavigation(request) {
   const isAuthenticated = request?.auth?.credentials?.isAuthenticated || false
 
-  const baseNav = [
-    {
-      text: 'Home',
-      href: startPagePath,
-      current: request?.path === startPagePath
-    },
-    {
-      text: 'About',
-      href: '/about',
-      current: request?.path === '/about'
-    }
-  ]
-
-  // Add profile and sign in/out links based on auth state
-  if (isAuthenticated) {
-    baseNav.push({
-      text: 'Profile',
-      href: '/profile',
-      current: request?.path === '/profile'
-    })
-    baseNav.push({
-      text: 'Sign out',
-      href: '/auth/sign-out',
-      current: false
-    })
-  } else {
-    baseNav.push({
-      text: 'Sign in',
-      href: '/login',
-      current: request?.path === '/login'
-    })
-  }
-
-  return baseNav
+  return isAuthenticated ? [{ text: 'Sign out', href: AUTH_SIGN_OUT_PATH }] : []
 }

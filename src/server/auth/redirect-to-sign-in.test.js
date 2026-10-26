@@ -80,7 +80,7 @@ describe('redirectToSignIn', () => {
     const result = redirectToSignIn(request, h)
 
     expect(yar.set).toHaveBeenCalledWith('redirectTo', PROFILE_PATH)
-    expect(result.location).toBe('/login')
+    expect(result.location).toBe('/auth/sign-in')
   })
 
   it('falls back to the home page when the requested path is not a safe redirect', () => {

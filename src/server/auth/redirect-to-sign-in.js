@@ -1,11 +1,11 @@
 import { getSafeRedirect } from './get-safe-redirect.js'
+import { AUTH_SIGN_IN_PATH } from './auth-urls.js'
 
-const SIGN_IN_PATH = '/login'
 const AUTH_ROUTES_PREFIX = '/auth/'
 
 /**
  * Server-level onPreHandler extension that sends unauthenticated requests for
- * protected routes to the sign-in page, remembering the requested path in the
+ * protected routes straight to Defra ID sign-in, remembering the requested path in the
  * session so a successful login can redirect back to it.
  *
  * Registered by the DEFRA Identity plugin, so it only exists when auth is enabled.
@@ -37,5 +37,5 @@ export function redirectToSignIn(request, h) {
   request.yar.set('redirectTo', getSafeRedirect(request.path))
 
   // Pre-handler lifecycle extensions may only continue, throw, or return a takeover response
-  return h.redirect(SIGN_IN_PATH).takeover()
+  return h.redirect(AUTH_SIGN_IN_PATH).takeover()
 }

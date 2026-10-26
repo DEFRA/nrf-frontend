@@ -1,5 +1,4 @@
 import {
-  loginController,
   signInController,
   signInOidcController,
   signOutController,
@@ -10,24 +9,12 @@ import {
   CHANGE_ORGANISATION_PATH,
   RETURN_PATH,
   AUTH_SIGN_IN_PATH,
+  AUTH_SIGN_OUT_PATH,
   SIGNED_OUT_PATH
 } from './auth-urls.js'
 
 /**
  * @openapi
- * /login:
- *   get:
- *     tags:
- *       - Auth
- *     summary: Login page
- *     description: Renders the login page
- *     responses:
- *       200:
- *         description: HTML login page
- *         content:
- *           text/html:
- *             schema:
- *               type: string
  * /auth/sign-in:
  *   get:
  *     tags:
@@ -126,15 +113,6 @@ export const auth = {
       // Check if auth was actually successfully registered (not just enabled in config)
       const authEnabled = server.app.authEnabled || false
 
-      // Always register login page
-      server.route([
-        {
-          method: 'GET',
-          path: '/login',
-          ...loginController
-        }
-      ])
-
       // Only register OAuth routes if auth plugin successfully registered
       if (authEnabled) {
         server.route([
@@ -155,7 +133,7 @@ export const auth = {
           },
           {
             method: 'GET',
-            path: '/auth/sign-out',
+            path: AUTH_SIGN_OUT_PATH,
             ...signOutController
           },
           {

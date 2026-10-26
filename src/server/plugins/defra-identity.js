@@ -3,6 +3,7 @@ import { createLogger } from '../common/helpers/logging/logger.js'
 import { refreshTokens } from '../auth/refresh-tokens.js'
 import { syncUserToBackend } from '../auth/sync-user-to-backend.js'
 import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
+import { AUTH_STRATEGY_NAME } from '../auth/auth-urls.js'
 import { config } from '../../config/config.js'
 import { randomUUID } from 'node:crypto'
 
@@ -27,7 +28,11 @@ export const defraIdentity = {
       server.auth.scheme('yar-session', yarSessionScheme(sessionCache))
 
       // Configure session strategy using our custom Yar-based scheme
-      server.auth.strategy('defra-session', 'yar-session')
+      server.auth.strategy(AUTH_STRATEGY_NAME, 'yar-session')
+
+      // 'try' so every page knows whether the user is signed in; routes that
+      // must be protected opt in with rules: { requireAuth: true }
+      server.auth.default({ strategy: AUTH_STRATEGY_NAME, mode: 'try' })
 
       server.ext('onPreHandler', redirectToSignIn)
 

@@ -1,12 +1,13 @@
 {% extends "layouts/page.njk" %}
-{% from "organisation-heading/macro.njk" import appOrganisationHeading %}
 
-{% block content %}
+{% block organisationHeading %}
   {{ appOrganisationHeading({
     orgOrUserName: orgOrUserName,
     changeOrganisationUrl: changeOrganisationUrl
   }) }}
+{% endblock %}
 
+{% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">{{ pageTitle }}</h1>
@@ -32,7 +33,7 @@
 
       <p class="govuk-body govuk-!-margin-top-6">
         <a href="{{ defraAccountUrl }}" class="govuk-link govuk-!-margin-right-4">Defra account</a>
-        <a href="/auth/sign-out" class="govuk-link">Sign out</a>
+        <a href="{{ signOutPath }}" class="govuk-link">Sign out</a>
       </p>
     </div>
   </div>
