@@ -1,6 +1,4 @@
-import joi from 'joi'
 import { requestToUseController } from '../controller-get.js'
-import { reviewQuoteContinueController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
 import { routeId, routePath } from './route-path.js'
 import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
@@ -30,14 +28,6 @@ const getReviewQuoteDetailsData = (request) => ({
  *           text/html:
  *             schema:
  *               type: string
- *   post:
- *     tags:
- *       - RequestToUse
- *     summary: Continue from the review and amend the quote details page
- *     description: Redirects to the dropout page for an ineligible saved answer, or back to the review page
- *     responses:
- *       303:
- *         description: Redirect to a dropout page for an ineligible answer, or to the review page
  */
 export default [
   {
@@ -48,17 +38,5 @@ export default [
       getViewModel,
       getSessionData: getReviewQuoteDetailsData
     })
-  },
-  {
-    method: 'POST',
-    path: routePath,
-    options: {
-      // The Continue form posts no fields (the crumb plugin strips csrfToken
-      // before validation), so the schema is an empty object.
-      validate: {
-        payload: joi.object()
-      }
-    },
-    ...reviewQuoteContinueController
   }
 ]

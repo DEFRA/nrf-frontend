@@ -120,4 +120,54 @@ describe('Change confirm housing page', () => {
       routePath
     )
   })
+
+  it('should link back to the dropout page when backing out of it with the answer still No', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { isHousing: 'no' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/request-to-use/change/not-housing'
+    )
+  })
+
+  it('should return to the review page when housing is changed back to Yes after backing out of the dropout page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { isHousing: 'no' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const { response, cookie: reeligibleCookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { isHousing: 'yes' },
+      cookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(reviewQuoteDetailsPath)
+
+    const document = await loadPage({
+      requestUrl: reviewQuoteDetailsPath,
+      server: getSeededServer(),
+      cookie: reeligibleCookie
+    })
+
+    const housingValue = [
+      ...document.querySelectorAll('.govuk-summary-list__value')
+    ][1]
+    expect(housingValue).toHaveTextContent('Yes')
+  })
 })

@@ -2,15 +2,12 @@ import { getByRole, queryByRole } from '@testing-library/dom'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
-import { routePath as changePlanningTypePath } from '../change/planning-type/route-path.js'
-import { routePath as changeConfirmHousingPath } from '../change/confirm-housing/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { failIfBackendCalled } from '../../../test-utils/fail-if-backend-called.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { submitForm } from '../../../test-utils/submit-form.js'
 import { mergeCookies } from '../../../test-utils/merge-cookies.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
@@ -204,55 +201,5 @@ describe('Review and amend the quote details page', () => {
     expect(
       queryByRole(document, 'link', { name: /Delete/ })
     ).not.toBeInTheDocument()
-  })
-
-  it.each([
-    {
-      scenario: 'the planning type was changed to Other',
-      changeUrl: changePlanningTypePath,
-      formData: { planningType: 'other' },
-      expected:
-        '/request-to-use/change/application-type-not-available?from=review'
-    },
-    {
-      scenario: 'the housing answer was changed to No',
-      changeUrl: changeConfirmHousingPath,
-      formData: { isHousing: 'no' },
-      expected: '/request-to-use/change/not-housing?from=review'
-    }
-  ])(
-    'should redirect continue to the dropout page when $scenario',
-    async ({ changeUrl, formData, expected }) => {
-      const cookie = await withCompleteQuoteSession(getSeededServer())
-
-      await submitForm({
-        requestUrl: changeUrl,
-        server: getSeededServer(),
-        formData,
-        cookie
-      })
-
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getSeededServer(),
-        formData: {},
-        cookie
-      })
-
-      expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-      expect(response.headers.location).toBe(expected)
-    }
-  )
-
-  it('should redirect continue back to the review page while the accept the levy page is not built (NRF2-1302)', async () => {
-    const { response } = await submitForm({
-      requestUrl: routePath,
-      server: getSeededServer(),
-      formData: {},
-      cookie: await withCompleteQuoteSession(getSeededServer())
-    })
-
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(routePath)
   })
 })

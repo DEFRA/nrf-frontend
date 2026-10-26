@@ -43,3 +43,22 @@ const dropoutPageAliases = new Map([
 export const redirectToReviewPageUnlessDropout = ({ nextPage }) =>
   dropoutPageAliases.get(nextPage) ??
   (isDropoutPage(nextPage) ? nextPage : reviewQuoteDetailsPath)
+
+/**
+ * Like withBackLink, but the back link follows the saved answer: backing out
+ * of a dropout page into the question page must offer the way back to the
+ * dropout (the answer is still ineligible), while an eligible answer returns
+ * to the review page.
+ * @param {object} params
+ * @param {Function} params.getNextPage - the quote page's next-page decision
+ * @param {Function} params.getQuotePageViewModel - the quote page's view model
+ * @returns {(quoteData: object, query: object) => object} the change page's view model
+ */
+export const withBackLinkUnlessDropout =
+  ({ getNextPage, getQuotePageViewModel }) =>
+  (quoteData, query) => ({
+    ...getQuotePageViewModel(quoteData, query),
+    backLinkPath: redirectToReviewPageUnlessDropout({
+      nextPage: getNextPage(quoteData)
+    })
+  })

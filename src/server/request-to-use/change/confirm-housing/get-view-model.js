@@ -1,8 +1,8 @@
 import getConfirmHousingViewModel from '../../../quote/confirm-housing/get-view-model.js'
-import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
-import { withBackLink } from '../../helpers/change-answer/index.js'
+import getNextPage from '../../../quote/confirm-housing/get-next-page.js'
+import { withBackLinkUnlessDropout } from '../../helpers/change-answer/index.js'
 
-export default withBackLink({
-  backLinkPath: reviewQuoteDetailsPath,
+export default withBackLinkUnlessDropout({
+  getNextPage,
   getQuotePageViewModel: getConfirmHousingViewModel
 })

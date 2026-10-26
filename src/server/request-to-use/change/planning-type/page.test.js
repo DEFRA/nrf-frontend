@@ -123,4 +123,54 @@ describe('Change planning type page', () => {
       routePath
     )
   })
+
+  it('should link back to the dropout page when backing out of it with the type still Other', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { planningType: 'other' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/request-to-use/change/application-type-not-available'
+    )
+  })
+
+  it('should return to the review page when a valid planning type is re-entered after backing out of the dropout page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { planningType: 'other' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const { response, cookie: reeligibleCookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { planningType: 'outline-planning-permission' },
+      cookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(reviewQuoteDetailsPath)
+
+    const document = await loadPage({
+      requestUrl: reviewQuoteDetailsPath,
+      server: getSeededServer(),
+      cookie: reeligibleCookie
+    })
+
+    const planningTypeValue = [
+      ...document.querySelectorAll('.govuk-summary-list__value')
+    ][0]
+    expect(planningTypeValue).toHaveTextContent('Outline planning permission')
+  })
 })

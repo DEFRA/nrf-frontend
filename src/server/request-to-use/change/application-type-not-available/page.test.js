@@ -52,21 +52,6 @@ describe('Change application type not available page', () => {
     )
   })
 
-  it('should link back to the review page when the review page continue redirected here', async () => {
-    const cookie = await withCompleteQuoteSession(getSeededServer())
-
-    const document = await loadPage({
-      requestUrl: `${routePath}?from=review`,
-      server: getSeededServer(),
-      cookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/request-to-use/review-quote-details'
-    )
-  })
-
   it('should render for a real magic link session after a change selects Other', async () => {
     mockRedeemToken(mswServer)
     mockReadQuote(mswServer, savedQuote)
