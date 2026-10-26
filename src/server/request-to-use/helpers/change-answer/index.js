@@ -45,20 +45,20 @@ export const redirectToReviewPageUnlessDropout = ({ nextPage }) =>
   (isDropoutPage(nextPage) ? nextPage : reviewQuoteDetailsPath)
 
 /**
- * Like withBackLink, but the back link follows the saved answer: backing out
- * of a dropout page into the question page must offer the way back to the
- * dropout (the answer is still ineligible), while an eligible answer returns
- * to the review page.
+ * Wraps a change page's save so an ineligible answer never reaches the quote
+ * cache: the dropout page still shows, but the session keeps the last
+ * eligible answer, so the review page — and every back link to it — always
+ * renders a real, quotable state. A stored quote can never hold an
+ * ineligible answer either (those never reach check-your-answers), so an
+ * edit that makes the quote ineligible is rejected, not recorded.
  * @param {object} params
- * @param {Function} params.getNextPage - the quote page's next-page decision
- * @param {Function} params.getQuotePageViewModel - the quote page's view model
- * @returns {(quoteData: object, query: object) => object} the change page's view model
+ * @param {(sessionData: object | null) => string} params.getNextPage - the quote page's next-page decision, called on the submitted payload (single-question pages carry the field it reads)
+ * @param {Function} params.saveToSession - the quote page's save
+ * @returns {(request: import('@hapi/hapi').Request, payload: object) => object} the payload unsaved when it leads to a dropout, else the saved session data
  */
-export const withBackLinkUnlessDropout =
-  ({ getNextPage, getQuotePageViewModel }) =>
-  (quoteData, query) => ({
-    ...getQuotePageViewModel(quoteData, query),
-    backLinkPath: redirectToReviewPageUnlessDropout({
-      nextPage: getNextPage(quoteData)
-    })
-  })
+export const saveToSessionUnlessDropout =
+  ({ getNextPage, saveToSession }) =>
+  (request, payload) =>
+    isDropoutPage(getNextPage(payload))
+      ? payload
+      : saveToSession(request, payload)

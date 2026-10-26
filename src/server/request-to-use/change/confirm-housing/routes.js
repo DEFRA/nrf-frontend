@@ -3,7 +3,10 @@ import { createPostController } from '../../../common/controllers/post-controlle
 import formValidation from '../../../quote/confirm-housing/form-validation.js'
 import getNextPage from '../../../quote/confirm-housing/get-next-page.js'
 import { saveQuoteDataToCache } from '../../../quote/helpers/quote-session-cache/index.js'
-import { redirectToReviewPageUnlessDropout } from '../../helpers/change-answer/index.js'
+import {
+  redirectToReviewPageUnlessDropout,
+  saveToSessionUnlessDropout
+} from '../../helpers/change-answer/index.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -60,7 +63,12 @@ export default [
     ...createPostController({
       formValidation,
       getNextPage,
-      saveToSession: saveQuoteDataToCache,
+      // An ineligible answer still shows its dropout page but is never
+      // saved, so the session always holds a quotable state.
+      saveToSession: saveToSessionUnlessDropout({
+        getNextPage,
+        saveToSession: saveQuoteDataToCache
+      }),
       resolveRedirect: redirectToReviewPageUnlessDropout
     })
   }

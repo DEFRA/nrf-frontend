@@ -124,7 +124,7 @@ describe('Change planning type page', () => {
     )
   })
 
-  it('should link back to the dropout page when backing out of it with the type still Other', async () => {
+  it('should keep the saved answer and the review back link when backing out of the dropout page', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
@@ -138,39 +138,12 @@ describe('Change planning type page', () => {
       cookie
     })
 
+    // The ineligible answer was never saved: the original answer is still
+    // selected and the back link still returns to the review page.
+    expect(getByLabelText(document, 'Full planning permission')).toBeChecked()
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/change/application-type-not-available'
+      reviewQuoteDetailsPath
     )
-  })
-
-  it('should return to the review page when a valid planning type is re-entered after backing out of the dropout page', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: routePath,
-      server: getSeededServer(),
-      formData: { planningType: 'other' },
-      cookie: await withCompleteQuoteSession(getSeededServer())
-    })
-
-    const { response, cookie: reeligibleCookie } = await submitForm({
-      requestUrl: routePath,
-      server: getSeededServer(),
-      formData: { planningType: 'outline-planning-permission' },
-      cookie
-    })
-
-    expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(reviewQuoteDetailsPath)
-
-    const document = await loadPage({
-      requestUrl: reviewQuoteDetailsPath,
-      server: getSeededServer(),
-      cookie: reeligibleCookie
-    })
-
-    const planningTypeValue = [
-      ...document.querySelectorAll('.govuk-summary-list__value')
-    ][0]
-    expect(planningTypeValue).toHaveTextContent('Outline planning permission')
   })
 })

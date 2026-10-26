@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
 import { routePath as notInEdpPath } from '../../../quote/not-in-edp/route-path.js'
@@ -6,8 +6,8 @@ import { routePath as quotePlanningTypePath } from '../../../quote/planning-type
 import getNextPage from '../../../quote/planning-type/get-next-page.js'
 import {
   redirectToReviewPageUnlessDropout,
-  withBackLink,
-  withBackLinkUnlessDropout
+  saveToSessionUnlessDropout,
+  withBackLink
 } from './index.js'
 
 describe('change answer helpers', () => {
@@ -31,31 +31,27 @@ describe('change answer helpers', () => {
     })
   })
 
-  describe('withBackLinkUnlessDropout', () => {
-    const getQuotePageViewModel = (quoteData) => ({
-      pageHeading: 'Question',
-      savedAnswer: quoteData.planningType
-    })
-    const getViewModel = withBackLinkUnlessDropout({
-      getNextPage,
-      getQuotePageViewModel
-    })
+  describe('saveToSessionUnlessDropout', () => {
+    it('does not save an answer that leads to a dropout page', () => {
+      const saveToSession = vi.fn()
+      const save = saveToSessionUnlessDropout({ getNextPage, saveToSession })
 
-    it('spreads the quote page view model and links back to the dropout page while the answer is ineligible', () => {
-      expect(getViewModel({ planningType: 'other' }, {})).toEqual({
-        pageHeading: 'Question',
-        savedAnswer: 'other',
-        backLinkPath: '/request-to-use/change/application-type-not-available'
+      expect(save('request', { planningType: 'other' })).toEqual({
+        planningType: 'other'
       })
+      expect(saveToSession).not.toHaveBeenCalled()
     })
 
-    it('links back to the review and amend page once the answer is eligible', () => {
+    it('saves an eligible answer', () => {
+      const sessionData = { planningType: 'outline-planning-permission' }
+      const saveToSession = vi.fn(() => sessionData)
+      const save = saveToSessionUnlessDropout({ getNextPage, saveToSession })
+
       expect(
-        getViewModel({ planningType: 'full-planning-permission' }, {})
-      ).toEqual({
-        pageHeading: 'Question',
-        savedAnswer: 'full-planning-permission',
-        backLinkPath: '/request-to-use/review-quote-details'
+        save('request', { planningType: 'outline-planning-permission' })
+      ).toBe(sessionData)
+      expect(saveToSession).toHaveBeenCalledWith('request', {
+        planningType: 'outline-planning-permission'
       })
     })
   })

@@ -1,8 +1,8 @@
 import getPlanningTypeViewModel from '../../../quote/planning-type/get-view-model.js'
-import getNextPage from '../../../quote/planning-type/get-next-page.js'
-import { withBackLinkUnlessDropout } from '../../helpers/change-answer/index.js'
+import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { withBackLink } from '../../helpers/change-answer/index.js'
 
-export default withBackLinkUnlessDropout({
-  getNextPage,
+export default withBackLink({
+  backLinkPath: reviewQuoteDetailsPath,
   getQuotePageViewModel: getPlanningTypeViewModel
 })
