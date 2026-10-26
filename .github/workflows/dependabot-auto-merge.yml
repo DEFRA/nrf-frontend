@@ -1,0 +1,36 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Approve and auto-merge minor and patch npm updates
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve and enable auto-merge
+        if: steps.metadata.outputs.package-ecosystem == 'npm_and_yarn'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATED_DEPENDENCIES: ${{ steps.metadata.outputs.updated-dependencies-json }}
+        run: |
+          if jq -e 'any(.[]; .updateType == "version-update:semver-major")' <<< "$UPDATED_DEPENDENCIES" > /dev/null; then
+            echo "Major update present - leaving for manual review"
+            exit 0
+          fi
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
