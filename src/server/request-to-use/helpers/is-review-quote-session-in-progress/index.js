@@ -1,5 +1,8 @@
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
+import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
+import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
 import { isQuoteDataComplete } from '../../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../request-to-use-session/index.js'
 
@@ -10,10 +13,21 @@ import { requestToUseSession } from '../request-to-use-session/index.js'
 const isReviewQuoteSessionValid = (request) =>
   isQuoteDataComplete(request) && requestToUseSession.get(request) !== null
 
+// The review page and the change pages its change links open all need the
+// complete saved quote and the request to use session magic link redemption
+// (NRF2-1256) sets: editing one of these answers cannot break the quote's
+// completeness.
+const guardedPaths = new Set([
+  reviewQuoteDetailsPath,
+  changePlanningTypePath,
+  changeConfirmHousingPath,
+  changeUnitNumberPath
+])
+
 /**
- * Redirects to the start page when the review quote details page is requested
- * without both a complete saved quote and a request to use session, which
- * magic link redemption (NRF2-1256) sets.
+ * Redirects to the start page when the review quote details page or one of its
+ * change pages is requested without both a complete saved quote and a request
+ * to use session, which magic link redemption (NRF2-1256) sets.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {
@@ -21,7 +35,7 @@ export const checkForValidReviewQuoteSession = (request, h) => {
   // must be guarded too or the page handler runs unguarded.
   if (
     (request.method !== 'get' && request.method !== 'head') ||
-    request.path !== reviewQuoteDetailsPath
+    !guardedPaths.has(request.path)
   ) {
     return h.continue
   }

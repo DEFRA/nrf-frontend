@@ -22,7 +22,8 @@ const validEmail = fullQuote.email.address
 const guardedPaths = [
   haveNrlReferencePath,
   enterNrlReferencePath,
-  enterEmailPath
+  enterEmailPath,
+  noNrlReferencePath
 ]
 
 describe('checkForValidRetrieveQuoteSession', () => {
@@ -85,7 +86,7 @@ describe('checkForValidRetrieveQuoteSession', () => {
     expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
 
-  it.each([haveNrlReferencePath, enterNrlReferencePath])(
+  it.each([haveNrlReferencePath, enterNrlReferencePath, noNrlReferencePath])(
     'redirects %s to the start page when only an email remains after it was accepted',
     (path) => {
       const h = createMockRedirectToolkit()
@@ -129,22 +130,70 @@ describe('checkForValidRetrieveQuoteSession', () => {
     }
   )
 
-  it.each([
-    whatWouldYouLikeToDoPath,
-    noNrlReferencePath,
-    emailConfirmationPath,
-    quoteNotMatchedPath,
-    planningTypePath
-  ])('does not guard %s', (path) => {
+  it('continues on the details do not match page when a quote failed to match', () => {
     const h = createMockRedirectToolkit()
 
     const result = checkForValidRetrieveQuoteSession(
-      createRetrieveQuoteRequest({ path, session: {} }),
+      createRetrieveQuoteRequest({
+        path: quoteNotMatchedPath,
+        session: {
+          manage: requestToUseJourneySession.manage,
+          retrieveQuote: {
+            hasNrlReference: 'yes',
+            nrlReference: validReference,
+            email: validEmail
+          }
+        }
+      }),
       h
     )
 
     expect(result).toBe(h.continue)
   })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'no email was submitted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { hasNrlReference: 'yes', nrlReference: validReference }
+      }
+    },
+    {
+      scenario: 'the email was accepted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { email: validEmail }
+      }
+    }
+  ])(
+    'redirects the details do not match page to the start page when $scenario',
+    ({ session }) => {
+      const h = createMockRedirectToolkit()
+
+      checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({ path: quoteNotMatchedPath, session }),
+        h
+      )
+
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
+
+  it.each([whatWouldYouLikeToDoPath, planningTypePath])(
+    'does not guard %s',
+    (path) => {
+      const h = createMockRedirectToolkit()
+
+      const result = checkForValidRetrieveQuoteSession(
+        createRetrieveQuoteRequest({ path, session: {} }),
+        h
+      )
+
+      expect(result).toBe(h.continue)
+    }
+  )
 
   it('does not guard non-GET requests', () => {
     const h = createMockRedirectToolkit()
@@ -226,5 +275,44 @@ describe('checkForValidRetrieveQuoteSession', () => {
 
       expect(h.redirect).toHaveBeenCalledWith(startPath)
     })
+  })
+})
+
+describe('checkForValidRetrieveQuoteSession on the confirmation page', () => {
+  it('continues once the email was accepted', () => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidRetrieveQuoteSession(
+      createRetrieveQuoteRequest({
+        path: emailConfirmationPath,
+        session: {
+          manage: requestToUseJourneySession.manage,
+          retrieveQuote: { email: validEmail }
+        }
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+  })
+
+  it.each([
+    { scenario: 'there is no session', session: {} },
+    {
+      scenario: 'the email was not accepted',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        retrieveQuote: { hasNrlReference: 'yes', nrlReference: validReference }
+      }
+    }
+  ])('redirects to the start page when $scenario', ({ session }) => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidRetrieveQuoteSession(
+      createRetrieveQuoteRequest({ path: emailConfirmationPath, session }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
 })

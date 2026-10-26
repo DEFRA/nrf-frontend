@@ -14,6 +14,7 @@ import { routePath as startPagePath } from '../../../server/manage/start-page/ro
 
 const MANAGE_SERVICE_NAME = 'Manage the nature restoration levy'
 const QUOTE_SERVICE_NAME = 'Get a quote for the nature restoration levy'
+const REQUEST_TO_USE_SERVICE_NAME = 'Request to use the nature restoration levy'
 
 const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
@@ -25,12 +26,12 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
     serviceName: QUOTE_SERVICE_NAME
   },
   {
-    prefix: '/accessibility',
-    serviceName: MANAGE_SERVICE_NAME
+    prefix: '/request-to-use',
+    serviceName: REQUEST_TO_USE_SERVICE_NAME
   },
   {
     prefix: '/accessibility',
-    serviceName: 'Manage the nature restoration levy'
+    serviceName: MANAGE_SERVICE_NAME
   },
   {
     prefix: '/cookies',

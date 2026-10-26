@@ -1,15 +1,10 @@
 import { getByRole, queryByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
-import { routePath as haveNrlReferencePath } from '../have-nrl-reference/route-path.js'
-import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route-path.js'
-import { routePath as enterEmailPath } from '../enter-email/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { submitForm } from '../../../test-utils/submit-form.js'
-import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
-import { mockEmailQuoteLink } from '../../../test-utils/mock-get-quote.js'
+import { withEmailAcceptedSession } from '../../../test-utils/with-email-accepted-session.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
 
@@ -17,11 +12,17 @@ const mswServer = setupMswServer()
 
 describe('We have sent you an email page', () => {
   const getServer = setupTestServer()
+  let cookie
+
+  beforeEach(async () => {
+    cookie = await withEmailAcceptedSession(getServer(), mswServer)
+  })
 
   it('should render a page heading and title', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     const { pageTitle, pageHeading } = getViewModel()
 
@@ -34,7 +35,8 @@ describe('We have sent you an email page', () => {
   it('should not render a back link', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
 
     expect(
@@ -45,7 +47,8 @@ describe('We have sent you an email page', () => {
   it('should show the email sent confirmation content', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
     const main = getByRole(document, 'main')
 
@@ -59,31 +62,10 @@ describe('We have sent you an email page', () => {
   })
 
   it('should show the email address the link was sent to', async () => {
-    mockEmailQuoteLink(mswServer)
-    const cookie = await withValidRetrieveQuoteSession(getServer())
-    const { cookie: haveReferenceCookie } = await submitForm({
-      requestUrl: haveNrlReferencePath,
-      server: getServer(),
-      formData: { hasNrlReference: 'yes' },
-      cookie
-    })
-    const { cookie: referenceCookie } = await submitForm({
-      requestUrl: enterNrlReferencePath,
-      server: getServer(),
-      formData: { nrlReference: fullQuote.reference },
-      cookie: haveReferenceCookie
-    })
-    const { cookie: submittedCookie } = await submitForm({
-      requestUrl: enterEmailPath,
-      server: getServer(),
-      formData: { email: fullQuote.email.address },
-      cookie: referenceCookie
-    })
-
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer(),
-      cookie: submittedCookie
+      cookie
     })
 
     expect(getByRole(document, 'main')).toHaveTextContent(
@@ -94,9 +76,17 @@ describe('We have sent you an email page', () => {
   it('should show contact details for help with the nature restoration levy', async () => {
     const document = await loadPage({
       requestUrl: routePath,
-      server: getServer()
+      server: getServer(),
+      cookie
     })
 
     assertContactDetails(document)
+  })
+
+  it('should redirect to the start page without an accepted email', async () => {
+    const response = await getServer().inject({ method: 'GET', url: routePath })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/manage/start-page')
   })
 })
