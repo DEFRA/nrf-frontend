@@ -1,17 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+import { mockRecalculateLevy } from '../../../test-utils/mock-recalculate-levy.js'
+import { recalculatedLevy } from '../../../test-utils/fixtures/levy.js'
 
 const mockApiKeyRef = vi.hoisted(() => ({ current: '' }))
 
 vi.mock('../../../config/config.js', () => ({
   config: {
     get: vi.fn((key) => {
-      if (key === 'map.impactAssessorBaseUrl') {
+      if (key === 'impactAssessor.baseUrl') {
         return 'https://impact-assessor.example'
       }
       if (key === 'tracing.header') {
         return 'x-cdp-request-id'
       }
-      if (key === 'map.impactAssessorApiKey') {
+      if (key === 'impactAssessor.apiKey') {
         return mockApiKeyRef.current
       }
       return null
@@ -28,7 +31,9 @@ vi.mock('../helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-const { getMapTile } = await import('./ia-map-tile-server.js')
+const { getMapTile, recalculateLevy } = await import('./nrf-impact-assessor.js')
+
+const mswServer = setupMswServer()
 
 function createMockRequest(query = {}) {
   return { query }
@@ -85,7 +90,7 @@ describe('getMapTile', () => {
     expect(result).toBe(mockResponse)
   })
 
-  it('includes the x-api-key header when map.impactAssessorApiKey is set', async () => {
+  it('includes the x-api-key header when impactAssessor.apiKey is set', async () => {
     mockApiKeyRef.current = 'secret-key'
 
     await getMapTile('tiles/7/1/2.mvt', createMockRequest())
@@ -97,4 +102,62 @@ describe('getMapTile', () => {
       })
     )
   })
+})
+
+describe('recalculateLevy', () => {
+  const units = 42
+  const requestDate = '2026-10-14'
+
+  beforeEach(() => {
+    mockApiKeyRef.current = ''
+  })
+
+  it('posts the units and request date to the levy recalculate endpoint', async () => {
+    const requests = mockRecalculateLevy(mswServer)
+
+    await recalculateLevy({ units, requestDate })
+
+    expect(requests).toHaveLength(1)
+    expect(requests[0].body).toEqual({ units, requestDate })
+  })
+
+  it('includes the edpId when given', async () => {
+    const requests = mockRecalculateLevy(mswServer)
+
+    await recalculateLevy({ edpId: 2, units, requestDate })
+
+    expect(requests[0].body).toEqual({ edpId: 2, units, requestDate })
+  })
+
+  it('sends the x-api-key header when impactAssessor.apiKey is set', async () => {
+    mockApiKeyRef.current = 'secret-key'
+    const requests = mockRecalculateLevy(mswServer)
+
+    await recalculateLevy({ units, requestDate })
+
+    expect(requests[0].headers['x-api-key']).toBe('secret-key')
+  })
+
+  it('returns the recalculated levy', async () => {
+    mockRecalculateLevy(mswServer)
+
+    const result = await recalculateLevy({ units, requestDate })
+
+    expect(result).toEqual(recalculatedLevy)
+  })
+
+  it.each([400, 404, 422, 500])(
+    'logs and throws a 500 when the impact assessor responds with %i',
+    async (status) => {
+      mockRecalculateLevy(mswServer, { status })
+
+      await expect(
+        recalculateLevy({ units, requestDate })
+      ).rejects.toMatchObject({ output: { statusCode: 500 } })
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        'Levy recalculation request to impact assessor failed'
+      )
+    }
+  )
 })

@@ -107,10 +107,8 @@ describe('#config', () => {
       )
     })
 
-    test('map.impactAssessorBaseUrl is set', () => {
-      expect(config.get('map.impactAssessorBaseUrl')).toBe(
-        'http://localhost:8085'
-      )
+    test('impactAssessor.baseUrl is set', () => {
+      expect(config.get('impactAssessor.baseUrl')).toBe('http://localhost:8085')
     })
 
     test('map.impactAssessorLayers is set', () => {
