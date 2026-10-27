@@ -10,11 +10,11 @@ const pageTitle = 'Boundary type'
 
 export default function getViewModel(quoteData = {}, query = {}) {
   // In change mode the back link returns to check-your-answers — but only
-  // while the quote is still complete enough to render it. Posting a
-  // different boundary entry type nulls boundaryGeojson (see
-  // saveQuoteDataToCache), so a stale boundary-type?change=true reached via
-  // the browser back button falls back to the normal back link instead of a
-  // 400 dead end.
+  // while the quote is still complete enough to render it (a boundary in the
+  // cache). saveBoundaryEntryTypeToCache keeps the boundary across entry type
+  // changes, so a draw/upload swap no longer clears it; the fallback to the
+  // normal back link only fires for a stale boundary-type?change=true reached
+  // with no boundary at all, avoiding a check-your-answers 400 dead end.
   const backLinkPath =
     isChangeMode(query) && quoteData?.boundaryGeojson
       ? checkYourAnswersPath

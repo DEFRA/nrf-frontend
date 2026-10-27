@@ -108,7 +108,7 @@ describe('Boundary type page', () => {
     )
   })
 
-  it('should continue to the map page without change=true when a change keeps Draw', async () => {
+  it('should continue to the map page carrying change=true when a change keeps Draw', async () => {
     const { response } = await submitForm({
       requestUrl: `${routePath}?change=true`,
       server: getServer(),
@@ -116,10 +116,10 @@ describe('Boundary type page', () => {
       cookie: await withCompleteQuoteSession(getServer())
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/draw-boundary')
+    expect(response.headers.location).toBe('/quote/draw-boundary?change=true')
   })
 
-  it('should continue to the upload page without change=true when a change selects Upload', async () => {
+  it('should continue to the upload page carrying change=true when a change selects Upload', async () => {
     const { response } = await submitForm({
       requestUrl: `${routePath}?change=true`,
       server: getServer(),
@@ -127,10 +127,10 @@ describe('Boundary type page', () => {
       cookie: await withCompleteQuoteSession(getServer())
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/upload-boundary')
+    expect(response.headers.location).toBe('/quote/upload-boundary?change=true')
   })
 
-  it('should fall back to the unit-number back link when a type change has cleared the boundary', async () => {
+  it('should keep the check-your-answers back link after switching entry type in change mode', async () => {
     const { cookie } = await submitForm({
       requestUrl: `${routePath}?change=true`,
       server: getServer(),
@@ -141,6 +141,18 @@ describe('Boundary type page', () => {
       requestUrl: `${routePath}?change=true`,
       server: getServer(),
       cookie
+    })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      checkYourAnswersPath
+    )
+  })
+
+  it('should fall back to the unit-number back link in change mode when there is no boundary in the cache', async () => {
+    const document = await loadPage({
+      requestUrl: `${routePath}?change=true`,
+      server: getServer(),
+      cookie: sessionCookie
     })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

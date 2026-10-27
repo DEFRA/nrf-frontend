@@ -52,13 +52,13 @@ describe('getViewModel', () => {
     expect(result.backLinkPath).toBe('/quote/upload-boundary')
   })
 
-  it('should link back to check-your-answers when change=true is in the query', () => {
+  it('should link back to upload-boundary carrying change=true when change=true is in the query', () => {
     const result = getViewModel({
       boundaryGeojson: {},
       query: { change: 'true' }
     })
 
-    expect(result.backLinkPath).toBe('/quote/check-your-answers')
+    expect(result.backLinkPath).toBe('/quote/upload-boundary?change=true')
   })
 
   it('should handle null boundaryGeojson with defaults', () => {
@@ -156,6 +156,15 @@ describe('getViewModel', () => {
     const result = getViewModel({ boundaryGeojson: {} })
 
     expect(result.boundaryTypePath).toBe('/quote/boundary-type')
+  })
+
+  it('should carry change=true in boundaryTypePath when change=true is in the query', () => {
+    const result = getViewModel({
+      boundaryGeojson: {},
+      query: { change: 'true' }
+    })
+
+    expect(result.boundaryTypePath).toBe('/quote/boundary-type?change=true')
   })
 
   it('should report uploadStatus success and no failureReason when there is no failure', () => {

@@ -4,7 +4,7 @@ import formValidation from '../../../quote/boundary-type/form-validation.js'
 import getNextPage from '../../../quote/boundary-type/get-next-page.js'
 import getViewModel from './get-view-model.js'
 import resolveRedirect from './resolve-redirect.js'
-import saveBoundaryEntryTypeToCache from './save-to-session.js'
+import saveBoundaryEntryTypeToCache from '../../../quote/boundary-type/save-to-session.js'
 import { routePath } from './route-path.js'
 
 export { routePath }

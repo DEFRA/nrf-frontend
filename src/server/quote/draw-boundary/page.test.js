@@ -97,7 +97,7 @@ describe('Draw boundary page', () => {
     )
   })
 
-  it('keeps the back link path at boundary-type when loaded with change=true', async () => {
+  it('keeps change mode in the back link and save URL when loaded with change=true', async () => {
     const cookie = await withValidQuoteSession(getServer())
     const document = await loadPage({
       requestUrl: `${routePath}?change=true`,
@@ -106,6 +106,13 @@ describe('Draw boundary page', () => {
     })
 
     const mapEl = document.getElementById('draw-boundary-map')
-    expect(mapEl).toHaveAttribute('data-back-link-path', '/quote/boundary-type')
+    expect(mapEl).toHaveAttribute(
+      'data-back-link-path',
+      '/quote/boundary-type?change=true'
+    )
+    expect(mapEl).toHaveAttribute(
+      'data-save-and-continue-url',
+      '/quote/draw-boundary/save?change=true'
+    )
   })
 })

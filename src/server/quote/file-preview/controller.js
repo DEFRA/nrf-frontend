@@ -66,7 +66,9 @@ export const createFilePreviewHandlers = ({
       !boundaryFailureReason
     ) {
       logger.info('map - no boundary data in session')
-      return h.redirect(retryUploadBoundaryPath)
+      return h.redirect(
+        appendChangeParam(retryUploadBoundaryPath, request.query)
+      )
     }
 
     const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson

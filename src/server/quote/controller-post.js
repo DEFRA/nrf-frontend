@@ -16,10 +16,10 @@ import {
  * @param {string} params.nextPage - journey-derived next page path
  * @param {object} params.query - the parsed request query
  * @param {boolean} [params.continueToNextPageInChangeMode=false] - when true,
- *   a change-mode POST still follows nextPage (without change=true). For
- *   pages like boundary-type whose answer starts a sub-journey (draw or
- *   upload) that must run in normal mode before the user returns to
- *   check-your-answers.
+ *   a change-mode POST still follows nextPage, carrying change=true so the
+ *   sub-journey it starts (boundary-type's draw or upload steps) keeps
+ *   running in change mode and returns to check-your-answers when it
+ *   completes.
  * @returns {string} redirect path
  */
 export const resolveChangeModeRedirect = ({
@@ -33,20 +33,21 @@ export const resolveChangeModeRedirect = ({
   if (isChangeMode(query) && !continueToNextPageInChangeMode) {
     return checkYourAnswersPath
   }
-  return nextPage
+  return appendChangeParam(nextPage, query)
 }
 
 export const quotePostController = ({
   formValidation,
   getNextPage,
   payloadOptions,
+  saveToSession = saveQuoteDataToCache,
   continueToNextPageInChangeMode = false
 }) =>
   createPostController({
     formValidation,
     getNextPage,
     payloadOptions,
-    saveToSession: saveQuoteDataToCache,
+    saveToSession,
     resolveRedirect: ({ nextPage, request }) =>
       resolveChangeModeRedirect({
         nextPage,

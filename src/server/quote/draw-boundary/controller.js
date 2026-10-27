@@ -5,7 +5,12 @@ import { createLogger } from '../../common/helpers/logging/logger.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as emailPath } from '../email/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { saveQuoteDataToCache } from '../helpers/quote-session-cache/index.js'
+import {
+  appendChangeParam,
+  isChangeMode
+} from '../helpers/change-mode/index.js'
 
 const logger = createLogger()
 
@@ -43,10 +48,11 @@ export async function checkBoundaryHandler(request, h) {
 /**
  * Builds the save handler for a drawn boundary. The success target is a
  * parameter because the request to use change alias returns to the review and
- * amend page instead of asking for the email again.
+ * amend page instead of asking for the email again; in change mode the quote
+ * journey returns to check-your-answers, where the email is already captured.
  * @param {object} [params]
  * @param {string} [params.successPath=emailPath] - where a boundary that
- *   intersects an EDP continues to
+ *   intersects an EDP continues to outside change mode
  * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
  */
 export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
@@ -86,16 +92,25 @@ export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
     // exclusion zone it is ineligible for the EDP, so the user must use the
     // Habitat Regulations instead. The impact assessor still populates
     // intersectingEdps in this case (the exclusion zones sit inside the EDP),
-    // so this check must come first.
+    // so this check must come first. The dropout redirects carry change=true
+    // so their back links keep the edit alive.
     if (intersectsExcludedArea) {
-      return h.redirect(excludedAreaPath).code(statusCodes.redirectAfterPost)
+      return h
+        .redirect(appendChangeParam(excludedAreaPath, request.query))
+        .code(statusCodes.redirectAfterPost)
     }
 
     if (intersectsEdp) {
-      return h.redirect(successPath).code(statusCodes.redirectAfterPost)
+      return h
+        .redirect(
+          isChangeMode(request.query) ? checkYourAnswersPath : successPath
+        )
+        .code(statusCodes.redirectAfterPost)
     }
 
-    return h.redirect(notInEdpPath).code(statusCodes.redirectAfterPost)
+    return h
+      .redirect(appendChangeParam(notInEdpPath, request.query))
+      .code(statusCodes.redirectAfterPost)
   }
 
 export const saveBoundaryHandler = createSaveBoundaryHandler()

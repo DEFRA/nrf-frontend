@@ -1,13 +1,13 @@
 import {
   saveQuoteDataToCache,
   getQuoteDataFromCache
-} from '../../../quote/helpers/quote-session-cache/index.js'
+} from '../helpers/quote-session-cache/index.js'
 
 /**
- * Saves the entry type without the quote journey's rule that a changed entry
- * type clears the boundary: in the change flow, browsing between drawing and
- * uploading must not discard the saved boundary — only a newly drawn or
- * uploaded boundary replaces it.
+ * Saves the entry type without the rule that a changed entry type clears the
+ * boundary: browsing between drawing and uploading must not discard the saved
+ * boundary — only a newly drawn or uploaded boundary replaces it. Shared by
+ * the quote journey and the request to use change alias.
  * @param {import('@hapi/hapi').Request} request
  * @param {object} payload - the validated payload
  * @returns {object} the merged quote session data
