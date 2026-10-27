@@ -16,6 +16,7 @@ import { routePath as noNrlReferencePath } from './no-nrl-reference/route-path.j
 import { routePath as quoteNotMatchedPath } from './quote-not-matched/route-path.js'
 import { routePath as emailConfirmationPath } from './email-confirmation/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
+import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
@@ -66,6 +67,7 @@ const reachablePaths = [
 const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
+  acceptLevyPath,
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
@@ -116,6 +118,19 @@ describe('After the retrieve quote email is sent', () => {
       const response = await getResponse({
         server: getServer(),
         requestUrl: reviewQuoteDetailsPath,
+        cookie
+      })
+
+      expect(response.statusCode).toBe(statusCodes.found)
+      expect(response.headers.location).toBe(startPath)
+    })
+
+    it('should redirect the accept levy page to the start page', async () => {
+      const cookie = await createSession(getServer())
+
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: acceptLevyPath,
         cookie
       })
 

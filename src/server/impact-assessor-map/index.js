@@ -9,7 +9,7 @@ export const impactAssessorMap = {
     name: 'impact-assessor-map',
     register(server) {
       logger.info(
-        `Impact assessor map proxy registered at ${routePath} -> ${config.get('map.impactAssessorBaseUrl')}`
+        `Impact assessor map proxy registered at ${routePath} -> ${config.get('impactAssessor.baseUrl')}`
       )
 
       server.route(routes)

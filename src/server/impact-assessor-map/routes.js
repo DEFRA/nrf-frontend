@@ -1,7 +1,7 @@
 import { config } from '../../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { statusCodes } from '../common/constants/status-codes.js'
-import { getMapTile } from '../common/services/ia-map-tile-server.js'
+import { getMapTile } from '../common/services/nrf-impact-assessor.js'
 import {
   getCachedTile,
   isAerialTilePath,

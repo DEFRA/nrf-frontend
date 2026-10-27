@@ -1,6 +1,8 @@
 import { getByRole, queryByRole } from '@testing-library/dom'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
+import { submitForm } from '../../../test-utils/submit-form.js'
+import { mockRecalculateLevy } from '../../../test-utils/mock-recalculate-levy.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -186,6 +188,47 @@ describe('Review and amend the quote details page', () => {
     expect(boundaryValue).toHaveTextContent(hostileFilename)
     expect(boundaryValue.querySelector('script')).toBeNull()
   })
+
+  it('should recalculate the levy and redirect to the accept levy page on continue', async () => {
+    const requests = mockRecalculateLevy(mswServer)
+    const cookie = await withCompleteQuoteSession(getSeededServer())
+
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: {},
+      cookie
+    })
+
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe('/request-to-use/accept-levy')
+    expect(requests.map(({ body }) => body)).toEqual([
+      {
+        units: 42,
+        requestDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+      }
+    ])
+  })
+
+  it.each([404, 422, 500])(
+    'should show the 500 error page when the levy recalculation fails with %i',
+    async (status) => {
+      mockRecalculateLevy(mswServer, { status })
+      const cookie = await withCompleteQuoteSession(getSeededServer())
+
+      const { response, document } = await submitForm({
+        requestUrl: routePath,
+        server: getSeededServer(),
+        formData: {},
+        cookie
+      })
+
+      expect(response.statusCode).toBe(500)
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'Sorry, there is a problem with the service'
+      )
+    }
+  )
 
   it('should not render a back link or a delete link', async () => {
     const cookie = await withCompleteQuoteSession(getSeededServer())

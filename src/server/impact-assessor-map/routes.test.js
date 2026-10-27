@@ -23,13 +23,13 @@ vi.mock('../../config/config.js', () => ({
       if (key === 'map.aerialTileCacheControlMaxAge') {
         return 2592000
       }
-      if (key === 'map.impactAssessorBaseUrl') {
+      if (key === 'impactAssessor.baseUrl') {
         return impactAssessorBaseUrl
       }
       if (key === 'tracing.header') {
         return 'x-cdp-request-id'
       }
-      if (key === 'map.impactAssessorApiKey') {
+      if (key === 'impactAssessor.apiKey') {
         return ''
       }
       return null
