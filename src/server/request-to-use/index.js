@@ -3,6 +3,7 @@ import routesNoNrlReference from './no-nrl-reference/routes.js'
 import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesEnterEmail from './enter-email/routes.js'
 import routesEmailConfirmation from './email-confirmation/routes.js'
+import routesEnterAddress from './enter-address/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesChangePlanningType from './change/planning-type/routes.js'
@@ -32,6 +33,7 @@ export const requestToUse = {
         ...routesNoNrlReference,
         ...routesEnterEmail,
         ...routesEmailConfirmation,
+        ...routesEnterAddress,
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
         ...routesChangePlanningType,

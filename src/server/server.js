@@ -17,6 +17,7 @@ import { secureContext } from '@defra/hapi-secure-context'
 import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 import { applySecurityHeaders } from './common/helpers/security-headers.js'
 import { defraIdentity } from './plugins/defra-identity.js'
+import { registerAuthRules } from './auth/auth-rules.js'
 import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { createLogger } from './common/helpers/logging/logger.js'
@@ -30,7 +31,6 @@ export async function createServer() {
     host: config.get('host'),
     port: config.get('port'),
     routes: {
-      auth: false,
       validate: {
         options: {
           abortEarly: false
@@ -108,6 +108,8 @@ export async function createServer() {
       // Don't throw - allow server to start without auth for debugging
     }
   }
+
+  registerAuthRules(server)
 
   // Register routes after auth is configured
   await server.register(router)

@@ -8,10 +8,10 @@ import {
   vi
 } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import Jwt from '@hapi/jwt'
 import { within } from '@testing-library/dom'
 
 import { config } from '../../config/config.js'
+import { defraIdSignInHandlers } from '../../test-utils/defra-id-sign-in-handlers.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { mockUser } from '../../test-utils/fixtures/mock-user.js'
 import { loadPage } from '../../test-utils/load-page.js'
@@ -21,15 +21,8 @@ import {
 } from '../../test-utils/fixtures/defra-id-org-claims.js'
 
 const PROFILE_PATH = '/profile'
-const SIGN_IN_PATH = '/login'
-const SIGNING_SECRET = 'test-signing-secret-not-for-production'
+const SIGN_IN_PATH = '/auth/sign-in'
 
-const defraIdBaseUrl = config.get('defraId.baseUrl')
-const wellKnownUrl = new URL(
-  config.get('defraId.wellKnownPath'),
-  defraIdBaseUrl
-).toString()
-const tokenUrl = `${defraIdBaseUrl}/token`
 const backendUrl = config.get('backend').apiUrl
 
 // Claims the mocked token endpoint issues; overridden per test, reset in afterEach
@@ -47,33 +40,12 @@ const defaultBackendUser = {
 let backendUser = { ...defaultBackendUser }
 
 setupMswServer(
-  http.get(wellKnownUrl, () =>
-    HttpResponse.json({
-      issuer: defraIdBaseUrl,
-      authorization_endpoint: `${defraIdBaseUrl}/authorize`,
-      token_endpoint: tokenUrl
-    })
-  ),
-  http.post(tokenUrl, () => {
-    const exp = Math.floor(Date.now() / 1000) + 3600
-    const token = Jwt.token.generate(
-      { ...tokenClaims, exp },
-      { key: SIGNING_SECRET }
-    )
-    return HttpResponse.json({
-      access_token: token,
-      refresh_token: 'test-refresh-token',
-      id_token: token,
-      expires_in: 3600
-    })
+  ...defraIdSignInHandlers({
+    getClaims: () => tokenClaims,
+    onUserSync: (body) => backendRequests.push(body)
   }),
   // The full user record (incl. linked organisations) the profile page fetches
-  http.get(`${backendUrl}/users`, () => HttpResponse.json(backendUser)),
-  // Records the user sync PATCH so it can be asserted on
-  http.patch(`${backendUrl}/users`, async ({ request }) => {
-    backendRequests.push(await request.json())
-    return new HttpResponse(null, { status: 204 })
-  })
+  http.get(`${backendUrl}/users`, () => HttpResponse.json(backendUser))
 )
 
 let server
@@ -170,7 +142,7 @@ describe('Profile page', () => {
   })
 
   describe('organisation heading', () => {
-    const changeLinkName = 'Change who you’re representing'
+    const changeLinkName = 'Change organisation'
 
     const loadSignedInProfile = async () => {
       const { cookie } = await completeDefraSignIn({ server })
