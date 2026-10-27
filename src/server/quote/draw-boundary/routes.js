@@ -24,13 +24,13 @@ export const savePath = '/quote/draw-boundary/save'
  * @returns {Array<object>} the check and save route configs
  */
 export const createDrawBoundaryApiRoutes = ({
-  checkPath,
-  savePath,
+  checkPath: checkRoutePath = checkPath,
+  savePath: saveRoutePath = savePath,
   saveHandler = saveBoundaryHandler
 }) => [
   {
     method: 'POST',
-    path: checkPath,
+    path: checkRoutePath,
     options: {
       plugins: {
         crumb: { restful: true }
@@ -60,7 +60,7 @@ export const createDrawBoundaryApiRoutes = ({
   },
   {
     method: 'POST',
-    path: savePath,
+    path: saveRoutePath,
     options: {
       plugins: {
         crumb: { restful: true }

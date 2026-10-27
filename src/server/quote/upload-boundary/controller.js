@@ -61,7 +61,7 @@ export const createUploadBoundaryHandler = ({
   checkingFilePath: redirectPath = checkingFilePath,
   getViewModel: buildViewModel = getViewModel
 } = {}) =>
-  async function handler(request, h) {
+  async function uploadBoundaryHandler(request, h) {
     const viewModel = buildViewModel({}, request.query)
 
     // Clear any stale boundary data from a previous upload attempt

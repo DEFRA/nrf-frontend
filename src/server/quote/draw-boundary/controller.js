@@ -56,7 +56,7 @@ export async function checkBoundaryHandler(request, h) {
  * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
  */
 export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
-  function saveBoundaryHandler(request, h) {
+  function saveBoundary(request, h) {
     const {
       boundaryGeojson: {
         intersectingEdps,

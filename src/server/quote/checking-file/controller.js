@@ -43,13 +43,13 @@ const UPLOAD_REJECTION_CODES = new Set([
  * @param {string} params.failureReason
  * @param {object} params.request
  * @param {object} params.h
- * @param {string} params.uploadBoundaryPath
+ * @param {string} params.retryUploadBoundaryPath
  */
 function redirectToUploadWithError({
   failureReason,
   request,
   h,
-  uploadBoundaryPath
+  retryUploadBoundaryPath
 }) {
   const validationErrors = mapValidationErrorsForDisplay([
     { path: ['file'], message: getBoundaryErrorMessage(failureReason) }
@@ -59,7 +59,7 @@ function redirectToUploadWithError({
   request.yar.clear('pendingUploadId')
   request.yar.clear('pendingUploadUrl')
   return h
-    .redirect(appendChangeParam(uploadBoundaryPath, request.query))
+    .redirect(appendChangeParam(retryUploadBoundaryPath, request.query))
     .code(statusCodes.redirectAfterPost)
 }
 
@@ -68,15 +68,15 @@ function redirectToUploadWithError({
  * @param {string} params.uploadId
  * @param {object} params.request
  * @param {object} params.h
- * @param {string} params.uploadBoundaryPath - where a rejected upload retries
- * @param {string} params.filePreviewPath - where a checked boundary continues
+ * @param {string} params.retryUploadBoundaryPath - where a rejected upload retries
+ * @param {string} params.previewPath - where a checked boundary continues
  */
 async function processBoundaryCheck({
   uploadId,
   request,
   h,
-  uploadBoundaryPath,
-  filePreviewPath
+  retryUploadBoundaryPath,
+  previewPath
 }) {
   logger.info({ uploadId }, 'check-boundary')
 
@@ -92,7 +92,7 @@ async function processBoundaryCheck({
         failureReason: result.failureReason,
         request,
         h,
-        uploadBoundaryPath
+        retryUploadBoundaryPath
       })
     }
 
@@ -103,7 +103,7 @@ async function processBoundaryCheck({
     request.yar.clear('pendingUploadId')
     request.yar.clear('pendingUploadUrl')
     return h
-      .redirect(appendChangeParam(filePreviewPath, request.query))
+      .redirect(appendChangeParam(previewPath, request.query))
       .code(statusCodes.redirectAfterPost)
   }
 
@@ -113,7 +113,7 @@ async function processBoundaryCheck({
   request.yar.clear('boundaryFailureReason')
 
   return h
-    .redirect(appendChangeParam(filePreviewPath, request.query))
+    .redirect(appendChangeParam(previewPath, request.query))
     .code(statusCodes.redirectAfterPost)
 }
 
@@ -130,7 +130,7 @@ export const createCheckingFileHandler = ({
   uploadBoundaryPath: retryUploadBoundaryPath = uploadBoundaryPath,
   filePreviewPath: previewPath = filePreviewPath
 } = {}) =>
-  async function handler(request, h) {
+  async function checkingFileHandler(request, h) {
     const uploadId = request.yar.get('pendingUploadId')
     logger.info({ uploadId }, 'upload-received')
     if (!uploadId) {
@@ -148,8 +148,8 @@ export const createCheckingFileHandler = ({
         uploadId,
         request,
         h,
-        uploadBoundaryPath: retryUploadBoundaryPath,
-        filePreviewPath: previewPath
+        retryUploadBoundaryPath,
+        previewPath
       })
     }
 
@@ -167,7 +167,7 @@ export const createCheckingFileHandler = ({
         failureReason: BOUNDARY_ERRORS.UPLOAD.UPLOAD_STATUS_CHECK_FAILED,
         request,
         h,
-        uploadBoundaryPath: retryUploadBoundaryPath
+        retryUploadBoundaryPath
       })
     }
 
@@ -189,7 +189,7 @@ export async function checkBoundaryHandler(request, h) {
     uploadId: id,
     request,
     h,
-    uploadBoundaryPath,
-    filePreviewPath
+    retryUploadBoundaryPath: uploadBoundaryPath,
+    previewPath: filePreviewPath
   })
 }

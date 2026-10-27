@@ -38,6 +38,68 @@ function redirectToExcludedArea(boundaryGeojson, request, h) {
 }
 
 /**
+ * Builds the file preview page's POST handler, which promotes the checked
+ * boundary to the quote cache and routes ineligible boundaries to their
+ * outcome page. The paths are parameters for the same reason as the GET's.
+ * @param {object} params
+ * @param {string} params.retryUploadBoundaryPath - where a user without a
+ *   boundary in session is sent to upload one
+ * @param {string} params.successPath - where an accepted boundary continues
+ *   to when not editing from check-your-answers
+ * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
+ */
+function createPostHandler({ retryUploadBoundaryPath, successPath }) {
+  return function saveUploadedBoundary(request, h) {
+    const boundaryGeojson = request.yar.get('boundaryGeojson')
+    const quoteCache = getQuoteDataFromCache(request)
+
+    // if the user has previously saved from this screen and come back to it, the boundaryGeojson session key will have been cleared by this handler; so also check for the main quote session cache
+    if (!boundaryGeojson && !quoteCache.boundaryGeojson) {
+      return h
+        .redirect(appendChangeParam(retryUploadBoundaryPath, request.query))
+        .code(statusCodes.redirectAfterPost)
+    }
+
+    // Lift the filename out of the geojson blob so it lives at the top of the
+    // quote cache alongside other submit fields, and posts to the backend as a
+    // top-level column rather than a buried property.
+    const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
+
+    if (boundaryGeojson) {
+      promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
+    }
+
+    // The GET handler redirects non-intersecting boundaries away before the
+    // form renders, but guard the POST too in case of a stale or direct submit.
+    const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
+    const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
+    const intersectsExcludedArea =
+      resolvedGeojson?.intersectingExcludedAreas?.length > 0
+    if (intersectsExcludedArea) {
+      return h
+        .redirect(appendChangeParam(excludedAreaPath, request.query))
+        .code(statusCodes.redirectAfterPost)
+    }
+    if (!intersectsEdp) {
+      return h
+        .redirect(appendChangeParam(notInEdpPath, request.query))
+        .code(statusCodes.redirectAfterPost)
+    }
+
+    // When editing from check-your-answers the email is already captured, so
+    // return there instead of asking for it again. The eligibility dead ends
+    // above still take precedence: a boundary outside the EDP (or in an
+    // exclusion zone) can't be quoted either way. The form posts back to the
+    // current URL, so the change=true query param arrives on the POST too.
+    return h
+      .redirect(
+        isChangeMode(request.query) ? checkYourAnswersPath : successPath
+      )
+      .code(statusCodes.redirectAfterPost)
+  }
+}
+
+/**
  * Builds the file preview page's GET and POST handlers. The paths are
  * parameters because the request to use change alias keeps its retry hop
  * inside that journey and returns to the review and amend page instead of
@@ -108,54 +170,7 @@ export const createFilePreviewHandlers = ({
     })
   },
 
-  postHandler(request, h) {
-    const boundaryGeojson = request.yar.get('boundaryGeojson')
-    const quoteCache = getQuoteDataFromCache(request)
-
-    // if the user has previously saved from this screen and come back to it, the boundaryGeojson session key will have been cleared by this handler; so also check for the main quote session cache
-    if (!boundaryGeojson && !quoteCache.boundaryGeojson) {
-      return h
-        .redirect(appendChangeParam(retryUploadBoundaryPath, request.query))
-        .code(statusCodes.redirectAfterPost)
-    }
-
-    // Lift the filename out of the geojson blob so it lives at the top of the
-    // quote cache alongside other submit fields, and posts to the backend as a
-    // top-level column rather than a buried property.
-    const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
-
-    if (boundaryGeojson) {
-      promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
-    }
-
-    // The GET handler redirects non-intersecting boundaries away before the
-    // form renders, but guard the POST too in case of a stale or direct submit.
-    const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
-    const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
-    const intersectsExcludedArea =
-      resolvedGeojson?.intersectingExcludedAreas?.length > 0
-    if (intersectsExcludedArea) {
-      return h
-        .redirect(appendChangeParam(excludedAreaPath, request.query))
-        .code(statusCodes.redirectAfterPost)
-    }
-    if (!intersectsEdp) {
-      return h
-        .redirect(appendChangeParam(notInEdpPath, request.query))
-        .code(statusCodes.redirectAfterPost)
-    }
-
-    // When editing from check-your-answers the email is already captured, so
-    // return there instead of asking for it again. The eligibility dead ends
-    // above still take precedence: a boundary outside the EDP (or in an
-    // exclusion zone) can't be quoted either way. The form posts back to the
-    // current URL, so the change=true query param arrives on the POST too.
-    return h
-      .redirect(
-        isChangeMode(request.query) ? checkYourAnswersPath : successPath
-      )
-      .code(statusCodes.redirectAfterPost)
-  }
+  postHandler: createPostHandler({ retryUploadBoundaryPath, successPath })
 })
 
 export const { handler, postHandler } = createFilePreviewHandlers()
