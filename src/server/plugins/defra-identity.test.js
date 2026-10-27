@@ -51,7 +51,8 @@ const generateToken = (expiresInSec) => {
 const createMockServer = () => ({
   auth: {
     scheme: vi.fn(),
-    strategy: vi.fn()
+    strategy: vi.fn(),
+    default: vi.fn()
   },
   ext: vi.fn()
 })
@@ -113,6 +114,15 @@ describe('defra-identity plugin', () => {
         'defra-session',
         'yar-session'
       )
+    })
+
+    it('tries the session strategy on every route so pages know who is signed in', async () => {
+      await registerPlugin()
+
+      expect(server.auth.default).toHaveBeenCalledWith({
+        strategy: 'defra-session',
+        mode: 'try'
+      })
     })
 
     it('does not register a Bell (defra-id) strategy or fetch OIDC config at boot', async () => {

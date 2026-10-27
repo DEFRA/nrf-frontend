@@ -6,10 +6,12 @@ import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
 import {
+  AUTH_SIGN_IN_PATH,
   CHANGE_ORGANISATION_QUERY_PARAM,
   RETURN_PATH,
   SIGNED_OUT_PATH
 } from './auth-urls.js'
+import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/routes.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
@@ -17,27 +19,20 @@ import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
 const logger = createLogger()
 
 /**
- * Display login page
+ * @param {import('@hapi/hapi').ResponseToolkit} h
+ * @param {string} error - message shown to the user
+ * @param {number} [statusCode] - HTTP status of the error page
+ * @returns {import('@hapi/hapi').ResponseObject} the sign-in error page
  */
-export const loginController = {
-  handler(request, h) {
-    // Redirect authenticated users to home
-    if (request.auth?.isAuthenticated) {
-      return h.redirect(startPath)
-    }
-
-    const authEnabled = request.server.app.authEnabled || false
-
-    return h.view('auth/login', {
-      pageTitle: 'Sign in',
-      heading: 'Sign in to continue',
-      authEnabled
+const signInErrorView = (h, error, statusCode = statusCodes.badRequest) =>
+  h
+    .view('auth/sign-in-error', {
+      pageTitle: 'Authentication error',
+      heading: 'Authentication error',
+      signInPath: AUTH_SIGN_IN_PATH,
+      error
     })
-  },
-  options: {
-    auth: false // Login page doesn't require authentication
-  }
-}
+    .code(statusCode)
 
 /**
  * Initiate OAuth flow - redirects to DEFRA Identity
@@ -82,33 +77,28 @@ export const signInOidcController = {
         error: request.query.error,
         description: request.query.error_description
       })
-      return h.view('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
-        error:
-          request.query.error_description ||
+      return signInErrorView(
+        h,
+        request.query.error_description ||
           'Authentication failed. Please try again.'
-      })
+      )
     }
 
     // Verify state parameter for CSRF protection
     const expectedState = request.yar.get('oauth_state')
     if (!expectedState || request.query.state !== expectedState) {
       logger.error('OAuth state mismatch')
-      return h.view('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
-        error: 'Invalid authentication state. Please try again.'
-      })
+      return signInErrorView(
+        h,
+        'Invalid authentication state. Please try again.'
+      )
     }
     request.yar.clear('oauth_state')
 
     // Check for authorization code
     if (!request.query.code) {
       logger.warn('OAuth callback received without authorization code')
-      return h.redirect('/login')
+      return signInErrorView(h, 'Authentication failed. Please try again.')
     }
 
     try {
@@ -191,12 +181,11 @@ export const signInOidcController = {
       return h.redirect(getSafeRedirect(redirect))
     } catch (error) {
       logger.error(error, 'Token exchange failed')
-      return h.view('auth/login', {
-        pageTitle: 'Sign in',
-        heading: 'Authentication Error',
-        authEnabled: true,
-        error: 'Authentication failed during token exchange. Please try again.'
-      })
+      return signInErrorView(
+        h,
+        'Authentication failed during token exchange. Please try again.',
+        statusCodes.internalServerError
+      )
     }
   },
   options: {
