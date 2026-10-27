@@ -68,7 +68,9 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     changePlanningTypePath,
     changeConfirmHousingPath,
-    changeUnitNumberPath
+    changeUnitNumberPath,
+    changeApplicationTypeNotAvailablePath,
+    changeNotHousingPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -79,71 +81,6 @@ describe('checkForValidReviewQuoteSession', () => {
 
     expect(result).toBe(h.continue)
     expect(h.redirect).not.toHaveBeenCalled()
-  })
-
-  describe('dropout change pages', () => {
-    it('continues on a dropout page when the change POST just granted it and consumes the grant', () => {
-      const h = createMockRedirectToolkit()
-      const request = createReviewQuoteRequest({
-        path: changeNotHousingPath,
-        session: {
-          ...reviewQuoteSession,
-          dropoutJustReached: changeNotHousingPath
-        }
-      })
-
-      const result = checkForValidReviewQuoteSession(request, h)
-
-      expect(result).toBe(h.continue)
-      expect(request.yar.get('dropoutJustReached')).toBe(null)
-    })
-
-    it('redirects a dropout page to the review page when no change just granted it', () => {
-      const h = createMockRedirectToolkit()
-
-      checkForValidReviewQuoteSession(
-        createReviewQuoteRequest({ path: changeNotHousingPath }),
-        h
-      )
-
-      expect(h.redirect).toHaveBeenCalledWith(reviewQuoteDetailsPath)
-    })
-
-    it('redirects a dropout page to the review page when the grant is for the other dropout page', () => {
-      const h = createMockRedirectToolkit()
-
-      checkForValidReviewQuoteSession(
-        createReviewQuoteRequest({
-          path: changeNotHousingPath,
-          session: {
-            ...reviewQuoteSession,
-            dropoutJustReached: changeApplicationTypeNotAvailablePath
-          }
-        }),
-        h
-      )
-
-      expect(h.redirect).toHaveBeenCalledWith(reviewQuoteDetailsPath)
-    })
-
-    it('serves HEAD from the grant without consuming it', () => {
-      const h = createMockRedirectToolkit()
-      const request = createReviewQuoteRequest({
-        path: changeApplicationTypeNotAvailablePath,
-        method: 'head',
-        session: {
-          ...reviewQuoteSession,
-          dropoutJustReached: changeApplicationTypeNotAvailablePath
-        }
-      })
-
-      const result = checkForValidReviewQuoteSession(request, h)
-
-      expect(result).toBe(h.continue)
-      expect(request.yar.get('dropoutJustReached')).toBe(
-        changeApplicationTypeNotAvailablePath
-      )
-    })
   })
 
   it.each([

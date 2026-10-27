@@ -3,7 +3,6 @@ import { clearValidationFlashFromCache } from '../form-validation-session/index.
 import { retrieveQuoteSession } from '../../../request-to-use/helpers/retrieve-quote-session/index.js'
 import { requestToUseSession } from '../../../request-to-use/helpers/request-to-use-session/index.js'
 import { expiredLinkSession } from '../../../request-to-use/helpers/expired-link-session/index.js'
-import { dropoutAccessKey } from '../../../request-to-use/helpers/is-review-quote-session-in-progress/index.js'
 import {
   clearQuoteDataFromCache,
   getQuoteDataFromCache,
@@ -53,9 +52,6 @@ export const clearJourneySessions = (request) => {
   retrieveQuoteSession.clear(request)
   requestToUseSession.clear(request)
   expiredLinkSession.clear(request)
-  // The dropout grant is review-quote journey state: it must not survive a
-  // journey switch or a later magic link re-seed.
-  request.yar.clear(dropoutAccessKey)
 }
 
 /**

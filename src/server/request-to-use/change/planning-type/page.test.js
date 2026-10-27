@@ -124,7 +124,7 @@ describe('Change planning type page', () => {
     )
   })
 
-  it('should keep the saved answer and the review back link when backing out of the dropout page', async () => {
+  it('should save the ineligible answer so it stays selected when backing out of the dropout page', async () => {
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
@@ -138,9 +138,9 @@ describe('Change planning type page', () => {
       cookie
     })
 
-    // The ineligible answer was never saved: the original answer is still
-    // selected and the back link still returns to the review page.
-    expect(getByLabelText(document, 'Full planning permission')).toBeChecked()
+    // The ineligible answer is saved like any other: it stays selected on the
+    // change page, whose back link still returns to the review page.
+    expect(getByLabelText(document, 'Other')).toBeChecked()
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
       reviewQuoteDetailsPath

@@ -1,5 +1,4 @@
 import { isDropoutPage } from '../../../quote/helpers/change-mode/index.js'
-import { grantDropoutAccess } from '../is-review-quote-session-in-progress/index.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
@@ -36,38 +35,12 @@ export const dropoutPageAliases = new Map([
 
 /**
  * A saved edit returns to the review page rather than continuing the quote
- * journey. Dropout pages still win: an ineligible answer must show its dropout
- * page, at its change alias when one exists — and that redirect grants the
- * dropout page exactly one render, so the back button, a pasted URL or a
- * refresh cannot reach it afterwards (see grantDropoutAccess).
- * @param {{ nextPage: string, request: import('@hapi/hapi').Request }} params
+ * journey. Dropout pages still win: an ineligible answer is saved like any
+ * other and must show its dropout page, at its change alias when one exists.
+ * @param {{ nextPage: string }} params
  * @returns {string} redirect path
  */
-export const redirectToReviewPageUnlessDropout = ({ nextPage, request }) => {
-  if (isDropoutPage(nextPage)) {
-    const dropoutPath = dropoutPageAliases.get(nextPage) ?? nextPage
-    grantDropoutAccess(request, dropoutPath)
-    return dropoutPath
-  }
-
-  return reviewQuoteDetailsPath
-}
-
-/**
- * Wraps a change page's save so an ineligible answer never reaches the quote
- * cache: the dropout page still shows, but the session keeps the last
- * eligible answer, so the review page — and every back link to it — always
- * renders a real, quotable state. A stored quote can never hold an
- * ineligible answer either (those never reach check-your-answers), so an
- * edit that makes the quote ineligible is rejected, not recorded.
- * @param {object} params
- * @param {(sessionData: object | null) => string} params.getNextPage - the quote page's next-page decision, called on the submitted payload (single-question pages carry the field it reads)
- * @param {Function} params.saveToSession - the quote page's save
- * @returns {(request: import('@hapi/hapi').Request, payload: object) => object} the payload unsaved when it leads to a dropout, else the saved session data
- */
-export const saveToSessionUnlessDropout =
-  ({ getNextPage, saveToSession }) =>
-  (request, payload) =>
-    isDropoutPage(getNextPage(payload))
-      ? payload
-      : saveToSession(request, payload)
+export const redirectToReviewPageUnlessDropout = ({ nextPage }) =>
+  isDropoutPage(nextPage)
+    ? (dropoutPageAliases.get(nextPage) ?? nextPage)
+    : reviewQuoteDetailsPath

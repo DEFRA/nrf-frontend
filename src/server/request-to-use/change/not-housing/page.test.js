@@ -17,6 +17,8 @@ import { savedQuote } from '../../../../test-utils/fixtures/saved-quote.js'
 const mswServer = setupMswServer()
 
 const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/abc123_TOKEN-xyz`
+const pageHeading =
+  'Nature restoration levy is only available for housing units'
 
 describe('Change not housing page', () => {
   const getServer = setupTestServer()
@@ -49,7 +51,7 @@ describe('Change not housing page', () => {
     })
 
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Nature restoration levy is only available for housing units'
+      pageHeading
     )
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
@@ -57,16 +59,19 @@ describe('Change not housing page', () => {
     )
   })
 
-  it('should redirect to the review page when reached without a change just submitted', async () => {
-    const response = await getResponse({
-      server: getSeededServer(),
+  it('should render the dropout page whenever the review quote session is valid', async () => {
+    const document = await loadPage({
       requestUrl: routePath,
+      server: getSeededServer(),
       cookie: await withCompleteQuoteSession(getSeededServer())
     })
 
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(
-      '/request-to-use/review-quote-details'
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      pageHeading
+    )
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      changeConfirmHousingPath
     )
   })
 
@@ -95,7 +100,7 @@ describe('Change not housing page', () => {
     })
 
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Nature restoration levy is only available for housing units'
+      pageHeading
     )
   })
 })

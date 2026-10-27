@@ -154,28 +154,6 @@ describe('journey session', () => {
     })
   })
 
-  describe('dropout grant', () => {
-    it('is cleared when the journeys are cleared', () => {
-      const request = buildRequest({
-        dropoutJustReached: '/request-to-use/change/not-housing'
-      })
-
-      clearJourneySessions(request)
-
-      expect(request.yar.get('dropoutJustReached')).toBeNull()
-    })
-
-    it('is cleared when all session data is cleared', () => {
-      const request = buildRequest({
-        dropoutJustReached: '/request-to-use/change/not-housing'
-      })
-
-      clearAllSessionData(request)
-
-      expect(request.yar.get('dropoutJustReached')).toBeNull()
-    })
-  })
-
   describe('clearJourneySessions', () => {
     it('clears the quote, retrieve quote, request to use and expired link data but keeps manage', () => {
       const manage = { whatWouldYouLikeToDo: journeys.requestToUse }
