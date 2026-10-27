@@ -1,4 +1,5 @@
 import createDatasetsPlugin from '@defra/interactive-map/plugins/datasets'
+import { EDP_NAME } from '../../../../shared/edp.js'
 
 export const FILL_LAYER_IDS = ['edp_boundaries', 'excluded_areas']
 export const ALL_LAYER_IDS = FILL_LAYER_IDS.flatMap((id) => [
@@ -12,8 +13,7 @@ export function createMapDatasetsPlugin() {
     datasets: [
       {
         id: 'edp_boundaries',
-        label:
-          'Norfolk: Broads Special Area of Conservation (SAC) (Yare and Bure), Broadland Ramsar and River Wensum SAC Environmental Delivery Plan addressing nutrient pollution (2027 to 2037)',
+        label: EDP_NAME,
         tiles: ['/impact-assessor-map/tiles/edp_boundaries/{z}/{x}/{y}.mvt'],
         sourceLayer: 'edp_boundaries',
         showInKey: true,

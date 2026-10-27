@@ -6,6 +6,7 @@ import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesEnterAddress from './enter-address/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
+import routesAcceptLevy from './accept-levy/routes.js'
 import routesChangePlanningType from './change/planning-type/routes.js'
 import routesChangeConfirmHousing from './change/confirm-housing/routes.js'
 import routesChangeUnitNumber from './change/unit-number/routes.js'
@@ -34,6 +35,7 @@ export const requestToUse = {
         ...routesEnterAddress,
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
+        ...routesAcceptLevy,
         ...routesChangePlanningType,
         ...routesChangeConfirmHousing,
         ...routesChangeUnitNumber,
