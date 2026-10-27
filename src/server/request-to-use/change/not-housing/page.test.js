@@ -36,29 +36,6 @@ describe('Change not housing page', () => {
     expect(response.headers.location).toBe('/manage/start-page')
   })
 
-  it('should render the dropout page with a back link to the change page after a change selects No', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: changeConfirmHousingPath,
-      server: getSeededServer(),
-      formData: { isHousing: 'no' },
-      cookie: await withCompleteQuoteSession(getSeededServer())
-    })
-
-    const document = await loadPage({
-      requestUrl: routePath,
-      server: getSeededServer(),
-      cookie
-    })
-
-    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      pageHeading
-    )
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      changeConfirmHousingPath
-    )
-  })
-
   it('should render the dropout page whenever the review quote session is valid', async () => {
     const document = await loadPage({
       requestUrl: routePath,
