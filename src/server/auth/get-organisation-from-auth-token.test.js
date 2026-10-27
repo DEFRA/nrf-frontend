@@ -17,8 +17,7 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
 const defaultCitizen = {
   userRelationshipType: 'Citizen',
   hasMultipleOrgPickerEntries: false,
-  shouldShowOrgOrUserName: false,
-  shouldShowCitizenName: true
+  shouldShowCitizenName: false
 }
 
 describe('#getOrganisationFromToken', () => {
@@ -31,7 +30,6 @@ describe('#getOrganisationFromToken', () => {
           organisationName: firstOrgName,
           userRelationshipType: 'Employee',
           hasMultipleOrgPickerEntries: false,
-          shouldShowOrgOrUserName: true,
           shouldShowCitizenName: false
         }
       ],
@@ -42,7 +40,6 @@ describe('#getOrganisationFromToken', () => {
           organisationName: firstOrgName,
           userRelationshipType: 'Employee',
           hasMultipleOrgPickerEntries: true,
-          shouldShowOrgOrUserName: true,
           shouldShowCitizenName: false
         }
       ],
@@ -53,7 +50,6 @@ describe('#getOrganisationFromToken', () => {
           organisationName: firstOrgName,
           userRelationshipType: 'Employee',
           hasMultipleOrgPickerEntries: true,
-          shouldShowOrgOrUserName: true,
           shouldShowCitizenName: false
         }
       ],
@@ -64,7 +60,6 @@ describe('#getOrganisationFromToken', () => {
           organisationName: 'CDP Beneficiary Org',
           userRelationshipType: 'Agent',
           hasMultipleOrgPickerEntries: false,
-          shouldShowOrgOrUserName: false,
           shouldShowCitizenName: false
         }
       ],
@@ -75,7 +70,6 @@ describe('#getOrganisationFromToken', () => {
           organisationName: 'CDP Beneficiary Org',
           userRelationshipType: 'Agent',
           hasMultipleOrgPickerEntries: true,
-          shouldShowOrgOrUserName: true,
           shouldShowCitizenName: false
         }
       ],
@@ -86,8 +80,27 @@ describe('#getOrganisationFromToken', () => {
           organisationName: 'CDP Org',
           userRelationshipType: 'Citizen',
           hasMultipleOrgPickerEntries: false,
-          shouldShowOrgOrUserName: false,
+          shouldShowCitizenName: false
+        }
+      ],
+      [
+        'a Citizen with several enrolments',
+        { ...citizenClaims, enrolmentCount: 2 },
+        {
+          organisationName: 'CDP Org',
+          userRelationshipType: 'Citizen',
+          hasMultipleOrgPickerEntries: true,
           shouldShowCitizenName: true
+        }
+      ],
+      [
+        'a Citizen with one enrolment and no roles',
+        { ...citizenClaims, roles: [] },
+        {
+          organisationName: 'CDP Org',
+          userRelationshipType: 'Citizen',
+          hasMultipleOrgPickerEntries: false,
+          shouldShowCitizenName: false
         }
       ]
     ])('returns the organisation details for %s', (_, claims, expected) => {

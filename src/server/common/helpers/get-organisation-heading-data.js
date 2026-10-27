@@ -12,7 +12,6 @@ export const getOrganisationHeadingData = (request) => {
   const {
     organisationName,
     hasMultipleOrgPickerEntries,
-    shouldShowOrgOrUserName,
     shouldShowCitizenName
   } = profile?.organisation ?? {}
 
@@ -20,7 +19,7 @@ export const getOrganisationHeadingData = (request) => {
     profile?.name ||
     [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
 
-  const nameToShow = shouldShowOrgOrUserName
+  const nameToShow = hasMultipleOrgPickerEntries
     ? organisationName || displayName
     : null
   const orgOrUserName = shouldShowCitizenName ? displayName : nameToShow
