@@ -1,4 +1,5 @@
 import { quoteController } from '../../../quote/controller-get.js'
+import { routeId } from '../../../quote/not-housing/route-path.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -24,8 +25,8 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    // The routeId is the quote page's template dir: this route renders the
-    // quote dropout page itself under the request to use prefix.
-    ...quoteController({ routeId: 'not-housing', getViewModel })
+    // Renders the quote dropout page's own template, under the request to use
+    // prefix, via the quote page's routeId.
+    ...quoteController({ routeId, getViewModel })
   }
 ]

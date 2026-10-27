@@ -50,7 +50,7 @@ describe('change answer helpers', () => {
       ).toBe('/request-to-use/change/application-type-not-available')
     })
 
-    it('still returns a dropout page without an alias unchanged (the boundary dropouts until NRF2-1315)', () => {
+    it('still returns a dropout page without an alias unchanged (the boundary dropouts, which no change page can reach yet)', () => {
       expect(
         redirectToReviewPageUnlessDropout({ nextPage: notInEdpPath })
       ).toBe(notInEdpPath)
@@ -61,7 +61,7 @@ describe('change answer helpers', () => {
     // A new quote dropout page without a change alias would redirect a
     // request to use session to the /quote/ page its guard bounces to the
     // start page — this fails so the alias (or a boundary entry) is added.
-    it('maps every quote dropout page to a change alias except the boundary dropouts reserved for NRF2-1315', () => {
+    it('maps every quote dropout page to a change alias except the boundary dropouts, which no change page can reach yet', () => {
       const unmappedDropoutPaths = [...dropoutPaths].filter(
         (path) => !dropoutPageAliases.has(path)
       )

@@ -26,8 +26,9 @@ export const withBackLink =
 // change aliases: under the /quote/ prefix the quote journey's session guard
 // would bounce a request to use session to the start page, so the dropout must
 // render at its alias, guarded by the review quote session instead. The
-// boundary dropouts have no alias yet (NRF2-1315) and no change page can reach
-// them today, so they pass through bare.
+// boundary dropouts have no alias because they are only reachable while
+// drawing a boundary, which no change page can do yet, so they pass through
+// bare.
 export const dropoutPageAliases = new Map([
   [applicationTypeNotAvailablePath, changeApplicationTypeNotAvailablePath],
   [notHousingPath, changeNotHousingPath]
