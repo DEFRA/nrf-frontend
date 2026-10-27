@@ -46,6 +46,27 @@ describe('#contentSecurityPolicy config variations', () => {
     )
   })
 
+  test('should include the Defra ID base URL and cspRedirectHosts in formAction', async () => {
+    mockConfigGet.mockImplementation((key) => {
+      if (key === 'defraId.enabled') return true
+      if (key === 'defraId.baseUrl') return 'https://id.example.com'
+      if (key === 'defraId.cspRedirectHosts') {
+        return ['http://localhost:3200', 'https://other.example.com']
+      }
+      return null
+    })
+
+    const { contentSecurityPolicy } =
+      await import('./content-security-policy.js')
+
+    expect(contentSecurityPolicy.options.formAction).toEqual([
+      'self',
+      'https://id.example.com',
+      'http://localhost:3200',
+      'https://other.example.com'
+    ])
+  })
+
   test('should exclude optional origins when not configured', async () => {
     mockConfigGet.mockImplementation(() => null)
 
