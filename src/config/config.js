@@ -286,14 +286,14 @@ export const config = convict({
     baseUrl: {
       doc: 'Base URL (origin) of the DEFRA Customer Identity B2C tenant. Used to build the well-known URL.',
       format: String,
-      default: 'https://your-account.cpdev.cui.defra.gov.uk',
+      default: 'https://your-account.pre.cui.defra.gov.uk',
       env: 'DEFRA_ID_BASE_URL'
     },
     wellKnownPath: {
       doc: 'Path of the OIDC well-known configuration document, appended to defraId.baseUrl. Changes per environment/policy.',
       format: String,
       default:
-        '/idphub/b2c/b2c_1a_cui_cpdev_signupsignin/.well-known/openid-configuration',
+        '/idphub/b2c/b2c_1a_cui_signupsignin/.well-known/openid-configuration',
       env: 'DEFRA_ID_WELL_KNOWN_PATH'
     },
     clientId: {
@@ -326,6 +326,12 @@ export const config = convict({
       format: Array,
       env: 'DEFRA_ID_SCOPES',
       default: ['openid', 'offline_access']
+    },
+    cspRedirectHosts: {
+      doc: 'The Defra ID hosts that are redirected to before signin, for CSP form-action',
+      format: Array,
+      default: ['https://dcidmpreprod.b2clogin.com'],
+      env: 'DEFRA_ID_REDIRECT_HOSTS'
     }
   },
   cookie: {

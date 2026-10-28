@@ -6,6 +6,12 @@ import { config } from '../../../config/config.js'
  * @satisfies {import('@hapi/hapi').Plugin}
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
+const defraIdBaseUrl = config.get('defraId.enabled')
+  ? config.get('defraId.baseUrl')
+  : null
+// Browsers apply form-action to redirects that follow a form POST, so a POST
+// that redirects to a protected page and on to Defra ID sign-in needs its host.
+const cspRedirectHosts = config.get('defraId.cspRedirectHosts') ?? []
 const gtmId = config.get('gtmId')
 const gtmOrigin = 'https://*.googletagmanager.com'
 const gaOrigin = 'https://*.google-analytics.com'
@@ -45,7 +51,12 @@ const contentSecurityPolicy = {
     frameSrc: ['self', ...(gtmId ? [gtmOrigin] : [])],
     objectSrc: ['none'],
     frameAncestors: ['none'],
-    formAction: ['self', ...(cdpUploaderUrl ? [cdpUploaderUrl] : [])],
+    formAction: [
+      'self',
+      ...(cdpUploaderUrl ? [cdpUploaderUrl] : []),
+      ...(defraIdBaseUrl ? [defraIdBaseUrl] : []),
+      ...cspRedirectHosts
+    ],
     manifestSrc: ['self'],
     // blob: is required by maplibre-gl which creates web workers from blob URLs
     workerSrc: ['self', 'blob:'],
