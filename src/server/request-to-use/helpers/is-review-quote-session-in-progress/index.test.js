@@ -21,6 +21,7 @@ import {
 const defraAccountIndividualPath = '/request-to-use/defra-account-individual'
 const defraAccountOrganisationPath =
   '/request-to-use/defra-account-organisation'
+const defraAccountAgentPath = '/request-to-use/defra-account-agent'
 
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
@@ -127,7 +128,8 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     defraAccountUserTypePath,
     defraAccountIndividualPath,
-    defraAccountOrganisationPath
+    defraAccountOrganisationPath,
+    defraAccountAgentPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -142,7 +144,8 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     defraAccountUserTypePath,
     defraAccountIndividualPath,
-    defraAccountOrganisationPath
+    defraAccountOrganisationPath,
+    defraAccountAgentPath
   ])('redirects %s to the start page when there is no session', (path) => {
     const h = createMockRedirectToolkit()
 
