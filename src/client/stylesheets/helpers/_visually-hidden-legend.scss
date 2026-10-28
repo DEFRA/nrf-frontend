@@ -1,0 +1,8 @@
+// GOV.UK Frontend sets `display: table` on fieldset legends, and a table can't
+// be narrower than its content. That overrides the 1px width of
+// `govuk-visually-hidden`, so with `white-space: nowrap` a long hidden legend
+// stays as wide as its text. It is clipped, but still widens the scrollable
+// area and causes horizontal scrolling on narrow screens.
+.govuk-fieldset__legend.govuk-visually-hidden {
+  display: block;
+}
