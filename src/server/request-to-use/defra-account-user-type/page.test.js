@@ -90,20 +90,31 @@ describe('Who are you requesting to use the nature restoration levy for page', (
     )
   })
 
-  it.each(['organisation', 'agent'])(
-    'should redirect to enter address when "%s" is selected',
-    async (answer) => {
-      const { response } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { defraAccountUserType: answer },
-        cookie: sessionCookie
-      })
+  it('should redirect to the organisation Defra account page when "organisation" is selected', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { defraAccountUserType: 'organisation' },
+      cookie: sessionCookie
+    })
 
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe('/request-to-use/enter-address')
-    }
-  )
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/request-to-use/defra-account-organisation'
+    )
+  })
+
+  it('should redirect to enter address when "agent" is selected', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { defraAccountUserType: 'agent' },
+      cookie: sessionCookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/request-to-use/enter-address')
+  })
 
   it.each([
     { scenario: 'no option is selected', formData: {} },

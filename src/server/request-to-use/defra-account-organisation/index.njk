@@ -1,0 +1,60 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    <p class="govuk-body">You need a Defra account to request to use the nature restoration levy and to view your commitment certificate. A Defra account lets you register with a range of online services from Defra and related organisations. You sign in to it with GOV.UK One Login or Government Gateway.</p>
+
+    {{ govukWarningText({
+      text: "If you are creating a Defra account for the organisation you work for, you need to create an organisation account.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    <h2 class="govuk-heading-m">If your organisation already has a Defra account</h2>
+
+    {{ govukDetails({
+      summaryText: "How to request to join the existing account",
+      text: "If your organisation has already registered for a Defra account you cannot create a new one. You need ask the account admin and request to join the account."
+    }) }}
+
+    <h2 class="govuk-heading-m">Inviting other people to the Defra account</h2>
+
+    {% set inviteHtml %}
+      <p class="govuk-body">The first person to register for a Defra account will be the account admin. They can invite and remove other team members or third parties and manage the account. They can also give admin rights to other team members.</p>
+      <p class="govuk-body">We recommend there are at least 2 account admins to prevent issues accessing and managing the account.</p>
+    {% endset %}
+    {{ govukDetails({
+      summaryText: "How to invite other people to join a Defra account",
+      html: inviteHtml
+    }) }}
+
+    <h2 class="govuk-heading-m">Before you start</h2>
+
+    <p class="govuk-body">To create a Defra account you need to provide:</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+      <li>email address, phone number and postal address</li>
+      <li>One Login or Government Gateway user ID and password. If you do not have a One Login or Government Gateway account, you can create one in the next step.</li>
+      <li>main contact details for your business or organisation (for example, head office contact details)</li>
+      <li>Companies House number if the business or organisation is a limited company</li>
+    </ul>
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Continue",
+        href: continuePath
+      }) }}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

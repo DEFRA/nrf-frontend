@@ -68,6 +68,7 @@ const pathsWithOwnSessionChecks = [
   acceptLevyPath,
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',
+  '/request-to-use/defra-account-organisation',
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
