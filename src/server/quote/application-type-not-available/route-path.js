@@ -1,4 +1,4 @@
-const routeId = 'application-type-not-available'
+export const routeId = 'application-type-not-available'
 
 // Leaf module: the change-mode helper imports this path to detect dropout
 // pages without pulling route registration into a circular import (their

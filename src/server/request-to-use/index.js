@@ -10,6 +10,8 @@ import routesAcceptLevy from './accept-levy/routes.js'
 import routesChangePlanningType from './change/planning-type/routes.js'
 import routesChangeConfirmHousing from './change/confirm-housing/routes.js'
 import routesChangeUnitNumber from './change/unit-number/routes.js'
+import routesChangeApplicationTypeNotAvailable from './change/application-type-not-available/routes.js'
+import routesChangeNotHousing from './change/not-housing/routes.js'
 import routesChangeBoundaryType from './change/boundary-type/routes.js'
 import routesChangeDrawBoundary from './change/draw-boundary/routes.js'
 import routesChangeUploadBoundary from './change/upload-boundary/routes.js'
@@ -44,6 +46,8 @@ export const requestToUse = {
         ...routesChangePlanningType,
         ...routesChangeConfirmHousing,
         ...routesChangeUnitNumber,
+        ...routesChangeApplicationTypeNotAvailable,
+        ...routesChangeNotHousing,
         ...routesChangeBoundaryType,
         ...routesChangeDrawBoundary,
         ...routesChangeUploadBoundary,

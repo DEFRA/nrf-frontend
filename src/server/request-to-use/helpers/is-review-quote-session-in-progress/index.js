@@ -4,6 +4,8 @@ import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { routePath as changeBoundaryTypePath } from '../../change/boundary-type/route-path.js'
 import { routePath as changeDrawBoundaryPath } from '../../change/draw-boundary/route-path.js'
 import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
@@ -19,16 +21,19 @@ import { requestToUseSession } from '../request-to-use-session/index.js'
 const hasRequestToUseSession = (request) =>
   requestToUseSession.get(request) !== null
 
-// The change pages reached from the review page's change links need only the
-// request to use session a magic link redemption sets: mid-edit the quote
-// cache is legitimately incomplete, because choosing a different boundary
-// entry type clears the saved boundary until a new one is drawn or uploaded.
-// The pages that render the saved quote itself — the review page and the
-// accept levy page continuing from it — still need the complete quote.
+// The change pages reached from the review page's change links — and the
+// dropout pages an ineligible change redirects to — need only the request to
+// use session a magic link redemption sets: mid-edit the quote cache is
+// legitimately incomplete, because choosing a different boundary entry type
+// clears the saved boundary until a new one is drawn or uploaded. The pages
+// that render the saved quote itself — the review page and the accept levy
+// page continuing from it — still need the complete quote.
 const changePaths = new Set([
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
+  changeApplicationTypeNotAvailablePath,
+  changeNotHousingPath,
   changeBoundaryTypePath,
   changeDrawBoundaryPath,
   changeUploadBoundaryPath,

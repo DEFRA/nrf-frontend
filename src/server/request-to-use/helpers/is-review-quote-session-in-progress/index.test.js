@@ -6,6 +6,8 @@ import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { routePath as changeBoundaryTypeAliasPath } from '../../change/boundary-type/route-path.js'
 import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
@@ -72,7 +74,9 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     changePlanningTypePath,
     changeConfirmHousingPath,
-    changeUnitNumberPath
+    changeUnitNumberPath,
+    changeApplicationTypeNotAvailablePath,
+    changeNotHousingPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -88,7 +92,9 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     changePlanningTypePath,
     changeConfirmHousingPath,
-    changeUnitNumberPath
+    changeUnitNumberPath,
+    changeApplicationTypeNotAvailablePath,
+    changeNotHousingPath
   ])('redirects %s to the start page when the session is missing', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -101,8 +107,9 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   // Mid-edit state: choosing a different boundary entry type clears the saved
-  // boundary until a new one is drawn or uploaded, so the change pages must
-  // not require a complete quote — the user needs them to finish the swap.
+  // boundary until a new one is drawn or uploaded, so the change pages — and
+  // the dropout pages an ineligible change redirects to from them — must not
+  // require a complete quote; the user needs them to finish the swap.
   it.each([
     {
       scenario: 'the upload page, reached by switching from a drawn boundary',
@@ -111,6 +118,16 @@ describe('checkForValidReviewQuoteSession', () => {
     {
       scenario: 'the boundary type page, reached with the browser back button',
       path: changeBoundaryTypeAliasPath
+    },
+    {
+      scenario:
+        'the not housing dropout page, reached by an ineligible housing change',
+      path: changeNotHousingPath
+    },
+    {
+      scenario:
+        'the application type not available dropout page, reached by an ineligible planning type change',
+      path: changeApplicationTypeNotAvailablePath
     }
   ])('continues on $scenario while the boundary is cleared', ({ path }) => {
     const h = createMockRedirectToolkit()

@@ -20,6 +20,8 @@ import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from './change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from './change/not-housing/route-path.js'
 import { routePath as changeBoundaryTypePath } from './change/boundary-type/route-path.js'
 import { routePath as changeDrawBoundaryPath } from './change/draw-boundary/route-path.js'
 import { routePath as changeUploadBoundaryPath } from './change/upload-boundary/route-path.js'
@@ -71,6 +73,8 @@ const pathsWithOwnSessionChecks = [
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
+  changeApplicationTypeNotAvailablePath,
+  changeNotHousingPath,
   changeBoundaryTypePath,
   changeDrawBoundaryPath,
   changeUploadBoundaryPath,
