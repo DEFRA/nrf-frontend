@@ -2,6 +2,9 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
+import { routePath as changeDrawBoundaryPath } from '../../request-to-use/change/draw-boundary/route-path.js'
+import { routePath as changeUploadBoundaryPath } from '../../request-to-use/change/upload-boundary/route-path.js'
+import { routePath as changeBoundaryTypePath } from '../../request-to-use/change/boundary-type/route-path.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { appendChangeParam } from '../helpers/change-mode/index.js'
 
@@ -17,15 +20,22 @@ const logger = createLogger()
  * @returns {object} view model for the excluded-area page
  */
 export default function getViewModel(quoteData = {}, query = {}) {
-  let backLinkPath = boundaryTypePath
+  // An edit from the review page goes back to the change alias's boundary
+  // steps; the quote journey's own pages would bounce it to the start page.
+  const editingSavedQuote = quoteData.isEditingSavedQuote === true
+  let backLinkPath = editingSavedQuote
+    ? changeBoundaryTypePath
+    : boundaryTypePath
   const { boundaryEntryType, boundaryGeojson } = quoteData
   /**
    * TODO: store the list of possible boundary entry types in a single location and import it here, rather than hardcoding the values in this function.
    */
   if (boundaryEntryType === 'draw') {
-    backLinkPath = drawBoundaryPath
+    backLinkPath = editingSavedQuote ? changeDrawBoundaryPath : drawBoundaryPath
   } else if (boundaryEntryType === 'upload') {
-    backLinkPath = uploadBoundaryPath
+    backLinkPath = editingSavedQuote
+      ? changeUploadBoundaryPath
+      : uploadBoundaryPath
   } else {
     logger.error({ boundaryEntryType }, 'boundaryEntryType is not recognised')
   }

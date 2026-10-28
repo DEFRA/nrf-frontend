@@ -17,6 +17,16 @@ const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
 
 const isExempt = (path) => exemptPaths.has(path)
 
+/**
+ * Whether the user is editing their saved quote from the review and amend
+ * page — the magic link redemption leaves the request to use session set for
+ * the whole edit.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {boolean}
+ */
+export const hasRequestToUseSession = (request) =>
+  requestToUseSession.get(request) !== null
+
 // A user editing their saved quote from the review and amend page chose the
 // request to use journey, so the quote journey check below would bounce them
 // off the dropout pages their change redirects to: an ineligible answer or a
@@ -25,7 +35,7 @@ const isExempt = (path) => exemptPaths.has(path)
 // dropout pages only — the pages that continue the quote journey stay closed,
 // so an edit cannot wander into it.
 const isEditingSavedQuote = (request) =>
-  isDropoutPage(request.path) && requestToUseSession.get(request) !== null
+  isDropoutPage(request.path) && hasRequestToUseSession(request)
 
 // The dropout redirects carry change=true when the intercepted request had
 // it, so a user editing from check-your-answers keeps change mode after being

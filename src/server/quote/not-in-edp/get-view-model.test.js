@@ -44,6 +44,34 @@ describe('no-edp getViewModel', () => {
     expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
 
+  // A user editing their saved quote from the review page must go back to
+  // the change alias's boundary steps — the quote journey's own pages would
+  // bounce them to the start page.
+  it.each([
+    {
+      boundaryEntryType: 'draw',
+      expected: '/request-to-use/change/draw-boundary'
+    },
+    {
+      boundaryEntryType: 'upload',
+      expected: '/request-to-use/change/upload-boundary'
+    },
+    {
+      boundaryEntryType: undefined,
+      expected: '/request-to-use/change/boundary-type'
+    }
+  ])(
+    'should link back to the change alias $expected when editing a saved quote',
+    ({ boundaryEntryType, expected }) => {
+      const viewModel = getViewModel({
+        boundaryEntryType,
+        isEditingSavedQuote: true
+      })
+
+      expect(viewModel.backLinkPath).toBe(expected)
+    }
+  )
+
   it('should log an error and keep the placeholder back link when the boundary entry type is not recognised', () => {
     const viewModel = getViewModel({ boundaryEntryType: 'unknown' })
 
