@@ -97,7 +97,7 @@ describe('Change planning type page', () => {
   })
 
   it('should redirect to the application type not available page when a change selects Other', async () => {
-    const { response } = await submitForm({
+    const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
       formData: { planningType: 'other' },
@@ -106,7 +106,44 @@ describe('Change planning type page', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(
-      '/quote/application-type-not-available'
+      '/request-to-use/change/application-type-not-available'
+    )
+
+    const document = await loadPage({
+      requestUrl: '/request-to-use/change/application-type-not-available',
+      server: getSeededServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      'Nature restoration levy is not currently available for this planning application type'
+    )
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      routePath
+    )
+  })
+
+  it('should save the ineligible answer so it stays selected when backing out of the dropout page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { planningType: 'other' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      cookie
+    })
+
+    // The ineligible answer is saved like any other: it stays selected on the
+    // change page, whose back link still returns to the review page.
+    expect(getByLabelText(document, 'Other')).toBeChecked()
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      reviewQuoteDetailsPath
     )
   })
 })

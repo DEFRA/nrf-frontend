@@ -20,6 +20,8 @@ import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from './change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from './change/not-housing/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
@@ -66,6 +68,8 @@ const pathsWithOwnSessionChecks = [
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
+  changeApplicationTypeNotAvailablePath,
+  changeNotHousingPath,
   '/request-to-use/link-expired',
   '/request-to-use/enter-address'
 ]

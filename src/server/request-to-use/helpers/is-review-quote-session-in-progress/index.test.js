@@ -6,6 +6,8 @@ import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
+import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
+import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
@@ -70,7 +72,9 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     changePlanningTypePath,
     changeConfirmHousingPath,
-    changeUnitNumberPath
+    changeUnitNumberPath,
+    changeApplicationTypeNotAvailablePath,
+    changeNotHousingPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -86,7 +90,9 @@ describe('checkForValidReviewQuoteSession', () => {
   it.each([
     changePlanningTypePath,
     changeConfirmHousingPath,
-    changeUnitNumberPath
+    changeUnitNumberPath,
+    changeApplicationTypeNotAvailablePath,
+    changeNotHousingPath
   ])('redirects %s to the start page when the session is missing', (path) => {
     const h = createMockRedirectToolkit()
 

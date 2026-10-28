@@ -1,4 +1,4 @@
-import { getByRole } from '@testing-library/dom'
+import { getByLabelText, getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -96,7 +96,7 @@ describe('Change confirm housing page', () => {
   })
 
   it('should redirect to the not housing page when a change selects No', async () => {
-    const { response } = await submitForm({
+    const { response, cookie } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
       formData: { isHousing: 'no' },
@@ -104,6 +104,43 @@ describe('Change confirm housing page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/not-housing')
+    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
+
+    const document = await loadPage({
+      requestUrl: '/request-to-use/change/not-housing',
+      server: getSeededServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      'Nature restoration levy is only available for housing units'
+    )
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      routePath
+    )
+  })
+
+  it('should save the ineligible answer so it stays selected when backing out of the dropout page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      formData: { isHousing: 'no' },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getSeededServer(),
+      cookie
+    })
+
+    // The ineligible answer is saved like any other: it stays selected on the
+    // change page, whose back link still returns to the review page.
+    expect(getByLabelText(document, 'No')).toBeChecked()
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      reviewQuoteDetailsPath
+    )
   })
 })
