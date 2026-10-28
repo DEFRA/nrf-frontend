@@ -1,4 +1,4 @@
-import { routePath as enterAddressPath } from '../enter-address/route-path.js'
+import { routePath as defraAccountUserTypePath } from '../defra-account-user-type/route-path.js'
 
 // Literal path: the delete quote page for this journey is not built yet. Swap
 // for its route-path import when it exists.
@@ -10,7 +10,7 @@ const deleteQuotePath = '/request-to-use/delete-quote'
  */
 export default function getNextPage({ acceptLevy }) {
   if (acceptLevy === 'yes') {
-    return enterAddressPath
+    return defraAccountUserTypePath
   }
 
   return deleteQuotePath
