@@ -21,11 +21,13 @@ const isExempt = (path) => exemptPaths.has(path)
  * Whether the user is editing their saved quote from the review and amend
  * page — the magic link redemption leaves the request to use session set for
  * the whole edit.
- * @param {import('@hapi/hapi').Request} request
+ * @param {import('@hapi/hapi').Request} [request] - no request counts as no
+ * session, so view models can call it with the request the page controller
+ * may not have passed
  * @returns {boolean}
  */
 export const hasRequestToUseSession = (request) =>
-  requestToUseSession.get(request) !== null
+  Boolean(request) && requestToUseSession.get(request) !== null
 
 // A user editing their saved quote from the review and amend page chose the
 // request to use journey, so the quote journey check below would bounce them

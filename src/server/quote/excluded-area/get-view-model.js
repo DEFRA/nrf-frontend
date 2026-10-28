@@ -7,6 +7,7 @@ import { routePath as changeUploadBoundaryPath } from '../../request-to-use/chan
 import { routePath as changeBoundaryTypePath } from '../../request-to-use/change/boundary-type/route-path.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { appendChangeParam } from '../helpers/change-mode/index.js'
+import { hasRequestToUseSession } from '../helpers/is-quote-session-in-progress/index.js'
 
 const pageHeading =
   'Development is within the excluded area of this Environmental Delivery Plan (EDP)'
@@ -17,12 +18,14 @@ const logger = createLogger()
  * @param {object} [quoteData] - the cached quote data; read for the boundary
  * entry type and the intersecting EDP/exclusion labels
  * @param {object} [query] - the parsed request query
+ * @param {import('@hapi/hapi').Request} [request] - the request, so the page
+ * can read the session itself
  * @returns {object} view model for the excluded-area page
  */
-export default function getViewModel(quoteData = {}, query = {}) {
+export default function getViewModel(quoteData = {}, query = {}, request) {
   // An edit from the review page goes back to the change alias's boundary
   // steps; the quote journey's own pages would bounce it to the start page.
-  const editingSavedQuote = quoteData.isEditingSavedQuote === true
+  const editingSavedQuote = hasRequestToUseSession(request)
   let backLinkPath = editingSavedQuote
     ? changeBoundaryTypePath
     : boundaryTypePath

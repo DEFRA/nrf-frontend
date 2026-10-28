@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import getViewModel from './get-view-model.js'
+import { createSessionRequest } from '../../../test-utils/create-session-request.js'
 
 const mockLogger = vi.hoisted(() => ({
   error: vi.fn(),
@@ -53,11 +54,14 @@ describe('excluded-area getViewModel', () => {
   ])(
     'should link back to the change alias $expected when editing a saved quote',
     ({ boundaryEntryType, expected }) => {
-      const viewModel = getViewModel({
-        ...baseQuoteData,
-        boundaryEntryType,
-        isEditingSavedQuote: true
+      const request = createSessionRequest({
+        session: { requestToUse: { nrlReference: 'NRL-4321' } }
       })
+      const viewModel = getViewModel(
+        { ...baseQuoteData, boundaryEntryType },
+        {},
+        request
+      )
 
       expect(viewModel.backLinkPath).toBe(expected)
     }
