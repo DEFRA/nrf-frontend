@@ -1,6 +1,8 @@
 import { createFilePreviewHandlers } from '../../../quote/file-preview/controller.js'
 import { routePath as changeUploadBoundaryPath } from '../upload-boundary/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../excluded-area/route-path.js'
+import { routePath as changeNotInEdpPath } from '../not-in-edp/route-path.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -9,6 +11,8 @@ export { routePath }
 const { handler, postHandler } = createFilePreviewHandlers({
   uploadBoundaryPath: changeUploadBoundaryPath,
   successPath: reviewQuoteDetailsPath,
+  excludedAreaPath: changeExcludedAreaPath,
+  notInEdpPath: changeNotInEdpPath,
   getViewModel
 })
 

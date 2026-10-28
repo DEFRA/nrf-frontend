@@ -30,11 +30,16 @@ function promoteBoundaryToCache(request, cacheData) {
   request.yar.clear('boundaryFailureReason')
 }
 
-function redirectToExcludedArea(boundaryGeojson, request, h) {
+function redirectToExcludedArea(
+  boundaryGeojson,
+  request,
+  h,
+  dropoutExcludedAreaPath
+) {
   if (boundaryGeojson) {
     promoteBoundaryToCache(request, { boundaryGeojson })
   }
-  return h.redirect(appendChangeParam(excludedAreaPath, request.query))
+  return h.redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
 }
 
 /**
@@ -46,9 +51,18 @@ function redirectToExcludedArea(boundaryGeojson, request, h) {
  *   boundary in session is sent to upload one
  * @param {string} params.successPath - where an accepted boundary continues
  *   to when not editing from check-your-answers
+ * @param {string} params.excludedAreaPath - where a boundary in an EDP
+ *   exclusion zone drops out to
+ * @param {string} params.notInEdpPath - where a boundary outside every EDP
+ *   drops out to
  * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
  */
-function createPostHandler({ retryUploadBoundaryPath, successPath }) {
+function createPostHandler({
+  retryUploadBoundaryPath,
+  successPath,
+  excludedAreaPath: dropoutExcludedAreaPath,
+  notInEdpPath: dropoutNotInEdpPath
+}) {
   return function saveUploadedBoundary(request, h) {
     const boundaryGeojson = request.yar.get('boundaryGeojson')
     const quoteCache = getQuoteDataFromCache(request)
@@ -77,12 +91,12 @@ function createPostHandler({ retryUploadBoundaryPath, successPath }) {
       resolvedGeojson?.intersectingExcludedAreas?.length > 0
     if (intersectsExcludedArea) {
       return h
-        .redirect(appendChangeParam(excludedAreaPath, request.query))
+        .redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
         .code(statusCodes.redirectAfterPost)
     }
     if (!intersectsEdp) {
       return h
-        .redirect(appendChangeParam(notInEdpPath, request.query))
+        .redirect(appendChangeParam(dropoutNotInEdpPath, request.query))
         .code(statusCodes.redirectAfterPost)
     }
 
@@ -109,12 +123,18 @@ function createPostHandler({ retryUploadBoundaryPath, successPath }) {
  *   boundary in session is sent to upload one
  * @param {string} [params.successPath=emailPath] - where an accepted boundary
  *   continues to when not editing from check-your-answers
+ * @param {string} [params.excludedAreaPath=excludedAreaPath] - where a boundary
+ *   in an EDP exclusion zone drops out to
+ * @param {string} [params.notInEdpPath=notInEdpPath] - where a boundary outside
+ *   every EDP drops out to
  * @param {Function} [params.getViewModel] - the page's view model
  * @returns {{handler: import('@hapi/hapi').Lifecycle.Method, postHandler: import('@hapi/hapi').Lifecycle.Method}} the GET and POST handlers
  */
 export const createFilePreviewHandlers = ({
   uploadBoundaryPath: retryUploadBoundaryPath = uploadBoundaryPath,
   successPath = emailPath,
+  excludedAreaPath: dropoutExcludedAreaPath = excludedAreaPath,
+  notInEdpPath: dropoutNotInEdpPath = notInEdpPath,
   getViewModel: buildViewModel = getViewModel
 } = {}) => ({
   handler(request, h) {
@@ -148,7 +168,12 @@ export const createFilePreviewHandlers = ({
         { intersectsExcludedArea },
         'map - boundary intersects an excluded area, redirecting to excluded-area'
       )
-      return redirectToExcludedArea(boundaryGeojson, request, h)
+      return redirectToExcludedArea(
+        boundaryGeojson,
+        request,
+        h,
+        dropoutExcludedAreaPath
+      )
     }
 
     if (!boundaryFailureReason && !intersectsEdp) {
@@ -170,7 +195,12 @@ export const createFilePreviewHandlers = ({
     })
   },
 
-  postHandler: createPostHandler({ retryUploadBoundaryPath, successPath })
+  postHandler: createPostHandler({
+    retryUploadBoundaryPath,
+    successPath,
+    excludedAreaPath: dropoutExcludedAreaPath,
+    notInEdpPath: dropoutNotInEdpPath
+  })
 })
 
 export const { handler, postHandler } = createFilePreviewHandlers()

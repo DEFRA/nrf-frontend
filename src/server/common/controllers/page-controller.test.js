@@ -65,7 +65,7 @@ describe('createPageController', () => {
     expect(result.model).toMatchObject(viewModel)
   })
 
-  it('reads the quote session by default and passes it, the request query and the request to getViewModel', async () => {
+  it('reads the quote session by default and passes it and the request query to getViewModel', async () => {
     const quoteData = { boundaryEntryType: 'draw' }
     const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
     const controller = createPageController({ viewsDir: 'quote' })({
@@ -79,11 +79,7 @@ describe('createPageController', () => {
 
     await controller.handler(request, buildH())
 
-    expect(mockGetViewModel).toHaveBeenCalledWith(
-      quoteData,
-      request.query,
-      request
-    )
+    expect(mockGetViewModel).toHaveBeenCalledWith(quoteData, request.query)
   })
 
   it('reads the session data given by getSessionData instead of the quote session', async () => {
@@ -100,7 +96,7 @@ describe('createPageController', () => {
     const result = await controller.handler(request, buildH())
 
     expect(getSessionData).toHaveBeenCalledWith(request)
-    expect(mockGetViewModel).toHaveBeenCalledWith(otherData, undefined, request)
+    expect(mockGetViewModel).toHaveBeenCalledWith(otherData, undefined)
     expect(result.model.formSubmitData).toEqual(otherData)
   })
 
@@ -134,8 +130,7 @@ describe('createPageController', () => {
 
     expect(mockGetViewModel).toHaveBeenCalledWith(
       { ...quoteData, ...flash.formSubmitData },
-      undefined,
-      request
+      undefined
     )
     expect(result.model.formSubmitData).toEqual({
       ...quoteData,

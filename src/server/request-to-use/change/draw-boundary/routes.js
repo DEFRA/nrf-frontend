@@ -2,6 +2,8 @@ import { quoteController } from '../../../quote/controller-get.js'
 import { createDrawBoundaryApiRoutes } from '../../../quote/draw-boundary/routes.js'
 import { createSaveBoundaryHandler } from '../../../quote/draw-boundary/controller.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../excluded-area/route-path.js'
+import { routePath as changeNotInEdpPath } from '../not-in-edp/route-path.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -54,11 +56,13 @@ export default [
   ...createDrawBoundaryApiRoutes({
     checkPath,
     savePath,
-    // A boundary that intersects an EDP saves and returns to the review page.
-    // The excluded-area and no-EDP outcomes keep their quote journey paths —
-    // their behaviour when reached from a change link is NRF2-1314.
+    // A boundary that intersects an EDP saves and returns to the review page;
+    // the ineligible outcomes drop out at their change aliases, like the other
+    // dropout pages an answer change can reach.
     saveHandler: createSaveBoundaryHandler({
-      successPath: reviewQuoteDetailsPath
+      successPath: reviewQuoteDetailsPath,
+      excludedAreaPath: changeExcludedAreaPath,
+      notInEdpPath: changeNotInEdpPath
     })
   })
 ]

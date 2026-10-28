@@ -10,10 +10,7 @@ import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/i
  * Shared by the `quote`, `manage` and `request-to-use` route groups so they
  * can render pages consistently without duplicating the flash/session-merge
  * logic. Each route says which session data it reads through `getSessionData`
- * (default: the quote session). View models receive the session data, the
- * parsed query and the request, so a page that needs more context (e.g. a
- * second session namespace) can read it directly instead of having it copied
- * into its session data first.
+ * (default: the quote session).
  */
 export const createPageController =
   ({ viewsDir }) =>
@@ -27,11 +24,7 @@ export const createPageController =
         validationErrors = formValidationErrors.validationErrors
         clearValidationFlashFromCache(request)
       }
-      const baseViewModel = await getViewModel(
-        sessionData,
-        request.query,
-        request
-      )
+      const baseViewModel = await getViewModel(sessionData, request.query)
       const viewModel = {
         ...baseViewModel,
         formSubmitData: sessionData,

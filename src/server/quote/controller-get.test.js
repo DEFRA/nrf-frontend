@@ -28,7 +28,7 @@ describe('quoteController', () => {
     expect(result.model).toEqual(viewModel)
   })
 
-  it('should pass quoteData, the request query and the request to getViewModel', async () => {
+  it('should pass quoteData and the request query to getViewModel', async () => {
     const quoteData = { boundaryEntryType: 'draw' }
     vi.mocked(getQuoteDataFromCache).mockReturnValue(quoteData)
     const mockGetViewModel = vi.fn().mockReturnValue(viewModel)
@@ -38,11 +38,7 @@ describe('quoteController', () => {
     })
     const request = { query: { change: 'true' } }
     await controller.handler(request, buildH())
-    expect(mockGetViewModel).toHaveBeenCalledWith(
-      quoteData,
-      request.query,
-      request
-    )
+    expect(mockGetViewModel).toHaveBeenCalledWith(quoteData, request.query)
   })
 
   it('should set formSubmitData from quoteData', async () => {

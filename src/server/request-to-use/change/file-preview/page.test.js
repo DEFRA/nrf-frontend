@@ -6,6 +6,10 @@ import { getResponse } from '../../../../test-utils/get-response.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
+import {
+  boundaryGeojson,
+  boundaryGeojsonWithExcludedArea
+} from '../../../../test-utils/fixtures/boundary-geojson.js'
 
 describe('Change file preview page', () => {
   const getServer = setupTestServer()
@@ -62,5 +66,51 @@ describe('Change file preview page', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(reviewQuoteDetailsPath)
+  })
+
+  it('should drop out to the change excluded area page when the saved boundary is in an exclusion zone', async () => {
+    const seededServer = getSeededServer()
+    const cookie = await withCompleteQuoteSession(seededServer)
+    // Replace the complete session's EDP boundary with an excluded one, as an
+    // upload whose boundary check found an exclusion zone would have cached.
+    await submitForm({
+      requestUrl: '/request-to-use/change/draw-boundary/save',
+      server: seededServer,
+      formData: { boundaryGeojson: boundaryGeojsonWithExcludedArea },
+      cookie
+    })
+
+    const response = await getResponse({
+      server: seededServer,
+      requestUrl: routePath,
+      cookie
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(
+      '/request-to-use/change/excluded-area'
+    )
+  })
+
+  it('should drop out to the change not in EDP page when the saved boundary misses every EDP', async () => {
+    const seededServer = getSeededServer()
+    const cookie = await withCompleteQuoteSession(seededServer)
+    // Replace the complete session's EDP boundary with one outside every EDP.
+    await submitForm({
+      requestUrl: '/request-to-use/change/draw-boundary/save',
+      server: seededServer,
+      formData: { boundaryGeojson },
+      cookie
+    })
+
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: seededServer,
+      formData: {},
+      cookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/request-to-use/change/not-in-edp')
   })
 })

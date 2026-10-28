@@ -2,8 +2,12 @@ import { isDropoutPage } from '../../../quote/helpers/change-mode/index.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
+import { routePath as notInEdpPath } from '../../../quote/not-in-edp/route-path.js'
+import { routePath as excludedAreaPath } from '../../../quote/excluded-area/route-path.js'
 import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
 import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
+import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 
 /**
  * Wraps a quote question page's view model for its change alias: the alias
@@ -25,13 +29,12 @@ export const withBackLink =
 // Quote dropout pages reachable from a change page and their request to use
 // change aliases: under the /quote/ prefix the quote journey's session guard
 // would bounce a request to use session to the start page, so the dropout must
-// render at its alias, guarded by the review quote session instead. The
-// boundary dropouts have no alias because they are only reachable while
-// drawing a boundary, which no change page can do yet, so they pass through
-// bare.
+// render at its alias, guarded by the review quote session instead.
 export const dropoutPageAliases = new Map([
   [applicationTypeNotAvailablePath, changeApplicationTypeNotAvailablePath],
-  [notHousingPath, changeNotHousingPath]
+  [notHousingPath, changeNotHousingPath],
+  [notInEdpPath, changeNotInEdpPath],
+  [excludedAreaPath, changeExcludedAreaPath]
 ])
 
 /**

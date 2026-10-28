@@ -10,6 +10,7 @@ import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 import {
+  boundaryGeojson,
   boundaryGeojsonWithEdp,
   boundaryGeojsonWithExcludedArea
 } from '../../../../test-utils/fixtures/boundary-geojson.js'
@@ -77,7 +78,7 @@ describe('Change draw boundary page', () => {
     expect(response.headers.location).toBe(reviewQuoteDetailsPath)
   })
 
-  it('should keep the excluded area dropout page when a drawn boundary intersects one', async () => {
+  it('should drop out to the change excluded area page when a drawn boundary intersects one', async () => {
     const { response } = await submitForm({
       requestUrl: savePath,
       server: getSeededServer(),
@@ -86,7 +87,21 @@ describe('Change draw boundary page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/quote/excluded-area')
+    expect(response.headers.location).toBe(
+      '/request-to-use/change/excluded-area'
+    )
+  })
+
+  it('should drop out to the change not in EDP page when a drawn boundary misses every EDP', async () => {
+    const { response } = await submitForm({
+      requestUrl: savePath,
+      server: getSeededServer(),
+      formData: { boundaryGeojson },
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/request-to-use/change/not-in-edp')
   })
 
   it('should validate drawn geometry through the check endpoint', async () => {

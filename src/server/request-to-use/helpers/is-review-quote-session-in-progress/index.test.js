@@ -11,6 +11,8 @@ import { routePath as changeApplicationTypeNotAvailablePath } from '../../change
 import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { routePath as changeBoundaryTypeAliasPath } from '../../change/boundary-type/route-path.js'
 import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
+import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
@@ -77,7 +79,9 @@ describe('checkForValidReviewQuoteSession', () => {
     changeConfirmHousingPath,
     changeUnitNumberPath,
     changeApplicationTypeNotAvailablePath,
-    changeNotHousingPath
+    changeNotHousingPath,
+    changeNotInEdpPath,
+    changeExcludedAreaPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -95,7 +99,9 @@ describe('checkForValidReviewQuoteSession', () => {
     changeConfirmHousingPath,
     changeUnitNumberPath,
     changeApplicationTypeNotAvailablePath,
-    changeNotHousingPath
+    changeNotHousingPath,
+    changeNotInEdpPath,
+    changeExcludedAreaPath
   ])('redirects %s to the start page when the session is missing', (path) => {
     const h = createMockRedirectToolkit()
 

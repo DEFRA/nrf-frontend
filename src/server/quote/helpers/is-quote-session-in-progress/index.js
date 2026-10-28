@@ -6,38 +6,15 @@ import { routePath as deleteConfirmationPath } from '../../delete-quote-confirma
 import { routePath as confirmHousingPath } from '../../confirm-housing/route-path.js'
 import { routePath as notHousingPath } from '../../not-housing/route-path.js'
 import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
-import { appendChangeParam, isDropoutPage } from '../change-mode/index.js'
+import { appendChangeParam } from '../change-mode/index.js'
 import {
   isJourneySelected,
   journeys
 } from '../../../common/helpers/journey-session/index.js'
-import { requestToUseSession } from '../../../request-to-use/helpers/request-to-use-session/index.js'
 
 const exemptPaths = new Set([confirmationPath, deleteConfirmationPath])
 
 const isExempt = (path) => exemptPaths.has(path)
-
-/**
- * Whether the user is editing their saved quote from the review and amend
- * page — the magic link redemption leaves the request to use session set for
- * the whole edit.
- * @param {import('@hapi/hapi').Request} [request] - no request counts as no
- * session, so view models can call it with the request the page controller
- * may not have passed
- * @returns {boolean}
- */
-export const hasRequestToUseSession = (request) =>
-  Boolean(request) && requestToUseSession.get(request) !== null
-
-// A user editing their saved quote from the review and amend page chose the
-// request to use journey, so the quote journey check below would bounce them
-// off the dropout pages their change redirects to: an ineligible answer or a
-// boundary outside an EDP lands on the quote journey's dropout pages. Their
-// live request to use session is the evidence of the edit, and it opens the
-// dropout pages only — the pages that continue the quote journey stay closed,
-// so an edit cannot wander into it.
-const isEditingSavedQuote = (request) =>
-  isDropoutPage(request.path) && hasRequestToUseSession(request)
 
 // The dropout redirects carry change=true when the intercepted request had
 // it, so a user editing from check-your-answers keeps change mode after being
@@ -97,8 +74,7 @@ export const checkForValidQuoteSession = (request, h) => {
   const quoteData = getQuoteDataFromCache(request)
   if (
     quoteData === null ||
-    (!isJourneySelected({ request, journey: journeys.quote }) &&
-      !isEditingSavedQuote(request))
+    !isJourneySelected({ request, journey: journeys.quote })
   ) {
     return h.redirect(startPath).takeover()
   }

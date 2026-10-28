@@ -12,6 +12,8 @@ import { routePath as changeDrawBoundaryPath } from '../../change/draw-boundary/
 import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
 import { routePath as changeCheckingFilePath } from '../../change/checking-file/route-path.js'
 import { routePath as changeFilePreviewPath } from '../../change/file-preview/route-path.js'
+import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 import { isQuoteDataComplete } from '../../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../request-to-use-session/index.js'
 
@@ -40,7 +42,9 @@ const changePaths = new Set([
   changeDrawBoundaryPath,
   changeUploadBoundaryPath,
   changeCheckingFilePath,
-  changeFilePreviewPath
+  changeFilePreviewPath,
+  changeNotInEdpPath,
+  changeExcludedAreaPath
 ])
 
 const completeQuotePaths = new Set([

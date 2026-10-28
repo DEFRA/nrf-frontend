@@ -18,6 +18,8 @@ import routesChangeDrawBoundary from './change/draw-boundary/routes.js'
 import routesChangeUploadBoundary from './change/upload-boundary/routes.js'
 import routesChangeCheckingFile from './change/checking-file/routes.js'
 import routesChangeFilePreview from './change/file-preview/routes.js'
+import routesChangeNotInEdp from './change/not-in-edp/routes.js'
+import routesChangeExcludedArea from './change/excluded-area/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
@@ -55,6 +57,8 @@ export const requestToUse = {
         ...routesChangeUploadBoundary,
         ...routesChangeCheckingFile,
         ...routesChangeFilePreview,
+        ...routesChangeNotInEdp,
+        ...routesChangeExcludedArea,
         ...routesRetrieveQuote,
         ...routesLinkExpired
       ])

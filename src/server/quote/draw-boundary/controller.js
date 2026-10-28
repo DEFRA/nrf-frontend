@@ -46,16 +46,25 @@ export async function checkBoundaryHandler(request, h) {
 }
 
 /**
- * Builds the save handler for a drawn boundary. The success target is a
- * parameter because the request to use change alias returns to the review and
- * amend page instead of asking for the email again; in change mode the quote
- * journey returns to check-your-answers, where the email is already captured.
+ * Builds the save handler for a drawn boundary. The targets are parameters
+ * because the request to use change alias returns to the review and amend
+ * page instead of asking for the email again, and serves the dropout pages at
+ * its own change aliases; in change mode the quote journey returns to
+ * check-your-answers, where the email is already captured.
  * @param {object} [params]
  * @param {string} [params.successPath=emailPath] - where a boundary that
  *   intersects an EDP continues to outside change mode
+ * @param {string} [params.excludedAreaPath=excludedAreaPath] - where a boundary
+ *   in an EDP exclusion zone drops out to
+ * @param {string} [params.notInEdpPath=notInEdpPath] - where a boundary outside
+ *   every EDP drops out to
  * @returns {import('@hapi/hapi').Lifecycle.Method} the save handler
  */
-export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
+export const createSaveBoundaryHandler = ({
+  successPath = emailPath,
+  excludedAreaPath: dropoutExcludedAreaPath = excludedAreaPath,
+  notInEdpPath: dropoutNotInEdpPath = notInEdpPath
+} = {}) =>
   function saveBoundary(request, h) {
     const {
       boundaryGeojson: {
@@ -96,7 +105,7 @@ export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
     // so their back links keep the edit alive.
     if (intersectsExcludedArea) {
       return h
-        .redirect(appendChangeParam(excludedAreaPath, request.query))
+        .redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
         .code(statusCodes.redirectAfterPost)
     }
 
@@ -109,7 +118,7 @@ export const createSaveBoundaryHandler = ({ successPath = emailPath } = {}) =>
     }
 
     return h
-      .redirect(appendChangeParam(notInEdpPath, request.query))
+      .redirect(appendChangeParam(dropoutNotInEdpPath, request.query))
       .code(statusCodes.redirectAfterPost)
   }
 
