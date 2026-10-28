@@ -36,34 +36,25 @@ describe('#getOrganisationHeadingData', () => {
     })
   })
 
-  it('shows the organisation name without a change link for an Employee of one organisation', () => {
-    const result = getOrganisationHeadingData(
-      buildRequest({ claims: singleOrgEmployeeClaims })
-    )
+  it.each([
+    ['an Employee of one organisation', singleOrgEmployeeClaims],
+    ['a Citizen', citizenClaims],
+    ['an Agent', agentClaims]
+  ])('shows nothing for %s with one enrolment', (_, claims) => {
+    const result = getOrganisationHeadingData(buildRequest({ claims }))
 
-    expect(result).toEqual({
-      orgOrUserName: firstOrgName,
-      changeOrganisationUrl: null
-    })
+    expect(result).toEqual({ orgOrUserName: null, changeOrganisationUrl: null })
   })
 
-  it('shows the user name for a Citizen', () => {
+  it('shows the user name and a change link for a Citizen with several enrolments', () => {
     const result = getOrganisationHeadingData(
-      buildRequest({ claims: citizenClaims })
+      buildRequest({ claims: { ...citizenClaims, enrolmentCount: 2 } })
     )
 
     expect(result).toEqual({
       orgOrUserName: 'Test User',
-      changeOrganisationUrl: null
+      changeOrganisationUrl: '/auth/change-organisation?redirectTo=%2Fprofile'
     })
-  })
-
-  it('shows nothing for an Agent with one relationship', () => {
-    const result = getOrganisationHeadingData(
-      buildRequest({ claims: agentClaims })
-    )
-
-    expect(result).toEqual({ orgOrUserName: null, changeOrganisationUrl: null })
   })
 
   it('shows nothing when the request is unauthenticated', () => {

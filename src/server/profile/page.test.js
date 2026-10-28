@@ -170,12 +170,12 @@ describe('Profile page', () => {
       )
     })
 
-    it('shows the user name without a change link when the user has no other organisation to switch to', async () => {
+    it('does not show the organisation heading when the user has only one enrolment', async () => {
       const body = await loadSignedInProfile()
 
       expect(
-        within(body).getByTestId('app-organisation-heading')
-      ).toHaveTextContent(`${mockUser.name}`)
+        within(body).queryByTestId('app-organisation-heading')
+      ).not.toBeInTheDocument()
       expect(
         within(body).queryByRole('link', { name: changeLinkName })
       ).not.toBeInTheDocument()

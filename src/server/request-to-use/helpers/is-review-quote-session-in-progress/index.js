@@ -1,5 +1,6 @@
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -21,6 +22,7 @@ const isReviewQuoteSessionValid = (request) =>
 // one of these answers cannot break the quote's completeness.
 const guardedPaths = new Set([
   reviewQuoteDetailsPath,
+  acceptLevyPath,
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
@@ -29,9 +31,9 @@ const guardedPaths = new Set([
 ])
 
 /**
- * Redirects to the start page when the review quote details page or one of its
- * change pages is requested without both a complete saved quote and a request
- * to use session, which magic link redemption (NRF2-1256) sets.
+ * Redirects to the start page when the review quote details page, the accept
+ * levy page or one of the change pages is requested without both a complete
+ * saved quote and a request to use session, which magic link redemption sets.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {

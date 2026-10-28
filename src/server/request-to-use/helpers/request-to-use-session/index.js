@@ -4,9 +4,16 @@ import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validati
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
+const levy = joi.object({
+  calculationDate: joi.string().required(),
+  provisionalAmount: joi.number().required(),
+  inflationAdjustedAmount: joi.number().required()
+})
+
 export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
   schema: joi.object({
-    nrlReference
+    nrlReference,
+    levy
   })
 })

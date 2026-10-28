@@ -1,5 +1,6 @@
 import { fullQuote } from './quote.js'
 import { boundaryGeojson } from './boundary-geojson.js'
+import { recalculatedLevy } from './levy.js'
 
 export const requestToUseJourneySession = {
   manage: { whatWouldYouLikeToDo: 'request-to-use' },
@@ -21,4 +22,9 @@ export const reviewQuoteSession = {
     email: 'test@example.com'
   },
   requestToUse: { nrlReference: fullQuote.reference }
+}
+
+export const acceptLevySession = {
+  ...reviewQuoteSession,
+  requestToUse: { ...reviewQuoteSession.requestToUse, levy: recalculatedLevy }
 }

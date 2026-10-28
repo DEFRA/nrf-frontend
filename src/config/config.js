@@ -286,14 +286,14 @@ export const config = convict({
     baseUrl: {
       doc: 'Base URL (origin) of the DEFRA Customer Identity B2C tenant. Used to build the well-known URL.',
       format: String,
-      default: 'https://your-account.cpdev.cui.defra.gov.uk',
+      default: 'https://your-account.pre.cui.defra.gov.uk',
       env: 'DEFRA_ID_BASE_URL'
     },
     wellKnownPath: {
       doc: 'Path of the OIDC well-known configuration document, appended to defraId.baseUrl. Changes per environment/policy.',
       format: String,
       default:
-        '/idphub/b2c/b2c_1a_cui_cpdev_signupsignin/.well-known/openid-configuration',
+        '/idphub/b2c/b2c_1a_cui_signupsignin/.well-known/openid-configuration',
       env: 'DEFRA_ID_WELL_KNOWN_PATH'
     },
     clientId: {
@@ -326,6 +326,12 @@ export const config = convict({
       format: Array,
       env: 'DEFRA_ID_SCOPES',
       default: ['openid', 'offline_access']
+    },
+    cspRedirectHosts: {
+      doc: 'The Defra ID hosts that are redirected to before signin, for CSP form-action',
+      format: Array,
+      default: ['https://dcidmpreprod.b2clogin.com'],
+      env: 'DEFRA_ID_REDIRECT_HOSTS'
     }
   },
   cookie: {
@@ -380,19 +386,6 @@ export const config = convict({
       sensitive: true,
       env: 'OS_API_KEY'
     },
-    impactAssessorBaseUrl: {
-      doc: 'Base URL for the impact assessor tile and validation APIs.',
-      format: String,
-      default: 'http://localhost:8085',
-      env: 'IMPACT_ASSESSOR_BASE_URL'
-    },
-    impactAssessorApiKey: {
-      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor (e.g. map tile proxy).',
-      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
-      default: '',
-      sensitive: true,
-      env: 'IMPACT_ASSESSOR_API_KEY'
-    },
     impactAssessorLayers: {
       doc: 'Comma-separated list of impact assessor tile layer params shown in the Layers panel.',
       format: String,
@@ -435,6 +428,21 @@ export const config = convict({
       format: Number,
       default: thirtyDaysSeconds,
       env: 'MAP_AERIAL_TILE_CACHE_CONTROL_MAX_AGE'
+    }
+  },
+  impactAssessor: {
+    baseUrl: {
+      doc: 'Base URL for the impact assessor API (map tiles, boundary validation, levy recalculation).',
+      format: String,
+      default: 'http://localhost:8085',
+      env: 'IMPACT_ASSESSOR_BASE_URL'
+    },
+    apiKey: {
+      doc: 'Service-to-service x-api-key value sent on every outbound call to the impact assessor.',
+      format: requireInProduction('IMPACT_ASSESSOR_API_KEY'),
+      default: '',
+      sensitive: true,
+      env: 'IMPACT_ASSESSOR_API_KEY'
     }
   },
   gtmId: {

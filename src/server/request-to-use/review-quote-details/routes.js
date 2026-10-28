@@ -1,5 +1,7 @@
+import joi from 'joi'
 import { requestToUseController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
+import { reviewQuoteDetailsPostController } from './controller-post.js'
 import { routeId, routePath } from './route-path.js'
 import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
@@ -28,6 +30,14 @@ const getReviewQuoteDetailsData = (request) => ({
  *           text/html:
  *             schema:
  *               type: string
+ *   post:
+ *     tags:
+ *       - RequestToUse
+ *     summary: Recalculate the levy from the review and amend the quote details page
+ *     description: Recalculates the levy from the saved quote details, saves it to the request to use session and redirects to the accept levy page
+ *     responses:
+ *       303:
+ *         description: Redirect to the do you accept this nature restoration levy amount page
  */
 export default [
   {
@@ -38,5 +48,11 @@ export default [
       getViewModel,
       getSessionData: getReviewQuoteDetailsData
     })
+  },
+  {
+    method: 'POST',
+    path: routePath,
+    options: { validate: { payload: joi.object({}) } },
+    ...reviewQuoteDetailsPostController
   }
 ]
