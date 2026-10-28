@@ -1,5 +1,7 @@
-import { getByLabelText, getByRole, getByText } from '@testing-library/dom'
+import { http, HttpResponse } from 'msw'
+import { getByLabelText, getByRole } from '@testing-library/dom'
 import { routePath } from './routes.js'
+import { config } from '../../../../config/config.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupMswServer } from '../../../../test-utils/setup-msw-server.js'
@@ -14,6 +16,7 @@ import {
 } from '../../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../../test-utils/fixtures/saved-quote.js'
 import { magicLinkToken } from '../../../../test-utils/fixtures/magic-link-token.js'
+import { uploadId } from '../../../../test-utils/fixtures/upload-id.js'
 import { getYarCookie } from '../../../../test-utils/yar-cookie.js'
 
 const mswServer = setupMswServer()
@@ -74,10 +77,21 @@ describe('Change boundary type page', () => {
     }
   )
 
-  it('should show the existing uploaded file preview when upload is chosen again for an uploaded quote', async () => {
+  it('should continue to the change upload page when upload is chosen again for an uploaded quote', async () => {
     // The quote was made by uploading a file, so redeeming its magic link
-    // seeds the session with the uploaded filename: choosing upload again
-    // previews that file instead of starting a fresh upload.
+    // seeds the session with the uploaded filename: choosing upload again must
+    // still open the upload page — the preview page's "Upload a new file or
+    // draw on a map" link sends the user back through here, and landing them
+    // on the existing file's preview again would make a new upload impossible.
+    const backendUrl = config.get('backend').apiUrl
+    mswServer.use(
+      http.post(`${backendUrl}/upload/initiate`, () =>
+        HttpResponse.json({
+          uploadId,
+          uploadUrl: `/upload-and-scan/${uploadId}`
+        })
+      )
+    )
     mockRedeemToken(mswServer)
     mockReadQuote(mswServer, savedQuote)
     const redeem = await getServer().inject({
@@ -95,32 +109,18 @@ describe('Change boundary type page', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(
-      '/request-to-use/change/file-preview'
+      '/request-to-use/change/upload-boundary'
     )
 
     const document = await loadPage({
-      requestUrl: '/request-to-use/change/file-preview',
+      requestUrl: '/request-to-use/change/upload-boundary',
       server: getServer(),
       cookie
     })
 
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Your uploaded red line boundary file'
+      'Upload a red line boundary file'
     )
-    // The EDP list is rebuilt from the saved quote's own EDPs, so the preview
-    // renders without a fresh boundary check.
-    expect(getByText(document, 'Norfolk Fens East')).toBeInTheDocument()
-
-    // Accepting the existing file keeps it and returns to the review page
-    const { response: saveResponse } = await submitForm({
-      requestUrl: '/request-to-use/change/file-preview',
-      server: getServer(),
-      formData: {},
-      cookie
-    })
-
-    expect(saveResponse.statusCode).toBe(303)
-    expect(saveResponse.headers.location).toBe(reviewQuoteDetailsPath)
   })
 
   it('should keep the saved boundary when the entry type changes and changes back', async () => {
