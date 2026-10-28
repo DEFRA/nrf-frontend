@@ -8,10 +8,13 @@ import { getQuoteDataFromCache } from '../quote-session-cache/index.js'
 import { routePath as deleteConfirmationPath } from '../../delete-quote-confirmation/routes.js'
 import { routePath as confirmHousingPath } from '../../confirm-housing/route-path.js'
 import { routePath as notHousingPath } from '../../not-housing/route-path.js'
+import { routePath as notInEdpPath } from '../../not-in-edp/route-path.js'
+import { routePath as excludedAreaPath } from '../../excluded-area/route-path.js'
 import { createMockYar } from '../../../../test-utils/create-mock-yar.js'
 import {
   quoteJourneySession,
-  requestToUseJourneySession
+  requestToUseJourneySession,
+  reviewQuoteSession
 } from '../../../../test-utils/fixtures/session.js'
 
 vi.mock('../quote-session-cache/index.js')
@@ -90,6 +93,66 @@ describe('checkForValidQuoteSession', () => {
       expect(h.redirect).toHaveBeenCalledWith(startPath)
     }
   )
+
+  // A user editing their saved quote from the review and amend page chose the
+  // request to use journey, but their ineligible answers redirect to the quote
+  // journey's dropout pages — those must render, not bounce to the start page.
+  it.each([
+    notInEdpPath,
+    excludedAreaPath,
+    notHousingPath,
+    applicationTypeNotAvailablePath
+  ])(
+    'continues on %s when the user is editing a saved quote from the review page',
+    (path) => {
+      vi.mocked(getQuoteDataFromCache).mockReturnValue({
+        planningType: 'full-planning-permission',
+        isHousing: 'yes'
+      })
+      const request = makeRequest({
+        path,
+        session: {
+          manage: requestToUseJourneySession.manage,
+          ...reviewQuoteSession
+        }
+      })
+      const h = makeH()
+
+      const result = checkForValidQuoteSession(request, h)
+
+      expect(result).toBe(h.continue)
+      expect(h.redirect).not.toHaveBeenCalled()
+    }
+  )
+
+  it('redirects a dropout page to start when the request to use session is missing', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({})
+    const request = makeRequest({
+      path: notInEdpPath,
+      session: { manage: requestToUseJourneySession.manage }
+    })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+
+  it('redirects a quote journey page other than a dropout to start when the user is editing a saved quote', () => {
+    vi.mocked(getQuoteDataFromCache).mockReturnValue({})
+    const request = makeRequest({
+      path: '/quote/check-your-answers',
+      session: {
+        manage: requestToUseJourneySession.manage,
+        ...reviewQuoteSession
+      }
+    })
+    const h = makeH()
+
+    checkForValidQuoteSession(request, h)
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
 
   it('continues without session check for non-quote paths', () => {
     const request = makeRequest({ path: '/about' })
