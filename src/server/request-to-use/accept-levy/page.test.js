@@ -117,7 +117,7 @@ describe('Do you accept this nature restoration levy amount page', () => {
   })
 
   it.each([
-    { answer: 'yes', nextPage: '/request-to-use/enter-address' },
+    { answer: 'yes', nextPage: '/request-to-use/defra-account-user-type' },
     { answer: 'no', nextPage: '/request-to-use/delete-quote' }
   ])(
     'should redirect to $nextPage when "$answer" is selected',

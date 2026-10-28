@@ -3,6 +3,7 @@ import { checkForValidReviewQuoteSession } from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
+import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -117,6 +118,28 @@ describe('checkForValidReviewQuoteSession', () => {
 
     expect(result).toBe(h.continue)
     expect(h.redirect).not.toHaveBeenCalled()
+  })
+
+  it('continues on the who are you requesting to use the levy for page when the session is valid', () => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path: defraAccountUserTypePath }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+  })
+
+  it('redirects the who are you requesting to use the levy for page to the start page when there is no session', () => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path: defraAccountUserTypePath, session: {} }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
   })
 
   it.each([

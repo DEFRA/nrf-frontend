@@ -3,6 +3,17 @@ import { ensureRedis } from './ensure-redis.js'
 import { requestToUseSession } from '../server/request-to-use/helpers/request-to-use-session/index.js'
 import { fullQuote } from './fixtures/quote.js'
 
+/**
+ * onPostHandler extension that seeds the request to use session after every response.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {import('@hapi/hapi').ResponseToolkit} h
+ * @returns {symbol} continue
+ */
+export function seedRequestToUseSession(request, h) {
+  requestToUseSession.save(request, { nrlReference: fullQuote.reference })
+  return h.continue
+}
+
 let seededServer = null
 let initPromise = null
 
@@ -16,10 +27,7 @@ async function getSeededServer() {
     // Seeds requestToUse after every response, so tests using this server can
     // never exercise the missing-requestToUse path: that runs against
     // setupTestServer instead (see the redirect tests in review-quote-details).
-    server.ext('onPostHandler', (request, h) => {
-      requestToUseSession.save(request, { nrlReference: fullQuote.reference })
-      return h.continue
-    })
+    server.ext('onPostHandler', seedRequestToUseSession)
     await server.initialize()
     seededServer = server
     return seededServer
