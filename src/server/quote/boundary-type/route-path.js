@@ -1,4 +1,4 @@
-const routeId = 'boundary-type'
+export const routeId = 'boundary-type'
 
 // Leaf module: other pages and shared controllers import this path without
 // pulling in route registration (circular import). Must stay import-free.

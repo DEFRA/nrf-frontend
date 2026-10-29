@@ -8,6 +8,7 @@ import {
 } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { quoteUploadSession } from '../../../../test-utils/fixtures/upload-session.js'
+import { magicLinkToken } from '../../../../test-utils/fixtures/magic-link-token.js'
 
 const MANAGE_KEY = 'manage'
 const QUOTE_KEY = 'quote'
@@ -22,7 +23,7 @@ const retrieveQuoteAnswers = {
 const requestToUseAnswers = { nrlReference: 'NRL-123456' }
 const expiredLinkAnswers = {
   reference: 'NRL-123456',
-  token: 'abc123_TOKEN-xyz'
+  token: magicLinkToken
 }
 const EXPIRED_LINK_KEY = 'expiredLink'
 

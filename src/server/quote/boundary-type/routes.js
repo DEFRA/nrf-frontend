@@ -3,6 +3,7 @@ import { quotePostController } from '../controller-post.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import saveBoundaryEntryTypeToCache from './save-boundary-entry-type-to-cache.js'
 import { routePath } from './route-path.js'
 
 const routeId = 'boundary-type'
@@ -60,6 +61,7 @@ export default [
       formValidation,
       getViewModel,
       getNextPage,
+      saveToSession: saveBoundaryEntryTypeToCache,
       continueToNextPageInChangeMode: true
     })
   }

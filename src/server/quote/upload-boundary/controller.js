@@ -8,11 +8,18 @@ import {
   getValidationFlashFromCache,
   clearValidationFlashFromCache
 } from '../../common/helpers/form-validation-session/index.js'
-import { routePath as checkingFilePath } from '../checking-file/routes.js'
+import { routePath as checkingFilePath } from '../checking-file/route-path.js'
 import { appendChangeParam } from '../helpers/change-mode/index.js'
+
 const routeId = 'upload-boundary'
 
-async function getUploadSession(request) {
+/**
+ * @param {object} params
+ * @param {object} params.request
+ * @param {string} params.redirectPath - the checking file page the CDP
+ *   uploader redirects back to
+ */
+async function getUploadSession({ request, redirectPath }) {
   const existingUploadId = request.yar.get('pendingUploadId')
   const existingUploadUrl = request.yar.get('pendingUploadUrl')
 
@@ -36,50 +43,66 @@ async function getUploadSession(request) {
   // The redirect target is baked into the CDP uploader session, so change
   // mode must be included here to survive the external uploader hop.
   return initiateUpload({
-    redirect: appendChangeParam(checkingFilePath, request.query)
+    redirect: appendChangeParam(redirectPath, request.query)
   })
 }
 
-export async function handler(request, h) {
-  const viewModel = getViewModel({}, request.query)
+/**
+ * Builds the upload page handler. The checking file path is a parameter
+ * because the request to use change alias bakes its own return URL into the
+ * CDP uploader session so the user comes back inside that journey.
+ * @param {object} [params]
+ * @param {string} [params.checkingFilePath] - the return URL baked into the
+ *   uploader session
+ * @param {Function} [params.getViewModel] - the page's view model
+ * @returns {import('@hapi/hapi').Lifecycle.Method} the upload page handler
+ */
+export const createUploadBoundaryHandler = ({
+  checkingFilePath: redirectPath = checkingFilePath,
+  getViewModel: buildViewModel = getViewModel
+} = {}) =>
+  async function uploadBoundaryHandler(request, h) {
+    const viewModel = buildViewModel({}, request.query)
 
-  // Clear any stale boundary data from a previous upload attempt
-  request.yar.clear('boundaryGeojson')
-  request.yar.clear('boundaryFailureReason')
+    // Clear any stale boundary data from a previous upload attempt
+    request.yar.clear('boundaryGeojson')
+    request.yar.clear('boundaryFailureReason')
 
-  // Get validation errors from flash if any
-  const flash = getValidationFlashFromCache(request)
-  if (flash) {
-    clearValidationFlashFromCache(request)
-  }
+    // Get validation errors from flash if any
+    const flash = getValidationFlashFromCache(request)
+    if (flash) {
+      clearValidationFlashFromCache(request)
+    }
 
-  // One-shot: set by upload-received when the previous upload was rejected
-  const uploadRejectionReason = request.yar.get('uploadRejectionReason')
-  if (uploadRejectionReason) {
-    request.yar.clear('uploadRejectionReason')
-  }
+    // One-shot: set by upload-received when the previous upload was rejected
+    const uploadRejectionReason = request.yar.get('uploadRejectionReason')
+    if (uploadRejectionReason) {
+      request.yar.clear('uploadRejectionReason')
+    }
 
-  const uploadSession = await getUploadSession(request)
+    const uploadSession = await getUploadSession({ request, redirectPath })
 
-  if (uploadSession.error) {
+    if (uploadSession.error) {
+      return h.view(`quote/${routeId}/index`, {
+        ...viewModel,
+        uploadError: uploadSession.error
+      })
+    }
+
+    request.yar.set('pendingUploadId', uploadSession.uploadId)
+    request.yar.set('pendingUploadUrl', uploadSession.uploadUrl)
+
     return h.view(`quote/${routeId}/index`, {
       ...viewModel,
-      uploadError: uploadSession.error
+      uploadUrl: uploadSession.uploadUrl,
+      ...(flash?.validationErrors && {
+        validationErrors: flash.validationErrors
+      }),
+      ...(uploadRejectionReason && {
+        uploadStatus: 'fail',
+        failureReason: uploadRejectionReason
+      })
     })
   }
 
-  request.yar.set('pendingUploadId', uploadSession.uploadId)
-  request.yar.set('pendingUploadUrl', uploadSession.uploadUrl)
-
-  return h.view(`quote/${routeId}/index`, {
-    ...viewModel,
-    uploadUrl: uploadSession.uploadUrl,
-    ...(flash?.validationErrors && {
-      validationErrors: flash.validationErrors
-    }),
-    ...(uploadRejectionReason && {
-      uploadStatus: 'fail',
-      failureReason: uploadRejectionReason
-    })
-  })
-}
+export const handler = createUploadBoundaryHandler()

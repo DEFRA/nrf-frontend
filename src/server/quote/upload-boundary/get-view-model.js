@@ -1,7 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as routePathBoundaryType } from '../boundary-type/route-path.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { isChangeMode } from '../helpers/change-mode/index.js'
+import { appendChangeParam } from '../helpers/change-mode/index.js'
 import { BOUNDARY_UPLOAD_HINT_TEXT } from '../../common/constants/boundary-upload-hint.js'
 
 const pageHeading = 'Upload a red line boundary file'
@@ -16,9 +15,7 @@ export default function getViewModel(_quoteData, query = {}) {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
-    backLinkPath: isChangeMode(query)
-      ? checkYourAnswersPath
-      : routePathBoundaryType,
+    backLinkPath: appendChangeParam(routePathBoundaryType, query),
     boundaryUploadHint: BOUNDARY_UPLOAD_HINT_TEXT
   }
 }

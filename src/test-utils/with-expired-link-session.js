@@ -1,12 +1,13 @@
 import { mockRedeemToken } from './mock-get-quote.js'
 import { fullQuote } from './fixtures/quote.js'
+import { magicLinkToken } from './fixtures/magic-link-token.js'
 import { mergeCookies } from './merge-cookies.js'
 import { loadPage } from './load-page.js'
 import { submitForm } from './submit-form.js'
 import { routePath as linkExpiredPath } from '../server/request-to-use/link-expired/route-path.js'
 
 export const expiredLinkReference = fullQuote.reference
-export const expiredLinkToken = 'abc123_TOKEN-xyz'
+export const expiredLinkToken = magicLinkToken
 
 /**
  * Prime the link expired session by driving the real route: open a magic link

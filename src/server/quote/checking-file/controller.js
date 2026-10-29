@@ -10,8 +10,8 @@ import { mapValidationErrorsForDisplay } from '../../common/helpers/form-validat
 import { saveValidationFlashToCache } from '../../common/helpers/form-validation-session/index.js'
 import { createLogger } from '../../common/helpers/logging/logger.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
-import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
-import { routePath as filePreviewPath } from '../file-preview/routes.js'
+import { routePath as uploadBoundaryPath } from '../upload-boundary/route-path.js'
+import { routePath as filePreviewPath } from '../file-preview/route-path.js'
 import { appendChangeParam } from '../helpers/change-mode/index.js'
 
 const logger = createLogger()
@@ -43,8 +43,14 @@ const UPLOAD_REJECTION_CODES = new Set([
  * @param {string} params.failureReason
  * @param {object} params.request
  * @param {object} params.h
+ * @param {string} params.retryUploadBoundaryPath
  */
-function redirectToUploadWithError({ failureReason, request, h }) {
+function redirectToUploadWithError({
+  failureReason,
+  request,
+  h,
+  retryUploadBoundaryPath
+}) {
   const validationErrors = mapValidationErrorsForDisplay([
     { path: ['file'], message: getBoundaryErrorMessage(failureReason) }
   ])
@@ -53,12 +59,26 @@ function redirectToUploadWithError({ failureReason, request, h }) {
   request.yar.clear('pendingUploadId')
   request.yar.clear('pendingUploadUrl')
   return h
-    .redirect(appendChangeParam(uploadBoundaryPath, request.query))
+    .redirect(appendChangeParam(retryUploadBoundaryPath, request.query))
     .code(statusCodes.redirectAfterPost)
 }
 
-async function processBoundaryCheck(uploadId, request, h) {
-  logger.info(`check-boundary - uploadId: ${uploadId}`)
+/**
+ * @param {object} params
+ * @param {string} params.uploadId
+ * @param {object} params.request
+ * @param {object} params.h
+ * @param {string} params.retryUploadBoundaryPath - where a rejected upload retries
+ * @param {string} params.previewPath - where a checked boundary continues
+ */
+async function processBoundaryCheck({
+  uploadId,
+  request,
+  h,
+  retryUploadBoundaryPath,
+  previewPath
+}) {
+  logger.info({ uploadId }, 'check-boundary')
 
   const result = await checkBoundary(uploadId)
 
@@ -71,7 +91,8 @@ async function processBoundaryCheck(uploadId, request, h) {
       return redirectToUploadWithError({
         failureReason: result.failureReason,
         request,
-        h
+        h,
+        retryUploadBoundaryPath
       })
     }
 
@@ -82,7 +103,7 @@ async function processBoundaryCheck(uploadId, request, h) {
     request.yar.clear('pendingUploadId')
     request.yar.clear('pendingUploadUrl')
     return h
-      .redirect(appendChangeParam(filePreviewPath, request.query))
+      .redirect(appendChangeParam(previewPath, request.query))
       .code(statusCodes.redirectAfterPost)
   }
 
@@ -92,55 +113,83 @@ async function processBoundaryCheck(uploadId, request, h) {
   request.yar.clear('boundaryFailureReason')
 
   return h
-    .redirect(appendChangeParam(filePreviewPath, request.query))
+    .redirect(appendChangeParam(previewPath, request.query))
     .code(statusCodes.redirectAfterPost)
 }
 
-export async function handler(request, h) {
-  const uploadId = request.yar.get('pendingUploadId')
-  logger.info(`upload-received - pendingUploadId: ${uploadId}`)
-  if (!uploadId) {
-    return h.redirect(appendChangeParam(uploadBoundaryPath, request.query))
+/**
+ * Builds the checking file page handler. The outcome paths are parameters
+ * because the request to use change alias keeps its retry and preview hops
+ * inside that journey.
+ * @param {object} [params]
+ * @param {string} [params.uploadBoundaryPath] - where a rejected upload retries
+ * @param {string} [params.filePreviewPath] - where a checked boundary continues
+ * @returns {import('@hapi/hapi').Lifecycle.Method} the checking file handler
+ */
+export const createCheckingFileHandler = ({
+  uploadBoundaryPath: retryUploadBoundaryPath = uploadBoundaryPath,
+  filePreviewPath: previewPath = filePreviewPath
+} = {}) =>
+  async function checkingFileHandler(request, h) {
+    const uploadId = request.yar.get('pendingUploadId')
+    logger.info({ uploadId }, 'upload-received')
+    if (!uploadId) {
+      return h.redirect(
+        appendChangeParam(retryUploadBoundaryPath, request.query)
+      )
+    }
+
+    const response = await getUploadStatus(uploadId)
+    const uploadStatus = response.uploadStatus
+    logger.info({ uploadId, uploadStatus }, 'upload-received - upload status')
+
+    if (uploadStatus === UPLOAD_STATUS.READY) {
+      return processBoundaryCheck({
+        uploadId,
+        request,
+        h,
+        retryUploadBoundaryPath,
+        previewPath
+      })
+    }
+
+    const isProcessing =
+      uploadStatus === UPLOAD_STATUS.PENDING ||
+      uploadStatus === UPLOAD_STATUS.INITIATED
+
+    if (!isProcessing) {
+      // Terminal, non-ready status (error/failed/unknown) — send the user
+      // back to upload-boundary to retry, since there is nothing to show on
+      // this page. redirectToUploadWithError clears the pending upload so a
+      // retry mints a fresh CDP Uploader session instead of reusing this
+      // dead one.
+      return redirectToUploadWithError({
+        failureReason: BOUNDARY_ERRORS.UPLOAD.UPLOAD_STATUS_CHECK_FAILED,
+        request,
+        h,
+        retryUploadBoundaryPath
+      })
+    }
+
+    const heading = 'Checking your file…'
+    const viewModel = {
+      pageTitle: getPageTitle(pageTitle),
+      pageHeading: heading,
+      refreshInterval: REFRESH_INTERVAL_SECONDS
+    }
+
+    return h.view('quote/checking-file/index', viewModel)
   }
 
-  const response = await getUploadStatus(uploadId)
-  const uploadStatus = response.uploadStatus
-  logger.info(
-    `upload-received - uploadId: ${uploadId}, uploadStatus: ${uploadStatus}`
-  )
-
-  if (uploadStatus === UPLOAD_STATUS.READY) {
-    return processBoundaryCheck(uploadId, request, h)
-  }
-
-  const isProcessing =
-    uploadStatus === UPLOAD_STATUS.PENDING ||
-    uploadStatus === UPLOAD_STATUS.INITIATED
-
-  if (!isProcessing) {
-    // Terminal, non-ready status (error/failed/unknown) — send the user
-    // back to upload-boundary to retry, since there is nothing to show on
-    // this page. redirectToUploadWithError clears the pending upload so a
-    // retry mints a fresh CDP Uploader session instead of reusing this
-    // dead one.
-    return redirectToUploadWithError({
-      failureReason: BOUNDARY_ERRORS.UPLOAD.UPLOAD_STATUS_CHECK_FAILED,
-      request,
-      h
-    })
-  }
-
-  const heading = 'Checking your file…'
-  const viewModel = {
-    pageTitle: getPageTitle(pageTitle),
-    pageHeading: heading,
-    refreshInterval: REFRESH_INTERVAL_SECONDS
-  }
-
-  return h.view('quote/checking-file/index', viewModel)
-}
+export const handler = createCheckingFileHandler()
 
 export async function checkBoundaryHandler(request, h) {
   const { id } = request.params
-  return processBoundaryCheck(id, request, h)
+  return processBoundaryCheck({
+    uploadId: id,
+    request,
+    h,
+    retryUploadBoundaryPath: uploadBoundaryPath,
+    previewPath: filePreviewPath
+  })
 }

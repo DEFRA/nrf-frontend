@@ -23,6 +23,13 @@ import { routePath as changeConfirmHousingPath } from './change/confirm-housing/
 import { routePath as changeUnitNumberPath } from './change/unit-number/route-path.js'
 import { routePath as changeApplicationTypeNotAvailablePath } from './change/application-type-not-available/route-path.js'
 import { routePath as changeNotHousingPath } from './change/not-housing/route-path.js'
+import { routePath as changeBoundaryTypePath } from './change/boundary-type/route-path.js'
+import { routePath as changeDrawBoundaryPath } from './change/draw-boundary/route-path.js'
+import { routePath as changeUploadBoundaryPath } from './change/upload-boundary/route-path.js'
+import { routePath as changeCheckingFilePath } from './change/checking-file/route-path.js'
+import { routePath as changeFilePreviewPath } from './change/file-preview/route-path.js'
+import { routePath as changeNotInEdpPath } from './change/not-in-edp/route-path.js'
+import { routePath as changeExcludedAreaPath } from './change/excluded-area/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
@@ -75,6 +82,13 @@ const pathsWithOwnSessionChecks = [
   changeUnitNumberPath,
   changeApplicationTypeNotAvailablePath,
   changeNotHousingPath,
+  changeBoundaryTypePath,
+  changeDrawBoundaryPath,
+  changeUploadBoundaryPath,
+  changeCheckingFilePath,
+  changeFilePreviewPath,
+  changeNotInEdpPath,
+  changeExcludedAreaPath,
   '/request-to-use/link-expired',
   '/request-to-use/enter-address'
 ]

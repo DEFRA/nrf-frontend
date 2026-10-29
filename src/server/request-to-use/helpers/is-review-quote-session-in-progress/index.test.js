@@ -9,6 +9,10 @@ import { routePath as changeConfirmHousingPath } from '../../change/confirm-hous
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
 import { routePath as changeApplicationTypeNotAvailablePath } from '../../change/application-type-not-available/route-path.js'
 import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
+import { routePath as changeBoundaryTypeAliasPath } from '../../change/boundary-type/route-path.js'
+import { routePath as changeUploadBoundaryPath } from '../../change/upload-boundary/route-path.js'
+import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-path.js'
+import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 import { routePath as enterEmailPath } from '../../enter-email/route-path.js'
 import { routePath as planningTypePath } from '../../../quote/planning-type/route-path.js'
 import { createReviewQuoteRequest } from '../../../../test-utils/create-review-quote-request.js'
@@ -80,7 +84,9 @@ describe('checkForValidReviewQuoteSession', () => {
     changeConfirmHousingPath,
     changeUnitNumberPath,
     changeApplicationTypeNotAvailablePath,
-    changeNotHousingPath
+    changeNotHousingPath,
+    changeNotInEdpPath,
+    changeExcludedAreaPath
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -98,7 +104,9 @@ describe('checkForValidReviewQuoteSession', () => {
     changeConfirmHousingPath,
     changeUnitNumberPath,
     changeApplicationTypeNotAvailablePath,
-    changeNotHousingPath
+    changeNotHousingPath,
+    changeNotInEdpPath,
+    changeExcludedAreaPath
   ])('redirects %s to the start page when the session is missing', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -108,6 +116,47 @@ describe('checkForValidReviewQuoteSession', () => {
     )
 
     expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+
+  // Mid-edit state: choosing a different boundary entry type clears the saved
+  // boundary until a new one is drawn or uploaded, so the change pages — and
+  // the dropout pages an ineligible change redirects to from them — must not
+  // require a complete quote; the user needs them to finish the swap.
+  it.each([
+    {
+      scenario: 'the upload page, reached by switching from a drawn boundary',
+      path: changeUploadBoundaryPath
+    },
+    {
+      scenario: 'the boundary type page, reached with the browser back button',
+      path: changeBoundaryTypeAliasPath
+    },
+    {
+      scenario:
+        'the not housing dropout page, reached by an ineligible housing change',
+      path: changeNotHousingPath
+    },
+    {
+      scenario:
+        'the application type not available dropout page, reached by an ineligible planning type change',
+      path: changeApplicationTypeNotAvailablePath
+    }
+  ])('continues on $scenario while the boundary is cleared', ({ path }) => {
+    const h = createMockRedirectToolkit()
+
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({
+        path,
+        session: {
+          quote: { ...reviewQuoteSession.quote, boundaryGeojson: null },
+          requestToUse: reviewQuoteSession.requestToUse
+        }
+      }),
+      h
+    )
+
+    expect(result).toBe(h.continue)
+    expect(h.redirect).not.toHaveBeenCalled()
   })
 
   it('continues on the accept levy page when the session is valid', () => {
@@ -151,6 +200,23 @@ describe('checkForValidReviewQuoteSession', () => {
 
     checkForValidReviewQuoteSession(
       createReviewQuoteRequest({ path, session: {} }),
+      h
+    )
+
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
+
+  it('redirects the review page to the start page when the boundary is cleared mid-edit', () => {
+    const h = createMockRedirectToolkit()
+
+    checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({
+        path: reviewQuoteDetailsPath,
+        session: {
+          quote: { ...reviewQuoteSession.quote, boundaryGeojson: null },
+          requestToUse: reviewQuoteSession.requestToUse
+        }
+      }),
       h
     )
 

@@ -81,6 +81,21 @@ describe('map controller', () => {
       expect(h.redirect).toHaveBeenCalledWith(uploadBoundaryPath)
     })
 
+    it('should carry change=true on the upload-boundary redirect in change mode', () => {
+      const h = createMockH()
+      const request = {
+        ...createMockRequest(null, null),
+        query: { change: 'true' }
+      }
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(h.redirect).toHaveBeenCalledWith(
+        `${uploadBoundaryPath}?change=true`
+      )
+    })
+
     it('should save boundaryGeojson to cache and redirect to excluded-area when the boundary intersects an excluded area', () => {
       const h = createMockH()
       const request = createMockRequest(mockExcludedAreaGeojson)

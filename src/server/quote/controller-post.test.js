@@ -108,14 +108,14 @@ describe('resolveChangeModeRedirect', () => {
     ).toBe(confirmHousingPath)
   })
 
-  it('should follow the next page (without change=true) in change mode when continueToNextPageInChangeMode is set', () => {
+  it('should follow the next page carrying change=true in change mode when continueToNextPageInChangeMode is set', () => {
     expect(
       resolveChangeModeRedirect({
         nextPage: confirmHousingPath,
         query: { change: 'true' },
         continueToNextPageInChangeMode: true
       })
-    ).toBe(confirmHousingPath)
+    ).toBe(`${confirmHousingPath}?change=true`)
   })
 
   it('should still redirect to the dropout page carrying change=true in change mode when continueToNextPageInChangeMode is set', () => {

@@ -7,8 +7,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { primeUploadSession } from '../../../test-utils/prime-upload-session.js'
 import { boundaryGeojson } from '../../../test-utils/fixtures/boundary-geojson.js'
-
-const uploadId = '22222222-2222-2222-2222-222222222222'
+import { uploadId } from '../../../test-utils/fixtures/upload-id.js'
 
 const mswServer = setupMswServer()
 
@@ -37,7 +36,7 @@ describe('Upload checked successfully', () => {
 
   it('redirects to the file preview once the boundary check succeeds', async () => {
     stubSuccessfulCheck()
-    const cookie = await primeUploadSession(getServer())
+    const cookie = await primeUploadSession({ server: getServer() })
 
     const response = await getServer().inject({
       method: 'GET',
@@ -51,7 +50,7 @@ describe('Upload checked successfully', () => {
 
   it('carries change=true on the redirect in change mode', async () => {
     stubSuccessfulCheck()
-    const cookie = await primeUploadSession(getServer())
+    const cookie = await primeUploadSession({ server: getServer() })
 
     const response = await getServer().inject({
       method: 'GET',

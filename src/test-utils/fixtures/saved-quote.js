@@ -9,6 +9,8 @@ export const savedQuote = {
   boundary: {
     userInputType: 'upload',
     filename: 'site-plan.geojson',
-    geoJsonWgs84: JSON.stringify(boundaryGeojson)
+    // The backend maps this from PostGIS (ST_AsGeoJSON), so it is the checked
+    // WGS84 geometry alone — not the boundary check response blob.
+    geoJsonWgs84: JSON.stringify(boundaryGeojson.boundaryGeometryWgs84)
   }
 }

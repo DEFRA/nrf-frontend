@@ -43,7 +43,7 @@
               value: {
                 text: formSubmitData.boundaryFilename if formSubmitData.boundaryFilename else 'Uploaded'
               },
-              actions: { items: [{ href: quoteRoutes.filePreview + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
+              actions: { items: [{ href: quoteRoutes.boundaryType + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
             } if formSubmitData.boundaryEntryType === 'upload',
             {
               key: { text: "Email address" },

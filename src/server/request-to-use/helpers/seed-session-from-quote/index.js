@@ -38,8 +38,18 @@ export const seedSessionFromQuote = ({ request, quote }) => {
   saveQuoteDataToCache(request, toQuoteSessionData(quote))
   // Saved separately: changing the boundary entry type in the call above clears
   // the geojson, so it must be written after the entry type is in place.
+  // The quote record stores only the checked geometry (PostGIS ST_AsGeoJSON),
+  // so it is nested in the check-response shape the map pages read
+  // (boundaryGeometryWgs84) — a redraw then starts from the saved boundary.
+  // The file preview reads the intersecting EDPs from the same blob and would
+  // otherwise bounce to the not-in-EDP page, so they are rebuilt from the
+  // quote's own EDP list in the check response's label shape. Only the
+  // metadata stays unset until the boundary is redrawn or re-uploaded.
   saveQuoteDataToCache(request, {
-    boundaryGeojson: JSON.parse(quote.boundary.geoJsonWgs84)
+    boundaryGeojson: {
+      boundaryGeometryWgs84: JSON.parse(quote.boundary.geoJsonWgs84),
+      intersectingEdps: quote.edps.map(({ edpName: label }) => ({ label }))
+    }
   })
 
   requestToUseSession.save(request, { nrlReference: quote.reference })

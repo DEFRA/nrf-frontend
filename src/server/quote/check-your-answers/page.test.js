@@ -198,14 +198,12 @@ describe('Check your answers page', () => {
       ? [].concat(checkResponse.headers['set-cookie']).join('; ')
       : cookie
 
-    const previewResponse = await getServer().inject({
-      method: 'POST',
-      url: '/quote/file-preview',
-      headers: { cookie }
-    })
-    cookie = previewResponse.headers['set-cookie']
-      ? [].concat(previewResponse.headers['set-cookie']).join('; ')
-      : cookie
+    ;({ cookie } = await submitForm({
+      requestUrl: '/quote/file-preview',
+      server: getServer(),
+      formData: {},
+      cookie
+    }))
 
     const document = await loadPage({
       requestUrl: routePath,
@@ -214,13 +212,13 @@ describe('Check your answers page', () => {
     })
     const summaryList = document.querySelector('.govuk-summary-list')
     expect(summaryList).toHaveTextContent('site-boundary.geojson')
-    // The uploaded row deliberately still links straight to the file preview
-    // (NRF2-1188 only changed the drawn row)
+    // Both boundary rows change from the entry type question, like the review
+    // and amend page
     expect(
       getByRole(document, 'link', {
         name: 'Changeuploaded red line boundary'
       })
-    ).toHaveAttribute('href', '/quote/file-preview?change=true')
+    ).toHaveAttribute('href', '/quote/boundary-type?change=true')
   })
 
   it('should set a no-store Cache-Control header so the page cannot be shown from cache', async () => {

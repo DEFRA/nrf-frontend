@@ -279,7 +279,7 @@ describe('POST /quote/draw-boundary/save', () => {
     expect(response.headers.location).toBe(emailPath)
   })
 
-  it('drops a stray change=true param and redirects to email when there are intersections', async () => {
+  it('redirects to check-your-answers in change mode when there are intersections', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -291,10 +291,10 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryFilename: null
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(emailPath)
+    expect(response.headers.location).toBe('/quote/check-your-answers')
   })
 
-  it('drops a stray change=true param when redirecting to excluded-area', async () => {
+  it('keeps change=true when redirecting to excluded-area', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -302,10 +302,10 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(excludedAreaPath)
+    expect(response.headers.location).toBe('/quote/excluded-area?change=true')
   })
 
-  it('drops a stray change=true param when redirecting to not-in-edp', async () => {
+  it('keeps change=true when redirecting to not-in-edp', async () => {
     const response = await getServer().inject({
       method: 'POST',
       url: `${savePath}?change=true`,
@@ -313,7 +313,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(notInEdpPath)
+    expect(response.headers.location).toBe('/quote/not-in-edp?change=true')
   })
 
   it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {

@@ -14,9 +14,9 @@ describe('upload-boundary getViewModel', () => {
     })
   })
 
-  it('should link back to check-your-answers in change mode', () => {
+  it('should link back to boundary-type carrying change=true in change mode', () => {
     const viewModel = getViewModel({}, { change: 'true' })
 
-    expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
+    expect(viewModel.backLinkPath).toBe('/quote/boundary-type?change=true')
   })
 })

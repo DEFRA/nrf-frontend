@@ -166,7 +166,7 @@ describe('Boundary map page', () => {
       expect(response.headers.location).toBe('/quote/email')
     })
 
-    it('should link back to check-your-answers when loaded with change=true', async () => {
+    it('should link back to the upload page carrying change=true when loaded with change=true', async () => {
       const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
       const document = await loadPage({
         requestUrl: `${routePath}?change=true`,
@@ -176,7 +176,22 @@ describe('Boundary map page', () => {
 
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',
-        '/quote/check-your-answers'
+        '/quote/upload-boundary?change=true'
+      )
+    })
+
+    it('should carry change=true in the retry link when loaded with change=true', async () => {
+      const cookie = await withValidQuoteSession(getServer(), boundaryCheckPath)
+      const document = await loadPage({
+        requestUrl: `${routePath}?change=true`,
+        server: getServer(),
+        cookie
+      })
+
+      const retryLink = getByRole(document, 'link', { name: retryLinkText })
+      expect(retryLink).toHaveAttribute(
+        'href',
+        '/quote/boundary-type?change=true'
       )
     })
   })

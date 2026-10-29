@@ -1,4 +1,4 @@
-const routeId = 'not-in-edp'
+export const routeId = 'not-in-edp'
 
 // Leaf module: the change-mode helper imports this path to detect dropout
 // pages without pulling route registration into a circular import (their
