@@ -92,6 +92,28 @@ describe('Change file preview page', () => {
     )
   })
 
+  it('should drop out to the change not in EDP page when the uploaded boundary misses every EDP', async () => {
+    const seededServer = getSeededServer()
+    const cookie = await withCompleteQuoteSession(seededServer)
+    // Replace the complete session's EDP boundary with one outside every EDP,
+    // as an upload whose boundary check found no EDP would have cached.
+    await submitForm({
+      requestUrl: '/request-to-use/change/draw-boundary/save',
+      server: seededServer,
+      formData: { boundaryGeojson },
+      cookie
+    })
+
+    const response = await getResponse({
+      server: seededServer,
+      requestUrl: routePath,
+      cookie
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/request-to-use/change/not-in-edp')
+  })
+
   it('should drop out to the change not in EDP page when the saved boundary misses every EDP', async () => {
     const seededServer = getSeededServer()
     const cookie = await withCompleteQuoteSession(seededServer)

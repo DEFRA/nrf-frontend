@@ -181,7 +181,7 @@ export const createFilePreviewHandlers = ({
         { intersectsEdp },
         'map - boundary does not intersect EDP, redirecting to no-edp'
       )
-      return h.redirect(appendChangeParam(notInEdpPath, request.query))
+      return h.redirect(appendChangeParam(dropoutNotInEdpPath, request.query))
     }
 
     const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
