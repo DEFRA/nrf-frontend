@@ -2,6 +2,7 @@ import { routePath as startPath } from '../../../manage/start-page/route-path.js
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
+import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -30,8 +31,8 @@ const hasRequestToUseSession = (request) =>
 // legitimately incomplete, because choosing a different boundary entry type
 // clears the saved boundary until a new one is drawn or uploaded. The pages
 // that render the saved quote itself — the review page, the accept levy page
-// continuing from it and the who are you requesting to use the levy for page
-// following it — still need the complete quote.
+// continuing from it and the Defra account pages following it — still need
+// the complete quote.
 const changePaths = new Set([
   changePlanningTypePath,
   changeConfirmHousingPath,
@@ -50,16 +51,17 @@ const changePaths = new Set([
 const completeQuotePaths = new Set([
   reviewQuoteDetailsPath,
   acceptLevyPath,
-  defraAccountUserTypePath
+  defraAccountUserTypePath,
+  defraAccountIndividualPath
 ])
 
 /**
  * Redirects to the start page when the review quote details page, the accept
- * levy page, the who are you requesting to use the levy for page or a change
- * page reached from the review page's change links is requested without the
- * session state magic link redemption (NRF2-1256) sets. The review, accept
- * levy and who are you requesting to use the levy for pages need the complete
- * saved quote they render; the change pages only the request to use session.
+ * levy page, the Defra account pages or a change page reached from the review
+ * page's change links is requested without the session state magic link
+ * redemption (NRF2-1256) sets. The review, accept levy and Defra account
+ * pages need the complete saved quote they render; the change pages only the
+ * request to use session.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {

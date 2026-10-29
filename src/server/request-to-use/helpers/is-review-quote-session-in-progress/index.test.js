@@ -22,6 +22,8 @@ import {
   reviewQuoteSession
 } from '../../../../test-utils/fixtures/session.js'
 
+const defraAccountIndividualPath = '/request-to-use/defra-account-individual'
+
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
     const h = createMockRedirectToolkit()
@@ -169,27 +171,33 @@ describe('checkForValidReviewQuoteSession', () => {
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
-  it('continues on the who are you requesting to use the levy for page when the session is valid', () => {
-    const h = createMockRedirectToolkit()
+  it.each([defraAccountUserTypePath, defraAccountIndividualPath])(
+    'continues on %s when the session is valid',
+    (path) => {
+      const h = createMockRedirectToolkit()
 
-    const result = checkForValidReviewQuoteSession(
-      createReviewQuoteRequest({ path: defraAccountUserTypePath }),
-      h
-    )
+      const result = checkForValidReviewQuoteSession(
+        createReviewQuoteRequest({ path }),
+        h
+      )
 
-    expect(result).toBe(h.continue)
-  })
+      expect(result).toBe(h.continue)
+    }
+  )
 
-  it('redirects the who are you requesting to use the levy for page to the start page when there is no session', () => {
-    const h = createMockRedirectToolkit()
+  it.each([defraAccountUserTypePath, defraAccountIndividualPath])(
+    'redirects %s to the start page when there is no session',
+    (path) => {
+      const h = createMockRedirectToolkit()
 
-    checkForValidReviewQuoteSession(
-      createReviewQuoteRequest({ path: defraAccountUserTypePath, session: {} }),
-      h
-    )
+      checkForValidReviewQuoteSession(
+        createReviewQuoteRequest({ path, session: {} }),
+        h
+      )
 
-    expect(h.redirect).toHaveBeenCalledWith(startPath)
-  })
+      expect(h.redirect).toHaveBeenCalledWith(startPath)
+    }
+  )
 
   it('redirects the review page to the start page when the boundary is cleared mid-edit', () => {
     const h = createMockRedirectToolkit()

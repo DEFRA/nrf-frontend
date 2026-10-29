@@ -1,5 +1,5 @@
-import { statusCodes } from '../../common/constants/status-codes.js'
-import { routePath as enterAddressPath } from '../enter-address/route-path.js'
+import { statusCodes } from '../../../common/constants/status-codes.js'
+import { routePath as enterAddressPath } from '../../enter-address/route-path.js'
 
 /**
  * Route pre-handler: skips the page for users already signed in to Defra ID.

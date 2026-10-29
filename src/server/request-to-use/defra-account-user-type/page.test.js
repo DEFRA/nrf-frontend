@@ -76,7 +76,21 @@ describe('Who are you requesting to use the nature restoration levy for page', (
     ).toBeInTheDocument()
   })
 
-  it.each(['individual', 'organisation', 'agent'])(
+  it('should redirect to the individual Defra account page when "individual" is selected', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { defraAccountUserType: 'individual' },
+      cookie: sessionCookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/request-to-use/defra-account-individual'
+    )
+  })
+
+  it.each(['organisation', 'agent'])(
     'should redirect to enter address when "%s" is selected',
     async (answer) => {
       const { response } = await submitForm({

@@ -1,7 +1,7 @@
 import { requestToUseController } from '../controller-get.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
 import { saveDefraAccountUserType } from '../helpers/request-to-use-session/index.js'
-import { redirectWhenSignedIn } from './redirect-when-signed-in.js'
+import { redirectWhenSignedIn } from '../helpers/redirect-when-signed-in/index.js'
 import getViewModel from './get-view-model.js'
 import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
@@ -59,7 +59,7 @@ const postController = createPostController({
  *                   - agent
  *     responses:
  *       303:
- *         description: Redirect to the matching Defra account page on success, to enter address when signed in, or back to the form on validation failure
+ *         description: Redirect to the individual Defra account page for the individual answer, to enter address for the other answers, to enter address when signed in, or back to the form on validation failure
  */
 export default [
   {
