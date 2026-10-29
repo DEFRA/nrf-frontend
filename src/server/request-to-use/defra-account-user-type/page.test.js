@@ -104,7 +104,7 @@ describe('Who are you requesting to use the nature restoration levy for page', (
     )
   })
 
-  it('should redirect to enter address when "agent" is selected', async () => {
+  it('should redirect to the agent Defra account page when "agent" is selected', async () => {
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
@@ -113,7 +113,9 @@ describe('Who are you requesting to use the nature restoration levy for page', (
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/request-to-use/enter-address')
+    expect(response.headers.location).toBe(
+      '/request-to-use/defra-account-agent'
+    )
   })
 
   it.each([
