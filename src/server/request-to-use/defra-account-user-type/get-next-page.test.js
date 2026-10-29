@@ -7,14 +7,19 @@ describe('getNextPage', () => {
     )
   })
 
-  it.each([
-    {
-      scenario: 'an organisation',
-      data: { defraId: { userType: 'organisation' } }
-    },
-    { scenario: 'an agent', data: { defraId: { userType: 'agent' } } },
-    { scenario: 'no saved answer', data: {} }
-  ])('goes to enter address for $scenario', ({ data }) => {
-    expect(getNextPage(data)).toBe('/request-to-use/enter-address')
+  it('goes to the organisation Defra account page for an organisation', () => {
+    expect(getNextPage({ defraId: { userType: 'organisation' } })).toBe(
+      '/request-to-use/defra-account-organisation'
+    )
+  })
+
+  it('goes to the agent Defra account page for an agent', () => {
+    expect(getNextPage({ defraId: { userType: 'agent' } })).toBe(
+      '/request-to-use/defra-account-agent'
+    )
+  })
+
+  it('goes to enter address when there is no saved answer', () => {
+    expect(getNextPage({})).toBe('/request-to-use/enter-address')
   })
 })

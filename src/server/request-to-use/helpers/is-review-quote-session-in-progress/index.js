@@ -3,6 +3,8 @@ import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
+import { routePath as defraAccountOrganisationPath } from '../../defra-account-organisation/route-path.js'
+import { routePath as defraAccountAgentPath } from '../../defra-account-agent/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -52,7 +54,9 @@ const completeQuotePaths = new Set([
   reviewQuoteDetailsPath,
   acceptLevyPath,
   defraAccountUserTypePath,
-  defraAccountIndividualPath
+  defraAccountIndividualPath,
+  defraAccountOrganisationPath,
+  defraAccountAgentPath
 ])
 
 /**
