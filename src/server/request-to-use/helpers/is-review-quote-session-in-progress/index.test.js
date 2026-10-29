@@ -19,6 +19,8 @@ import {
 } from '../../../../test-utils/fixtures/session.js'
 
 const defraAccountIndividualPath = '/request-to-use/defra-account-individual'
+const defraAccountOrganisationPath =
+  '/request-to-use/defra-account-organisation'
 
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
@@ -122,33 +124,35 @@ describe('checkForValidReviewQuoteSession', () => {
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
-  it.each([defraAccountUserTypePath, defraAccountIndividualPath])(
-    'continues on %s when the session is valid',
-    (path) => {
-      const h = createMockRedirectToolkit()
+  it.each([
+    defraAccountUserTypePath,
+    defraAccountIndividualPath,
+    defraAccountOrganisationPath
+  ])('continues on %s when the session is valid', (path) => {
+    const h = createMockRedirectToolkit()
 
-      const result = checkForValidReviewQuoteSession(
-        createReviewQuoteRequest({ path }),
-        h
-      )
+    const result = checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path }),
+      h
+    )
 
-      expect(result).toBe(h.continue)
-    }
-  )
+    expect(result).toBe(h.continue)
+  })
 
-  it.each([defraAccountUserTypePath, defraAccountIndividualPath])(
-    'redirects %s to the start page when there is no session',
-    (path) => {
-      const h = createMockRedirectToolkit()
+  it.each([
+    defraAccountUserTypePath,
+    defraAccountIndividualPath,
+    defraAccountOrganisationPath
+  ])('redirects %s to the start page when there is no session', (path) => {
+    const h = createMockRedirectToolkit()
 
-      checkForValidReviewQuoteSession(
-        createReviewQuoteRequest({ path, session: {} }),
-        h
-      )
+    checkForValidReviewQuoteSession(
+      createReviewQuoteRequest({ path, session: {} }),
+      h
+    )
 
-      expect(h.redirect).toHaveBeenCalledWith(startPath)
-    }
-  )
+    expect(h.redirect).toHaveBeenCalledWith(startPath)
+  })
 
   it.each([
     { scenario: 'there is no session', session: {} },

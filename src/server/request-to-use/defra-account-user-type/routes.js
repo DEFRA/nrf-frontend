@@ -59,7 +59,7 @@ const postController = createPostController({
  *                   - agent
  *     responses:
  *       303:
- *         description: Redirect to the individual Defra account page for the individual answer, to enter address for the other answers, to enter address when signed in, or back to the form on validation failure
+ *         description: Redirect to the individual or organisation Defra account page for those answers, to enter address for the agent answer, to enter address when signed in, or back to the form on validation failure
  */
 export default [
   {
