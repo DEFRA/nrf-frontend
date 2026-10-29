@@ -115,9 +115,11 @@ function createPostHandler({
 
 /**
  * Builds the file preview page's GET and POST handlers. The paths are
- * parameters because the request to use change alias keeps its retry hop
- * inside that journey and returns to the review and amend page instead of
- * asking for the email again.
+ * parameters so the request to use change alias can wire its own pages into
+ * the same handlers: its retry link goes back to the alias's upload page
+ * rather than the quote journey's, a successful save returns to the review
+ * and amend page rather than asking for the email again, and its eligibility
+ * dropouts land on the alias's own dropout pages.
  * @param {object} [params]
  * @param {string} [params.uploadBoundaryPath] - where a user without a
  *   boundary in session is sent to upload one
