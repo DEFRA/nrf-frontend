@@ -17,6 +17,7 @@ import { routePath as quoteNotMatchedPath } from './quote-not-matched/route-path
 import { routePath as emailConfirmationPath } from './email-confirmation/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
+import { routePath as deleteQuotePath } from './delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from './defra-account-user-type/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
@@ -64,7 +65,10 @@ const unreachablePaths = [
 const reachablePaths = [
   startPath,
   emailConfirmationPath,
-  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`
+  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
+  // Unguarded until the delete quote page's session behaviour ticket adds it
+  // to the review quote session guard.
+  deleteQuotePath
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
