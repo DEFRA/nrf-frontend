@@ -6,7 +6,6 @@ import { checkPath, savePath } from './routes.js'
 import { routePath as notInEdpPath } from '../not-in-edp/route-path.js'
 import { routePath as excludedAreaPath } from '../excluded-area/route-path.js'
 import { routePath as emailPath } from '../email/routes.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import {
   boundaryGeojsonWithEdp,
   boundaryGeojsonWithExcludedArea
@@ -292,7 +291,7 @@ describe('POST /quote/draw-boundary/save', () => {
       boundaryFilename: null
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(checkYourAnswersPath)
+    expect(response.headers.location).toBe('/quote/check-your-answers')
   })
 
   it('keeps change=true when redirecting to excluded-area', async () => {
@@ -303,7 +302,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(`${excludedAreaPath}?change=true`)
+    expect(response.headers.location).toBe('/quote/excluded-area?change=true')
   })
 
   it('keeps change=true when redirecting to not-in-edp', async () => {
@@ -314,7 +313,7 @@ describe('POST /quote/draw-boundary/save', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
-    expect(response.headers.location).toBe(`${notInEdpPath}?change=true`)
+    expect(response.headers.location).toBe('/quote/not-in-edp?change=true')
   })
 
   it('saves and redirects to excluded-area when intersectingExcludedAreas is non-empty', async () => {

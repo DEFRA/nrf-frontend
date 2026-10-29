@@ -1,3 +1,4 @@
+import joi from 'joi'
 import { createFilePreviewHandlers } from '../../../quote/file-preview/controller.js'
 import { routePath as changeUploadBoundaryPath } from '../upload-boundary/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
@@ -49,6 +50,13 @@ export default [
   {
     method: 'POST',
     path: routePath,
+    options: {
+      // The Save-and-continue form posts no fields (the crumb plugin strips
+      // csrfToken before validation), so the schema is an empty object.
+      validate: {
+        payload: joi.object()
+      }
+    },
     handler: postHandler
   }
 ]

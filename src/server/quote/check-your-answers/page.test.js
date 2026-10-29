@@ -198,14 +198,12 @@ describe('Check your answers page', () => {
       ? [].concat(checkResponse.headers['set-cookie']).join('; ')
       : cookie
 
-    const previewResponse = await getServer().inject({
-      method: 'POST',
-      url: '/quote/file-preview',
-      headers: { cookie }
-    })
-    cookie = previewResponse.headers['set-cookie']
-      ? [].concat(previewResponse.headers['set-cookie']).join('; ')
-      : cookie
+    ;({ cookie } = await submitForm({
+      requestUrl: '/quote/file-preview',
+      server: getServer(),
+      formData: {},
+      cookie
+    }))
 
     const document = await loadPage({
       requestUrl: routePath,

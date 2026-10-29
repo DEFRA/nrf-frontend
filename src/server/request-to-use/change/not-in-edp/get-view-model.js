@@ -2,9 +2,7 @@ import getNotInEdpViewModel from '../../../quote/not-in-edp/get-view-model.js'
 import { routePath as changeBoundaryTypePath } from '../boundary-type/route-path.js'
 import { routePath as changeDrawBoundaryPath } from '../draw-boundary/route-path.js'
 import { routePath as changeUploadBoundaryPath } from '../upload-boundary/route-path.js'
-import { createLogger } from '../../../common/helpers/logging/logger.js'
-
-const logger = createLogger()
+import { resolveBoundaryStepBackLink } from '../../../quote/helpers/boundary-step-back-link/index.js'
 
 /**
  * The alias serves the quote dropout page's own template, so the view model
@@ -17,20 +15,12 @@ const logger = createLogger()
  * @returns {object} view model for the change not in EDP page
  */
 export default function getViewModel(quoteData = {}) {
-  let backLinkPath = changeBoundaryTypePath
-  /**
-   * TODO: store the list of possible boundary entry types in a single location and import it here, rather than hardcoding the values in this function.
-   */
-  if (quoteData.boundaryEntryType === 'draw') {
-    backLinkPath = changeDrawBoundaryPath
-  } else if (quoteData.boundaryEntryType === 'upload') {
-    backLinkPath = changeUploadBoundaryPath
-  } else {
-    logger.error(
-      { boundaryEntryType: quoteData.boundaryEntryType },
-      'boundaryEntryType is not recognised'
-    )
-  }
+  const backLinkPath = resolveBoundaryStepBackLink({
+    boundaryEntryType: quoteData.boundaryEntryType,
+    drawBoundaryPath: changeDrawBoundaryPath,
+    uploadBoundaryPath: changeUploadBoundaryPath,
+    fallbackPath: changeBoundaryTypePath
+  })
 
   return {
     ...getNotInEdpViewModel(quoteData),

@@ -144,7 +144,7 @@ describe('Boundary type page', () => {
     })
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      checkYourAnswersPath
+      '/quote/check-your-answers'
     )
   })
 

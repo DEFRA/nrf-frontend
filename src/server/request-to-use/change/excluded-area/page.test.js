@@ -13,11 +13,12 @@ import {
   mockRedeemToken
 } from '../../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../../test-utils/fixtures/saved-quote.js'
+import { magicLinkToken } from '../../../../test-utils/fixtures/magic-link-token.js'
 import { boundaryGeojsonWithExcludedArea } from '../../../../test-utils/fixtures/boundary-geojson.js'
 
 const mswServer = setupMswServer()
 
-const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/abc123_TOKEN-xyz`
+const magicLink = `/request-to-use/retrieve/${savedQuote.reference}/${magicLinkToken}`
 const pageHeading =
   'Development is within the excluded area of this Environmental Delivery Plan (EDP)'
 

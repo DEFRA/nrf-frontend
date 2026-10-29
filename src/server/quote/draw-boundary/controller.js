@@ -95,7 +95,10 @@ export const createSaveBoundaryHandler = ({
       boundaryFilename: null
     })
 
-    logger.info('draw-boundary boundary saved to quote cache')
+    logger.info(
+      { intersectsEdp, intersectsExcludedArea },
+      'draw-boundary boundary saved to quote cache'
+    )
 
     // Excluded-area takes precedence: when the boundary overlaps an EDP
     // exclusion zone it is ineligible for the EDP, so the user must use the

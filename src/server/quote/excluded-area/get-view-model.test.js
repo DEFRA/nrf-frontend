@@ -1,15 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import getViewModel from './get-view-model.js'
-
-const mockLogger = vi.hoisted(() => ({
-  error: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn()
-}))
-
-vi.mock('../../common/helpers/logging/logger.js', () => ({
-  createLogger: () => mockLogger
-}))
 
 const excludedAreas = ['River Wensum Exclusion Zone', 'Norfolk Broads Buffer']
 
@@ -50,19 +40,6 @@ describe('excluded-area getViewModel', () => {
       boundaryGeojson: { intersectingExcludedAreas: [] }
     })
 
-    expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
-  })
-
-  it('should log an error and keep the placeholder back link when the boundary entry type is not recognised', () => {
-    const viewModel = getViewModel({
-      ...baseQuoteData,
-      boundaryEntryType: 'unknown'
-    })
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      { boundaryEntryType: 'unknown' },
-      'boundaryEntryType is not recognised'
-    )
     expect(viewModel.backLinkPath).toBe('/quote/boundary-type')
   })
 
