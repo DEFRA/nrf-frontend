@@ -67,6 +67,7 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/review-quote-details',
   acceptLevyPath,
   defraAccountUserTypePath,
+  '/request-to-use/defra-account-individual',
   changePlanningTypePath,
   changeConfirmHousingPath,
   changeUnitNumberPath,
