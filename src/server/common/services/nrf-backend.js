@@ -130,10 +130,10 @@ export const patchRequestToBackend = async ({ endpointPath, payload }) => {
 }
 
 /**
- * Deletes a quote. Whatever went wrong upstream — the quote was already
- * deleted elsewhere (404) or the backend is down (5xx) — the user sees the
- * 500 error page, so every failure is wrapped as an internal error rather
- * than rethrown (a rethrown Wreck 404 would render the 404 page).
+ * Sends a DELETE request to the backend. Whatever went wrong upstream — the
+ * resource was already deleted elsewhere (404) or the backend is down (5xx) —
+ * the user sees the 500 error page, so every failure is wrapped as an internal
+ * error rather than rethrown (a rethrown Wreck 404 would render the 404 page).
  * @param {{ endpointPath: string }} params
  * @returns {Promise<object>} the Wreck response ({ res, payload })
  */
@@ -147,6 +147,6 @@ export const deleteRequestToBackend = async ({ endpointPath }) => {
     return response
   } catch (error) {
     logger.error(error, 'DELETE request to backend failed')
-    throw Boom.internal('Delete quote request to backend failed', error)
+    throw Boom.internal('DELETE request to backend failed', error)
   }
 }

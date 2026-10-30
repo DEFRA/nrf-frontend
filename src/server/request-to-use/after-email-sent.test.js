@@ -162,8 +162,8 @@ describe('After the retrieve quote email is sent', () => {
         cookie
       })
 
-      expect(response.statusCode).toBe(statusCodes.found)
-      expect(response.headers.location).toBe(startPath)
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/manage/start-page')
     })
 
     it('should show the page not found page for the link expired page', async () => {

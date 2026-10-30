@@ -1,3 +1,4 @@
+import { referenceParam } from '@defra/nrf-library'
 import { deleteRequestToBackend } from '../../common/services/nrf-backend.js'
 import { clearJourneySessions } from '../../common/helpers/journey-session/index.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -5,10 +6,6 @@ import { isQuoteDataComplete } from '../../quote/helpers/quote-session-cache/ind
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
 import getNextPage from './get-next-page.js'
-
-// Mirrors the backend's reference param schema. Defensive only: the session
-// reference is seeded server-side from the redeemed quote, never user input.
-const REFERENCE_PATTERN = /^NRL-\d{6}$/
 
 /**
  * The delete is only honoured when the session still carries what magic link
@@ -21,7 +18,8 @@ const REFERENCE_PATTERN = /^NRL-\d{6}$/
  * @returns {boolean}
  */
 const hasRedeemedQuoteInSession = (request, reference) =>
-  REFERENCE_PATTERN.test(reference ?? '') && isQuoteDataComplete(request)
+  referenceParam.validate(reference).error === undefined &&
+  isQuoteDataComplete(request)
 
 export const deleteQuotePostController = {
   async handler(request, h) {

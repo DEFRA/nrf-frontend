@@ -1,7 +1,5 @@
 import { getByRole, getByText } from '@testing-library/dom'
-import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
-import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
@@ -19,7 +17,7 @@ describe('Are you sure you want to delete this quote page', () => {
 
   const load = async () =>
     loadPage({
-      requestUrl: routePath,
+      requestUrl: '/request-to-use/delete-quote',
       server: getSeededServer(),
       cookie: await withCompleteQuoteSession(getSeededServer())
     })
@@ -27,10 +25,10 @@ describe('Are you sure you want to delete this quote page', () => {
   it('should redirect to the start page when there is no session', async () => {
     const response = await getResponse({
       server: getServer(),
-      requestUrl: routePath
+      requestUrl: '/request-to-use/delete-quote'
     })
 
-    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/manage/start-page')
   })
 
@@ -82,13 +80,13 @@ describe('Are you sure you want to delete this quote page', () => {
     const requests = mockDeleteQuote(mswServer)
 
     const { response } = await submitForm({
-      requestUrl: routePath,
+      requestUrl: '/request-to-use/delete-quote',
       server: getSeededServer(),
       formData: { confirmDeleteQuote: 'Yes' },
       cookie: await withCompleteQuoteSession(getSeededServer())
     })
 
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(
       '/request-to-use/delete-quote-confirmation'
     )
@@ -97,13 +95,13 @@ describe('Are you sure you want to delete this quote page', () => {
 
   it('should redirect back to the form when the hidden field is missing', async () => {
     const { response } = await submitForm({
-      requestUrl: routePath,
+      requestUrl: '/request-to-use/delete-quote',
       server: getSeededServer(),
       formData: {},
       cookie: await withCompleteQuoteSession(getSeededServer())
     })
 
-    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/request-to-use/delete-quote')
   })
 
@@ -113,7 +111,7 @@ describe('Are you sure you want to delete this quote page', () => {
       mockDeleteQuote(mswServer, { status })
 
       const { response, document } = await submitForm({
-        requestUrl: routePath,
+        requestUrl: '/request-to-use/delete-quote',
         server: getSeededServer(),
         formData: { confirmDeleteQuote: 'Yes' },
         cookie: await withCompleteQuoteSession(getSeededServer())

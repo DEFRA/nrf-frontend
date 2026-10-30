@@ -4,17 +4,12 @@ import { createMockRedirectToolkit } from '../../../test-utils/create-mock-redir
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { mockDeleteQuote } from '../../../test-utils/mock-get-quote.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
-import { reviewQuoteSession } from '../../../test-utils/fixtures/session.js'
+import {
+  redeemedQuoteSession,
+  reviewQuoteSession
+} from '../../../test-utils/fixtures/session.js'
 
 const nrlReference = fullQuote.reference
-
-// The full session state magic link redemption leaves behind, plus keys from
-// earlier steps that the successful delete must also wipe
-const buildRedeemedSession = () => ({
-  ...reviewQuoteSession,
-  retrieveQuote: { nrlReference },
-  pendingUploadId: 'an-upload-key-clearJourneySessions-removes'
-})
 
 describe('deleteQuotePostController', () => {
   const mswServer = setupMswServer()
@@ -53,7 +48,7 @@ describe('deleteQuotePostController', () => {
     const requests = mockDeleteQuote(mswServer)
 
     await deleteQuotePostController.handler(
-      createSessionRequest({ session: buildRedeemedSession() }),
+      createSessionRequest({ session: redeemedQuoteSession }),
       createMockRedirectToolkit()
     )
 
@@ -62,7 +57,7 @@ describe('deleteQuotePostController', () => {
 
   it('should clear every journey session key on success', async () => {
     mockDeleteQuote(mswServer)
-    const request = createSessionRequest({ session: buildRedeemedSession() })
+    const request = createSessionRequest({ session: redeemedQuoteSession })
 
     await deleteQuotePostController.handler(
       request,
@@ -80,7 +75,7 @@ describe('deleteQuotePostController', () => {
     const toolkit = createMockRedirectToolkit()
 
     await deleteQuotePostController.handler(
-      createSessionRequest({ session: buildRedeemedSession() }),
+      createSessionRequest({ session: redeemedQuoteSession }),
       toolkit
     )
 
@@ -94,7 +89,7 @@ describe('deleteQuotePostController', () => {
     'should keep the session and not redirect when the delete returns %i',
     async (status) => {
       mockDeleteQuote(mswServer, { status })
-      const request = createSessionRequest({ session: buildRedeemedSession() })
+      const request = createSessionRequest({ session: redeemedQuoteSession })
       const toolkit = createMockRedirectToolkit()
 
       await expect(
