@@ -1,5 +1,6 @@
 import { quoteController } from '../controller-get.js'
 import { quotePostController } from '../controller-post.js'
+import { saveToSessionUnlessDropout } from '../helpers/save-to-session-unless-dropout/index.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
@@ -59,7 +60,8 @@ export default [
       routeId,
       formValidation,
       getViewModel,
-      getNextPage
+      getNextPage,
+      saveToSession: saveToSessionUnlessDropout({ getNextPage })
     })
   }
 ]

@@ -6,6 +6,7 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 
 describe('Confirm housing page', () => {
   const getServer = setupTestServer()
@@ -82,5 +83,61 @@ describe('Confirm housing page', () => {
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe('/quote/unit-number')
+  })
+
+  it('should redirect to not-housing (with change=true) when a change-mode submission selects No', async () => {
+    const cookie = await withCompleteQuoteSession(getServer())
+
+    const { response } = await submitForm({
+      requestUrl: '/quote/confirm-housing?change=true',
+      server: getServer(),
+      formData: { isHousing: 'no' },
+      cookie
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe('/quote/not-housing?change=true')
+
+    const document = await loadPage({
+      requestUrl: '/quote/confirm-housing?change=true',
+      server: getServer(),
+      cookie
+    })
+    expect(getByRole(document, 'radio', { name: 'Yes' })).toBeChecked()
+    expect(getByRole(document, 'radio', { name: 'No' })).not.toBeChecked()
+
+    const checkYourAnswers = await loadPage({
+      requestUrl: '/quote/check-your-answers',
+      server: getServer(),
+      cookie
+    })
+    expect(
+      getByRole(checkYourAnswers, 'heading', { level: 1 })
+    ).toHaveTextContent('Check your answers')
+    const rows = Array.from(
+      checkYourAnswers.querySelectorAll('.govuk-summary-list__row')
+    )
+    const housingRow = rows.find((row) =>
+      row
+        .querySelector('.govuk-summary-list__key')
+        .textContent.includes('Housing')
+    )
+    expect(
+      housingRow.querySelector('.govuk-summary-list__value')
+    ).toHaveTextContent('Yes')
+  })
+
+  it('should remember a first-run No selection', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { isHousing: 'no' },
+      cookie: sessionCookie
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    expect(getByRole(document, 'radio', { name: 'No' })).toBeChecked()
   })
 })

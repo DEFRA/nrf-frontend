@@ -9,6 +9,7 @@ import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
 
 describe('Planning type page', () => {
@@ -140,6 +141,39 @@ describe('Planning type page', () => {
     expect(retryResponse.headers.location).toBe(checkYourAnswersPath)
   })
 
+  it('should keep the previous answer when the user backs out of the dropout page to check-your-answers', async () => {
+    const cookie = await withCompleteQuoteSession(getServer())
+
+    const { response } = await submitForm({
+      requestUrl: changeUrl,
+      server: getServer(),
+      formData: { planningType: 'other' },
+      cookie
+    })
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
+    expect(response.headers.location).toBe(dropoutChangeUrl)
+
+    const document = await loadPage({
+      requestUrl: changeUrl,
+      server: getServer(),
+      cookie
+    })
+    expect(getByLabelText(document, 'Full planning permission')).toBeChecked()
+    expect(getByLabelText(document, 'Other')).not.toBeChecked()
+
+    const checkYourAnswers = await loadPage({
+      requestUrl: '/quote/check-your-answers',
+      server: getServer(),
+      cookie
+    })
+    expect(
+      getByRole(checkYourAnswers, 'heading', { level: 1 })
+    ).toHaveTextContent('Check your answers')
+    expect(
+      checkYourAnswers.querySelector('.govuk-summary-list')
+    ).toHaveTextContent('Full planning permission')
+  })
+
   it('should show a validation error after an invalid form submission', async () => {
     const { response, cookie } = await submitForm({
       requestUrl: routePath,
@@ -180,6 +214,21 @@ describe('Planning type page', () => {
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(applicationTypeNotAvailablePath)
+  })
+
+  it('should remember a first-run Other selection', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { planningType: 'other' },
+      cookie: sessionCookie
+    })
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+    expect(getByLabelText(document, 'Other')).toBeChecked()
   })
 
   it("should remember the user's previous selection", async () => {
