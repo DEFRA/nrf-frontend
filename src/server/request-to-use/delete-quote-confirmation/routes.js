@@ -1,8 +1,10 @@
-import { requestToUseController } from '../controller-get.js'
+import { quoteController } from '../../quote/controller-get.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
-const routeId = 'delete-quote-confirmation' // must match the page folder name
+// The routeId is the quote page's template dir: this route renders the
+// quote delete quote confirmation page itself under the request to use prefix.
+const routeId = 'delete-quote-confirmation'
 
 export { routePath }
 
@@ -26,6 +28,6 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    ...requestToUseController({ routeId, getViewModel })
+    ...quoteController({ routeId, getViewModel })
   }
 ]
