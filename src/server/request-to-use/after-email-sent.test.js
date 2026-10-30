@@ -65,10 +65,7 @@ const unreachablePaths = [
 const reachablePaths = [
   startPath,
   emailConfirmationPath,
-  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
-  // Unguarded until the delete quote page's session behaviour ticket adds it
-  // to the review quote session guard.
-  deleteQuotePath
+  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
@@ -77,6 +74,7 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
   acceptLevyPath,
+  deleteQuotePath,
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',
   '/request-to-use/defra-account-organisation',
@@ -153,6 +151,19 @@ describe('After the retrieve quote email is sent', () => {
 
       expect(response.statusCode).toBe(statusCodes.found)
       expect(response.headers.location).toBe(startPath)
+    })
+
+    it('should redirect the delete quote page to the start page', async () => {
+      const cookie = await createSession(getServer())
+
+      const response = await getResponse({
+        server: getServer(),
+        requestUrl: deleteQuotePath,
+        cookie
+      })
+
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/manage/start-page')
     })
 
     it('should show the page not found page for the link expired page', async () => {

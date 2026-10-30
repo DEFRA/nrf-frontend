@@ -3,6 +3,7 @@ import { checkForValidReviewQuoteSession } from './index.js'
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
+import { routePath as deleteQuotePath } from '../../delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
@@ -175,6 +176,7 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
+    deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
@@ -191,6 +193,7 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
+    deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
