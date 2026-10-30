@@ -7,6 +7,7 @@ import routesEnterAddress from './enter-address/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesAcceptLevy from './accept-levy/routes.js'
+import routesDeleteQuote from './delete-quote/routes.js'
 import routesDefraAccountUserType from './defra-account-user-type/routes.js'
 import routesDefraAccountIndividual from './defra-account-individual/routes.js'
 import routesDefraAccountOrganisation from './defra-account-organisation/routes.js'
@@ -49,6 +50,7 @@ export const requestToUse = {
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
         ...routesAcceptLevy,
+        ...routesDeleteQuote,
         ...routesDefraAccountUserType,
         ...routesDefraAccountIndividual,
         ...routesDefraAccountOrganisation,

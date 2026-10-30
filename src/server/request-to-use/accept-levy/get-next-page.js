@@ -1,8 +1,5 @@
 import { routePath as defraAccountUserTypePath } from '../defra-account-user-type/route-path.js'
-
-// Literal path: the delete quote page for this journey is not built yet. Swap
-// for its route-path import when it exists.
-const deleteQuotePath = '/request-to-use/delete-quote'
+import { routePath as deleteQuotePath } from '../delete-quote/route-path.js'
 
 /**
  * @param {{ acceptLevy: string }} formData - the validated payload
