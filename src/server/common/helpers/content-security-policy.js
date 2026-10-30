@@ -6,9 +6,7 @@ import { config } from '../../../config/config.js'
  * @satisfies {import('@hapi/hapi').Plugin}
  */
 const cdpUploaderUrl = config.get('cdpUploader.url')
-const defraIdBaseUrl = config.get('defraId.enabled')
-  ? config.get('defraId.baseUrl')
-  : null
+const defraIdBaseUrl = config.get('defraId.baseUrl')
 // Browsers apply form-action to redirects that follow a form POST, so a POST
 // that redirects to a protected page and on to Defra ID sign-in needs its host.
 const cspRedirectHosts = config.get('defraId.cspRedirectHosts') ?? []
