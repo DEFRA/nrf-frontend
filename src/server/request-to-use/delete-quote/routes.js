@@ -4,8 +4,16 @@ import formValidation from '../../quote/delete-quote/form-validation.js'
 import getViewModel from './get-view-model.js'
 import getNextPage from './get-next-page.js'
 import { routePath } from './route-path.js'
+import { clearAllSessionData } from '../../common/helpers/journey-session/index.js'
 
 export { routePath }
+
+// Clears the session so browser back from the confirmation page reaches the
+// session guard on this page and is redirected to the start page.
+const clearSessionOnDelete = (request, payload) => {
+  clearAllSessionData(request)
+  return payload
+}
 
 /**
  * @openapi
@@ -55,6 +63,10 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    ...createPostController({
+      formValidation,
+      getNextPage,
+      saveToSession: clearSessionOnDelete
+    })
   }
 ]

@@ -1,6 +1,7 @@
 import { routePath as startPath } from '../../../manage/start-page/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
+import { routePath as deleteQuotePath } from '../../delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
 import { routePath as defraAccountOrganisationPath } from '../../defra-account-organisation/route-path.js'
@@ -53,6 +54,7 @@ const changePaths = new Set([
 const completeQuotePaths = new Set([
   reviewQuoteDetailsPath,
   acceptLevyPath,
+  deleteQuotePath,
   defraAccountUserTypePath,
   defraAccountIndividualPath,
   defraAccountOrganisationPath,
@@ -61,7 +63,7 @@ const completeQuotePaths = new Set([
 
 /**
  * Redirects to the start page when the review quote details page, the accept
- * levy page, the Defra account pages or a change page reached from the review
+ * levy page, the delete quote page, the Defra account pages or a change page reached from the review
  * page's change links is requested without the session state magic link
  * redemption (NRF2-1256) sets. The review, accept levy and Defra account
  * pages need the complete saved quote they render; the change pages only the
