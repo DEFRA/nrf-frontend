@@ -17,6 +17,7 @@ import { routePath as quoteNotMatchedPath } from './quote-not-matched/route-path
 import { routePath as emailConfirmationPath } from './email-confirmation/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
+import { routePath as deleteQuotePath } from './delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from './defra-account-user-type/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
@@ -65,7 +66,9 @@ const reachablePaths = [
   startPath,
   emailConfirmationPath,
   `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
-  // Static confirmation page: needs no session.
+  // Unguarded until the delete quote page's session behaviour ticket adds it
+  // to the review quote session guard.
+  deleteQuotePath,
   '/request-to-use/delete-quote-confirmation'
 ]
 
@@ -75,7 +78,6 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
   acceptLevyPath,
-  '/request-to-use/delete-quote',
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',
   '/request-to-use/defra-account-organisation',

@@ -1,28 +1,15 @@
 import { getByRole, getByText } from '@testing-library/dom'
+import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
-import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
+import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
-import { getResponse } from '../../../test-utils/get-response.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
-import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
-
-const pagePath = '/request-to-use/delete-quote'
-const startPath = '/manage/start-page'
 
 describe('Are you sure you want to delete this quote page', () => {
-  const getServer = setupSeededRequestToUseServer()
-  let sessionCookie
+  const getServer = setupTestServer()
 
-  beforeEach(async () => {
-    sessionCookie = await withCompleteQuoteSession(getServer())
-  })
-
-  const load = () =>
-    loadPage({
-      requestUrl: pagePath,
-      server: getServer(),
-      cookie: sessionCookie
-    })
+  const load = () => loadPage({ requestUrl: routePath, server: getServer() })
 
   it('should render the heading, title and warning content', async () => {
     const document = await load()
@@ -70,55 +57,25 @@ describe('Are you sure you want to delete this quote page', () => {
 
   it('should redirect to the delete quote confirmation page after form submission', async () => {
     const { response } = await submitForm({
-      requestUrl: pagePath,
+      requestUrl: routePath,
       server: getServer(),
-      formData: { confirmDeleteQuote: 'Yes' },
-      cookie: sessionCookie
+      formData: { confirmDeleteQuote: 'Yes' }
     })
 
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(
       '/request-to-use/delete-quote-confirmation'
     )
   })
 
-  it('should redirect to the start page when requested again after the quote is deleted', async () => {
-    const { cookie } = await submitForm({
-      requestUrl: pagePath,
-      server: getServer(),
-      formData: { confirmDeleteQuote: 'Yes' },
-      cookie: sessionCookie
-    })
-
-    const response = await getResponse({
-      server: getServer(),
-      requestUrl: pagePath,
-      cookie
-    })
-
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(startPath)
-  })
-
-  it('should redirect to the start page without a session', async () => {
-    const response = await getResponse({
-      server: getServer(),
-      requestUrl: pagePath
-    })
-
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(startPath)
-  })
-
   it('should redirect back to the form when the hidden field is missing', async () => {
     const { response } = await submitForm({
-      requestUrl: pagePath,
+      requestUrl: routePath,
       server: getServer(),
-      formData: {},
-      cookie: sessionCookie
+      formData: {}
     })
 
-    expect(response.statusCode).toBe(303)
+    expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe('/request-to-use/delete-quote')
   })
 })

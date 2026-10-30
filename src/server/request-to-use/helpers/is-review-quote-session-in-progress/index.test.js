@@ -26,7 +26,6 @@ const defraAccountIndividualPath = '/request-to-use/defra-account-individual'
 const defraAccountOrganisationPath =
   '/request-to-use/defra-account-organisation'
 const defraAccountAgentPath = '/request-to-use/defra-account-agent'
-const deleteQuotePath = '/request-to-use/delete-quote'
 
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
@@ -176,7 +175,6 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
-    deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
@@ -193,7 +191,6 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
-    deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
