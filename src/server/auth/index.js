@@ -110,39 +110,33 @@ export const auth = {
   plugin: {
     name: 'auth',
     register(server) {
-      // Check if auth was actually successfully registered (not just enabled in config)
-      const authEnabled = server.app.authEnabled || false
-
-      // Only register OAuth routes if auth plugin successfully registered
-      if (authEnabled) {
-        server.route([
-          {
-            method: 'GET',
-            path: AUTH_SIGN_IN_PATH,
-            ...signInController
-          },
-          {
-            method: 'GET',
-            path: CHANGE_ORGANISATION_PATH,
-            ...changeOrganisationController
-          },
-          {
-            method: 'GET',
-            path: RETURN_PATH,
-            ...signInOidcController
-          },
-          {
-            method: 'GET',
-            path: AUTH_SIGN_OUT_PATH,
-            ...signOutController
-          },
-          {
-            method: 'GET',
-            path: SIGNED_OUT_PATH,
-            ...signOutOidcController
-          }
-        ])
-      }
+      server.route([
+        {
+          method: 'GET',
+          path: AUTH_SIGN_IN_PATH,
+          ...signInController
+        },
+        {
+          method: 'GET',
+          path: CHANGE_ORGANISATION_PATH,
+          ...changeOrganisationController
+        },
+        {
+          method: 'GET',
+          path: RETURN_PATH,
+          ...signInOidcController
+        },
+        {
+          method: 'GET',
+          path: AUTH_SIGN_OUT_PATH,
+          ...signOutController
+        },
+        {
+          method: 'GET',
+          path: SIGNED_OUT_PATH,
+          ...signOutOidcController
+        }
+      ])
     }
   }
 }
