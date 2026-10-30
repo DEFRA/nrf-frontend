@@ -68,7 +68,8 @@ const reachablePaths = [
   `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
   // Unguarded until the delete quote page's session behaviour ticket adds it
   // to the review quote session guard.
-  deleteQuotePath
+  deleteQuotePath,
+  '/request-to-use/delete-quote-confirmation'
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
