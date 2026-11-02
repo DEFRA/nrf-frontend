@@ -1,8 +1,8 @@
 import { quoteController } from '../../quote/controller-get.js'
-import { createPostController } from '../../common/controllers/post-controller.js'
+import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
 import formValidation from '../../quote/delete-quote/form-validation.js'
+import { deleteQuotePostController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
-import getNextPage from './get-next-page.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -26,7 +26,7 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Submit the delete quote decision
- *     description: Redirects to the delete quote confirmation page; the quote data itself is deleted separately
+ *     description: Deletes the quote from the backend, clears the journey session and redirects to the delete quote confirmation page; without a valid session it redirects to the start page
  *     requestBody:
  *       required: true
  *       content:
@@ -42,7 +42,7 @@ export { routePath }
  *                   - 'Yes'
  *     responses:
  *       303:
- *         description: Redirect to the delete quote confirmation page, or back to the form on validation failure
+ *         description: Redirect to the delete quote confirmation page, back to the form on validation failure, or to the start page without a valid session
  */
 export default [
   {
@@ -55,6 +55,12 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    options: {
+      validate: {
+        payload: formValidation(),
+        failAction: redirectToFormWithValidationErrors
+      }
+    },
+    ...deleteQuotePostController
   }
 ]
