@@ -1,6 +1,4 @@
-// Literal path: the delete quote confirmation page for this journey is not
-// built yet. Swap for its route-path import when it exists.
-const deleteQuoteConfirmationPath = '/request-to-use/delete-quote-confirmation'
+import { routePath as deleteQuoteConfirmationPath } from '../delete-quote-confirmation/route-path.js'
 
 /**
  * @returns {string} path of the page to redirect to

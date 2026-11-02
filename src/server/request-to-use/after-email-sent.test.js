@@ -65,7 +65,8 @@ const unreachablePaths = [
 const reachablePaths = [
   startPath,
   emailConfirmationPath,
-  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`
+  `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
+  '/request-to-use/delete-quote-confirmation'
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
