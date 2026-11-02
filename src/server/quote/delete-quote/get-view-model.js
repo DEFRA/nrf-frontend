@@ -8,6 +8,7 @@ export default function () {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
-    backLinkPath: routePathCheckYourAnswers
+    backLinkPath: routePathCheckYourAnswers,
+    cancelLinkPath: routePathCheckYourAnswers
   }
 }

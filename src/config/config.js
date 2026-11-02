@@ -277,12 +277,6 @@ export const config = convict({
     }
   },
   defraId: {
-    enabled: {
-      doc: 'Enable DEFRA Customer Identity authentication',
-      format: Boolean,
-      default: true,
-      env: 'ENABLE_DEFRA_ID'
-    },
     baseUrl: {
       doc: 'Base URL (origin) of the DEFRA Customer Identity B2C tenant. Used to build the well-known URL.',
       format: String,

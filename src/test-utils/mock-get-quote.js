@@ -59,6 +59,21 @@ export const mockRedeemToken = (
   return requests
 }
 
+export const mockDeleteQuote = (
+  mswServer,
+  { reference = fullQuote.reference, status = 204 } = {}
+) => {
+  const requests = []
+  mswServer.use(
+    http.delete(`${config.get('backend').apiUrl}/quotes/${reference}`, () => {
+      requests.push(reference)
+      // A 204 must have no body, so this is a plain response, not json()
+      return new HttpResponse(null, { status })
+    })
+  )
+  return requests
+}
+
 export const mockResendLink = (
   mswServer,
   {

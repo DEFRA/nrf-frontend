@@ -20,10 +20,7 @@ import { defraIdentity } from './plugins/defra-identity.js'
 import { registerAuthRules } from './auth/auth-rules.js'
 import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
-import { createLogger } from './common/helpers/logging/logger.js'
 import { csrf } from './common/helpers/csrf.js'
-
-const logger = createLogger()
 
 export async function createServer() {
   const { engine: sessionCacheEngine, client: redisClient } = getCacheEngine()
@@ -87,27 +84,12 @@ export async function createServer() {
     expiresIn: 24 * 60 * 60 * 1000 // 24 hours
   })
 
-  // Register DEFRA Identity authentication if enabled
-  server.app.authEnabled = false
-  if (config.get('defraId.enabled')) {
-    try {
-      // Register DEFRA Identity plugin to configure auth strategies
-      await server.register({
-        plugin: defraIdentity,
-        options: {
-          sessionCache: server.app.sessionCache
-        }
-      })
-      server.app.authEnabled = true
-      logger.info('DEFRA Identity authentication enabled')
-    } catch (error) {
-      logger.error(error, 'Failed to register DEFRA Identity plugin')
-      logger.warn(
-        'Server will start without authentication. Check network connectivity and DEFRA_ID configuration.'
-      )
-      // Don't throw - allow server to start without auth for debugging
+  await server.register({
+    plugin: defraIdentity,
+    options: {
+      sessionCache: server.app.sessionCache
     }
-  }
+  })
 
   registerAuthRules(server)
 

@@ -28,3 +28,11 @@ export const acceptLevySession = {
   ...reviewQuoteSession,
   requestToUse: { ...reviewQuoteSession.requestToUse, levy: recalculatedLevy }
 }
+
+// The full session state magic link redemption leaves behind, plus keys from
+// earlier steps that a successful delete must also wipe
+export const redeemedQuoteSession = {
+  ...reviewQuoteSession,
+  retrieveQuote: { nrlReference: fullQuote.reference },
+  pendingUploadId: 'an-upload-key-clearJourneySessions-removes'
+}

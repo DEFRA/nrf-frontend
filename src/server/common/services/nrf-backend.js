@@ -1,4 +1,5 @@
 import Wreck from '@hapi/wreck'
+import Boom from '@hapi/boom'
 import { buildServiceHeaders, getRequestFromService } from '@defra/nrf-library'
 import { config } from '../../../config/config.js'
 import { createLogger } from '../helpers/logging/logger.js'
@@ -125,5 +126,30 @@ export const patchRequestToBackend = async ({ endpointPath, payload }) => {
   } catch (error) {
     logger.error(error, 'PATCH request to backend failed')
     throw error
+  }
+}
+
+/**
+ * Sends a DELETE request to the backend. Whatever went wrong upstream — the
+ * resource was already deleted elsewhere (404) or the backend is down (5xx) —
+ * the user sees the 500 error page, so every failure is wrapped as an internal
+ * error rather than rethrown (a rethrown Wreck 404 would render the 404 page).
+ * @param {{ endpointPath: string }} params
+ * @returns {Promise<object>} the Wreck response ({ res, payload })
+ */
+export const deleteRequestToBackend = async ({ endpointPath }) => {
+  try {
+    const url = `${config.get('backend').apiUrl}${endpointPath}`
+    const response = await Wreck.delete(url, {
+      json: true,
+      headers: backendHeaders()
+    })
+    return response
+  } catch (error) {
+    // The endpoint path carries the quote reference — the only place it is
+    // logged on this failure path, since the Wreck error holds just the
+    // status and message
+    logger.error(error, `DELETE request to backend failed for ${endpointPath}`)
+    throw Boom.internal('DELETE request to backend failed', error)
   }
 }
