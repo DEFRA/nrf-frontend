@@ -1,4 +1,4 @@
-import { getByLabelText, getByRole } from '@testing-library/dom'
+import { getByLabelText, getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -12,6 +12,8 @@ describe('Change planning type page', () => {
   const getServer = setupTestServer()
   const getSeededServer = setupSeededRequestToUseServer()
   const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
+  const dropoutPagePath =
+    '/request-to-use/change/application-type-not-available'
 
   it('should redirect to the start page when there is no request to use session', async () => {
     const response = await getResponse({
@@ -105,12 +107,10 @@ describe('Change planning type page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(
-      '/request-to-use/change/application-type-not-available'
-    )
+    expect(response.headers.location).toBe(dropoutPagePath)
 
     const document = await loadPage({
-      requestUrl: '/request-to-use/change/application-type-not-available',
+      requestUrl: dropoutPagePath,
       server: getSeededServer(),
       cookie
     })
@@ -134,9 +134,7 @@ describe('Change planning type page', () => {
       cookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(
-      '/request-to-use/change/application-type-not-available'
-    )
+    expect(response.headers.location).toBe(dropoutPagePath)
 
     // The ineligible answer is not saved: the change page still shows the
     // answer from the quote, and the review page is unchanged.
@@ -153,9 +151,9 @@ describe('Change planning type page', () => {
       server: getSeededServer(),
       cookie
     })
-    const planningTypeValue = [
-      ...reviewPage.querySelectorAll('.govuk-summary-list__value')
-    ][0]
-    expect(planningTypeValue).toHaveTextContent('Full planning permission')
+    const planningTypeRow = getByText(reviewPage, 'Planning permission type')
+    expect(planningTypeRow.nextElementSibling).toHaveTextContent(
+      'Full planning permission'
+    )
   })
 })

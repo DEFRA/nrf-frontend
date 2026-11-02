@@ -1,4 +1,4 @@
-import { getByLabelText, getByRole } from '@testing-library/dom'
+import { getByLabelText, getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -12,6 +12,7 @@ describe('Change confirm housing page', () => {
   const getServer = setupTestServer()
   const getSeededServer = setupSeededRequestToUseServer()
   const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
+  const dropoutPagePath = '/request-to-use/change/not-housing'
 
   it('should redirect to the start page when there is no request to use session', async () => {
     const response = await getResponse({
@@ -104,10 +105,10 @@ describe('Change confirm housing page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
+    expect(response.headers.location).toBe(dropoutPagePath)
 
     const document = await loadPage({
-      requestUrl: '/request-to-use/change/not-housing',
+      requestUrl: dropoutPagePath,
       server: getSeededServer(),
       cookie
     })
@@ -131,7 +132,7 @@ describe('Change confirm housing page', () => {
       cookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
+    expect(response.headers.location).toBe(dropoutPagePath)
 
     // The ineligible answer is not saved: the change page still shows the
     // answer from the quote, and the review page is unchanged.
@@ -148,9 +149,7 @@ describe('Change confirm housing page', () => {
       server: getSeededServer(),
       cookie
     })
-    const housingValue = [
-      ...reviewPage.querySelectorAll('.govuk-summary-list__value')
-    ][1]
-    expect(housingValue).toHaveTextContent('Yes')
+    const housingRow = getByText(reviewPage, 'Housing')
+    expect(housingRow.nextElementSibling).toHaveTextContent('Yes')
   })
 })
