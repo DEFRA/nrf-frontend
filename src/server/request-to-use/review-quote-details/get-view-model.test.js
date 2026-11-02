@@ -137,24 +137,32 @@ describe('Review and amend your quote details view model', () => {
       hiddenText: uploadedBoundaryHiddenText
     },
     {
-      scenario: 'an uploaded boundary file with no stored filename',
+      scenario: 'a boundary drawn before an abandoned switch to upload',
       quote: {
         ...completeQuote,
         boundaryEntryType: 'upload',
         boundaryFilename: null
       },
-      text: 'Uploaded',
-      hiddenText: uploadedBoundaryHiddenText
-    },
-    {
-      scenario: 'a drawn boundary',
-      quote: completeQuote,
       text: 'Added',
       hiddenText: boundaryHiddenText
     },
     {
+      scenario: 'a file uploaded before an abandoned switch to drawing',
+      quote: {
+        ...completeQuote,
+        boundaryEntryType: 'draw',
+        boundaryFilename: 'old-boundary.geojson'
+      },
+      text: 'old-boundary.geojson',
+      hiddenText: uploadedBoundaryHiddenText
+    },
+    {
       scenario: 'no boundary added',
-      quote: { ...completeQuote, boundaryEntryType: null },
+      quote: {
+        ...completeQuote,
+        boundaryEntryType: null,
+        boundaryGeojson: null
+      },
       text: 'Not added',
       hiddenText: boundaryHiddenText
     }

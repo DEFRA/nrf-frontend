@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import { getByRole } from '@testing-library/dom'
+import { getByRole, getByText } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
 import { config } from '../../../config/config.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
@@ -219,6 +219,29 @@ describe('Check your answers page', () => {
         name: 'Changeuploaded red line boundary'
       })
     ).toHaveAttribute('href', '/quote/boundary-type?change=true')
+  })
+
+  it('should still show Added after an abandoned switch to upload', async () => {
+    // Choosing upload on the change page persists the entry type straight
+    // away; until a file is uploaded the drawn boundary is still the saved
+    // boundary, so the row must keep its drawn answer.
+    let cookie = await withCompleteQuoteSession(getServer())
+
+    ;({ cookie } = await submitForm({
+      requestUrl: `${boundaryTypePath}?change=true`,
+      server: getServer(),
+      formData: { boundaryEntryType: 'upload' },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    const boundaryKey = getByText(document, 'Red line boundary')
+    expect(boundaryKey.nextElementSibling).toHaveTextContent('Added')
   })
 
   it('should set a no-store Cache-Control header so the page cannot be shown from cache', async () => {
