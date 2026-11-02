@@ -12,8 +12,6 @@ describe('Change planning type page', () => {
   const getServer = setupTestServer()
   const getSeededServer = setupSeededRequestToUseServer()
   const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
-  const dropoutPagePath =
-    '/request-to-use/change/application-type-not-available'
 
   it('should redirect to the start page when there is no request to use session', async () => {
     const response = await getResponse({
@@ -107,10 +105,12 @@ describe('Change planning type page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(dropoutPagePath)
+    expect(response.headers.location).toBe(
+      '/request-to-use/change/application-type-not-available'
+    )
 
     const document = await loadPage({
-      requestUrl: dropoutPagePath,
+      requestUrl: '/request-to-use/change/application-type-not-available',
       server: getSeededServer(),
       cookie
     })
@@ -134,7 +134,9 @@ describe('Change planning type page', () => {
       cookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(dropoutPagePath)
+    expect(response.headers.location).toBe(
+      '/request-to-use/change/application-type-not-available'
+    )
 
     // The ineligible answer is not saved: the change page still shows the
     // answer from the quote, and the review page is unchanged.

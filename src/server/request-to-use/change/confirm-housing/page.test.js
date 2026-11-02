@@ -12,7 +12,6 @@ describe('Change confirm housing page', () => {
   const getServer = setupTestServer()
   const getSeededServer = setupSeededRequestToUseServer()
   const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
-  const dropoutPagePath = '/request-to-use/change/not-housing'
 
   it('should redirect to the start page when there is no request to use session', async () => {
     const response = await getResponse({
@@ -105,10 +104,10 @@ describe('Change confirm housing page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(dropoutPagePath)
+    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
 
     const document = await loadPage({
-      requestUrl: dropoutPagePath,
+      requestUrl: '/request-to-use/change/not-housing',
       server: getSeededServer(),
       cookie
     })
@@ -132,7 +131,7 @@ describe('Change confirm housing page', () => {
       cookie
     })
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(dropoutPagePath)
+    expect(response.headers.location).toBe('/request-to-use/change/not-housing')
 
     // The ineligible answer is not saved: the change page still shows the
     // answer from the quote, and the review page is unchanged.
