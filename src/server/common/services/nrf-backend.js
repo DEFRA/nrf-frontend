@@ -146,7 +146,10 @@ export const deleteRequestToBackend = async ({ endpointPath }) => {
     })
     return response
   } catch (error) {
-    logger.error(error, 'DELETE request to backend failed')
+    // The endpoint path carries the quote reference — the only place it is
+    // logged on this failure path, since the Wreck error holds just the
+    // status and message
+    logger.error(error, `DELETE request to backend failed for ${endpointPath}`)
     throw Boom.internal('DELETE request to backend failed', error)
   }
 }
