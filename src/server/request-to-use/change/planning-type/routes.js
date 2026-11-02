@@ -2,8 +2,11 @@ import { quoteController } from '../../../quote/controller-get.js'
 import { createPostController } from '../../../common/controllers/post-controller.js'
 import formValidation from '../../../quote/planning-type/form-validation.js'
 import getNextPage from '../../../quote/planning-type/get-next-page.js'
-import { saveQuoteDataToCache } from '../../../quote/helpers/quote-session-cache/index.js'
-import { redirectToReviewPageUnlessDropout } from '../../helpers/change-answer/index.js'
+import { saveToSessionUnlessDropout } from '../../../quote/helpers/save-to-session-unless-dropout/index.js'
+import {
+  isChangeFromReviewPage,
+  redirectToReviewPageUnlessDropout
+} from '../../helpers/change-answer/index.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -62,7 +65,10 @@ export default [
     ...createPostController({
       formValidation,
       getNextPage,
-      saveToSession: saveQuoteDataToCache,
+      saveToSession: saveToSessionUnlessDropout({
+        getNextPage,
+        isChangeMode: isChangeFromReviewPage
+      }),
       resolveRedirect: redirectToReviewPageUnlessDropout
     })
   }
