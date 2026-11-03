@@ -2,6 +2,7 @@ import { routePath as startPath } from '../../../manage/start-page/route-path.js
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as variationPath } from '../../variation/route-path.js'
+import { routePath as originalCommittedPath } from '../../original-committed/route-path.js'
 import { routePath as deleteQuotePath } from '../../delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
@@ -57,6 +58,7 @@ const completeQuotePaths = new Set([
   reviewQuoteDetailsPath,
   acceptLevyPath,
   variationPath,
+  originalCommittedPath,
   deleteQuotePath,
   defraAccountUserTypePath,
   defraAccountIndividualPath,
@@ -65,17 +67,7 @@ const completeQuotePaths = new Set([
   originalReferenceNotMatchedPath
 ])
 
-/**
- * Redirects to the start page when the review quote details page, the accept
- * levy page, the variation page, the delete quote page, the Defra account
- * pages, the original reference not matched page or a change page reached
- * from the review page's change links is requested without the session state
- * magic link redemption sets. The review, accept levy, variation, delete
- * quote, Defra account and original reference not matched pages need the
- * complete saved quote they render or act on; the change pages only the
- * request to use session.
- * @type {import('@hapi/hapi').Lifecycle.Method}
- */
+/** @type {import('@hapi/hapi').Lifecycle.Method} */
 export const checkForValidReviewQuoteSession = (request, h) => {
   // HEAD requests are routed to GET routes but keep their own method, so they
   // must be guarded too or the page handler runs unguarded.

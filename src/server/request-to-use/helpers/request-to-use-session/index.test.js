@@ -28,6 +28,22 @@ describe('requestToUseSession', () => {
     expect(request.logger.error).not.toHaveBeenCalled()
   })
 
+  it('allows the levy to be saved before the accept levy answer exists', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: { nrlReference: fullQuote.reference } }
+    })
+    const levy = {
+      calculationDate: '2026-01-01',
+      provisionalAmount: 100,
+      inflationAdjustedAmount: 110
+    }
+
+    const result = requestToUseSession.save(request, { levy })
+
+    expect(result).toEqual({ nrlReference: fullQuote.reference, levy })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
   it('allows other answers to be saved before variation has been answered', () => {
     const request = createRequest()
 
@@ -46,6 +62,32 @@ describe('requestToUseSession', () => {
     const request = createRequest()
 
     requestToUseSession.save(request, { variation: 'maybe' })
+
+    expect(request.logger.error).toHaveBeenCalledWith(
+      expect.any(Error),
+      'session namespace requestToUse: invalid data on save'
+    )
+  })
+
+  it('saves the original committed answer without logging a schema error', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: savedNrlReference }
+    })
+
+    const result = requestToUseSession.save(request, {
+      originalCommitted: 'no'
+    })
+
+    expect(result).toEqual({ ...savedNrlReference, originalCommitted: 'no' })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('logs an error when the original committed answer is not a recognised option', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: savedNrlReference }
+    })
+
+    requestToUseSession.save(request, { originalCommitted: 'maybe' })
 
     expect(request.logger.error).toHaveBeenCalledWith(
       expect.any(Error),
