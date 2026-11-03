@@ -1,21 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { requestToUseSession } from './index.js'
-import { createMockRequest } from '../../../../test-utils/create-mock-request.js'
+import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 
 const originalReferenceKey = 'originalNrlReference'
 
-const createRequest = () => {
-  const store = {}
-  return createMockRequest({
-    yar: {
-      get: (key) => store[key],
-      set: (key, value) => {
-        store[key] = value
-      }
-    }
-  })
+const savedNrlReference = {
+  nrlReference: fullQuote.reference,
+  acceptLevy: 'yes'
 }
+
+const createRequest = () =>
+  createSessionRequest({ session: { requestToUse: savedNrlReference } })
 
 const loggedErrorPaths = (request) =>
   request.logger.error.mock.calls.flatMap(([error]) =>
@@ -23,6 +19,40 @@ const loggedErrorPaths = (request) =>
   )
 
 describe('requestToUseSession', () => {
+  it('saves the variation answer without logging a schema error', () => {
+    const request = createRequest()
+
+    const result = requestToUseSession.save(request, { variation: 'yes' })
+
+    expect(result).toEqual({ ...savedNrlReference, variation: 'yes' })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('allows other answers to be saved before variation has been answered', () => {
+    const request = createRequest()
+
+    const result = requestToUseSession.save(request, {
+      defraId: { userType: 'individual' }
+    })
+
+    expect(result).toEqual({
+      ...savedNrlReference,
+      defraId: { userType: 'individual' }
+    })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('logs an error when the variation answer is not a recognised option', () => {
+    const request = createRequest()
+
+    requestToUseSession.save(request, { variation: 'maybe' })
+
+    expect(request.logger.error).toHaveBeenCalledWith(
+      expect.any(Error),
+      'session namespace requestToUse: invalid data on save'
+    )
+  })
+
   it('should not complain about the original reference when it has not been saved yet', () => {
     const request = createRequest()
 
@@ -35,7 +65,6 @@ describe('requestToUseSession', () => {
     const request = createRequest()
 
     const saved = requestToUseSession.save(request, {
-      nrlReference: fullQuote.reference,
       [originalReferenceKey]: ' nrl-654321 '
     })
 
@@ -47,7 +76,6 @@ describe('requestToUseSession', () => {
     const request = createRequest()
 
     requestToUseSession.save(request, {
-      nrlReference: fullQuote.reference,
       [originalReferenceKey]: 'not-a-reference'
     })
 
