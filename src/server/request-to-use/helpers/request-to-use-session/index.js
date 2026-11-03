@@ -8,6 +8,11 @@ import originalCommittedValidation from '../../original-committed/form-validatio
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
+// The reference entered on the original reference page, kept apart from the
+// quote's own nrlReference so the not matched page can show what was entered.
+// Optional because it is not set until that page has been completed.
+const originalNrlReference = nrlReference.optional()
+
 const acceptLevy = acceptLevyValidation().extract('acceptLevy').optional()
 
 const userType = defraAccountUserTypeValidation().extract(
@@ -34,6 +39,7 @@ export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
   schema: joi.object({
     nrlReference,
+    originalNrlReference,
     levy,
     acceptLevy,
     variation,

@@ -1,0 +1,21 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    <p class="govuk-body">You can find the NRL reference on the commitment certificate for the original planning permission.</p>
+
+    <p class="govuk-body"><a href="{{ enterOriginalReferencePath }}" class="govuk-link">Enter the NRL reference again</a>.</p>
+
+  </div>
+</div>
+{% endblock %}

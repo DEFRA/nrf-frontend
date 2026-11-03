@@ -8,6 +8,7 @@ import { routePath as defraAccountUserTypePath } from '../../defra-account-user-
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
 import { routePath as defraAccountOrganisationPath } from '../../defra-account-organisation/route-path.js'
 import { routePath as defraAccountAgentPath } from '../../defra-account-agent/route-path.js'
+import { routePath as originalReferenceNotMatchedPath } from '../../original-reference-not-matched/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -62,7 +63,8 @@ const completeQuotePaths = new Set([
   defraAccountUserTypePath,
   defraAccountIndividualPath,
   defraAccountOrganisationPath,
-  defraAccountAgentPath
+  defraAccountAgentPath,
+  originalReferenceNotMatchedPath
 ])
 
 /** @type {import('@hapi/hapi').Lifecycle.Method} */
