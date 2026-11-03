@@ -1,9 +1,12 @@
 import joi from 'joi'
 import { createSessionNamespace } from '../../../common/helpers/session-namespace/index.js'
 import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validation.js'
+import acceptLevyValidation from '../../accept-levy/form-validation.js'
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
+
+const acceptLevy = acceptLevyValidation().extract('acceptLevy')
 
 const userType = defraAccountUserTypeValidation().extract(
   'defraAccountUserType'
@@ -24,6 +27,7 @@ export const requestToUseSession = createSessionNamespace({
   schema: joi.object({
     nrlReference,
     levy,
+    acceptLevy,
     defraId
   })
 })
