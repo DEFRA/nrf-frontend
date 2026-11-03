@@ -153,3 +153,24 @@ export const deleteRequestToBackend = async ({ endpointPath }) => {
     throw Boom.internal('DELETE request to backend failed', error)
   }
 }
+
+/**
+ * Records that the commitment certificate has been created for the quote. The
+ * backend rejects a repeat call, and whatever went wrong upstream the user sees
+ * the 500 error page, so every failure is wrapped as an internal error.
+ * @param {{ reference: string }} params
+ * @returns {Promise<object>} the Wreck response ({ res, payload })
+ */
+export const createCommitmentCertificateInBackend = async ({ reference }) => {
+  try {
+    return await patchRequestToBackend({
+      endpointPath: `/quotes/${reference}/commitment-certificate`,
+      payload: { createCommitmentCertificate: true }
+    })
+  } catch (error) {
+    throw Boom.internal(
+      'Commitment certificate request to backend failed',
+      error
+    )
+  }
+}
