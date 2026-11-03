@@ -3,6 +3,7 @@ import { createSessionNamespace } from '../../../common/helpers/session-namespac
 import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validation.js'
 import acceptLevyValidation from '../../accept-levy/form-validation.js'
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
+import variationValidation from '../../variation/form-validation.js'
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
@@ -11,6 +12,8 @@ const acceptLevy = acceptLevyValidation().extract('acceptLevy')
 const userType = defraAccountUserTypeValidation().extract(
   'defraAccountUserType'
 )
+
+const variation = variationValidation().extract('variation').optional()
 
 const defraId = joi.object({
   userType
@@ -28,6 +31,7 @@ export const requestToUseSession = createSessionNamespace({
     nrlReference,
     levy,
     acceptLevy,
+    variation,
     defraId
   })
 })

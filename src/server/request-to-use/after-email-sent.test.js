@@ -75,6 +75,7 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
   acceptLevyPath,
+  '/request-to-use/variation',
   deleteQuotePath,
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',

@@ -1,5 +1,5 @@
-import { routePath as defraAccountUserTypePath } from '../defra-account-user-type/route-path.js'
 import { routePath as deleteQuotePath } from '../delete-quote/route-path.js'
+import { routePath as variationPath } from '../variation/route-path.js'
 
 /**
  * @param {{ acceptLevy: string }} formData - the validated payload
@@ -7,7 +7,7 @@ import { routePath as deleteQuotePath } from '../delete-quote/route-path.js'
  */
 export default function getNextPage({ acceptLevy }) {
   if (acceptLevy === 'yes') {
-    return defraAccountUserTypePath
+    return variationPath
   }
 
   return deleteQuotePath
