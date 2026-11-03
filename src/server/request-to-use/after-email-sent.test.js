@@ -79,6 +79,8 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/retrieve/{reference}/{token}',
   '/request-to-use/review-quote-details',
   acceptLevyPath,
+  '/request-to-use/variation',
+  '/request-to-use/original-committed',
   deleteQuotePath,
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',
@@ -97,7 +99,8 @@ const pathsWithOwnSessionChecks = [
   changeNotInEdpPath,
   changeExcludedAreaPath,
   '/request-to-use/link-expired',
-  '/request-to-use/enter-address'
+  '/request-to-use/enter-address',
+  '/request-to-use/original-reference-not-matched'
 ]
 
 describe('After the retrieve quote email is sent', () => {

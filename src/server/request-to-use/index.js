@@ -7,6 +7,8 @@ import routesEnterAddress from './enter-address/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesAcceptLevy from './accept-levy/routes.js'
+import routesVariation from './variation/routes.js'
+import routesOriginalCommitted from './original-committed/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
 import routesOriginalReference from './original-reference/routes.js'
@@ -28,6 +30,7 @@ import routesChangeNotInEdp from './change/not-in-edp/routes.js'
 import routesChangeExcludedArea from './change/excluded-area/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
+import routesOriginalReferenceNotMatched from './original-reference-not-matched/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
 import { checkForValidReviewQuoteSession } from './helpers/is-review-quote-session-in-progress/index.js'
 
@@ -52,6 +55,8 @@ export const requestToUse = {
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
         ...routesAcceptLevy,
+        ...routesVariation,
+        ...routesOriginalCommitted,
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
         ...routesOriginalReference,
@@ -72,7 +77,8 @@ export const requestToUse = {
         ...routesChangeNotInEdp,
         ...routesChangeExcludedArea,
         ...routesRetrieveQuote,
-        ...routesLinkExpired
+        ...routesLinkExpired,
+        ...routesOriginalReferenceNotMatched
       ])
     }
   }

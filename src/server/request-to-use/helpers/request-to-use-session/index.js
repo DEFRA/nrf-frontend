@@ -1,13 +1,29 @@
 import joi from 'joi'
 import { createSessionNamespace } from '../../../common/helpers/session-namespace/index.js'
 import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validation.js'
+import acceptLevyValidation from '../../accept-levy/form-validation.js'
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
+import variationValidation from '../../variation/form-validation.js'
+import originalCommittedValidation from '../../original-committed/form-validation.js'
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
+
+// The reference entered on the original reference page, kept apart from the
+// quote's own nrlReference so the not matched page can show what was entered.
+// Optional because it is not set until that page has been completed.
+const originalNrlReference = nrlReference.optional()
+
+const acceptLevy = acceptLevyValidation().extract('acceptLevy').optional()
 
 const userType = defraAccountUserTypeValidation().extract(
   'defraAccountUserType'
 )
+
+const variation = variationValidation().extract('variation').optional()
+
+const originalCommitted = originalCommittedValidation()
+  .extract('originalCommitted')
+  .optional()
 
 const defraId = joi.object({
   userType
@@ -23,7 +39,11 @@ export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
   schema: joi.object({
     nrlReference,
+    originalNrlReference,
     levy,
+    acceptLevy,
+    variation,
+    originalCommitted,
     defraId
   })
 })

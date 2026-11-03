@@ -1,5 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { routePath as originalReferencePath } from '../original-reference/route-path.js'
+import { routePath as variationPath } from '../variation/route-path.js'
 import { defraAccountUserTypeOptions } from './options.js'
 
 export const pageHeading =
@@ -9,7 +9,7 @@ export default function getViewModel() {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    backLinkPath: originalReferencePath,
+    backLinkPath: variationPath,
     defraAccountUserTypeOptions
   }
 }

@@ -117,7 +117,7 @@ describe('Do you accept this nature restoration levy amount page', () => {
   })
 
   it.each([
-    { answer: 'yes', nextPage: '/request-to-use/defra-account-user-type' },
+    { answer: 'yes', nextPage: '/request-to-use/variation' },
     { answer: 'no', nextPage: '/request-to-use/delete-quote' }
   ])(
     'should redirect to $nextPage when "$answer" is selected',
@@ -131,6 +131,25 @@ describe('Do you accept this nature restoration levy amount page', () => {
 
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(nextPage)
+    }
+  )
+
+  it.each([
+    { answer: 'yes', label: 'Yes, accept this amount' },
+    { answer: 'no', label: 'No, delete my quote details' }
+  ])(
+    'should reselect "$answer" when the user returns to the page',
+    async ({ answer, label }) => {
+      const { cookie } = await submitForm({
+        requestUrl: routePath,
+        server: getServer(),
+        formData: { acceptLevy: answer },
+        cookie: sessionCookie
+      })
+
+      const document = await load(cookie)
+
+      expect(getByLabelText(document, label)).toBeChecked()
     }
   )
 
