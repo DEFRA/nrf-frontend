@@ -8,7 +8,7 @@ import originalCommittedValidation from '../../original-committed/form-validatio
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
-const acceptLevy = acceptLevyValidation().extract('acceptLevy')
+const acceptLevy = acceptLevyValidation().extract('acceptLevy').optional()
 
 const userType = defraAccountUserTypeValidation().extract(
   'defraAccountUserType'

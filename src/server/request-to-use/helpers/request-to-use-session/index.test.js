@@ -20,6 +20,22 @@ describe('requestToUseSession', () => {
     expect(request.logger.error).not.toHaveBeenCalled()
   })
 
+  it('allows the levy to be saved before the accept levy answer exists', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: { nrlReference: fullQuote.reference } }
+    })
+    const levy = {
+      calculationDate: '2026-01-01',
+      provisionalAmount: 100,
+      inflationAdjustedAmount: 110
+    }
+
+    const result = requestToUseSession.save(request, { levy })
+
+    expect(result).toEqual({ nrlReference: fullQuote.reference, levy })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
   it('allows other answers to be saved before variation has been answered', () => {
     const request = createSessionRequest({
       session: { requestToUse: savedNrlReference }
