@@ -58,6 +58,10 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({ formValidation, getNextPage })
+    ...createPostController({
+      formValidation,
+      getNextPage,
+      saveToSession: requestToUseSession.save
+    })
   }
 ]
