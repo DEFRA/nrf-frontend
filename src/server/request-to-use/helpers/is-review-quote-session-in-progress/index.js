@@ -65,16 +65,7 @@ const completeQuotePaths = new Set([
   defraAccountAgentPath
 ])
 
-/**
- * Redirects to the start page when the review quote details page, the accept
- * levy page, the variation page, the original committed page, the delete
- * quote page, the Defra account pages or a change page reached from the review
- * page's change links is requested without the session state magic link
- * redemption sets. The review, accept levy, variation, original committed,
- * delete quote and Defra account pages need the complete saved quote they
- * render or act on; the change pages only the request to use session.
- * @type {import('@hapi/hapi').Lifecycle.Method}
- */
+/** @type {import('@hapi/hapi').Lifecycle.Method} */
 export const checkForValidReviewQuoteSession = (request, h) => {
   // HEAD requests are routed to GET routes but keep their own method, so they
   // must be guarded too or the page handler runs unguarded.
