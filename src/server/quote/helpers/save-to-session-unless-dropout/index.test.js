@@ -6,7 +6,7 @@ const nextPage = '/quote/confirm-housing'
 
 const buildRequest = (query) => ({ query })
 
-const buildSave = () => {
+const buildSave = ({ isChangeMode } = {}) => {
   const saveToSession = vi.fn((request, payload) => ({
     ...payload,
     saved: true
@@ -14,7 +14,8 @@ const buildSave = () => {
   const save = saveToSessionUnlessDropout({
     getNextPage: ({ planningType }) =>
       planningType === 'other' ? dropoutPage : nextPage,
-    saveToSession
+    saveToSession,
+    isChangeMode
   })
   return { save, saveToSession }
 }
@@ -50,6 +51,30 @@ describe('saveToSessionUnlessDropout', () => {
     const result = save(buildRequest({}), { planningType: 'other' })
 
     expect(result).toEqual({ planningType: 'other', saved: true })
+    expect(saveToSession).toHaveBeenCalledOnce()
+  })
+
+  it('returns the payload unsaved when an overridden change-mode check says change without ?change=true', () => {
+    const { save, saveToSession } = buildSave({ isChangeMode: () => true })
+    const payload = { planningType: 'other' }
+
+    const result = save(buildRequest({}), payload)
+
+    expect(result).toBe(payload)
+    expect(saveToSession).not.toHaveBeenCalled()
+  })
+
+  it('still saves an eligible submission when the change-mode check is overridden', () => {
+    const { save, saveToSession } = buildSave({ isChangeMode: () => true })
+
+    const result = save(buildRequest({}), {
+      planningType: 'full-planning-permission'
+    })
+
+    expect(result).toEqual({
+      planningType: 'full-planning-permission',
+      saved: true
+    })
     expect(saveToSession).toHaveBeenCalledOnce()
   })
 })
