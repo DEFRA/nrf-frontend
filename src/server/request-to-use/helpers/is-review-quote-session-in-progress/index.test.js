@@ -23,6 +23,7 @@ import {
   reviewQuoteSession
 } from '../../../../test-utils/fixtures/session.js'
 
+const variationPath = '/request-to-use/variation'
 const defraAccountIndividualPath = '/request-to-use/defra-account-individual'
 const defraAccountOrganisationPath =
   '/request-to-use/defra-account-organisation'
@@ -176,6 +177,7 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
+    variationPath,
     deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,
@@ -193,6 +195,7 @@ describe('checkForValidReviewQuoteSession', () => {
   })
 
   it.each([
+    variationPath,
     deleteQuotePath,
     defraAccountUserTypePath,
     defraAccountIndividualPath,

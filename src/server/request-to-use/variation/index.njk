@@ -1,0 +1,54 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate data-disable-on-submit>
+      {% include "partials/csrf-token.njk" %}
+
+      {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+      {% endif %}
+
+      {% set legendHtml %}<h1 class="govuk-fieldset__heading">{{ pageHeading }}</h1>{% endset %}
+
+      {{ govukRadios({
+        name: "variation",
+        fieldset: {
+          legend: {
+            html: legendHtml,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        errorMessage: validationErrors.messagesByFormField.variation,
+        value: formSubmitData.variation,
+        items: variationOptions
+      }) }}
+
+      {% set amendmentDetailsHtml %}
+        <p class="govuk-body">An application made under section 73 of the Town and Country Planning Act 1990 can be used to make a material amendment by varying or removing conditions associated with a planning permission. <a href="https://www.gov.uk/guidance/flexible-options-for-planning-permissions#make-minor-material-amendments" class="govuk-link" target="_blank" rel="noopener noreferrer">Learn more about amendments (opens in new tab)</a></p>
+      {% endset %}
+
+      {{ govukDetails({
+        summaryText: "What is an amendment?",
+        html: amendmentDetailsHtml
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
