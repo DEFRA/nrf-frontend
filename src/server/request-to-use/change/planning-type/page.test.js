@@ -1,4 +1,4 @@
-import { getByLabelText, getByRole } from '@testing-library/dom'
+import { getByLabelText, getByRole, getByText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { setupSeededRequestToUseServer } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -124,26 +124,38 @@ describe('Change planning type page', () => {
     )
   })
 
-  it('should save the ineligible answer so it stays selected when backing out of the dropout page', async () => {
-    const { cookie } = await submitForm({
+  it('should keep the previous answer when the user backs out of the dropout page to the review page', async () => {
+    const cookie = await withCompleteQuoteSession(getSeededServer())
+
+    const { response } = await submitForm({
       requestUrl: routePath,
       server: getSeededServer(),
       formData: { planningType: 'other' },
-      cookie: await withCompleteQuoteSession(getSeededServer())
+      cookie
     })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/request-to-use/change/application-type-not-available'
+    )
 
+    // The ineligible answer is not saved: the change page still shows the
+    // answer from the quote, and the review page is unchanged.
     const document = await loadPage({
       requestUrl: routePath,
       server: getSeededServer(),
       cookie
     })
+    expect(getByLabelText(document, 'Full planning permission')).toBeChecked()
+    expect(getByLabelText(document, 'Other')).not.toBeChecked()
 
-    // The ineligible answer is saved like any other: it stays selected on the
-    // change page, whose back link still returns to the review page.
-    expect(getByLabelText(document, 'Other')).toBeChecked()
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      reviewQuoteDetailsPath
+    const reviewPage = await loadPage({
+      requestUrl: reviewQuoteDetailsPath,
+      server: getSeededServer(),
+      cookie
+    })
+    const planningTypeRow = getByText(reviewPage, 'Planning permission type')
+    expect(planningTypeRow.nextElementSibling).toHaveTextContent(
+      'Full planning permission'
     )
   })
 })

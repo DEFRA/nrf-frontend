@@ -38,9 +38,20 @@ export const dropoutPageAliases = new Map([
 ])
 
 /**
+ * The request to use change pages exist only in change mode — every POST
+ * from one edits an answer saved by the quote journey — so the
+ * save-to-session-unless-dropout wrapper treats every submission as a
+ * change without needing ?change=true.
+ * @returns {boolean} true
+ */
+export const isChangeFromReviewPage = () => true
+
+/**
  * A saved edit returns to the review page rather than continuing the quote
- * journey. Dropout pages still win: an ineligible answer is saved like any
- * other and must show its dropout page, at its change alias when one exists.
+ * journey. Dropout pages still win: an ineligible answer must show its
+ * dropout page, at its change alias when one exists — it is not saved, so
+ * backing out of the dropout returns to the review page with the previous
+ * answer.
  * @param {{ nextPage: string }} params
  * @returns {string} redirect path
  */
