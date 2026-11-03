@@ -9,6 +9,7 @@ import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesAcceptLevy from './accept-levy/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
+import routesOriginalReference from './original-reference/routes.js'
 import routesDefraAccountUserType from './defra-account-user-type/routes.js'
 import routesDefraAccountIndividual from './defra-account-individual/routes.js'
 import routesDefraAccountOrganisation from './defra-account-organisation/routes.js'
@@ -53,6 +54,7 @@ export const requestToUse = {
         ...routesAcceptLevy,
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
+        ...routesOriginalReference,
         ...routesDefraAccountUserType,
         ...routesDefraAccountIndividual,
         ...routesDefraAccountOrganisation,

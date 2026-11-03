@@ -51,12 +51,12 @@ describe('Who are you requesting to use the nature restoration levy for page', (
     ).not.toBeChecked()
   })
 
-  it('should link back to the accept levy page', async () => {
+  it('should link back to the enter the NRL reference for the original planning permission page', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/accept-levy'
+      '/request-to-use/original-reference'
     )
   })
 

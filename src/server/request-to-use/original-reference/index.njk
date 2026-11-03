@@ -1,0 +1,46 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {% if backLinkPath %}
+    {{ backLink({href: backLinkPath}) }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <form method="post" novalidate>
+      {% include "partials/csrf-token.njk" %}
+
+      {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+      {% endif %}
+
+      {{ govukInput({
+        label: {
+          text: pageHeading,
+          classes: "govuk-label--l",
+          isPageHeading: true
+        },
+        hint: {
+          text: "This is the NRL reference on the commitment certificate used for the original planning permission, for example NRL-123456."
+        },
+        name: "originalReference",
+        classes: "govuk-input--width-10",
+        spellcheck: false,
+        value: formSubmitData.originalReference,
+        errorMessage: validationErrors.messagesByFormField.originalReference
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+
+    </form>
+  </div>
+</div>
+{% endblock %}

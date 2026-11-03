@@ -18,6 +18,7 @@ import { routePath as emailConfirmationPath } from './email-confirmation/route-p
 import { routePath as reviewQuoteDetailsPath } from './review-quote-details/route-path.js'
 import { routePath as acceptLevyPath } from './accept-levy/route-path.js'
 import { routePath as deleteQuotePath } from './delete-quote/route-path.js'
+import { routePath as originalReferencePath } from './original-reference/route-path.js'
 import { routePath as defraAccountUserTypePath } from './defra-account-user-type/route-path.js'
 import { routePath as changePlanningTypePath } from './change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from './change/confirm-housing/route-path.js'
@@ -66,7 +67,10 @@ const reachablePaths = [
   startPath,
   emailConfirmationPath,
   `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
-  '/request-to-use/delete-quote-confirmation'
+  '/request-to-use/delete-quote-confirmation',
+  // Unguarded while the journey wiring is a separate ticket (NRF2-1317): it
+  // renders with or without a session, including after the email is sent.
+  originalReferencePath
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
