@@ -6,6 +6,7 @@ import { routePath as defraAccountUserTypePath } from '../../defra-account-user-
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
 import { routePath as defraAccountOrganisationPath } from '../../defra-account-organisation/route-path.js'
 import { routePath as defraAccountAgentPath } from '../../defra-account-agent/route-path.js'
+import { routePath as originalReferenceNotMatchedPath } from '../../original-reference-not-matched/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -58,16 +59,18 @@ const completeQuotePaths = new Set([
   defraAccountUserTypePath,
   defraAccountIndividualPath,
   defraAccountOrganisationPath,
-  defraAccountAgentPath
+  defraAccountAgentPath,
+  originalReferenceNotMatchedPath
 ])
 
 /**
  * Redirects to the start page when the review quote details page, the accept
- * levy page, the delete quote page, the Defra account pages or a change page
- * reached from the review page's change links is requested without the
- * session state magic link redemption sets. The review, accept levy, delete
- * quote and Defra account pages need the complete saved quote they render or
- * act on; the change pages only the request to use session.
+ * levy page, the delete quote page, the Defra account pages, the original
+ * reference not matched page or a change page reached from the review page's
+ * change links is requested without the session state magic link redemption
+ * sets. The review, accept levy, delete quote, Defra account and original
+ * reference not matched pages need the complete saved quote; the change pages
+ * only the request to use session.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const checkForValidReviewQuoteSession = (request, h) => {

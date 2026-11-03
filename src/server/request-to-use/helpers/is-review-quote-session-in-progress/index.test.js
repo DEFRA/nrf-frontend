@@ -180,7 +180,8 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
-    defraAccountAgentPath
+    defraAccountAgentPath,
+    '/request-to-use/original-reference-not-matched'
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -197,7 +198,8 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountUserTypePath,
     defraAccountIndividualPath,
     defraAccountOrganisationPath,
-    defraAccountAgentPath
+    defraAccountAgentPath,
+    '/request-to-use/original-reference-not-matched'
   ])('redirects %s to the start page when there is no session', (path) => {
     const h = createMockRedirectToolkit()
 

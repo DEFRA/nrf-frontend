@@ -93,7 +93,8 @@ const pathsWithOwnSessionChecks = [
   changeNotInEdpPath,
   changeExcludedAreaPath,
   '/request-to-use/link-expired',
-  '/request-to-use/enter-address'
+  '/request-to-use/enter-address',
+  '/request-to-use/original-reference-not-matched'
 ]
 
 describe('After the retrieve quote email is sent', () => {

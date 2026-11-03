@@ -14,6 +14,22 @@ export function seedRequestToUseSession(request, h) {
   return h.continue
 }
 
+/**
+ * Registers an onPostHandler on the test server that saves the request to use session
+ * returned by getSession after every response; a null return saves nothing.
+ * @param {import('@hapi/hapi').Server} server
+ * @param {() => object | null} getSession
+ */
+export function seedRequestToUseSessionWith(server, getSession) {
+  server.ext('onPostHandler', function seedSession(request, h) {
+    const session = getSession()
+    if (session) {
+      requestToUseSession.save(request, session)
+    }
+    return h.continue
+  })
+}
+
 let seededServer = null
 let initPromise = null
 
