@@ -1,4 +1,4 @@
-import { getByRole, queryByRole } from '@testing-library/dom'
+import { getByRole, getByText, queryByRole } from '@testing-library/dom'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath } from './routes.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
@@ -187,6 +187,38 @@ describe('Review and amend the quote details page', () => {
     expect(boundaryValue).toBeDefined()
     expect(boundaryValue).toHaveTextContent(hostileFilename)
     expect(boundaryValue.querySelector('script')).toBeNull()
+  })
+
+  it('should keep showing the uploaded filename after an abandoned switch to drawing', async () => {
+    // The change boundary type page persists the chosen entry type straight
+    // away; until a new boundary is drawn the uploaded file is still the
+    // saved boundary, so the review page must keep showing its filename.
+    mockRedeemToken(mswServer)
+    mockReadQuote(mswServer, savedQuote)
+
+    const { headers } = await getResponse({
+      server: getServer(),
+      requestUrl: magicLink
+    })
+    let cookie = mergeCookies(null, headers['set-cookie'])
+
+    ;({ cookie } = await submitForm({
+      requestUrl: '/request-to-use/change/boundary-type',
+      server: getServer(),
+      formData: { boundaryEntryType: 'draw' },
+      cookie
+    }))
+
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie
+    })
+
+    const boundaryKey = getByText(document, 'Red line boundary')
+    expect(boundaryKey.nextElementSibling).toHaveTextContent(
+      'site-plan.geojson'
+    )
   })
 
   it('should recalculate the levy and redirect to the accept levy page on continue', async () => {

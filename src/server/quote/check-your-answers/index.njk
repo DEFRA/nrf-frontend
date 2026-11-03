@@ -14,6 +14,9 @@
         {# boundaryFilename (below) is user-controlled. Safe here because
            govukSummaryList escapes value.text (but NOT value.html), and the
            backend validates it against a strict allowlist. Do NOT switch to html:. #}
+        {# The boundary rows read the saved boundary, not boundaryEntryType:
+           the change flow persists the chosen entry type before any boundary
+           of that kind exists, so an abandoned change must not relabel the row. #}
         {{ govukSummaryList({
           classes: "govuk-!-margin-bottom-9",
           rows: [
@@ -37,14 +40,14 @@
                 text: "Added"
               },
               actions: { items: [{ href: quoteRoutes.boundaryType + "?change=true", text: "Change", visuallyHiddenText: "drawn red line boundary" }] }
-            } if formSubmitData.boundaryEntryType === 'draw',
+            } if not formSubmitData.boundaryFilename and formSubmitData.boundaryGeojson,
             {
               key: { text: "Red line boundary" },
               value: {
-                text: formSubmitData.boundaryFilename if formSubmitData.boundaryFilename else 'Uploaded'
+                text: formSubmitData.boundaryFilename
               },
               actions: { items: [{ href: quoteRoutes.boundaryType + "?change=true", text: "Change", visuallyHiddenText: "uploaded red line boundary" }] }
-            } if formSubmitData.boundaryEntryType === 'upload',
+            } if formSubmitData.boundaryFilename,
             {
               key: { text: "Email address" },
               value: { text: formSubmitData.email },

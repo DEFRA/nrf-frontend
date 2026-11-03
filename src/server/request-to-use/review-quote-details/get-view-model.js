@@ -18,22 +18,25 @@ const changeAction = (visuallyHiddenText, href = '#') => ({
 })
 
 /**
- * Red line boundary answer by boundary entry type. boundaryFilename is
- * user-controlled: it only ever flows into value.text, which govukSummaryList
- * escapes (value.html would not be).
+ * Red line boundary answer, derived from the saved boundary rather than
+ * boundaryEntryType: the change boundary type page persists the chosen entry
+ * type before any boundary of that kind exists, so an abandoned change must
+ * not relabel the row. boundaryFilename is user-controlled: it only ever
+ * flows into value.text, which govukSummaryList escapes (value.html would
+ * not be).
  * @param {object} data - the quote session data
  * @returns {{text: string, visuallyHiddenText: string}} the row value and the change link hidden text
  */
 const boundaryAnswer = (data) => {
-  if (data?.boundaryEntryType === 'upload') {
+  if (data?.boundaryFilename) {
     return {
-      text: data?.boundaryFilename || 'Uploaded',
+      text: data.boundaryFilename,
       visuallyHiddenText: 'uploaded red line boundary'
     }
   }
 
   return {
-    text: data?.boundaryEntryType === 'draw' ? 'Added' : 'Not added',
+    text: data?.boundaryGeojson ? 'Added' : 'Not added',
     visuallyHiddenText: 'red line boundary'
   }
 }

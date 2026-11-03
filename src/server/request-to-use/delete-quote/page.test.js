@@ -50,21 +50,21 @@ describe('Are you sure you want to delete this quote page', () => {
     )
   })
 
-  it('should link back to the review and amend your quote details page', async () => {
+  it('should link back to the accept levy page', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/review-quote-details'
+      '/request-to-use/accept-levy'
     )
   })
 
-  it('should link to the review and amend your quote details page from Cancel', async () => {
+  it('should link to the accept levy page from Cancel', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: /Cancel/ })).toHaveAttribute(
       'href',
-      '/request-to-use/review-quote-details'
+      '/request-to-use/accept-levy'
     )
   })
 
