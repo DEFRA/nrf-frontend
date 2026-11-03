@@ -48,4 +48,30 @@ describe('requestToUseSession', () => {
       'session namespace requestToUse: invalid data on save'
     )
   })
+
+  it('saves the original committed answer without logging a schema error', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: savedNrlReference }
+    })
+
+    const result = requestToUseSession.save(request, {
+      originalCommitted: 'no'
+    })
+
+    expect(result).toEqual({ ...savedNrlReference, originalCommitted: 'no' })
+    expect(request.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('logs an error when the original committed answer is not a recognised option', () => {
+    const request = createSessionRequest({
+      session: { requestToUse: savedNrlReference }
+    })
+
+    requestToUseSession.save(request, { originalCommitted: 'maybe' })
+
+    expect(request.logger.error).toHaveBeenCalledWith(
+      expect.any(Error),
+      'session namespace requestToUse: invalid data on save'
+    )
+  })
 })
