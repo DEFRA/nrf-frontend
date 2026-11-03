@@ -28,6 +28,7 @@ import routesChangeNotInEdp from './change/not-in-edp/routes.js'
 import routesChangeExcludedArea from './change/excluded-area/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
+import routesOriginalReferenceNotMatched from './original-reference-not-matched/routes.js'
 import { checkForValidRetrieveQuoteSession } from './helpers/is-retrieve-quote-session-in-progress/index.js'
 import { checkForValidReviewQuoteSession } from './helpers/is-review-quote-session-in-progress/index.js'
 
@@ -72,7 +73,8 @@ export const requestToUse = {
         ...routesChangeNotInEdp,
         ...routesChangeExcludedArea,
         ...routesRetrieveQuote,
-        ...routesLinkExpired
+        ...routesLinkExpired,
+        ...routesOriginalReferenceNotMatched
       ])
     }
   }
