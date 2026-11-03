@@ -3,7 +3,10 @@ import { requestToUseSession } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 
-const savedNrlReference = { nrlReference: fullQuote.reference }
+const savedNrlReference = {
+  nrlReference: fullQuote.reference,
+  acceptLevy: 'yes'
+}
 
 describe('requestToUseSession', () => {
   it('saves the variation answer without logging a schema error', () => {
