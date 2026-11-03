@@ -1,8 +1,5 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-
-// Literal route: the enter the original NRL reference page is not built yet.
-// Swap for its route-path.js import when it is.
-const enterOriginalReferencePath = '/request-to-use/original-reference'
+import { routePath as enterOriginalReferencePath } from '../original-reference/route-path.js'
 
 const fallbackHeading = 'This NRL reference does not match our records'
 

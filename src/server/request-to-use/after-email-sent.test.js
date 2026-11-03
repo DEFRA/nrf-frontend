@@ -67,10 +67,7 @@ const reachablePaths = [
   startPath,
   emailConfirmationPath,
   `${enterNrlReferencePath}?nrlReference=${fullQuote.reference}`,
-  '/request-to-use/delete-quote-confirmation',
-  // Unguarded while the journey wiring is a separate ticket (NRF2-1317): it
-  // renders with or without a session, including after the email is sent.
-  originalReferencePath
+  '/request-to-use/delete-quote-confirmation'
 ]
 
 // Pages with their own session checks, outside the retrieve quote journey's
@@ -81,6 +78,7 @@ const pathsWithOwnSessionChecks = [
   acceptLevyPath,
   '/request-to-use/variation',
   '/request-to-use/original-committed',
+  originalReferencePath,
   deleteQuotePath,
   defraAccountUserTypePath,
   '/request-to-use/defra-account-individual',

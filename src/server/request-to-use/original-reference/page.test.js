@@ -1,12 +1,17 @@
 import { getByRole, getByLabelText } from '@testing-library/dom'
 import { routePath } from './routes.js'
 import getViewModel from './get-view-model.js'
+import { routePath as originalCommittedPath } from '../original-committed/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../defra-account-user-type/route-path.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
+import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import { getResponse } from '../../../test-utils/get-response.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
+import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
 const inputLabel =
   'Enter the NRL reference for the original planning permission'
@@ -15,15 +20,16 @@ const missingMessage =
 const formatMessage =
   'Enter an NRL reference in the correct format, like NRL-123456'
 
-// The was the original planning permission committed page is not built yet,
-// so the back link targets a literal path.
-const originalCommittedPath = '/request-to-use/original-committed'
-
 describe('Enter the NRL reference for the original planning permission page', () => {
-  const getServer = setupTestServer()
+  const getServer = setupSeededRequestToUseServer()
+  let sessionCookie
 
-  const loadForm = () =>
-    loadPage({ requestUrl: routePath, server: getServer() })
+  beforeEach(async () => {
+    sessionCookie = await withCompleteQuoteSession(getServer())
+  })
+
+  const loadForm = (cookie = sessionCookie) =>
+    loadPage({ requestUrl: routePath, server: getServer(), cookie })
 
   it('should render all page elements', async () => {
     const document = await loadForm()
@@ -63,10 +69,23 @@ describe('Enter the NRL reference for the original planning permission page', ()
     const { response } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { originalReference: value }
+      formData: { originalReference: value },
+      cookie: sessionCookie
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(defraAccountUserTypePath)
+  })
+
+  it('should show the saved reference when returning to the page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'nrl-123456' },
+      cookie: sessionCookie
+    })
+
+    const document = await loadForm(cookie)
+    expect(getByLabelText(document, inputLabel)).toHaveValue('NRL-123456')
   })
 
   it.each([
@@ -107,7 +126,8 @@ describe('Enter the NRL reference for the original planning permission page', ()
       const { response, cookie } = await submitForm({
         requestUrl: routePath,
         server: getServer(),
-        formData
+        formData,
+        cookie: sessionCookie
       })
       expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
       expect(response.headers.location).toBe(routePath)
@@ -125,7 +145,8 @@ describe('Enter the NRL reference for the original planning permission page', ()
     const { cookie } = await submitForm({
       requestUrl: routePath,
       server: getServer(),
-      formData: { originalReference: 'ABC-123' }
+      formData: { originalReference: 'ABC-123' },
+      cookie: sessionCookie
     })
     const document = await loadPage({
       requestUrl: routePath,
@@ -133,5 +154,19 @@ describe('Enter the NRL reference for the original planning permission page', ()
       cookie
     })
     expect(getByLabelText(document, inputLabel)).toHaveValue('ABC-123')
+  })
+})
+
+describe('Enter the NRL reference for the original planning permission page without a session', () => {
+  const getServer = setupTestServer()
+
+  it('should redirect to the start page when there is no session', async () => {
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: routePath
+    })
+
+    expect(response.statusCode).toBe(statusCodes.found)
+    expect(response.headers.location).toBe(startPath)
   })
 })
