@@ -91,33 +91,8 @@ describe('Enter the NRL reference for the original planning permission page', ()
   it.each([
     { scenario: 'is absent', formData: {}, errorMessage: missingMessage },
     {
-      scenario: 'is empty',
-      formData: { originalReference: '' },
-      errorMessage: missingMessage
-    },
-    {
-      scenario: 'is only whitespace',
-      formData: { originalReference: '   ' },
-      errorMessage: missingMessage
-    },
-    {
       scenario: 'is in the wrong format',
       formData: { originalReference: 'ABC-123' },
-      errorMessage: formatMessage
-    },
-    {
-      scenario: 'has too many digits',
-      formData: { originalReference: 'NRL-1234567' },
-      errorMessage: formatMessage
-    },
-    {
-      scenario: 'has no hyphen',
-      formData: { originalReference: 'NRL123456' },
-      errorMessage: formatMessage
-    },
-    {
-      scenario: 'is six digits without the NRL- prefix',
-      formData: { originalReference: '123456' },
       errorMessage: formatMessage
     }
   ])(

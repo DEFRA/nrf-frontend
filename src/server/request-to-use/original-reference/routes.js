@@ -31,8 +31,7 @@ export { routePath }
  *     description: >
  *       Validates the reference, saves it to the request to use session and
  *       redirects to the next page. Matching it against the original
- *       commitment and the not-matched dropout are a separate ticket
- *       (NRF2-1317).
+ *       commitment and the not-matched dropout are out of scope here.
  *     requestBody:
  *       required: true
  *       content:
