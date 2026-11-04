@@ -2,7 +2,11 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as drawBoundaryPath } from '../draw-boundary/routes.js'
 import { routePath as uploadBoundaryPath } from '../upload-boundary/routes.js'
 import { routePath as boundaryTypePath } from '../boundary-type/route-path.js'
-import { appendChangeParam } from '../helpers/change-mode/index.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import {
+  appendChangeParam,
+  isFromSummary
+} from '../helpers/change-mode/index.js'
 import { resolveBoundaryStepBackLink } from '../helpers/boundary-step-back-link/index.js'
 
 const pageHeading =
@@ -12,17 +16,23 @@ const pageTitle = 'Excluded area'
 /**
  * @param {object} [quoteData] - the cached quote data; read for the boundary
  * entry type and the intersecting EDP/exclusion labels
- * @param {object} [query] - the parsed request query
+ * @param {object} [query] - the parsed request query; fromSummary links back
+ *   to check your answers instead
  * @returns {object} view model for the excluded-area page
  */
 export default function getViewModel(quoteData = {}, query = {}) {
   const { boundaryEntryType, boundaryGeojson } = quoteData
-  const backLinkPath = resolveBoundaryStepBackLink({
-    boundaryEntryType,
-    drawBoundaryPath,
-    uploadBoundaryPath,
-    fallbackPath: boundaryTypePath
-  })
+  const backLinkPath = isFromSummary(query)
+    ? checkYourAnswersPath
+    : appendChangeParam(
+        resolveBoundaryStepBackLink({
+          boundaryEntryType,
+          drawBoundaryPath,
+          uploadBoundaryPath,
+          fallbackPath: boundaryTypePath
+        }),
+        query
+      )
 
   const rlbEdp = boundaryGeojson?.intersectingEdps?.[0]
   const rlbCatchment = rlbEdp?.catchments?.[0]?.label
@@ -32,7 +42,7 @@ export default function getViewModel(quoteData = {}, query = {}) {
   return {
     pageTitle: getPageTitle(pageTitle),
     pageHeading,
-    backLinkPath: appendChangeParam(backLinkPath, query),
+    backLinkPath,
     rlbExcludedArea,
     rlbEdp: rlbEdp?.label,
     rlbCatchment,
