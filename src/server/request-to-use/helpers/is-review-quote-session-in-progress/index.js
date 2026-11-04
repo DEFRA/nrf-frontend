@@ -3,6 +3,7 @@ import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/
 import { routePath as acceptLevyPath } from '../../accept-levy/route-path.js'
 import { routePath as variationPath } from '../../variation/route-path.js'
 import { routePath as originalCommittedPath } from '../../original-committed/route-path.js'
+import { routePath as originalReferencePath } from '../../original-reference/route-path.js'
 import { routePath as deleteQuotePath } from '../../delete-quote/route-path.js'
 import { routePath as defraAccountUserTypePath } from '../../defra-account-user-type/route-path.js'
 import { routePath as defraAccountIndividualPath } from '../../defra-account-individual/route-path.js'
@@ -60,6 +61,7 @@ const completeQuotePaths = new Set([
   acceptLevyPath,
   variationPath,
   originalCommittedPath,
+  originalReferencePath,
   deleteQuotePath,
   defraAccountUserTypePath,
   defraAccountIndividualPath,

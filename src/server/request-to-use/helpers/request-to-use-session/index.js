@@ -2,6 +2,7 @@ import joi from 'joi'
 import { createSessionNamespace } from '../../../common/helpers/session-namespace/index.js'
 import enterNrlReferenceValidation from '../../enter-nrl-reference/form-validation.js'
 import acceptLevyValidation from '../../accept-levy/form-validation.js'
+import originalReferenceValidation from '../../original-reference/form-validation.js'
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
 import variationValidation from '../../variation/form-validation.js'
 import originalCommittedValidation from '../../original-committed/form-validation.js'
@@ -11,7 +12,9 @@ const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 // The reference entered on the original reference page, kept apart from the
 // quote's own nrlReference so the not matched page can show what was entered.
 // Optional because it is not set until that page has been completed.
-const originalNrlReference = nrlReference.optional()
+const originalNrlReference = originalReferenceValidation()
+  .extract('originalReference')
+  .optional()
 
 const acceptLevy = acceptLevyValidation().extract('acceptLevy').optional()
 
@@ -47,6 +50,18 @@ export const requestToUseSession = createSessionNamespace({
     defraId
   })
 })
+
+/**
+ * Saves the NRL reference for the original planning permission, leaving the
+ * rest of the request to use session untouched.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {{ originalReference: string }} payload
+ * @returns {object | null} the merged request to use data
+ */
+export const saveOriginalReference = (request, payload) =>
+  requestToUseSession.save(request, {
+    originalNrlReference: payload.originalReference
+  })
 
 /**
  * Saves the who are you requesting to use the levy for answer under defraId,

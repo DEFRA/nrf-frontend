@@ -12,6 +12,7 @@ import routesVariation from './variation/routes.js'
 import routesOriginalCommitted from './original-committed/routes.js'
 import routesDeleteQuote from './delete-quote/routes.js'
 import routesDeleteQuoteConfirmation from './delete-quote-confirmation/routes.js'
+import routesOriginalReference from './original-reference/routes.js'
 import routesDefraAccountUserType from './defra-account-user-type/routes.js'
 import routesDefraAccountIndividual from './defra-account-individual/routes.js'
 import routesDefraAccountOrganisation from './defra-account-organisation/routes.js'
@@ -60,6 +61,7 @@ export const requestToUse = {
         ...routesOriginalCommitted,
         ...routesDeleteQuote,
         ...routesDeleteQuoteConfirmation,
+        ...routesOriginalReference,
         ...routesDefraAccountUserType,
         ...routesDefraAccountIndividual,
         ...routesDefraAccountOrganisation,
