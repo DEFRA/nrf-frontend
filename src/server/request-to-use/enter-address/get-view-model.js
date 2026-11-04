@@ -1,5 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getDefraAccountUrl } from '../../auth/get-defra-account-url.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 
 export const pageHeadingIndividual = 'What is your address?'
 export const pageHeadingOrg = 'What is the business or organisation address?'
@@ -28,6 +29,7 @@ export default function getViewModel(data = {}) {
           relationship: data.userRelationshipType?.toLowerCase()
         }
       : null,
-    defraAccountUrl: getDefraAccountUrl()
+    defraAccountUrl: getDefraAccountUrl(),
+    continuePath: checkYourAnswersPath
   }
 }
