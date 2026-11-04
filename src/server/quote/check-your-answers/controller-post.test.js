@@ -51,12 +51,12 @@ describe('quoteSubmitController', () => {
     [
       'the excluded area dropout when the saved boundary is in an exclusion zone',
       boundaryGeojsonWithExcludedArea,
-      '/quote/excluded-area?change=true'
+      '/quote/excluded-area?fromSummary=true'
     ],
     [
       'the not in EDP dropout when the saved boundary misses every EDP',
       boundaryGeojson,
-      '/quote/not-in-edp?change=true'
+      '/quote/not-in-edp?fromSummary=true'
     ]
   ])(
     'redirects to %s without submitting the quote',

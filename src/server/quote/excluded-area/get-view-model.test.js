@@ -35,6 +35,12 @@ describe('excluded-area getViewModel', () => {
     expect(uploaded.backLinkPath).toBe('/quote/upload-boundary?change=true')
   })
 
+  it('should link back to check your answers when reached by continuing from it', () => {
+    const viewModel = getViewModel(baseQuoteData, { fromSummary: 'true' })
+
+    expect(viewModel.backLinkPath).toBe('/quote/check-your-answers')
+  })
+
   it('should use a placeholder back link when the boundary entry type is not set', () => {
     const viewModel = getViewModel({
       boundaryGeojson: { intersectingExcludedAreas: [] }

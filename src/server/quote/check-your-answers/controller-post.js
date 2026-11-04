@@ -3,7 +3,6 @@ import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { isAnalyticsDisabled } from '../../cookies/helpers/cookie-service.js'
 import { routePath as routePathConfirmation } from '../confirmation/routes.js'
 import { getBoundaryDropoutPath } from '../helpers/boundary-dropout/index.js'
-import { appendChangeParam } from '../helpers/change-mode/index.js'
 import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache
@@ -15,13 +14,12 @@ export const quoteSubmitController = {
 
     // A boundary dropout saves the ineligible geojson so backing out keeps the
     // edit alive; submitting from check your answers must show that dropout
-    // again rather than send an ineligible quote to the backend. change=true
-    // keeps the dropout's back links in change mode, so a corrected boundary
-    // returns here instead of restarting the journey.
+    // again rather than send an ineligible quote to the backend. fromSummary
+    // links the dropout back to this page instead of the boundary step.
     const dropoutPath = getBoundaryDropoutPath(completeQuoteData)
     if (dropoutPath) {
       return h
-        .redirect(appendChangeParam(dropoutPath, { change: 'true' }))
+        .redirect(`${dropoutPath}?fromSummary=true`)
         .code(statusCodes.redirectAfterPost)
     }
 

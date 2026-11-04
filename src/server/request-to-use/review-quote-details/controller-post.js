@@ -17,11 +17,12 @@ export const reviewQuoteDetailsPostController = {
 
     // A boundary dropout saves the ineligible geojson so backing out keeps the
     // edit alive; continuing from the review page must show that dropout again
-    // rather than price an ineligible quote.
+    // rather than price an ineligible quote. fromSummary links the dropout
+    // back to this page instead of the boundary step.
     const dropoutPath = getBoundaryDropoutPath(quoteData)
     if (dropoutPath) {
       return h
-        .redirect(dropoutPageAliases.get(dropoutPath))
+        .redirect(`${dropoutPageAliases.get(dropoutPath)}?fromSummary=true`)
         .code(statusCodes.redirectAfterPost)
     }
 

@@ -112,7 +112,7 @@ describe('reviewQuoteDetailsPostController', () => {
     await reviewQuoteDetailsPostController.handler(request, toolkit)
 
     expect(toolkit.redirect).toHaveBeenCalledWith(
-      '/request-to-use/change/excluded-area'
+      '/request-to-use/change/excluded-area?fromSummary=true'
     )
     expect(toolkit.response.code).toHaveBeenCalledWith(303)
     expect(requests).toEqual([])
@@ -127,7 +127,7 @@ describe('reviewQuoteDetailsPostController', () => {
     await reviewQuoteDetailsPostController.handler(request, toolkit)
 
     expect(toolkit.redirect).toHaveBeenCalledWith(
-      '/request-to-use/change/not-in-edp'
+      '/request-to-use/change/not-in-edp?fromSummary=true'
     )
     expect(requests).toEqual([])
     expect(request.yar.get('requestToUse')).toEqual({ nrlReference })
