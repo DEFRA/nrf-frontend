@@ -93,6 +93,19 @@ describe('Who are you requesting to use the nature restoration levy for page', (
         }
       ],
       expected: '/request-to-use/original-reference'
+    },
+    {
+      scenario:
+        'variation was changed to "no" after the original was committed',
+      answers: [
+        { path: '/request-to-use/variation', formData: { variation: 'yes' } },
+        {
+          path: '/request-to-use/original-committed',
+          formData: { originalCommitted: 'yes' }
+        },
+        { path: '/request-to-use/variation', formData: { variation: 'no' } }
+      ],
+      expected: '/request-to-use/variation'
     }
   ])(
     'should link back to $expected when $scenario',
