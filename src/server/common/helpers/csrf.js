@@ -16,7 +16,11 @@ export const csrf = {
     key: 'csrfToken',
     size: 43,
     cookieOptions: {
-      isSecure: config.get('isProduction')
+      isSecure: config.get('isProduction'),
+      // Hapi defaults to Strict, which drops the cookie on navigations from an
+      // email link, so each open mints a new token and invalidates the form
+      // in any earlier tab. Lax still withholds it from cross-site POSTs.
+      isSameSite: 'Lax'
     },
     skip: (request) =>
       config.get('isTest') || NO_CRUMB_PATHS.includes(request.path)
