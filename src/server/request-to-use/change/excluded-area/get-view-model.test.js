@@ -24,6 +24,15 @@ describe('change excluded area getViewModel', () => {
     }
   )
 
+  it('should link back to the review page when reached by continuing from it', () => {
+    const viewModel = getViewModel(
+      { boundaryEntryType: 'upload' },
+      { fromSummary: 'true' }
+    )
+
+    expect(viewModel.backLinkPath).toBe('/request-to-use/review-quote-details')
+  })
+
   it("should keep the quote dropout page's heading and intersecting labels", () => {
     const viewModel = getViewModel({
       boundaryEntryType: 'upload',

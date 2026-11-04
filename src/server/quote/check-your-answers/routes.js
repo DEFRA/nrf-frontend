@@ -46,7 +46,9 @@ export { routePath }
  *     description: Submits the quote to the backend API
  *     responses:
  *       303:
- *         description: Redirect to confirmation page with reference number
+ *         description: Redirect to confirmation page with reference number,
+ *           or to the boundary dropout page when the saved boundary is
+ *           outside every EDP or in an exclusion zone
  *       400:
  *         description: Quote is incomplete — renders the 400 error page
  */

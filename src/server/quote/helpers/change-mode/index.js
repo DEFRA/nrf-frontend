@@ -30,6 +30,16 @@ export const isDropoutPage = (path) => dropoutPaths.has(path)
 export const isChangeMode = (query) => query?.change === 'true'
 
 /**
+ * Whether a boundary dropout page was reached by continuing from a summary
+ * page (check your answers or the review page) with an ineligible saved
+ * boundary. Those dropouts link back to the summary page the user came from,
+ * not to the boundary step the boundary came from.
+ * @param {object} [query] - the parsed request query
+ * @returns {boolean}
+ */
+export const isFromSummary = (query) => query?.fromSummary === 'true'
+
+/**
  * Appends ?change=true when the request is in change mode, so redirects and
  * back links keep the mode alive across PRG navigations.
  * @param {string} path - a path without an existing query string is assumed to

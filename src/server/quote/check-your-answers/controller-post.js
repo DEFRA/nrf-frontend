@@ -1,21 +1,35 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
-import { routePath as routePathConfirmation } from '../confirmation/routes.js'
+import { isAnalyticsDisabled } from '../../cookies/helpers/cookie-service.js'
+import { routePath as routePathConfirmation } from '../confirmation/route-path.js'
+import { getBoundaryDropoutPath } from '../helpers/boundary-dropout/index.js'
 import {
   clearQuoteDataFromCache,
   getCompleteQuoteDataFromCache
 } from '../helpers/quote-session-cache/index.js'
-import { isAnalyticsDisabled } from '../../cookies/helpers/cookie-service.js'
 
 export const quoteSubmitController = {
   async handler(request, h) {
-    const { isHousing, ...quoteData } = getCompleteQuoteDataFromCache(request)
+    const completeQuoteData = getCompleteQuoteDataFromCache(request)
+
+    // A boundary dropout saves the ineligible geojson so backing out keeps the
+    // edit alive; submitting from check your answers must show that dropout
+    // again rather than send an ineligible quote to the backend. fromSummary
+    // links the dropout back to this page instead of the boundary step.
+    const dropoutPath = getBoundaryDropoutPath(completeQuoteData)
+    if (dropoutPath) {
+      return h
+        .redirect(`${dropoutPath}?fromSummary=true`)
+        .code(statusCodes.redirectAfterPost)
+    }
+
+    const { isHousing, ...quoteDataToSubmit } = completeQuoteData
     if (isAnalyticsDisabled(request)) {
-      quoteData.disableAnalyticsAudit = true
+      quoteDataToSubmit.disableAnalyticsAudit = true
     }
     const response = await postRequestToBackend({
       endpointPath: '/quotes',
-      payload: quoteData
+      payload: quoteDataToSubmit
     })
     clearQuoteDataFromCache(request)
     const nrfReference = response.payload.reference

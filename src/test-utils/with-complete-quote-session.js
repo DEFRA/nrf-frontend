@@ -15,9 +15,14 @@ import { routePath as emailPath } from '../server/quote/email/routes.js'
  * schema, so pages gated on quote completeness (check-your-answers) render.
  * Returns the combined session cookie.
  * @param {object} server
+ * @param {object} [boundaryGeojson] - the checked boundary geojson to save
+ *   with the drawn boundary step (defaults to an eligible boundary)
  * @returns {Promise<string>}
  */
-export async function withCompleteQuoteSession(server) {
+export async function withCompleteQuoteSession(
+  server,
+  boundaryGeojson = boundaryGeojsonWithEdp
+) {
   let { cookie } = await submitForm({
     requestUrl: planningTypePath,
     server,
@@ -45,7 +50,7 @@ export async function withCompleteQuoteSession(server) {
   ;({ cookie } = await submitForm({
     requestUrl: drawBoundarySavePath,
     server,
-    formData: { boundaryGeojson: boundaryGeojsonWithEdp },
+    formData: { boundaryGeojson },
     cookie
   }))
   ;({ cookie } = await submitForm({

@@ -1,4 +1,9 @@
-import { appendChangeParam, isChangeMode, isDropoutPage } from './index.js'
+import {
+  appendChangeParam,
+  isChangeMode,
+  isDropoutPage,
+  isFromSummary
+} from './index.js'
 
 describe('change-mode helper', () => {
   describe('isChangeMode', () => {
@@ -10,6 +15,19 @@ describe('change-mode helper', () => {
       'is false for %s',
       (query) => {
         expect(isChangeMode(query)).toBe(false)
+      }
+    )
+  })
+
+  describe('isFromSummary', () => {
+    it('is true when the query carries fromSummary=true', () => {
+      expect(isFromSummary({ fromSummary: 'true' })).toBe(true)
+    })
+
+    it.each([[{ fromSummary: 'false' }], [{}], [undefined]])(
+      'is false for %s',
+      (query) => {
+        expect(isFromSummary(query)).toBe(false)
       }
     )
   })

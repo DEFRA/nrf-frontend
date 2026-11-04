@@ -20,6 +20,10 @@ import {
 } from '../../../test-utils/mock-get-quote.js'
 import { savedQuote } from '../../../test-utils/fixtures/saved-quote.js'
 import { magicLinkToken } from '../../../test-utils/fixtures/magic-link-token.js'
+import {
+  boundaryGeojson,
+  boundaryGeojsonWithExcludedArea
+} from '../../../test-utils/fixtures/boundary-geojson.js'
 
 const mswServer = setupMswServer()
 
@@ -241,6 +245,39 @@ describe('Review and amend the quote details page', () => {
       }
     ])
   })
+
+  it.each([
+    [
+      'the excluded area dropout when the saved boundary is in an exclusion zone',
+      boundaryGeojsonWithExcludedArea,
+      '/request-to-use/change/excluded-area?fromSummary=true'
+    ],
+    [
+      'the not in EDP dropout when the saved boundary misses every EDP',
+      boundaryGeojson,
+      '/request-to-use/change/not-in-edp?fromSummary=true'
+    ]
+  ])(
+    'should redirect to %s instead of recalculating the levy',
+    async (_, boundaryGeojsonFixture, location) => {
+      const requests = mockRecalculateLevy(mswServer)
+      const cookie = await withCompleteQuoteSession(
+        getSeededServer(),
+        boundaryGeojsonFixture
+      )
+
+      const { response } = await submitForm({
+        requestUrl: routePath,
+        server: getSeededServer(),
+        formData: {},
+        cookie
+      })
+
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.location).toBe(location)
+      expect(requests).toEqual([])
+    }
+  )
 
   it.each([404, 422, 500])(
     'should show the 500 error page when the levy recalculation fails with %i',

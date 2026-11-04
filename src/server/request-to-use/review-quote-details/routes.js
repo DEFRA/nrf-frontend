@@ -37,7 +37,9 @@ const getReviewQuoteDetailsData = (request) => ({
  *     description: Recalculates the levy from the saved quote details, saves it to the request to use session and redirects to the accept levy page
  *     responses:
  *       303:
- *         description: Redirect to the do you accept this nature restoration levy amount page
+ *         description: Redirect to the do you accept this nature restoration levy amount page,
+ *           or to the boundary dropout alias when the saved boundary is outside
+ *           every EDP or in an exclusion zone
  */
 export default [
   {
