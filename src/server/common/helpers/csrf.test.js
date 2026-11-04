@@ -29,6 +29,10 @@ describe('#csrf', () => {
     expect(csrf.options.size).toBe(43)
   })
 
+  it('should send the cookie on cross-site navigations but not cross-site posts', () => {
+    expect(csrf.options.cookieOptions.isSameSite).toBe('Lax')
+  })
+
   describe('cookieOptions.isSecure', () => {
     test('Should be false when not in production', () => {
       expect(csrf.options.cookieOptions.isSecure).toBe(false)
