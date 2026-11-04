@@ -1,7 +1,7 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { postRequestToBackend } from '../../common/services/nrf-backend.js'
 import { isAnalyticsDisabled } from '../../cookies/helpers/cookie-service.js'
-import { routePath as routePathConfirmation } from '../confirmation/routes.js'
+import { routePath as routePathConfirmation } from '../confirmation/route-path.js'
 import { getBoundaryDropoutPath } from '../helpers/boundary-dropout/index.js'
 import {
   clearQuoteDataFromCache,

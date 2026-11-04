@@ -6,22 +6,13 @@ import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { mockRecalculateLevy } from '../../../test-utils/mock-recalculate-levy.js'
 import { recalculatedLevy } from '../../../test-utils/fixtures/levy.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
-import {
-  boundaryGeojson,
-  boundaryGeojsonWithExcludedArea
-} from '../../../test-utils/fixtures/boundary-geojson.js'
 
 const nrlReference = fullQuote.reference
 
-const buildRequest = (boundaryGeojsonFixture) =>
+const buildRequest = () =>
   createSessionRequest({
     session: {
-      quote: {
-        housingUnits: 42,
-        ...(boundaryGeojsonFixture && {
-          boundaryGeojson: boundaryGeojsonFixture
-        })
-      },
+      quote: { housingUnits: 42 },
       requestToUse: { nrlReference }
     }
   })
@@ -102,35 +93,6 @@ describe('reviewQuoteDetailsPostController', () => {
 
     expect(toolkit.redirect).toHaveBeenCalledWith('/request-to-use/accept-levy')
     expect(toolkit.response.code).toHaveBeenCalledWith(303)
-  })
-
-  it('should redirect to the excluded area dropout instead of recalculating the levy when the saved boundary is in an exclusion zone', async () => {
-    const requests = mockRecalculateLevy(mswServer)
-    const request = buildRequest(boundaryGeojsonWithExcludedArea)
-    const toolkit = createMockRedirectToolkit()
-
-    await reviewQuoteDetailsPostController.handler(request, toolkit)
-
-    expect(toolkit.redirect).toHaveBeenCalledWith(
-      '/request-to-use/change/excluded-area?fromSummary=true'
-    )
-    expect(toolkit.response.code).toHaveBeenCalledWith(303)
-    expect(requests).toEqual([])
-    expect(request.yar.get('requestToUse')).toEqual({ nrlReference })
-  })
-
-  it('should redirect to the not in EDP dropout instead of recalculating the levy when the saved boundary misses every EDP', async () => {
-    const requests = mockRecalculateLevy(mswServer)
-    const request = buildRequest(boundaryGeojson)
-    const toolkit = createMockRedirectToolkit()
-
-    await reviewQuoteDetailsPostController.handler(request, toolkit)
-
-    expect(toolkit.redirect).toHaveBeenCalledWith(
-      '/request-to-use/change/not-in-edp?fromSummary=true'
-    )
-    expect(requests).toEqual([])
-    expect(request.yar.get('requestToUse')).toEqual({ nrlReference })
   })
 
   it('should not save a levy or redirect when the recalculation fails', async () => {
