@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
+import Boom from '@hapi/boom'
 import { config } from '../../../config/config.js'
 import {
   getRequestFromBackend,
@@ -7,7 +8,8 @@ import {
   getUserFromBackend,
   postRequestToBackend,
   patchRequestToBackend,
-  createCommitmentCertificateInBackend
+  createCommitmentCertificateInBackend,
+  compareQuoteBoundariesInBackend
 } from './nrf-backend.js'
 
 const backendUrl = config.get('backend').apiUrl
@@ -25,6 +27,54 @@ vi.mock('../helpers/logging/logger.js', () => ({
 }))
 
 describe('nrf-backend service', () => {
+  describe('compareQuoteBoundariesInBackend', () => {
+    it('should post both references and return boundariesMatch', async () => {
+      vi.mocked(Wreck.post).mockResolvedValue({
+        payload: { boundariesMatch: false }
+      })
+
+      const result = await compareQuoteBoundariesInBackend({
+        originalReference: 'NRL-000001',
+        currentReference: 'NRL-000002'
+      })
+
+      expect(Wreck.post).toHaveBeenCalledWith(
+        `${backendUrl}/quotes/compare-boundaries`,
+        {
+          payload: {
+            originalReference: 'NRL-000001',
+            currentReference: 'NRL-000002'
+          },
+          json: true,
+          headers: {}
+        }
+      )
+      expect(result).toEqual({ originalFound: true, boundariesMatch: false })
+    })
+
+    it('should report the original as not found when the backend responds 404', async () => {
+      vi.mocked(Wreck.post).mockRejectedValue(Boom.notFound())
+
+      const result = await compareQuoteBoundariesInBackend({
+        originalReference: 'NRL-000001',
+        currentReference: 'NRL-000002'
+      })
+
+      expect(result).toEqual({ originalFound: false })
+    })
+
+    it('should rethrow other backend errors', async () => {
+      vi.mocked(Wreck.post).mockRejectedValue(Boom.badGateway())
+
+      await expect(
+        compareQuoteBoundariesInBackend({
+          originalReference: 'NRL-000001',
+          currentReference: 'NRL-000002'
+        })
+      ).rejects.toThrow()
+    })
+  })
+
   describe('getRequestFromBackend', () => {
     it('should call the correct URL and return the response', async () => {
       const mockResponse = { payload: { id: '123', status: 'ok' } }

@@ -2,6 +2,7 @@ import Wreck from '@hapi/wreck'
 import Boom from '@hapi/boom'
 import { buildServiceHeaders, getRequestFromService } from '@defra/nrf-library'
 import { config } from '../../../config/config.js'
+import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -79,6 +80,30 @@ export const redeemEmailQuoteLinkToken = async ({ reference, token }) => {
     payload: { token }
   })
   return payload.accessStatus
+}
+
+/**
+ * Asks the backend whether the boundaries of two quotes match.
+ * @param {{ originalReference: string, currentReference: string }} params
+ * @returns {Promise<{ originalFound: boolean, boundariesMatch?: boolean }>}
+ * originalFound is false when the backend has no committed quote for the original reference
+ */
+export const compareQuoteBoundariesInBackend = async ({
+  originalReference,
+  currentReference
+}) => {
+  try {
+    const { payload } = await postRequestToBackend({
+      endpointPath: '/quotes/compare-boundaries',
+      payload: { originalReference, currentReference }
+    })
+    return { originalFound: true, boundariesMatch: payload.boundariesMatch }
+  } catch (error) {
+    if (error.output?.statusCode === statusCodes.notFound) {
+      return { originalFound: false }
+    }
+    throw error
+  }
 }
 
 /**
