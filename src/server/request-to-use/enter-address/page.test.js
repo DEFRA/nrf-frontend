@@ -53,6 +53,20 @@ describe('Enter address page', () => {
     )
   })
 
+  it('links the Continue button to the check your answers page', async () => {
+    const { cookie } = await signIn()
+    const document = await loadPage({
+      requestUrl: ROUTE_PATH,
+      server: getServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'button', { name: 'Continue' })).toHaveAttribute(
+      'href',
+      '/request-to-use/check-your-answers'
+    )
+  })
+
   it('shows the name of the signed-in user', async () => {
     const { cookie } = await signIn()
     const document = await loadPage({

@@ -18,6 +18,10 @@
       <p class="govuk-body">You are representing {{ representing.organisationName }} as an {{ representing.relationship }}.</p>
       <p class="govuk-body"><a href="{{ defraAccountUrl }}" class="govuk-link" target="_blank" rel="noopener noreferrer">Your Defra account (opens in new tab)</a></p>
     {% endif %}
+    {{ govukButton({
+      text: "Continue",
+      href: continuePath
+    }) }}
   </div>
 </div>
 {% endblock %}
