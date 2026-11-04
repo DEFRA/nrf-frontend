@@ -95,6 +95,11 @@ export const mockResendLink = (
   return requests
 }
 
+/**
+ * @param {import('msw/node').SetupServerApi} mswServer
+ * @param {{ reference?: string, status?: number }} [options]
+ * @returns {object[]} the JSON bodies of the requests received
+ */
 export const mockCommitmentCertificate = (
   mswServer,
   { reference = fullQuote.reference, status = 200 } = {}

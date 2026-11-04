@@ -6,7 +6,8 @@ import {
   getQuoteFromBackend,
   getUserFromBackend,
   postRequestToBackend,
-  patchRequestToBackend
+  patchRequestToBackend,
+  createCommitmentCertificateInBackend
 } from './nrf-backend.js'
 
 const backendUrl = config.get('backend').apiUrl
@@ -217,6 +218,22 @@ describe('nrf-backend service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         error,
         'PATCH request to backend failed'
+      )
+    })
+  })
+
+  describe('createCommitmentCertificateInBackend', () => {
+    it('should log the quote reference and throw an internal error when the request fails', async () => {
+      const error = new Error('Network error')
+      vi.mocked(Wreck.patch).mockRejectedValue(error)
+
+      await expect(
+        createCommitmentCertificateInBackend({ reference: 'NRL-000001' })
+      ).rejects.toThrow('Commitment certificate request to backend failed')
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        error,
+        'Commitment certificate request to backend failed for NRL-000001'
       )
     })
   })

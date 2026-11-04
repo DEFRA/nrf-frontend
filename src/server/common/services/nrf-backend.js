@@ -168,6 +168,10 @@ export const createCommitmentCertificateInBackend = async ({ reference }) => {
       payload: { createCommitmentCertificate: true }
     })
   } catch (error) {
+    logger.error(
+      error,
+      `Commitment certificate request to backend failed for ${reference}`
+    )
     throw Boom.internal(
       'Commitment certificate request to backend failed',
       error
