@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import Wreck from '@hapi/wreck'
 import Boom from '@hapi/boom'
 import { config } from '../../../config/config.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
 import {
   getRequestFromBackend,
   getQuoteFromBackend,
@@ -28,14 +29,16 @@ vi.mock('../helpers/logging/logger.js', () => ({
 
 describe('nrf-backend service', () => {
   describe('compareQuoteBoundariesInBackend', () => {
-    it('should post both references and return boundariesMatch', async () => {
+    const currentBoundaryGeoJson = boundaryGeojsonWithEdp.boundaryGeometryWgs84
+
+    it('should post the original reference and current boundary and return boundariesMatch', async () => {
       vi.mocked(Wreck.post).mockResolvedValue({
         payload: { boundariesMatch: false }
       })
 
       const result = await compareQuoteBoundariesInBackend({
         originalReference: 'NRL-000001',
-        currentReference: 'NRL-000002'
+        currentBoundaryGeoJson
       })
 
       expect(Wreck.post).toHaveBeenCalledWith(
@@ -43,7 +46,7 @@ describe('nrf-backend service', () => {
         {
           payload: {
             originalReference: 'NRL-000001',
-            currentReference: 'NRL-000002'
+            currentBoundaryGeoJson
           },
           json: true,
           headers: {}
@@ -57,7 +60,7 @@ describe('nrf-backend service', () => {
 
       const result = await compareQuoteBoundariesInBackend({
         originalReference: 'NRL-000001',
-        currentReference: 'NRL-000002'
+        currentBoundaryGeoJson
       })
 
       expect(result).toEqual({ originalFound: false })
@@ -69,7 +72,7 @@ describe('nrf-backend service', () => {
       await expect(
         compareQuoteBoundariesInBackend({
           originalReference: 'NRL-000001',
-          currentReference: 'NRL-000002'
+          currentBoundaryGeoJson
         })
       ).rejects.toThrow()
     })
