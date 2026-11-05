@@ -22,12 +22,6 @@ RUN npm run build:frontend
 
 CMD [ "npm", "run", "docker:dev" ]
 
-FROM development AS production_build
-
-ENV NODE_ENV=production
-
-RUN npm run build:frontend
-
 FROM defradigital/node:${PARENT_VERSION} AS production
 ARG PARENT_VERSION
 LABEL uk.gov.defra.ffc.parent-image=defradigital/node:${PARENT_VERSION}
@@ -40,10 +34,10 @@ USER root
 RUN apk add --no-cache curl
 USER node
 
-COPY --from=production_build /home/node/package*.json /home/node/.npmrc ./
-COPY --from=production_build /home/node/src ./src/
-COPY --from=production_build /home/node/.public/ ./.public/
-COPY --from=production_build --chmod=444 /home/node/.git-has[h] ./
+COPY --from=development /home/node/package*.json /home/node/.npmrc ./
+COPY --from=development /home/node/src ./src/
+COPY --from=development /home/node/.public/ ./.public/
+COPY --from=development --chmod=444 /home/node/.git-has[h] ./
 
 RUN npm ci --omit=dev --ignore-scripts
 
