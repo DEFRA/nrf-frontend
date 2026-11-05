@@ -3,9 +3,9 @@ import Boom from '@hapi/boom'
 import joi from 'joi'
 import { confirmationGetController } from './controller-get.js'
 import getViewModel from './get-view-model.js'
+import { routeId, routePath } from './route-path.js'
 
-const routeId = 'confirmation'
-export const routePath = `/quote/${routeId}`
+export { routePath }
 
 // A missing or malformed reference can't correspond to a real quote, so fail
 // with a 404 before the backend is called — otherwise an empty reference would
