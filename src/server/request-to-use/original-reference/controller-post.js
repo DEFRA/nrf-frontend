@@ -5,7 +5,7 @@ import {
   saveOriginalReference
 } from '../helpers/request-to-use-session/index.js'
 import { routePath as originalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
-import { routePath as variationBoundariesNotMatchedPath } from '../variation-boundaries-not-matched/route-path.js'
+import { routePath as originalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
 import getNextPage from './get-next-page.js'
 
 /**
@@ -19,7 +19,7 @@ const getRedirectPath = ({ originalFound, boundariesMatch }, sessionData) => {
   }
   return boundariesMatch
     ? getNextPage(sessionData)
-    : variationBoundariesNotMatchedPath
+    : originalBoundaryNotMatchedPath
 }
 
 export const originalReferencePostController = {

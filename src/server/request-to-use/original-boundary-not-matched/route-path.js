@@ -1,4 +1,4 @@
-export const routeId = 'variation-boundaries-not-matched'
+export const routeId = 'original-boundary-not-matched'
 
 // Leaf module: other pages import this path to avoid circular imports through
 // routes.js. Must stay import-free.

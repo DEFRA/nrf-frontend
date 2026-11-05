@@ -1,0 +1,21 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    <p class="govuk-body">This amendment to a development is using a different red line boundary to {{ originalNrlReference }}.</p>
+
+    <p class="govuk-body"><a href="{{ originalReferencePath }}" class="govuk-link">Check the NRL reference</a> or <a href="{{ reviewQuoteDetailsPath }}" class="govuk-link">amend your red line boundary</a>.</p>
+
+  </div>
+</div>
+{% endblock %}

@@ -187,7 +187,8 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountOrganisationPath,
     defraAccountAgentPath,
     checkYourAnswersPath,
-    '/request-to-use/original-reference-not-matched'
+    '/request-to-use/original-reference-not-matched',
+    '/request-to-use/original-boundary-not-matched'
   ])('continues on %s when the session is valid', (path) => {
     const h = createMockRedirectToolkit()
 
@@ -208,7 +209,8 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountOrganisationPath,
     defraAccountAgentPath,
     checkYourAnswersPath,
-    '/request-to-use/original-reference-not-matched'
+    '/request-to-use/original-reference-not-matched',
+    '/request-to-use/original-boundary-not-matched'
   ])('redirects %s to the start page when there is no session', (path) => {
     const h = createMockRedirectToolkit()
 
