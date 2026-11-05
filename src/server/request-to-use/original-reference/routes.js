@@ -1,10 +1,9 @@
 import { requestToUseController } from '../controller-get.js'
-import { createPostController } from '../../common/controllers/post-controller.js'
-import { saveOriginalReference } from '../helpers/request-to-use-session/index.js'
+import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
+import { originalReferencePostController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
 import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
-import getNextPage from './get-next-page.js'
 import { routeId, routePath } from './route-path.js'
 
 export { routePath }
@@ -29,9 +28,10 @@ export { routePath }
  *       - RequestToUse
  *     summary: Submit the NRL reference for the original planning permission
  *     description: >
- *       Validates the reference, saves it to the request to use session and
- *       redirects to the next page. Matching it against the original
- *       commitment and the not-matched dropout are out of scope here.
+ *       Validates the reference, saves it to the request to use session, asks
+ *       the backend whether the original and current quotes' boundaries match,
+ *       and redirects to the next page. Acting on the result and the
+ *       not-matched dropout are out of scope here.
  *     requestBody:
  *       required: true
  *       content:
@@ -62,10 +62,12 @@ export default [
   {
     method: 'POST',
     path: routePath,
-    ...createPostController({
-      formValidation,
-      getNextPage,
-      saveToSession: saveOriginalReference
-    })
+    options: {
+      validate: {
+        payload: formValidation(),
+        failAction: redirectToFormWithValidationErrors
+      }
+    },
+    ...originalReferencePostController
   }
 ]

@@ -12,6 +12,9 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
+import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
+import { mockCompareBoundaries } from '../../../test-utils/mock-get-quote.js'
+import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 
 const inputLabel =
   'Enter the NRL reference for the original planning permission'
@@ -22,9 +25,12 @@ const formatMessage =
 
 describe('Enter the NRL reference for the original planning permission page', () => {
   const getServer = setupSeededRequestToUseServer()
+  const mswServer = setupMswServer()
   let sessionCookie
+  let compareRequests
 
   beforeEach(async () => {
+    compareRequests = mockCompareBoundaries(mswServer)
     sessionCookie = await withCompleteQuoteSession(getServer())
   })
 
@@ -74,6 +80,67 @@ describe('Enter the NRL reference for the original planning permission page', ()
     })
     expect(response.statusCode).toBe(statusCodes.redirectAfterPost)
     expect(response.headers.location).toBe(defraAccountUserTypePath)
+  })
+
+  it('should send the original and current references to the backend', async () => {
+    await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'nrl-123456' },
+      cookie: sessionCookie
+    })
+    expect(compareRequests).toEqual([
+      { originalReference: 'NRL-123456', currentReference: fullQuote.reference }
+    ])
+  })
+
+  it('should redirect to the original reference not matched page when the original quote is not found', async () => {
+    mockCompareBoundaries(mswServer, { status: statusCodes.notFound })
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'NRL-123456' },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/request-to-use/original-reference-not-matched'
+    )
+  })
+
+  it('should redirect to the variation boundaries not matched page when the boundaries differ', async () => {
+    mockCompareBoundaries(mswServer, { boundariesMatch: false })
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'NRL-123456' },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(
+      '/request-to-use/variation-boundaries-not-matched'
+    )
+  })
+
+  it('should show the error page when the backend request fails', async () => {
+    mockCompareBoundaries(mswServer, { status: statusCodes.badGateway })
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'NRL-123456' },
+      cookie: sessionCookie
+    })
+    expect(response.statusCode).toBe(502)
+  })
+
+  it('should not call the backend when validation fails', async () => {
+    await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'ABC-123' },
+      cookie: sessionCookie
+    })
+    expect(compareRequests).toEqual([])
   })
 
   it('should show the saved reference when returning to the page', async () => {
