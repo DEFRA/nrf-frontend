@@ -11,6 +11,7 @@ import { routePath as defraAccountOrganisationPath } from '../../defra-account-o
 import { routePath as defraAccountAgentPath } from '../../defra-account-agent/route-path.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import { routePath as originalReferenceNotMatchedPath } from '../../original-reference-not-matched/route-path.js'
+import { routePath as originalBoundaryNotMatchedPath } from '../../original-boundary-not-matched/route-path.js'
 import { routePath as changePlanningTypePath } from '../../change/planning-type/route-path.js'
 import { routePath as changeConfirmHousingPath } from '../../change/confirm-housing/route-path.js'
 import { routePath as changeUnitNumberPath } from '../../change/unit-number/route-path.js'
@@ -68,6 +69,7 @@ const completeQuotePaths = new Set([
   defraAccountOrganisationPath,
   defraAccountAgentPath,
   originalReferenceNotMatchedPath,
+  originalBoundaryNotMatchedPath,
   checkYourAnswersPath
 ])
 

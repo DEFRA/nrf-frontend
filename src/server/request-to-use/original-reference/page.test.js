@@ -108,7 +108,7 @@ describe('Enter the NRL reference for the original planning permission page', ()
     )
   })
 
-  it('should redirect to the variation boundaries not matched page when the boundaries differ', async () => {
+  it('should redirect to the original boundary not matched page when the boundaries differ', async () => {
     mockCompareBoundaries(mswServer, { boundariesMatch: false })
     const { response } = await submitForm({
       requestUrl: routePath,
@@ -118,7 +118,7 @@ describe('Enter the NRL reference for the original planning permission page', ()
     })
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(
-      '/request-to-use/variation-boundaries-not-matched'
+      '/request-to-use/original-boundary-not-matched'
     )
   })
 
