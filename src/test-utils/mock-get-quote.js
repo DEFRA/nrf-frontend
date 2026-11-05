@@ -116,3 +116,20 @@ export const mockCommitmentCertificate = (
   )
   return requests
 }
+
+export const mockCompareBoundaries = (
+  mswServer,
+  { boundariesMatch = true, status = 200 } = {}
+) => {
+  const requests = []
+  mswServer.use(
+    http.post(
+      `${config.get('backend').apiUrl}/quotes/compare-boundaries`,
+      async ({ request }) => {
+        requests.push(await request.json())
+        return HttpResponse.json({ boundariesMatch }, { status })
+      }
+    )
+  )
+  return requests
+}
