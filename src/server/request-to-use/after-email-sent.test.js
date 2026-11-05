@@ -99,7 +99,8 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/link-expired',
   '/request-to-use/enter-address',
   '/request-to-use/check-your-answers',
-  '/request-to-use/original-reference-not-matched'
+  '/request-to-use/original-reference-not-matched',
+  '/request-to-use/original-boundary-not-matched'
 ]
 
 describe('After the retrieve quote email is sent', () => {
