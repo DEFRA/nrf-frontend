@@ -30,7 +30,7 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
   })
 }))
 
-vi.mock('./get-safe-redirect.js', () => ({
+vi.mock('../common/helpers/safe-redirect.js', () => ({
   getSafeRedirect: vi.fn((path) => path)
 }))
 

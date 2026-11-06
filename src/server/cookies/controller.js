@@ -12,16 +12,14 @@ import {
   saveValidationFlashToCache
 } from '../common/helpers/form-validation-session/index.js'
 import { statusCodes } from '../common/constants/status-codes.js'
-import { routePath as startPagePath } from '../manage/start-page/routes.js'
+import { routePath as startPagePath } from '../manage/start-page/route-path.js'
+import { isSafeRedirect } from '../common/helpers/safe-redirect.js'
 
 const COOKIES_VIEW_ROUTE = 'cookies/index'
 
 const cookiesPageSettings = {
   pageTitle: 'Cookies on Nature restoration levy'
 }
-
-const isSafeRelativePath = (value) =>
-  typeof value === 'string' && /^\/(?!\/)/.test(value)
 
 export const cookiesController = {
   options: {
@@ -35,7 +33,7 @@ export const cookiesController = {
       analyticsChoice = preferences.analytics === true ? 'yes' : 'no'
     }
     const formValidationErrors = getValidationFlashFromCache(request)
-    const redirectUrl = isSafeRelativePath(request.query.redirectUrl)
+    const redirectUrl = isSafeRedirect(request.query.redirectUrl)
       ? request.query.redirectUrl
       : ''
     const backUrl = redirectUrl || startPagePath
@@ -66,7 +64,7 @@ export const cookiesSubmitController = {
           'any.required': validationMessage
         }),
         source: joi.string().valid('page', 'banner').optional(),
-        redirectUrl: joi.string().allow('').optional()
+        redirectUrl: joi.string().allow('').max(2048).optional()
       }),
       failAction: (request, h, err) => {
         const { payload } = request
@@ -75,7 +73,7 @@ export const cookiesSubmitController = {
           validationErrors,
           formSubmitData: payload
         })
-        const redirectPath = isSafeRelativePath(payload?.redirectUrl)
+        const redirectPath = isSafeRedirect(payload?.redirectUrl)
           ? `${request.path}?redirectUrl=${encodeURIComponent(payload.redirectUrl)}`
           : request.path
         return h
@@ -91,16 +89,17 @@ export const cookiesSubmitController = {
     const isFromBanner = payload.source === 'banner'
 
     try {
-      const safeRedirect = isSafeRelativePath(payload.redirectUrl)
-        ? payload.redirectUrl
-        : startPagePath
-      const successRedirect = isSafeRelativePath(payload.redirectUrl)
+      const hasSafeRedirect = isSafeRedirect(payload.redirectUrl)
+      const safeRedirect = hasSafeRedirect ? payload.redirectUrl : startPagePath
+      const successRedirect = hasSafeRedirect
         ? `${COOKIE_ROUTE}?success=true&redirectUrl=${encodeURIComponent(payload.redirectUrl)}`
         : `${COOKIE_ROUTE}?success=true`
       const bannerRedirect = `${safeRedirect}${safeRedirect.includes('?') ? '&' : '?'}${CONFIRMATION_QUERY_PARAM}=1`
       const redirectUrl = isFromBanner ? bannerRedirect : successRedirect
 
-      const response = h.redirect(redirectUrl)
+      const response = h
+        .redirect(redirectUrl)
+        .code(statusCodes.redirectAfterPost)
 
       setCookiePreferences(response, analytics)
       clearValidationFlashFromCache(request)
