@@ -15,6 +15,11 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/routes.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
+import {
+  completeSubmitReauth,
+  isNoDefraIdSessionError,
+  isSubmitReauthPending
+} from './submit-reauth.js'
 
 const logger = createLogger()
 
@@ -52,6 +57,9 @@ export const signInController = {
     if (request.query[CHANGE_ORGANISATION_QUERY_PARAM] === 'true') {
       authUrl.searchParams.set('forceReselection', 'true')
     }
+    if (request.query.prompt === 'none') {
+      authUrl.searchParams.set('prompt', 'none')
+    }
 
     // Generate and store state for CSRF protection
     const state = crypto.randomBytes(16).toString('base64url')
@@ -71,6 +79,17 @@ export const signInController = {
  */
 export const signInOidcController = {
   async handler(request, h) {
+    // A silent (prompt=none) check found no Defra ID session: send the user
+    // through a normal sign-in, which returns to the stored redirectTo
+    if (
+      isNoDefraIdSessionError(request.query.error) &&
+      isSubmitReauthPending(request) &&
+      request.query.state === request.yar.get('oauth_state')
+    ) {
+      request.yar.clear('oauth_state')
+      return h.redirect(AUTH_SIGN_IN_PATH)
+    }
+
     // Check for OAuth errors
     if (request.query.error) {
       logger.error('OAuth error:', {
@@ -177,6 +196,7 @@ export const signInOidcController = {
       // Redirect to original path or home
       const redirect = request.yar.get('redirectTo') || startPath
       request.yar.clear('redirectTo')
+      completeSubmitReauth(request)
 
       return h.redirect(getSafeRedirect(redirect))
     } catch (error) {

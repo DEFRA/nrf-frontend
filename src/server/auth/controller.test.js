@@ -9,6 +9,7 @@ import { http, HttpResponse } from 'msw'
 import { getOidcConfig } from './get-oidc-config.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { describe, it, expect, vi } from 'vitest'
+import { mockYarGet } from '../../test-utils/mock-yar-get.js'
 
 const { tokenEndpoint } = vi.hoisted(() => ({
   tokenEndpoint: 'https://auth.example.com/token'
@@ -117,6 +118,34 @@ describe('Auth Controllers', () => {
       expect(url.searchParams.get('forceReselection')).toBe('true')
     })
 
+    it('should ask Defra ID not to show a sign-in page for a silent check', async () => {
+      mockGetOidcConfig.mockResolvedValue({
+        authorization_endpoint: 'https://auth.example.com/authorize'
+      })
+
+      const request = { query: { prompt: 'none' }, yar: { set: vi.fn() } }
+      const h = { redirect: vi.fn((url) => ({ redirect: url })) }
+
+      await signInController.handler(request, h)
+
+      const url = new URL(h.redirect.mock.calls[0][0])
+      expect(url.searchParams.get('prompt')).toBe('none')
+    })
+
+    it('should not send prompt for a normal sign-in', async () => {
+      mockGetOidcConfig.mockResolvedValue({
+        authorization_endpoint: 'https://auth.example.com/authorize'
+      })
+
+      const request = { query: {}, yar: { set: vi.fn() } }
+      const h = { redirect: vi.fn((url) => ({ redirect: url })) }
+
+      await signInController.handler(request, h)
+
+      const url = new URL(h.redirect.mock.calls[0][0])
+      expect(url.searchParams.has('prompt')).toBe(false)
+    })
+
     it('should generate and store state token for CSRF protection', async () => {
       mockGetOidcConfig.mockResolvedValue({
         authorization_endpoint: 'https://auth.example.com/authorize'
@@ -193,6 +222,55 @@ describe('Auth Controllers', () => {
         }),
         redirect: vi.fn((url) => ({ redirect: url }))
       }
+    })
+
+    describe('when a submit is waiting for the Defra ID check', () => {
+      const noSessionError = 'interaction_required'
+      const signInErrorTemplate = 'auth/sign-in-error'
+
+      it.each([noSessionError, 'login_required'])(
+        'should send the user to a normal sign-in on %s',
+        async (error) => {
+          request.query.error = error
+          request.query.state = 'matching-state'
+          mockYarGet(request, {
+            submitReauth: 'pending',
+            oauth_state: 'matching-state'
+          })
+
+          await signInOidcController.handler(request, h)
+
+          expect(request.yar.clear).toHaveBeenCalledWith('oauth_state')
+          expect(h.redirect).toHaveBeenCalledWith('/auth/sign-in')
+          expect(h.view).not.toHaveBeenCalled()
+        }
+      )
+
+      it.each([
+        ['the state does not match', noSessionError, 'other-state', 'pending'],
+        ['no submit is waiting', noSessionError, 'matching-state', undefined],
+        [
+          'the error is not a missing session',
+          'access_denied',
+          'matching-state',
+          'pending'
+        ]
+      ])(
+        'should show the error page when %s',
+        async (_, error, state, submitReauth) => {
+          request.query.error = error
+          request.query.state = state
+          mockYarGet(request, { submitReauth, oauth_state: 'matching-state' })
+
+          await signInOidcController.handler(request, h)
+
+          expect(h.redirect).not.toHaveBeenCalled()
+          expect(h.view).toHaveBeenCalledWith(
+            signInErrorTemplate,
+            expect.anything()
+          )
+        }
+      )
     })
 
     it('should render error view when OAuth error is present', async () => {
@@ -340,6 +418,34 @@ describe('Auth Controllers', () => {
       // Verify redirect state is cleared and user is redirected
       expect(request.yar.clear).toHaveBeenCalledWith('redirectTo')
       expect(h.redirect).toHaveBeenCalledWith('/dashboard')
+    })
+
+    it('should record that the Defra ID check passed when a submit was waiting', async () => {
+      request.query.code = 'auth-code'
+      request.query.state = 'matching-state'
+      mockYarGet(request, {
+        oauth_state: 'matching-state',
+        redirectTo: '/request-to-use/check-your-answers',
+        submitReauth: 'pending'
+      })
+      const idToken = Jwt.token.generate({ sub: 'user-123' }, { key: 'k' })
+      mswServer.use(
+        http.post(tokenEndpoint, () =>
+          HttpResponse.json({
+            access_token: 'access-token',
+            refresh_token: 'refresh-token',
+            id_token: idToken,
+            expires_in: 3600
+          })
+        )
+      )
+
+      await signInOidcController.handler(request, h)
+
+      expect(request.yar.set).toHaveBeenCalledWith('submitReauth', 'verified')
+      expect(h.redirect).toHaveBeenCalledWith(
+        '/request-to-use/check-your-answers'
+      )
     })
   })
 
