@@ -1,4 +1,4 @@
-import { getSafeRedirect } from './get-safe-redirect.js'
+import { getSafeRedirect } from '../common/helpers/safe-redirect.js'
 import { AUTH_SIGN_IN_PATH } from './auth-urls.js'
 
 const AUTH_ROUTES_PREFIX = '/auth/'

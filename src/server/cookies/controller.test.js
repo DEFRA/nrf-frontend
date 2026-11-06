@@ -124,25 +124,23 @@ describe('cookiesController (GET)', () => {
     )
   })
 
-  test('rejects unsafe redirectUrl values', () => {
-    mockRequest.query.redirectUrl = 'https://evil.example.com'
+  it.each([
+    ['an absolute URL', 'https://evil.example.com'],
+    ['a protocol-relative URL', '//evil.example.com'],
+    ['a backslash protocol-relative URL', '/\\evil.example.com'],
+    ['an encoded backslash protocol-relative URL', '/%5Cevil.example.com'],
+    ['an encoded protocol-relative URL', '/%2f%2fevil.example.com']
+  ])('rejects %s as redirectUrl', (_, redirectUrl) => {
+    mockRequest.query.redirectUrl = redirectUrl
 
     cookiesController.handler(mockRequest, mockH)
 
     expect(mockH.view).toHaveBeenCalledWith(
       'cookies/index',
-      expect.objectContaining({ backUrl: startPagePath, redirectUrl: '' })
-    )
-  })
-
-  test('rejects protocol-relative redirectUrl values', () => {
-    mockRequest.query.redirectUrl = '//evil.example.com'
-
-    cookiesController.handler(mockRequest, mockH)
-
-    expect(mockH.view).toHaveBeenCalledWith(
-      'cookies/index',
-      expect.objectContaining({ backUrl: startPagePath, redirectUrl: '' })
+      expect.objectContaining({
+        backUrl: '/manage/start-page',
+        redirectUrl: ''
+      })
     )
   })
 
@@ -241,18 +239,39 @@ describe('cookiesSubmitController (POST)', () => {
       )
     })
 
-    test('falls back to the start page when banner submit has no safe redirectUrl', () => {
+    it.each([
+      ['an absolute URL', 'https://evil.example.com'],
+      ['a protocol-relative URL', '//evil.example.com'],
+      ['a backslash protocol-relative URL', '/\\evil.example.com'],
+      ['an encoded backslash protocol-relative URL', '/%5Cevil.example.com'],
+      ['an encoded protocol-relative URL', '/%2f%2fevil.example.com']
+    ])(
+      'falls back to the start page when the banner submit redirectUrl is %s',
+      (_, redirectUrl) => {
+        mockRequest.payload = {
+          analytics: 'no',
+          source: 'banner',
+          redirectUrl
+        }
+
+        cookiesSubmitController.handler(mockRequest, mockH)
+
+        expect(mockH.redirect).toHaveBeenCalledWith(
+          '/manage/start-page?cookies_updated=1'
+        )
+      }
+    )
+
+    test('drops an unsafe redirectUrl from the page submit success redirect', () => {
       mockRequest.payload = {
-        analytics: 'no',
-        source: 'banner',
-        redirectUrl: 'https://evil.example.com'
+        analytics: 'yes',
+        source: 'page',
+        redirectUrl: '/\\evil.example.com'
       }
 
       cookiesSubmitController.handler(mockRequest, mockH)
 
-      expect(mockH.redirect).toHaveBeenCalledWith(
-        `${startPagePath}?cookies_updated=1`
-      )
+      expect(mockH.redirect).toHaveBeenCalledWith('/cookies?success=true')
     })
 
     test('wraps thrown errors as Boom internal and logs them', () => {
@@ -324,6 +343,27 @@ describe('cookiesSubmitController (POST)', () => {
       expect(mockH.redirect).toHaveBeenCalledWith(
         '/cookies?redirectUrl=%2Fquote%2Fboundary-type'
       )
+    })
+
+    test('drops an unsafe redirectUrl from the failure redirect', () => {
+      const failAction = cookiesSubmitController.options.validate.failAction
+      mockRequest.payload = {
+        analytics: '',
+        redirectUrl: '/\\evil.example.com'
+      }
+      const err = {
+        details: [
+          {
+            path: ['analytics'],
+            message: 'Select if you want to accept analytics cookies',
+            type: 'any.required'
+          }
+        ]
+      }
+
+      failAction(mockRequest, mockH, err)
+
+      expect(mockH.redirect).toHaveBeenCalledWith('/cookies')
     })
   })
 })

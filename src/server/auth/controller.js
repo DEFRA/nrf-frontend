@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
-import { getSafeRedirect } from './get-safe-redirect.js'
+import { getSafeRedirect } from '../common/helpers/safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
