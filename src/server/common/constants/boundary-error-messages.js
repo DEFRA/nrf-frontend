@@ -17,6 +17,8 @@ export const BOUNDARY_ERROR_MESSAGES = {
     'Unable to check the upload status. Please try again.',
   [UPLOAD.S3_DOWNLOAD_FAILED]:
     'Unable to retrieve the uploaded file. Please try again.',
+  [UPLOAD.FILENAME_MISSING]:
+    'The selected file does not have a name. Give the file a name, then upload it again.',
   [UPLOAD.UNSAFE_FILENAME]:
     'A file name contains characters that are not allowed. Use only letters, numbers, spaces, full stops, underscores (_), hyphens (-) and brackets (), then upload the ZIP file again.',
   [UPLOAD.INVALID_ZIP]:
