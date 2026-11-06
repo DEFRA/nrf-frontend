@@ -4,7 +4,8 @@ const SUBMIT_REAUTH_KEY = 'submitReauth'
 const PENDING = 'pending'
 const VERIFIED = 'verified'
 const VERIFIED_AT_KEY = 'submitReauthVerifiedAt'
-const VERIFIED_TTL_MS = 5 * 60 * 1000
+const VERIFIED_TTL_MINUTES = 5
+const VERIFIED_TTL_MS = VERIFIED_TTL_MINUTES * 60 * 1000
 
 export const SILENT_SIGN_IN_PATH = `${AUTH_SIGN_IN_PATH}?prompt=none`
 
