@@ -2,6 +2,10 @@
 
 {% block pageTitle %}{{ pageTitle }}{% endblock %}
 
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
 {% block organisationHeading %}
   {{ appOrganisationHeading({
     orgOrUserName: orgOrUserName,
