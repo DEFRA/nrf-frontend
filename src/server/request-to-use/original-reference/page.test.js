@@ -14,7 +14,8 @@ import { expectInputError } from '../../../test-utils/assertions.js'
 import { routePath as startPath } from '../../manage/start-page/route-path.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { mockCompareBoundaries } from '../../../test-utils/mock-get-quote.js'
-import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
+import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 
 const inputLabel =
   'Enter the NRL reference for the original planning permission'
@@ -82,7 +83,7 @@ describe('Enter the NRL reference for the original planning permission page', ()
     expect(response.headers.location).toBe(defraAccountUserTypePath)
   })
 
-  it('should send the original and current references to the backend', async () => {
+  it('should send the original reference and the session boundary to the backend', async () => {
     await submitForm({
       requestUrl: routePath,
       server: getServer(),
@@ -90,8 +91,23 @@ describe('Enter the NRL reference for the original planning permission page', ()
       cookie: sessionCookie
     })
     expect(compareRequests).toEqual([
-      { originalReference: 'NRL-123456', currentReference: fullQuote.reference }
+      {
+        originalReference: 'NRL-123456',
+        currentBoundaryGeoJson: boundaryGeojsonWithEdp.boundaryGeometryWgs84
+      }
     ])
+  })
+
+  it('should redirect to the start page without calling the backend when the session has no boundary', async () => {
+    const { response } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { originalReference: 'NRL-123456' },
+      cookie: await withValidQuoteSession(getServer())
+    })
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/manage/start-page')
+    expect(compareRequests).toEqual([])
   })
 
   it('should redirect to the original reference not matched page when the original quote is not found', async () => {
