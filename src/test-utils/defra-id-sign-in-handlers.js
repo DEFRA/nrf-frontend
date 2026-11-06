@@ -8,23 +8,18 @@ const SIGNING_SECRET = 'test-signing-secret-not-for-production'
 
 /**
  * MSW handlers that let a test server complete a Defra ID sign-in: the OIDC
- * well-known document, the token endpoint and the user sync PATCH.
+ * well-known document and the token endpoint.
  * @param {Object} [options]
  * @param {() => object} [options.getClaims] - Returns the claims the token endpoint issues, read on each request so tests can override them
- * @param {(body: object) => void} [options.onUserSync] - Called with the body of each user sync PATCH
  * @returns {import('msw').RequestHandler[]}
  */
-export function defraIdSignInHandlers({
-  getClaims = () => mockUser,
-  onUserSync
-} = {}) {
+export function defraIdSignInHandlers({ getClaims = () => mockUser } = {}) {
   const defraIdBaseUrl = config.get('defraId.baseUrl')
   const wellKnownUrl = new URL(
     config.get('defraId.wellKnownPath'),
     defraIdBaseUrl
   ).toString()
   const tokenUrl = `${defraIdBaseUrl}/token`
-  const backendUrl = config.get('backend').apiUrl
 
   return [
     http.get(wellKnownUrl, () =>
@@ -46,10 +41,6 @@ export function defraIdSignInHandlers({
         id_token: token,
         expires_in: 3600
       })
-    }),
-    http.patch(`${backendUrl}/users`, async ({ request }) => {
-      onUserSync?.(await request.json())
-      return new HttpResponse(null, { status: 204 })
     })
   ]
 }

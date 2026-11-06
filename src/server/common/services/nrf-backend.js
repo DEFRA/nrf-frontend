@@ -39,19 +39,6 @@ export const getQuoteFromBackend = async ({ reference }) =>
   getRequestFromBackend({ endpointPath: `/quotes/${reference}` })
 
 /**
- * Fetches a user's full details (including their linked organisations) from the backend.
- * @param {{ defraId: string }} params - Defra ID sub claim identifying the user
- * @returns {Promise<object>} The stored user profile and their linked organisations
- */
-export const getUserFromBackend = async ({ defraId }) => {
-  const response = await getRequestFromBackend({
-    endpointPath: '/users',
-    headers: { 'x-defra-id': defraId }
-  })
-  return response.payload
-}
-
-/**
  * Asks the backend to email a magic link for the quote with this NRL reference
  * and email address. The backend sends nothing unless both match.
  * @param {{ nrlReference: string, email: string }} params

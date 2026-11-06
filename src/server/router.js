@@ -5,7 +5,6 @@ import { accessibility } from './accessibility/index.js'
 import { health } from './health/index.js'
 import { version } from './version/index.js'
 import { auth } from './auth/index.js'
-import { profile } from './profile/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
 import { quote } from './quote/index.js'
 import { manage } from './manage/index.js'
@@ -33,7 +32,6 @@ export const router = {
         accessibility,
         auth,
         cookies,
-        profile,
         quote,
         manage,
         requestToUse,

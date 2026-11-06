@@ -6,7 +6,6 @@ import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-ge
 import {
   getRequestFromBackend,
   getQuoteFromBackend,
-  getUserFromBackend,
   postRequestToBackend,
   patchRequestToBackend,
   createCommitmentCertificateInBackend,
@@ -171,34 +170,6 @@ describe('nrf-backend service', () => {
         json: true,
         headers: { 'x-api-key': 'secret-key' }
       })
-    })
-  })
-
-  describe('getUserFromBackend', () => {
-    it('should call the users endpoint and return the payload', async () => {
-      const mockResponse = {
-        statusCode: 200,
-        payload: { defraId: 'user-123', email: 'test@example.com' }
-      }
-      vi.mocked(Wreck.get).mockResolvedValue(mockResponse)
-      const result = await getUserFromBackend({ defraId: 'user-123' })
-
-      expect(Wreck.get).toHaveBeenCalledWith(
-        `${backendUrl}/users`,
-        expect.objectContaining({
-          json: true,
-          headers: expect.objectContaining({ 'x-defra-id': 'user-123' })
-        })
-      )
-      expect(result).toEqual(mockResponse.payload)
-    })
-
-    it('should rethrow when the request fails', async () => {
-      const error = new Error('Not found')
-      vi.mocked(Wreck.get).mockRejectedValue(error)
-      await expect(getUserFromBackend({ defraId: 'user-123' })).rejects.toThrow(
-        'Not found'
-      )
     })
   })
 
