@@ -85,6 +85,26 @@ describe('reviewQuoteDetailsPostController', () => {
     expect(request.yar.get('requestToUse').levy).toEqual(recalculatedLevy)
   })
 
+  it('should clear a previously saved accept levy answer', async () => {
+    mockRecalculateLevy(mswServer)
+    const request = buildRequest()
+    request.yar.set('requestToUse', {
+      nrlReference,
+      levy: recalculatedLevy,
+      acceptLevy: 'yes'
+    })
+
+    await reviewQuoteDetailsPostController.handler(
+      request,
+      createMockRedirectToolkit()
+    )
+
+    expect(request.yar.get('requestToUse')).toEqual({
+      nrlReference,
+      levy: recalculatedLevy
+    })
+  })
+
   it('should redirect to the accept levy page', async () => {
     mockRecalculateLevy(mswServer)
     const toolkit = createMockRedirectToolkit()
