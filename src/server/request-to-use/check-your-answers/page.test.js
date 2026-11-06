@@ -7,21 +7,11 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { mockCommitmentCertificate } from '../../../test-utils/mock-get-quote.js'
-import { completeDefraSignIn } from '../../../test-utils/complete-defra-sign-in.js'
-import { passDefraIdCheck } from '../../../test-utils/pass-defra-id-check.js'
-import { defraIdSignInHandlers } from '../../../test-utils/defra-id-sign-in-handlers.js'
-import { mockUser } from '../../../test-utils/fixtures/mock-user.js'
-import { getYarCookie } from '../../../test-utils/yar-cookie.js'
 
 const pagePath = '/request-to-use/check-your-answers'
 const startPath = '/manage/start-page'
-const confirmationPath = '/request-to-use/confirmation'
 
-const silentSignInPath = '/auth/sign-in?prompt=none'
-
-const mswServer = setupMswServer(
-  ...defraIdSignInHandlers({ getClaims: () => mockUser })
-)
+const mswServer = setupMswServer()
 
 describe('Check your answers page', () => {
   const getServer = setupTestServer()
@@ -83,16 +73,7 @@ describe('Check your answers page', () => {
     ).not.toBeInTheDocument()
   })
 
-  const passCheck = async () => {
-    const server = getSeededServer()
-    return passDefraIdCheck({
-      server,
-      requestUrl: pagePath,
-      cookie: await withCompleteQuoteSession(server)
-    })
-  }
-
-  it('should check with Defra ID before submitting, without calling the backend', async () => {
+  it('should record the commitment certificate and redirect to the confirmation page on submit', async () => {
     const requests = mockCommitmentCertificate(mswServer)
 
     const { response } = await submitForm({
@@ -103,118 +84,7 @@ describe('Check your answers page', () => {
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(silentSignInPath)
-    expect(requests).toEqual([])
-  })
-
-  it('should return to check your answers once the Defra ID check passes', async () => {
-    const { response } = await passCheck()
-
-    expect(response.headers.location).toBe(pagePath)
-  })
-
-  it('should record the commitment certificate and redirect to the confirmation page on submit after the Defra ID check', async () => {
-    const requests = mockCommitmentCertificate(mswServer)
-    const { cookie } = await passCheck()
-
-    const { response } = await submitForm({
-      requestUrl: pagePath,
-      server: getSeededServer(),
-      formData: {},
-      cookie
-    })
-
-    expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(confirmationPath)
-    expect(requests).toEqual([{ createCommitmentCertificate: true }])
-  })
-
-  it('should check with Defra ID again for a second submit', async () => {
-    mockCommitmentCertificate(mswServer)
-    const server = getSeededServer()
-    const { cookie } = await passCheck()
-    const submitted = await submitForm({
-      requestUrl: pagePath,
-      server,
-      formData: {},
-      cookie
-    })
-
-    const { response } = await submitForm({
-      requestUrl: pagePath,
-      server,
-      formData: {},
-      cookie: submitted.cookie
-    })
-
-    expect(response.headers.location).toBe(silentSignInPath)
-  })
-
-  it.each([
-    ['submits after exactly five minutes', 5 * 60 * 1000, confirmationPath],
-    [
-      'checks with Defra ID again after more than five minutes',
-      5 * 60 * 1000 + 1,
-      silentSignInPath
-    ]
-  ])(
-    'should honour a passed Defra ID check only for five minutes: %s',
-    async (_, elapsedMs, expectedLocation) => {
-      vi.useFakeTimers({ toFake: ['Date'] })
-      try {
-        mockCommitmentCertificate(mswServer)
-        const { cookie } = await passCheck()
-        vi.advanceTimersByTime(elapsedMs)
-
-        const { response } = await submitForm({
-          requestUrl: pagePath,
-          server: getSeededServer(),
-          formData: {},
-          cookie
-        })
-
-        expect(response.headers.location).toBe(expectedLocation)
-      } finally {
-        vi.useRealTimers()
-      }
-    }
-  )
-
-  it('should go through a normal sign-in and return to check your answers when Defra ID has no session', async () => {
-    const server = getSeededServer()
-    const requests = mockCommitmentCertificate(mswServer)
-    const started = await submitForm({
-      requestUrl: pagePath,
-      server,
-      formData: {},
-      cookie: await withCompleteQuoteSession(server)
-    })
-    const silent = await server.inject({
-      method: 'GET',
-      url: silentSignInPath,
-      headers: { cookie: started.cookie }
-    })
-    const state = new URL(silent.headers.location).searchParams.get('state')
-
-    const noSession = await server.inject({
-      method: 'GET',
-      url: `/login/return?error=interaction_required&state=${state}`,
-      headers: { cookie: getYarCookie(silent) }
-    })
-    const { response, cookie } = await completeDefraSignIn({
-      server,
-      cookie: getYarCookie(noSession) || getYarCookie(silent)
-    })
-    const submitted = await submitForm({
-      requestUrl: pagePath,
-      server,
-      formData: {},
-      cookie
-    })
-
-    expect(noSession.headers.location).toBe('/auth/sign-in')
-    expect(response.headers.location).toBe(pagePath)
-    expect(submitted.response.headers.location).toBe(confirmationPath)
+    expect(response.headers.location).toBe('/request-to-use/confirmation')
     expect(requests).toEqual([{ createCommitmentCertificate: true }])
   })
 
@@ -236,13 +106,12 @@ describe('Check your answers page', () => {
     'should show the 500 error page when the backend responds with %i',
     async (status) => {
       mockCommitmentCertificate(mswServer, { status })
-      const { cookie } = await passCheck()
 
       const { response, document } = await submitForm({
         requestUrl: pagePath,
         server: getSeededServer(),
         formData: {},
-        cookie
+        cookie: await withCompleteQuoteSession(getSeededServer())
       })
 
       expect(response.statusCode).toBe(500)
