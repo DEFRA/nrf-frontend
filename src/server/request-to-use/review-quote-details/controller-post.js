@@ -30,7 +30,7 @@ export const reviewQuoteDetailsPostController = {
       units: quoteData?.housingUnits,
       requestDate: getTodayInUk()
     })
-    requestToUseSession.save(request, { levy })
+    requestToUseSession.save(request, { levy, acceptLevy: undefined })
 
     return h.redirect(acceptLevyPath).code(statusCodes.redirectAfterPost)
   }
