@@ -4,3 +4,5 @@ export const surveyUrl =
 export const quoteSurveyUrl = `${surveyUrl}?Journey=Quote`
 
 export const requestToUseSurveyUrl = `${surveyUrl}?Journey=RequestToUse`
+
+export const genericSurveyUrl = `${surveyUrl}?Journey=Generic`

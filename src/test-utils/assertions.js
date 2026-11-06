@@ -1,5 +1,9 @@
 import { within } from '@testing-library/dom'
-import { quoteSurveyUrl, requestToUseSurveyUrl } from './fixtures/survey.js'
+import {
+  genericSurveyUrl,
+  quoteSurveyUrl,
+  requestToUseSurveyUrl
+} from './fixtures/survey.js'
 
 const expectErrorSummary = ({ document, errorMessage }) => {
   const errorSummary = within(document).getByRole('alert')
@@ -35,12 +39,13 @@ export const expectInputError = ({ document, inputLabel, errorMessage }) => {
 
 const surveyUrlByJourney = {
   Quote: quoteSurveyUrl,
-  RequestToUse: requestToUseSurveyUrl
+  RequestToUse: requestToUseSurveyUrl,
+  Generic: genericSurveyUrl
 }
 
 /**
  * Assert the beta banner links to the journey's survey in a new tab.
- * @param {{ document: Document, journey: 'Quote' | 'RequestToUse' }} params
+ * @param {{ document: Document, journey: 'Quote' | 'RequestToUse' | 'Generic' }} params
  * @returns {void}
  */
 export const expectPhaseBannerSurveyLink = ({ document, journey }) => {

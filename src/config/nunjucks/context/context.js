@@ -20,7 +20,7 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
     prefix: '/manage',
     serviceName: MANAGE_SERVICE_NAME,
-    surveyJourney: 'Quote'
+    surveyJourney: 'Generic'
   },
   {
     prefix: '/quote',
@@ -35,12 +35,12 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
     prefix: '/accessibility',
     serviceName: MANAGE_SERVICE_NAME,
-    surveyJourney: 'Quote'
+    surveyJourney: 'Generic'
   },
   {
     prefix: '/cookies',
     serviceName: QUOTE_SERVICE_NAME,
-    surveyJourney: 'Quote'
+    surveyJourney: 'Generic'
   }
 ]
 

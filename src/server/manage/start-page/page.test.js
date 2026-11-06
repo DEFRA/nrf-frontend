@@ -28,12 +28,12 @@ describe('Start page', () => {
     )
   })
 
-  it('should link to the quote survey from the beta banner', async () => {
+  it('should link to the generic survey from the beta banner', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    expectPhaseBannerSurveyLink({ document, journey: 'Quote' })
+    expectPhaseBannerSurveyLink({ document, journey: 'Generic' })
   })
 
   it('should show contact details for help with the nature restoration levy', async () => {

@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
 import {
+  genericSurveyUrl,
   quoteSurveyUrl,
   requestToUseSurveyUrl,
   surveyUrl
@@ -66,7 +67,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl: quoteSurveyUrl
+            feedbackUrl: genericSurveyUrl
           },
           user: null
         })
@@ -157,9 +158,9 @@ describe('context and cache', () => {
         ['/request-to-use/have-nrl-reference', requestToUseSurveyUrl],
         ['/request-to-use/change/planning-type', requestToUseSurveyUrl],
         ['/request-to-use/delete-quote', requestToUseSurveyUrl],
-        ['/manage', quoteSurveyUrl],
-        ['/cookies', quoteSurveyUrl],
-        ['/accessibility', quoteSurveyUrl],
+        ['/manage', genericSurveyUrl],
+        ['/cookies', genericSurveyUrl],
+        ['/accessibility', genericSurveyUrl],
         ['/about', surveyUrl]
       ])(
         'Should set the phase banner survey URL for path %s',
@@ -224,7 +225,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl: quoteSurveyUrl
+            feedbackUrl: genericSurveyUrl
           },
           user: null
         })
