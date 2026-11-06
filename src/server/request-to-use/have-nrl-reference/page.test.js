@@ -13,11 +13,13 @@ import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-re
 import { expectFieldsetError } from '../../../test-utils/assertions.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { expectPhaseBannerSurveyLink } from '../../../test-utils/assertions.js'
 
 const yes = 'yes'
 
 describe('Do you have an NRL reference page', () => {
   const getServer = setupTestServer()
+  const pagePath = '/request-to-use/have-nrl-reference'
   let sessionCookie
 
   beforeEach(async () => {
@@ -44,19 +46,11 @@ describe('Do you have an NRL reference page', () => {
 
   it('should link to the request to use survey from the beta banner', async () => {
     const document = await loadPage({
-      requestUrl: routePath,
+      requestUrl: pagePath,
       server: getServer(),
       cookie: sessionCookie
     })
-    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
-    const feedbackLink = getByRole(betaBanner, 'link', {
-      name: 'give your feedback (opens in new tab)'
-    })
-    expect(feedbackLink).toHaveAttribute(
-      'href',
-      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=RequestToUse'
-    )
-    expect(feedbackLink).toHaveAttribute('target', '_blank')
+    expectPhaseBannerSurveyLink({ document, journey: 'RequestToUse' })
   })
 
   it('should link back to the what would you like to do page', async () => {

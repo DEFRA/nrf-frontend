@@ -8,6 +8,7 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { mockDeleteQuote } from '../../../test-utils/mock-get-quote.js'
+import { expectPhaseBannerSurveyLink } from '../../../test-utils/assertions.js'
 
 const mswServer = setupMswServer()
 
@@ -53,15 +54,7 @@ describe('Are you sure you want to delete this quote page', () => {
   it('should link to the request to use survey from the beta banner', async () => {
     const document = await load()
 
-    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
-    const feedbackLink = getByRole(betaBanner, 'link', {
-      name: 'give your feedback (opens in new tab)'
-    })
-    expect(feedbackLink).toHaveAttribute(
-      'href',
-      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=RequestToUse'
-    )
-    expect(feedbackLink).toHaveAttribute('target', '_blank')
+    expectPhaseBannerSurveyLink({ document, journey: 'RequestToUse' })
   })
 
   it('should link back to the accept levy page', async () => {

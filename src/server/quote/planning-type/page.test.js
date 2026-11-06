@@ -10,10 +10,14 @@ import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { withValidQuoteSession } from '../../../test-utils/with-valid-quote-session.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
-import { expectFieldsetError } from '../../../test-utils/assertions.js'
+import {
+  expectFieldsetError,
+  expectPhaseBannerSurveyLink
+} from '../../../test-utils/assertions.js'
 
 describe('Planning type page', () => {
   const getServer = setupTestServer()
+  const pagePath = '/quote/planning-type'
   const changeUrl = `${routePath}?change=true`
   const dropoutChangeUrl = `${applicationTypeNotAvailablePath}?change=true`
   let sessionCookie
@@ -53,19 +57,11 @@ describe('Planning type page', () => {
 
   it('should link to the quote survey from the beta banner', async () => {
     const document = await loadPage({
-      requestUrl: routePath,
+      requestUrl: pagePath,
       server: getServer(),
       cookie: sessionCookie
     })
-    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
-    const feedbackLink = getByRole(betaBanner, 'link', {
-      name: 'give your feedback (opens in new tab)'
-    })
-    expect(feedbackLink).toHaveAttribute(
-      'href',
-      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=Quote'
-    )
-    expect(feedbackLink).toHaveAttribute('target', '_blank')
+    expectPhaseBannerSurveyLink({ document, journey: 'Quote' })
   })
 
   it('should link back to check-your-answers when loaded with change=true', async () => {

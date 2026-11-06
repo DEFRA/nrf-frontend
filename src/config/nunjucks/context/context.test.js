@@ -1,5 +1,10 @@
 import { vi } from 'vitest'
 import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
+import {
+  quoteSurveyUrl,
+  requestToUseSurveyUrl,
+  surveyUrl
+} from '../../../test-utils/fixtures/survey.js'
 
 const mockReadFileSync = vi.fn()
 const mockLoggerError = vi.fn()
@@ -147,27 +152,15 @@ describe('context and cache', () => {
         }
       )
 
-      const plainFeedbackUrl =
-        'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
-
       it.each([
-        ['/quote', `${plainFeedbackUrl}?Journey=Quote`],
-        ['/quote/boundary-type', `${plainFeedbackUrl}?Journey=Quote`],
-        [
-          '/request-to-use/have-nrl-reference',
-          `${plainFeedbackUrl}?Journey=RequestToUse`
-        ],
-        [
-          '/request-to-use/change/planning-type',
-          `${plainFeedbackUrl}?Journey=RequestToUse`
-        ],
-        [
-          '/request-to-use/delete-quote',
-          `${plainFeedbackUrl}?Journey=RequestToUse`
-        ],
-        ['/manage', plainFeedbackUrl],
-        ['/cookies', plainFeedbackUrl],
-        ['/about', plainFeedbackUrl]
+        ['/quote', quoteSurveyUrl],
+        ['/quote/boundary-type', quoteSurveyUrl],
+        ['/request-to-use/have-nrl-reference', requestToUseSurveyUrl],
+        ['/request-to-use/change/planning-type', requestToUseSurveyUrl],
+        ['/request-to-use/delete-quote', requestToUseSurveyUrl],
+        ['/manage', surveyUrl],
+        ['/cookies', surveyUrl],
+        ['/about', surveyUrl]
       ])(
         'Should set the phase banner survey URL for path %s',
         (requestPath, expectedFeedbackUrl) => {
