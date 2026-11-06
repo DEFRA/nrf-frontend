@@ -46,6 +46,36 @@ function getServiceName(request) {
   return match?.serviceName ?? config.get('serviceName')
 }
 
+const SURVEY_JOURNEY_BY_ROUTE_PREFIX = [
+  {
+    prefix: '/quote',
+    journey: 'Quote'
+  },
+  {
+    prefix: '/request-to-use',
+    journey: 'RequestToUse'
+  }
+]
+
+/**
+ * The survey shown from the phase banner differs by journey, selected via a
+ * Journey query parameter. Pages outside both journeys keep the plain URL.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {string}
+ */
+function getPhaseBannerFeedbackUrl(request) {
+  const feedbackUrl = config.get('phaseBanner.feedbackUrl')
+  const match = SURVEY_JOURNEY_BY_ROUTE_PREFIX.find(({ prefix }) =>
+    request?.path?.startsWith(prefix)
+  )
+  if (!match) {
+    return feedbackUrl
+  }
+  const url = new URL(feedbackUrl)
+  url.searchParams.set('Journey', match.journey)
+  return url.toString()
+}
+
 const logger = createLogger()
 const assetPath = config.get('assetPath')
 const manifestPath = path.join(
@@ -82,7 +112,7 @@ export function context(request) {
     serviceVersion: gitHash,
     serviceUrl: startPagePath,
     phaseBanner: {
-      feedbackUrl: config.get('phaseBanner.feedbackUrl')
+      feedbackUrl: getPhaseBannerFeedbackUrl(request)
     },
     breadcrumbs: [],
     navigation: buildNavigation(request),

@@ -51,6 +51,23 @@ describe('Planning type page', () => {
     expect(csrfToken).toBeInTheDocument()
   })
 
+  it('should link to the quote survey from the beta banner', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
+    const feedbackLink = getByRole(betaBanner, 'link', {
+      name: 'give your feedback (opens in new tab)'
+    })
+    expect(feedbackLink).toHaveAttribute(
+      'href',
+      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=Quote'
+    )
+    expect(feedbackLink).toHaveAttribute('target', '_blank')
+  })
+
   it('should link back to check-your-answers when loaded with change=true', async () => {
     const document = await loadPage({
       requestUrl: changeUrl,

@@ -146,6 +146,38 @@ describe('context and cache', () => {
           expect(contextResult.serviceName).toBe(expectedServiceName)
         }
       )
+
+      const plainFeedbackUrl =
+        'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+
+      it.each([
+        ['/quote', `${plainFeedbackUrl}?Journey=Quote`],
+        ['/quote/boundary-type', `${plainFeedbackUrl}?Journey=Quote`],
+        [
+          '/request-to-use/have-nrl-reference',
+          `${plainFeedbackUrl}?Journey=RequestToUse`
+        ],
+        [
+          '/request-to-use/change/planning-type',
+          `${plainFeedbackUrl}?Journey=RequestToUse`
+        ],
+        [
+          '/request-to-use/delete-quote',
+          `${plainFeedbackUrl}?Journey=RequestToUse`
+        ],
+        ['/manage', plainFeedbackUrl],
+        ['/cookies', plainFeedbackUrl],
+        ['/about', plainFeedbackUrl]
+      ])(
+        'Should set the phase banner survey URL for path %s',
+        (requestPath, expectedFeedbackUrl) => {
+          const contextResult = contextImport.context({ path: requestPath })
+
+          expect(contextResult.phaseBanner.feedbackUrl).toBe(
+            expectedFeedbackUrl
+          )
+        }
+      )
     })
   })
 

@@ -42,6 +42,23 @@ describe('Do you have an NRL reference page', () => {
     expect(getByLabelText(document, 'No')).not.toBeChecked()
   })
 
+  it('should link to the request to use survey from the beta banner', async () => {
+    const document = await loadPage({
+      requestUrl: routePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
+    const feedbackLink = getByRole(betaBanner, 'link', {
+      name: 'give your feedback (opens in new tab)'
+    })
+    expect(feedbackLink).toHaveAttribute(
+      'href',
+      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=RequestToUse'
+    )
+    expect(feedbackLink).toHaveAttribute('target', '_blank')
+  })
+
   it('should link back to the what would you like to do page', async () => {
     const document = await loadPage({
       requestUrl: routePath,

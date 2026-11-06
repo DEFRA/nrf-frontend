@@ -50,6 +50,20 @@ describe('Are you sure you want to delete this quote page', () => {
     )
   })
 
+  it('should link to the request to use survey from the beta banner', async () => {
+    const document = await load()
+
+    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
+    const feedbackLink = getByRole(betaBanner, 'link', {
+      name: 'give your feedback (opens in new tab)'
+    })
+    expect(feedbackLink).toHaveAttribute(
+      'href',
+      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86?Journey=RequestToUse'
+    )
+    expect(feedbackLink).toHaveAttribute('target', '_blank')
+  })
+
   it('should link back to the accept levy page', async () => {
     const document = await load()
 
