@@ -19,60 +19,55 @@ const REQUEST_TO_USE_SERVICE_NAME = 'Request to use the nature restoration levy'
 const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
     prefix: '/manage',
-    serviceName: MANAGE_SERVICE_NAME
+    serviceName: MANAGE_SERVICE_NAME,
+    surveyJourney: 'Quote'
   },
   {
     prefix: '/quote',
-    serviceName: QUOTE_SERVICE_NAME
+    serviceName: QUOTE_SERVICE_NAME,
+    surveyJourney: 'Quote'
   },
   {
     prefix: '/request-to-use',
-    serviceName: REQUEST_TO_USE_SERVICE_NAME
+    serviceName: REQUEST_TO_USE_SERVICE_NAME,
+    surveyJourney: 'RequestToUse'
   },
   {
     prefix: '/accessibility',
-    serviceName: MANAGE_SERVICE_NAME
+    serviceName: MANAGE_SERVICE_NAME,
+    surveyJourney: 'Quote'
   },
   {
     prefix: '/cookies',
-    serviceName: QUOTE_SERVICE_NAME
+    serviceName: QUOTE_SERVICE_NAME,
+    surveyJourney: 'Quote'
   }
 ]
 
-function getServiceName(request) {
-  const match = SERVICE_NAME_BY_ROUTE_PREFIX.find(({ prefix }) =>
+function getRoutePrefixMatch(request) {
+  return SERVICE_NAME_BY_ROUTE_PREFIX.find(({ prefix }) =>
     request?.path?.startsWith(prefix)
   )
-  return match?.serviceName ?? config.get('serviceName')
 }
 
-const SURVEY_JOURNEY_BY_ROUTE_PREFIX = [
-  {
-    prefix: '/quote',
-    journey: 'Quote'
-  },
-  {
-    prefix: '/request-to-use',
-    journey: 'RequestToUse'
-  }
-]
+function getServiceName(request) {
+  return getRoutePrefixMatch(request)?.serviceName ?? config.get('serviceName')
+}
 
 /**
  * The survey shown from the phase banner differs by journey, selected via a
- * Journey query parameter. Pages outside both journeys keep the plain URL.
+ * Journey query parameter. Routes outside the prefix table keep the plain URL.
  * @param {import('@hapi/hapi').Request} request
  * @returns {string}
  */
 function getPhaseBannerFeedbackUrl(request) {
   const feedbackUrl = config.get('phaseBanner.feedbackUrl')
-  const match = SURVEY_JOURNEY_BY_ROUTE_PREFIX.find(({ prefix }) =>
-    request?.path?.startsWith(prefix)
-  )
-  if (!match) {
+  const surveyJourney = getRoutePrefixMatch(request)?.surveyJourney
+  if (!surveyJourney) {
     return feedbackUrl
   }
   const url = new URL(feedbackUrl)
-  url.searchParams.set('Journey', match.journey)
+  url.searchParams.set('Journey', surveyJourney)
   return url.toString()
 }
 

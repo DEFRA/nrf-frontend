@@ -66,8 +66,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl:
-              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+            feedbackUrl: quoteSurveyUrl
           },
           user: null
         })
@@ -158,8 +157,9 @@ describe('context and cache', () => {
         ['/request-to-use/have-nrl-reference', requestToUseSurveyUrl],
         ['/request-to-use/change/planning-type', requestToUseSurveyUrl],
         ['/request-to-use/delete-quote', requestToUseSurveyUrl],
-        ['/manage', surveyUrl],
-        ['/cookies', surveyUrl],
+        ['/manage', quoteSurveyUrl],
+        ['/cookies', quoteSurveyUrl],
+        ['/accessibility', quoteSurveyUrl],
         ['/about', surveyUrl]
       ])(
         'Should set the phase banner survey URL for path %s',
@@ -224,8 +224,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl:
-              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+            feedbackUrl: quoteSurveyUrl
           },
           user: null
         })

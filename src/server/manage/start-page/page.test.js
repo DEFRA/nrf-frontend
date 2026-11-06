@@ -6,6 +6,7 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { routePath as whatWouldYouLikeToDoPath } from '../what-would-you-like-to-do/route-path.js'
 import { assertContactDetails } from '../../../test-utils/assert-contact-details.js'
+import { expectPhaseBannerSurveyLink } from '../../../test-utils/assertions.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { withValidRetrieveQuoteSession } from '../../../test-utils/with-valid-retrieve-quote-session.js'
@@ -27,19 +28,12 @@ describe('Start page', () => {
     )
   })
 
-  it('should link to a feedback survey from the beta banner', async () => {
+  it('should link to the quote survey from the beta banner', async () => {
     const document = await loadPage({
       requestUrl: routePath,
       server: getServer()
     })
-    const betaBanner = getByRole(document, 'region', { name: 'Give feedback' })
-    const feedbackLink = getByRole(betaBanner, 'link', {
-      name: 'give your feedback (opens in new tab)'
-    })
-    expect(feedbackLink).toHaveAttribute(
-      'href',
-      'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
-    )
+    expectPhaseBannerSurveyLink({ document, journey: 'Quote' })
   })
 
   it('should show contact details for help with the nature restoration levy', async () => {
