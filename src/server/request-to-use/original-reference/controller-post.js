@@ -1,9 +1,8 @@
 import { compareQuoteBoundariesInBackend } from '../../common/services/nrf-backend.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
-import {
-  requestToUseSession,
-  saveOriginalReference
-} from '../helpers/request-to-use-session/index.js'
+import { saveOriginalReference } from '../helpers/request-to-use-session/index.js'
+import { getQuoteDataFromCache } from '../../quote/helpers/quote-session-cache/index.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 import { routePath as originalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
 import { routePath as originalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
 import getNextPage from './get-next-page.js'
@@ -24,11 +23,18 @@ const getRedirectPath = ({ originalFound, boundariesMatch }, sessionData) => {
 
 export const originalReferencePostController = {
   async handler(request, h) {
+    const currentBoundaryGeoJson =
+      getQuoteDataFromCache(request)?.boundaryGeojson?.boundaryGeometryWgs84
+
+    if (!currentBoundaryGeoJson) {
+      return h.redirect(startPath).code(statusCodes.redirectAfterPost)
+    }
+
     const sessionData = saveOriginalReference(request, request.payload)
 
     const comparison = await compareQuoteBoundariesInBackend({
       originalReference: sessionData.originalNrlReference,
-      currentReference: requestToUseSession.get(request)?.nrlReference
+      currentBoundaryGeoJson
     })
 
     return h

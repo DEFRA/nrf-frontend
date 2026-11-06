@@ -29,9 +29,9 @@ export { routePath }
  *     summary: Submit the NRL reference for the original planning permission
  *     description: >
  *       Validates the reference, saves it to the request to use session, asks
- *       the backend whether the original and current quotes' boundaries match,
- *       and redirects to the next page. Acting on the result and the
- *       not-matched dropout are out of scope here.
+ *       the backend whether the boundary in the session matches the original
+ *       quote's saved boundary, and redirects to the next page. Redirects to
+ *       the start page when the session has no boundary.
  *     requestBody:
  *       required: true
  *       content:

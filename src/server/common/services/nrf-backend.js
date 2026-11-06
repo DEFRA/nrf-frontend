@@ -83,19 +83,20 @@ export const redeemEmailQuoteLinkToken = async ({ reference, token }) => {
 }
 
 /**
- * Asks the backend whether the boundaries of two quotes match.
- * @param {{ originalReference: string, currentReference: string }} params
+ * Asks the backend whether a boundary matches the saved boundary of the original quote.
+ * @param {{ originalReference: string, currentBoundaryGeoJson: object }} params
+ * currentBoundaryGeoJson is the WGS84 geometry, in the shape the backend returns saved boundaries
  * @returns {Promise<{ originalFound: boolean, boundariesMatch?: boolean }>}
  * originalFound is false when the backend has no committed quote for the original reference
  */
 export const compareQuoteBoundariesInBackend = async ({
   originalReference,
-  currentReference
+  currentBoundaryGeoJson
 }) => {
   try {
     const { payload } = await postRequestToBackend({
       endpointPath: '/quotes/compare-boundaries',
-      payload: { originalReference, currentReference }
+      payload: { originalReference, currentBoundaryGeoJson }
     })
     return { originalFound: true, boundariesMatch: payload.boundariesMatch }
   } catch (error) {
