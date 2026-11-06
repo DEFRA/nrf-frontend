@@ -13,7 +13,7 @@ import {
 } from './auth-urls.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
-import { routePath as startPath } from '../manage/start-page/routes.js'
+import { routePath as startPath } from '../manage/start-page/route-path.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
 
 const logger = createLogger()

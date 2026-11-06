@@ -9,16 +9,20 @@ import {
   getValidationFlashFromCache,
   saveValidationFlashToCache
 } from '../common/helpers/form-validation-session/index.js'
-import { routePath as startPagePath } from '../manage/start-page/routes.js'
+import { unsafeRedirectUrls } from '../../test-utils/fixtures/unsafe-redirect-urls.js'
 
 vi.mock('./helpers/cookie-preferences.js')
 vi.mock('./helpers/cookie-service.js')
 vi.mock('../common/helpers/form-validation-session/index.js')
 
+const cookieRoute = '/cookies'
+const cookiesSuccessRedirect = '/cookies?success=true'
+const startPagePath = '/manage/start-page'
+
 const createMockRequest = (overrides = {}) => ({
   query: {},
   payload: {},
-  path: '/cookies',
+  path: cookieRoute,
   state: {},
   logger: { error: vi.fn() },
   ...overrides
@@ -124,13 +128,7 @@ describe('cookiesController (GET)', () => {
     )
   })
 
-  it.each([
-    ['an absolute URL', 'https://evil.example.com'],
-    ['a protocol-relative URL', '//evil.example.com'],
-    ['a backslash protocol-relative URL', '/\\evil.example.com'],
-    ['an encoded backslash protocol-relative URL', '/%5Cevil.example.com'],
-    ['an encoded protocol-relative URL', '/%2f%2fevil.example.com']
-  ])('rejects %s as redirectUrl', (_, redirectUrl) => {
+  it.each(unsafeRedirectUrls)('rejects %s as redirectUrl', (_, redirectUrl) => {
     mockRequest.query.redirectUrl = redirectUrl
 
     cookiesController.handler(mockRequest, mockH)
@@ -138,7 +136,7 @@ describe('cookiesController (GET)', () => {
     expect(mockH.view).toHaveBeenCalledWith(
       'cookies/index',
       expect.objectContaining({
-        backUrl: '/manage/start-page',
+        backUrl: startPagePath,
         redirectUrl: ''
       })
     )
@@ -184,7 +182,7 @@ describe('cookiesSubmitController (POST)', () => {
 
       expect(setCookiePreferences).toHaveBeenCalledWith(mockResponse, true)
       expect(clearValidationFlashFromCache).toHaveBeenCalledWith(mockRequest)
-      expect(mockH.redirect).toHaveBeenCalledWith('/cookies?success=true')
+      expect(mockH.redirect).toHaveBeenCalledWith(cookiesSuccessRedirect)
       expect(result).toBe(mockResponse)
     })
 
@@ -194,7 +192,7 @@ describe('cookiesSubmitController (POST)', () => {
       cookiesSubmitController.handler(mockRequest, mockH)
 
       expect(setCookiePreferences).toHaveBeenCalledWith(mockResponse, false)
-      expect(mockH.redirect).toHaveBeenCalledWith('/cookies?success=true')
+      expect(mockH.redirect).toHaveBeenCalledWith(cookiesSuccessRedirect)
     })
 
     test('preserves a safe redirectUrl through the success redirect', () => {
@@ -239,13 +237,7 @@ describe('cookiesSubmitController (POST)', () => {
       )
     })
 
-    it.each([
-      ['an absolute URL', 'https://evil.example.com'],
-      ['a protocol-relative URL', '//evil.example.com'],
-      ['a backslash protocol-relative URL', '/\\evil.example.com'],
-      ['an encoded backslash protocol-relative URL', '/%5Cevil.example.com'],
-      ['an encoded protocol-relative URL', '/%2f%2fevil.example.com']
-    ])(
+    it.each(unsafeRedirectUrls)(
       'falls back to the start page when the banner submit redirectUrl is %s',
       (_, redirectUrl) => {
         mockRequest.payload = {
@@ -271,7 +263,7 @@ describe('cookiesSubmitController (POST)', () => {
 
       cookiesSubmitController.handler(mockRequest, mockH)
 
-      expect(mockH.redirect).toHaveBeenCalledWith('/cookies?success=true')
+      expect(mockH.redirect).toHaveBeenCalledWith(cookiesSuccessRedirect)
     })
 
     test('wraps thrown errors as Boom internal and logs them', () => {
@@ -318,7 +310,7 @@ describe('cookiesSubmitController (POST)', () => {
           formSubmitData: { analytics: '' }
         })
       )
-      expect(mockH.redirect).toHaveBeenCalledWith('/cookies')
+      expect(mockH.redirect).toHaveBeenCalledWith(cookieRoute)
       expect(mockResponse.takeover).toHaveBeenCalled()
     })
 
@@ -363,7 +355,7 @@ describe('cookiesSubmitController (POST)', () => {
 
       failAction(mockRequest, mockH, err)
 
-      expect(mockH.redirect).toHaveBeenCalledWith('/cookies')
+      expect(mockH.redirect).toHaveBeenCalledWith(cookieRoute)
     })
   })
 })

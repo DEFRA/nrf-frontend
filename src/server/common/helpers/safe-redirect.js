@@ -1,15 +1,24 @@
-import { routePath as startPath } from '../../manage/start-page/routes.js'
+import { routePath as startPath } from '../../manage/start-page/route-path.js'
 
-// Browsers treat "\" as "/" in special URLs, so /\example.com resolves to
-// //example.com — both prefixes, and their percent-encoded forms, must be
-// rejected to prevent open redirects
+// Browsers normalise URLs before routing: "\" is treated as "/" (so
+// /\example.com resolves to //example.com) and control characters are stripped
+// anywhere in the URL, so /<TAB>/evil.com resolves to //evil.com too — %09
+// decodes to a literal TAB server-side. Reject all these forms to prevent open
+// redirects
+const containsControlCharacter = (value) =>
+  [...value].some((character) => {
+    const charCode = character.charCodeAt(0)
+    return charCode < 0x20 || charCode === 0x7f
+  })
+
 export const isSafeRedirect = (value) =>
   typeof value === 'string' &&
   value.startsWith('/') &&
   !value.startsWith('//') &&
   !value.startsWith('/\\') &&
   !value.toLowerCase().startsWith('/%5c') &&
-  !value.toLowerCase().includes('%2f%2f')
+  !value.toLowerCase().includes('%2f%2f') &&
+  !containsControlCharacter(value)
 
 /**
  * Validates and returns a safe redirect URL

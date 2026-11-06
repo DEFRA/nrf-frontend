@@ -1,4 +1,5 @@
 import { getSafeRedirect, isSafeRedirect } from './safe-redirect.js'
+import { unsafeRedirectUrls } from '../../../test-utils/fixtures/unsafe-redirect-urls.js'
 
 const startPath = '/manage/start-page'
 
@@ -13,23 +14,13 @@ describe('#getSafeRedirect', () => {
   })
 
   it.each([
-    ['nothing is given', undefined],
-    ['the value is not a string', ['/profile']],
-    ['the value is an absolute URL', 'https://example.com/profile'],
-    ['the value is protocol-relative', '//example.com'],
-    ['the value is protocol-relative with a backslash', '/\\example.com'],
+    ...unsafeRedirectUrls,
     [
-      'the value is protocol-relative with an encoded backslash',
-      '/%5Cexample.com'
-    ],
-    [
-      'the value hides a protocol-relative URL behind encoding',
+      'the value hides a protocol-relative URL behind uppercase encoding',
       '/%2F%2Fexample.com'
     ],
-    [
-      'the value hides a protocol-relative URL behind lowercase encoding',
-      '/%2f%2fevil.example'
-    ]
+    ['nothing is given', undefined],
+    ['the value is not a string', ['/profile']]
   ])('returns the start page when %s', (_, redirect) => {
     expect(getSafeRedirect(redirect)).toBe(startPath)
   })
@@ -43,13 +34,7 @@ describe('#isSafeRedirect', () => {
     }
   )
 
-  it.each([
-    ['an absolute URL', 'https://evil.example.com'],
-    ['a protocol-relative URL', '//evil.example.com'],
-    ['a backslash protocol-relative URL', '/\\evil.example.com'],
-    ['an encoded backslash protocol-relative URL', '/%5Cevil.example.com'],
-    ['an encoded protocol-relative URL', '/%2f%2fevil.example.com']
-  ])('rejects %s', (_, redirect) => {
+  it.each(unsafeRedirectUrls)('rejects %s', (_, redirect) => {
     expect(isSafeRedirect(redirect)).toBe(false)
   })
 })

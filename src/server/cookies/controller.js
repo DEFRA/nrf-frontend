@@ -12,7 +12,7 @@ import {
   saveValidationFlashToCache
 } from '../common/helpers/form-validation-session/index.js'
 import { statusCodes } from '../common/constants/status-codes.js'
-import { routePath as startPagePath } from '../manage/start-page/routes.js'
+import { routePath as startPagePath } from '../manage/start-page/route-path.js'
 import { isSafeRedirect } from '../common/helpers/safe-redirect.js'
 
 const COOKIES_VIEW_ROUTE = 'cookies/index'
@@ -64,7 +64,7 @@ export const cookiesSubmitController = {
           'any.required': validationMessage
         }),
         source: joi.string().valid('page', 'banner').optional(),
-        redirectUrl: joi.string().allow('').optional()
+        redirectUrl: joi.string().allow('').max(2048).optional()
       }),
       failAction: (request, h, err) => {
         const { payload } = request
@@ -89,16 +89,17 @@ export const cookiesSubmitController = {
     const isFromBanner = payload.source === 'banner'
 
     try {
-      const safeRedirect = isSafeRedirect(payload.redirectUrl)
-        ? payload.redirectUrl
-        : startPagePath
-      const successRedirect = isSafeRedirect(payload.redirectUrl)
+      const hasSafeRedirect = isSafeRedirect(payload.redirectUrl)
+      const safeRedirect = hasSafeRedirect ? payload.redirectUrl : startPagePath
+      const successRedirect = hasSafeRedirect
         ? `${COOKIE_ROUTE}?success=true&redirectUrl=${encodeURIComponent(payload.redirectUrl)}`
         : `${COOKIE_ROUTE}?success=true`
       const bannerRedirect = `${safeRedirect}${safeRedirect.includes('?') ? '&' : '?'}${CONFIRMATION_QUERY_PARAM}=1`
       const redirectUrl = isFromBanner ? bannerRedirect : successRedirect
 
-      const response = h.redirect(redirectUrl)
+      const response = h
+        .redirect(redirectUrl)
+        .code(statusCodes.redirectAfterPost)
 
       setCookiePreferences(response, analytics)
       clearValidationFlashFromCache(request)
