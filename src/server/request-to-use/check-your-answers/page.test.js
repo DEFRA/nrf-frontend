@@ -150,6 +150,36 @@ describe('Check your answers page', () => {
     expect(response.headers.location).toBe(silentSignInPath)
   })
 
+  it.each([
+    ['submits after exactly five minutes', 5 * 60 * 1000, confirmationPath],
+    [
+      'checks with Defra ID again after more than five minutes',
+      5 * 60 * 1000 + 1,
+      silentSignInPath
+    ]
+  ])(
+    'should honour a passed Defra ID check only for five minutes: %s',
+    async (_, elapsedMs, expectedLocation) => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      try {
+        mockCommitmentCertificate(mswServer)
+        const { cookie } = await passCheck()
+        vi.advanceTimersByTime(elapsedMs)
+
+        const { response } = await submitForm({
+          requestUrl: pagePath,
+          server: getSeededServer(),
+          formData: {},
+          cookie
+        })
+
+        expect(response.headers.location).toBe(expectedLocation)
+      } finally {
+        vi.useRealTimers()
+      }
+    }
+  )
+
   it('should go through a normal sign-in and return to check your answers when Defra ID has no session', async () => {
     const server = getSeededServer()
     const requests = mockCommitmentCertificate(mswServer)

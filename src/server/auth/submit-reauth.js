@@ -3,6 +3,8 @@ import { AUTH_SIGN_IN_PATH } from './auth-urls.js'
 const SUBMIT_REAUTH_KEY = 'submitReauth'
 const PENDING = 'pending'
 const VERIFIED = 'verified'
+const VERIFIED_AT_KEY = 'submitReauthVerifiedAt'
+const VERIFIED_TTL_MS = 5 * 60 * 1000
 
 export const SILENT_SIGN_IN_PATH = `${AUTH_SIGN_IN_PATH}?prompt=none`
 
@@ -40,18 +42,22 @@ export const isNoDefraIdSessionCallback = (request) =>
 export const completeSubmitReauth = (request) => {
   if (isSubmitReauthPending(request)) {
     request.yar.set(SUBMIT_REAUTH_KEY, VERIFIED)
+    request.yar.set(VERIFIED_AT_KEY, Date.now())
   }
 }
 
 /**
- * One-shot: lets exactly one submit through after a passed Defra ID check.
+ * One-shot: lets exactly one submit through after a passed Defra ID check, if it
+ * passed within the last few minutes.
  * @param {import('@hapi/hapi').Request} request
- * @returns {boolean} true if the check had passed
+ * @returns {boolean} true if the check had passed recently
  */
 export const consumeVerifiedSubmitReauth = (request) => {
   const verified = request.yar.get(SUBMIT_REAUTH_KEY) === VERIFIED
+  const verifiedAt = request.yar.get(VERIFIED_AT_KEY)
   if (verified) {
     request.yar.clear(SUBMIT_REAUTH_KEY)
+    request.yar.clear(VERIFIED_AT_KEY)
   }
-  return verified
+  return verified && Date.now() - verifiedAt <= VERIFIED_TTL_MS
 }
