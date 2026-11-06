@@ -101,8 +101,10 @@ jobs:
       NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
       OS_API_KEY: ${{ secrets.OS_API_KEY }}
     steps:
+      # Checked out into a subdirectory so the action finds it and builds the
+      # image alongside the backend and impact assessor images, rather than
+      # this job building it first.
       - uses: actions/checkout@v7
-      - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
-      - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
         with:
-          nrf-frontend: ${{ github.sha }}
+          path: nrf-frontend
+      - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
