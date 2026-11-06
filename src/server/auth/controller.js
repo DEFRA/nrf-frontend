@@ -17,8 +17,7 @@ import { routePath as startPath } from '../manage/start-page/routes.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
 import {
   completeSubmitReauth,
-  isNoDefraIdSessionError,
-  isSubmitReauthPending
+  isNoDefraIdSessionCallback
 } from './submit-reauth.js'
 
 const logger = createLogger()
@@ -74,6 +73,41 @@ export const signInController = {
 }
 
 /**
+ * Checks the OAuth callback for a provider error, a state mismatch (CSRF) and a
+ * missing authorization code. Clears the stored state once it has matched.
+ * @param {import('@hapi/hapi').Request} request - the /login/return request
+ * @param {import('@hapi/hapi').ResponseToolkit} h
+ * @returns {import('@hapi/hapi').ResponseObject | undefined} the sign-in error page, or undefined when the callback is valid
+ */
+function checkCallback(request, h) {
+  if (request.query.error) {
+    logger.error('OAuth error:', {
+      error: request.query.error,
+      description: request.query.error_description
+    })
+    return signInErrorView(
+      h,
+      request.query.error_description ||
+        'Authentication failed. Please try again.'
+    )
+  }
+
+  const expectedState = request.yar.get('oauth_state')
+  if (!expectedState || request.query.state !== expectedState) {
+    logger.error('OAuth state mismatch')
+    return signInErrorView(h, 'Invalid authentication state. Please try again.')
+  }
+  request.yar.clear('oauth_state')
+
+  if (!request.query.code) {
+    logger.warn('OAuth callback received without authorization code')
+    return signInErrorView(h, 'Authentication failed. Please try again.')
+  }
+
+  return undefined
+}
+
+/**
  * OAuth callback handler - completes authentication
  * Manually exchanges authorization code for tokens to avoid Bell's automatic redirect
  */
@@ -81,43 +115,14 @@ export const signInOidcController = {
   async handler(request, h) {
     // A silent (prompt=none) check found no Defra ID session: send the user
     // through a normal sign-in, which returns to the stored redirectTo
-    if (
-      isNoDefraIdSessionError(request.query.error) &&
-      isSubmitReauthPending(request) &&
-      request.query.state === request.yar.get('oauth_state')
-    ) {
+    if (isNoDefraIdSessionCallback(request)) {
       request.yar.clear('oauth_state')
       return h.redirect(AUTH_SIGN_IN_PATH)
     }
 
-    // Check for OAuth errors
-    if (request.query.error) {
-      logger.error('OAuth error:', {
-        error: request.query.error,
-        description: request.query.error_description
-      })
-      return signInErrorView(
-        h,
-        request.query.error_description ||
-          'Authentication failed. Please try again.'
-      )
-    }
-
-    // Verify state parameter for CSRF protection
-    const expectedState = request.yar.get('oauth_state')
-    if (!expectedState || request.query.state !== expectedState) {
-      logger.error('OAuth state mismatch')
-      return signInErrorView(
-        h,
-        'Invalid authentication state. Please try again.'
-      )
-    }
-    request.yar.clear('oauth_state')
-
-    // Check for authorization code
-    if (!request.query.code) {
-      logger.warn('OAuth callback received without authorization code')
-      return signInErrorView(h, 'Authentication failed. Please try again.')
+    const invalidCallbackView = checkCallback(request, h)
+    if (invalidCallbackView) {
+      return invalidCallbackView
     }
 
     try {

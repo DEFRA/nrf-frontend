@@ -9,13 +9,6 @@ export const SILENT_SIGN_IN_PATH = `${AUTH_SIGN_IN_PATH}?prompt=none`
 const NO_SESSION_ERRORS = new Set(['interaction_required', 'login_required'])
 
 /**
- * Whether Defra ID reported, for a prompt=none request, that the user has no Defra ID session.
- * @param {string | undefined} error - the OAuth `error` query value
- * @returns {boolean}
- */
-export const isNoDefraIdSessionError = (error) => NO_SESSION_ERRORS.has(error)
-
-/**
  * Marks that a submit is waiting for Defra ID to confirm the user is still signed in.
  * @param {import('@hapi/hapi').Request} request
  */
@@ -28,6 +21,17 @@ export const startSubmitReauth = (request) =>
  */
 export const isSubmitReauthPending = (request) =>
   request.yar.get(SUBMIT_REAUTH_KEY) === PENDING
+
+/**
+ * Whether the OAuth callback is Defra ID answering a pending silent check with
+ * "no Defra ID session" (state must match, so a forged callback is not honoured).
+ * @param {import('@hapi/hapi').Request} request - the /login/return request
+ * @returns {boolean}
+ */
+export const isNoDefraIdSessionCallback = (request) =>
+  NO_SESSION_ERRORS.has(request.query.error) &&
+  isSubmitReauthPending(request) &&
+  request.query.state === request.yar.get('oauth_state')
 
 /**
  * Records that the pending Defra ID check passed (silent or full sign-in).
