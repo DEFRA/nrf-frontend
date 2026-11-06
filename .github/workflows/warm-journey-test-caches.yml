@@ -1,0 +1,24 @@
+name: Warm Journey Test Caches
+
+# Pull requests can only read caches written on their own ref or on main.
+# Running the journey tests on main seeds the npm, Playwright and Docker layer
+# caches that new pull requests would otherwise start without.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  journey-tests:
+    name: Run Journey Tests
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    env:
+      NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
+      OS_API_KEY: ${{ secrets.OS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: nrf-frontend
+      - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
