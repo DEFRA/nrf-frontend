@@ -16,7 +16,8 @@ export default defineConfig({
     mockReset: true,
     unstubGlobals: true,
     testTimeout: 10000,
-    maxWorkers: '50%',
+    // GitHub runners are dedicated, so use every core there
+    maxWorkers: process.env.CI ? '100%' : '50%',
     minWorkers: 1,
     coverage: {
       provider: 'v8',

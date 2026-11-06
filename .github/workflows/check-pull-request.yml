@@ -12,6 +12,25 @@ on:
       - ready_for_review
 
 jobs:
+  static-checks:
+    name: Run Static Checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: |
+          npm ci --ignore-scripts
+          npm run security-audit
+          npm run format:check
+          npm run lint
+
   pr-validator:
     name: Run Pull Request Checks
     runs-on: ubuntu-latest
@@ -29,23 +48,8 @@ jobs:
           cache: npm
       - run: |
           npm ci --ignore-scripts
-          npm run security-audit
           npm run build:frontend
-          npm run format:check
-          npm run lint
           npm test
-
-      - name: Set git hash
-        run: echo "${{ github.sha }}" > .git-hash
-
-      - name: Test Docker Image Build
-        run: |
-          set +e
-          docker build --no-cache --tag cdp-node-frontend-template .
-          exit $?
-
-      - name: Verify git hash in Docker image
-        run: docker run --rm cdp-node-frontend-template cat .git-hash
 
       - name: SonarCloud Scan
         if: github.actor != 'dependabot[bot]'
@@ -53,6 +57,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  docker-build:
+    name: Test Docker Image Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set git hash
+        run: echo "${{ github.sha }}" > .git-hash
+
+      - name: Test Docker Image Build
+        run: docker build --tag cdp-node-frontend-template .
+
+      - name: Verify git hash in Docker image
+        run: docker run --rm cdp-node-frontend-template cat .git-hash
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v5
@@ -69,8 +101,10 @@ jobs:
       NOTIFY_API_KEY: ${{ secrets.NOTIFY_API_KEY }}
       OS_API_KEY: ${{ secrets.OS_API_KEY }}
     steps:
+      # Checked out into a subdirectory so the action finds it and builds the
+      # image alongside the backend and impact assessor images, rather than
+      # this job building it first.
       - uses: actions/checkout@v7
-      - run: docker build -t defradigital/nrf-frontend:${{ github.sha }} .
-      - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
         with:
-          nrf-frontend: ${{ github.sha }}
+          path: nrf-frontend
+      - uses: DEFRA/nrf-journey-tests/run-journey-tests@main
