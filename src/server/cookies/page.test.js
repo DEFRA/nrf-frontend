@@ -3,6 +3,7 @@ import { setupTestServer } from '../../test-utils/setup-test-server.js'
 import { submitForm } from '../../test-utils/submit-form.js'
 import { loadPage } from '../../test-utils/load-page.js'
 import { COOKIE_ROUTE } from './helpers/constants.js'
+import { unsafeRedirectUrls } from '../../test-utils/fixtures/unsafe-redirect-urls.js'
 import { config } from '../../config/config.js'
 
 describe('Cookie form validation', () => {
@@ -199,5 +200,64 @@ describe('GTM script rendering', () => {
 
     expect(queryByTestId('gtm-head')).toBeNull()
     expect(queryByTestId('gtm-body')).toBeNull()
+  })
+})
+
+describe('Cookie redirect safety', () => {
+  const getServer = setupTestServer()
+
+  it('drops an unsafe redirectUrl from the page submit success redirect', async () => {
+    const { response } = await submitForm({
+      requestUrl: COOKIE_ROUTE,
+      server: getServer(),
+      formData: {
+        analytics: 'yes',
+        source: 'page',
+        redirectUrl: '/\\evil.example.com'
+      }
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/cookies?success=true')
+  })
+
+  it.each(unsafeRedirectUrls)(
+    'redirects a banner submit with %s back to the start page',
+    async (_, redirectUrl) => {
+      const { response } = await submitForm({
+        requestUrl: COOKIE_ROUTE,
+        server: getServer(),
+        formData: { analytics: 'yes', source: 'banner', redirectUrl }
+      })
+
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.location).toBe(
+        '/manage/start-page?cookies_updated=1'
+      )
+    }
+  )
+
+  it('links back to a safe redirectUrl from the success banner', async () => {
+    const document = await loadPage({
+      requestUrl: `${COOKIE_ROUTE}?success=true&redirectUrl=/quote/boundary-type`,
+      server: getServer()
+    })
+
+    const bannerLink = within(document.documentElement).getByRole('link', {
+      name: 'Go back to the previous page'
+    })
+    expect(bannerLink.getAttribute('href')).toBe('/quote/boundary-type')
+  })
+
+  it('links back to the start page from the success banner when redirectUrl hides a tab', async () => {
+    const document = await loadPage({
+      requestUrl: `${COOKIE_ROUTE}?success=true&redirectUrl=/%09/evil.example.com`,
+      server: getServer()
+    })
+
+    const bannerLink = within(document.documentElement).getByRole('link', {
+      name: 'Go back to the previous page'
+    })
+    expect(bannerLink.getAttribute('href')).toBe('/manage/start-page')
   })
 })
