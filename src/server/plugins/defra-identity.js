@@ -1,7 +1,6 @@
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { refreshTokens } from '../auth/refresh-tokens.js'
-import { syncUserToBackend } from '../auth/sync-user-to-backend.js'
 import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
 import { AUTH_STRATEGY_NAME } from '../auth/auth-urls.js'
 import { config } from '../../config/config.js'
@@ -80,17 +79,6 @@ function yarSessionScheme(sessionCache) {
             request.yar.clear('sessionId')
             return h.unauthenticated()
           }
-        }
-
-        if (!userSession.userSaved) {
-          // Fire-and-forget so the page isn't blocked on a backend call; failures are
-          // logged and retried on this session's next authenticated request.
-          syncUserToBackend({ userSession, sessionCache }).catch((error) => {
-            logger.error(
-              error,
-              `Failed to sync user profile for session ${sessionId}`
-            )
-          })
         }
 
         return h.authenticated({ credentials: userSession })
