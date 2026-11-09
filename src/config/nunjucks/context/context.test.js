@@ -1,5 +1,10 @@
 import { vi } from 'vitest'
 import { routePath as startPagePath } from '../../../server/manage/start-page/routes.js'
+import {
+  genericSurveyUrl,
+  quoteSurveyUrl,
+  requestToUseSurveyUrl
+} from '../../../test-utils/fixtures/survey.js'
 
 const mockReadFileSync = vi.fn()
 const mockLoggerError = vi.fn()
@@ -61,8 +66,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl:
-              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+            feedbackUrl: genericSurveyUrl
           },
           user: null
         })
@@ -146,6 +150,27 @@ describe('context and cache', () => {
           expect(contextResult.serviceName).toBe(expectedServiceName)
         }
       )
+
+      it.each([
+        ['/quote', quoteSurveyUrl],
+        ['/quote/boundary-type', quoteSurveyUrl],
+        ['/request-to-use/have-nrl-reference', requestToUseSurveyUrl],
+        ['/request-to-use/change/planning-type', requestToUseSurveyUrl],
+        ['/request-to-use/delete-quote', requestToUseSurveyUrl],
+        ['/manage', genericSurveyUrl],
+        ['/cookies', genericSurveyUrl],
+        ['/accessibility', genericSurveyUrl],
+        ['/about', genericSurveyUrl]
+      ])(
+        'Should set the phase banner survey URL for path %s',
+        (requestPath, expectedFeedbackUrl) => {
+          const contextResult = contextImport.context({ path: requestPath })
+
+          expect(contextResult.phaseBanner.feedbackUrl).toBe(
+            expectedFeedbackUrl
+          )
+        }
+      )
     })
   })
 
@@ -199,8 +224,7 @@ describe('context and cache', () => {
           serviceVersion: 'abc123',
           serviceUrl: startPagePath,
           phaseBanner: {
-            feedbackUrl:
-              'https://defragroup.eu.qualtrics.com/jfe/form/SV_9yRhrdtbb3vmw86'
+            feedbackUrl: genericSurveyUrl
           },
           user: null
         })
