@@ -3,8 +3,7 @@ import { routePath as startPagePath } from '../../../server/manage/start-page/ro
 import {
   genericSurveyUrl,
   quoteSurveyUrl,
-  requestToUseSurveyUrl,
-  surveyUrl
+  requestToUseSurveyUrl
 } from '../../../test-utils/fixtures/survey.js'
 
 const mockReadFileSync = vi.fn()
@@ -161,7 +160,7 @@ describe('context and cache', () => {
         ['/manage', genericSurveyUrl],
         ['/cookies', genericSurveyUrl],
         ['/accessibility', genericSurveyUrl],
-        ['/about', surveyUrl]
+        ['/about', genericSurveyUrl]
       ])(
         'Should set the phase banner survey URL for path %s',
         (requestPath, expectedFeedbackUrl) => {

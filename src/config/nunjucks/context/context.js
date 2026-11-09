@@ -19,8 +19,7 @@ const REQUEST_TO_USE_SERVICE_NAME = 'Request to use the nature restoration levy'
 const SERVICE_NAME_BY_ROUTE_PREFIX = [
   {
     prefix: '/manage',
-    serviceName: MANAGE_SERVICE_NAME,
-    surveyJourney: 'Generic'
+    serviceName: MANAGE_SERVICE_NAME
   },
   {
     prefix: '/quote',
@@ -34,13 +33,11 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   },
   {
     prefix: '/accessibility',
-    serviceName: MANAGE_SERVICE_NAME,
-    surveyJourney: 'Generic'
+    serviceName: MANAGE_SERVICE_NAME
   },
   {
     prefix: '/cookies',
-    serviceName: QUOTE_SERVICE_NAME,
-    surveyJourney: 'Generic'
+    serviceName: QUOTE_SERVICE_NAME
   }
 ]
 
@@ -56,18 +53,17 @@ function getServiceName(request) {
 
 /**
  * The survey shown from the phase banner differs by journey, selected via a
- * Journey query parameter. Routes outside the prefix table keep the plain URL.
+ * Journey query parameter. Everything outside the quote and request to use
+ * journeys gets the generic survey.
  * @param {import('@hapi/hapi').Request} request
  * @returns {string}
  */
 function getPhaseBannerFeedbackUrl(request) {
-  const feedbackUrl = config.get('phaseBanner.feedbackUrl')
-  const surveyJourney = getRoutePrefixMatch(request)?.surveyJourney
-  if (!surveyJourney) {
-    return feedbackUrl
-  }
-  const url = new URL(feedbackUrl)
-  url.searchParams.set('Journey', surveyJourney)
+  const url = new URL(config.get('phaseBanner.feedbackUrl'))
+  url.searchParams.set(
+    'Journey',
+    getRoutePrefixMatch(request)?.surveyJourney ?? 'Generic'
+  )
   return url.toString()
 }
 
