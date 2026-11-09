@@ -106,7 +106,7 @@ describe('getMapTile', () => {
 
 describe('recalculateLevy', () => {
   const units = 42
-  const requestDate = '2026-10-14'
+  const requestDate = '2026-10-14T09:30:00.000Z'
 
   beforeEach(() => {
     mockApiKeyRef.current = ''
