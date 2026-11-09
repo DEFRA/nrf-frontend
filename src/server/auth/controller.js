@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
-import { getSafeRedirect } from './get-safe-redirect.js'
+import { getSafeRedirect } from '../common/helpers/safe-redirect.js'
 import { createUserSession } from '../plugins/defra-identity.js'
 import { config } from '../../config/config.js'
 import { getOidcConfig } from './get-oidc-config.js'
@@ -13,7 +13,7 @@ import {
 } from './auth-urls.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
-import { routePath as startPath } from '../manage/start-page/routes.js'
+import { routePath as startPath } from '../manage/start-page/route-path.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
 
 const logger = createLogger()
