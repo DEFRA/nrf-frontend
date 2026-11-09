@@ -23,11 +23,13 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   },
   {
     prefix: '/quote',
-    serviceName: QUOTE_SERVICE_NAME
+    serviceName: QUOTE_SERVICE_NAME,
+    surveyJourney: 'Quote'
   },
   {
     prefix: '/request-to-use',
-    serviceName: REQUEST_TO_USE_SERVICE_NAME
+    serviceName: REQUEST_TO_USE_SERVICE_NAME,
+    surveyJourney: 'RequestToUse'
   },
   {
     prefix: '/accessibility',
@@ -39,11 +41,30 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   }
 ]
 
-function getServiceName(request) {
-  const match = SERVICE_NAME_BY_ROUTE_PREFIX.find(({ prefix }) =>
+function getRoutePrefixMatch(request) {
+  return SERVICE_NAME_BY_ROUTE_PREFIX.find(({ prefix }) =>
     request?.path?.startsWith(prefix)
   )
-  return match?.serviceName ?? config.get('serviceName')
+}
+
+function getServiceName(request) {
+  return getRoutePrefixMatch(request)?.serviceName ?? config.get('serviceName')
+}
+
+/**
+ * The survey shown from the phase banner differs by journey, selected via a
+ * Journey query parameter. Everything outside the quote and request to use
+ * journeys gets the generic survey.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {string}
+ */
+function getPhaseBannerFeedbackUrl(request) {
+  const url = new URL(config.get('phaseBanner.feedbackUrl'))
+  url.searchParams.set(
+    'Journey',
+    getRoutePrefixMatch(request)?.surveyJourney ?? 'Generic'
+  )
+  return url.toString()
 }
 
 const logger = createLogger()
@@ -82,7 +103,7 @@ export function context(request) {
     serviceVersion: gitHash,
     serviceUrl: startPagePath,
     phaseBanner: {
-      feedbackUrl: config.get('phaseBanner.feedbackUrl')
+      feedbackUrl: getPhaseBannerFeedbackUrl(request)
     },
     breadcrumbs: [],
     navigation: buildNavigation(request),

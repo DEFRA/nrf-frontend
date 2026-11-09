@@ -8,6 +8,7 @@ import { submitForm } from '../../../test-utils/submit-form.js'
 import { getResponse } from '../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { mockDeleteQuote } from '../../../test-utils/mock-get-quote.js'
+import { expectPhaseBannerSurveyLink } from '../../../test-utils/assertions.js'
 
 const mswServer = setupMswServer()
 
@@ -48,6 +49,12 @@ describe('Are you sure you want to delete this quote page', () => {
     expect(getByRole(document, 'button', { name: 'Delete' })).toHaveClass(
       'govuk-button--warning'
     )
+  })
+
+  it('should link to the request to use survey from the beta banner', async () => {
+    const document = await load()
+
+    expectPhaseBannerSurveyLink({ document, journey: 'RequestToUse' })
   })
 
   it('should link back to the accept levy page', async () => {
