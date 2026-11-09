@@ -63,6 +63,20 @@ describe('Enter address page', () => {
     )
   })
 
+  it('shows the sign out link for a signed-in user', async () => {
+    const { cookie } = await signIn()
+    const document = await loadPage({
+      requestUrl: ROUTE_PATH,
+      server: getServer(),
+      cookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Sign out' })).toHaveAttribute(
+      'href',
+      '/auth/sign-out'
+    )
+  })
+
   it('links the Continue button to the check your answers page', async () => {
     const { cookie } = await signIn()
     const document = await loadPage({
