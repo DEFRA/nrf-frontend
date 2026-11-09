@@ -11,9 +11,19 @@ import {
   singleOrgEmployeeClaims
 } from '../../../test-utils/fixtures/defra-id-org-claims.js'
 import { loadPage } from '../../../test-utils/load-page.js'
+import { seedRequestToUseSessionWith } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 
 const ROUTE_PATH = '/request-to-use/enter-address'
 const { getServer, signIn } = setupSignedInTestServer()
+
+let seededSession = null
+beforeAll(() => {
+  seedRequestToUseSessionWith(getServer(), () => seededSession)
+})
+
+afterEach(() => {
+  seededSession = null
+})
 
 describe('Enter address page', () => {
   it('redirects a signed-out visitor to sign in', async () => {
@@ -80,6 +90,43 @@ describe('Enter address page', () => {
       '/request-to-use/check-your-answers'
     )
   })
+
+  it.each([
+    ['there are no earlier answers', undefined, '/request-to-use/variation'],
+    [
+      'the development is not a variation',
+      { variation: 'no', originalCommitted: 'yes' },
+      '/request-to-use/variation'
+    ],
+    [
+      'the original permission was not committed',
+      { variation: 'yes', originalCommitted: 'no' },
+      '/request-to-use/original-committed'
+    ],
+    [
+      'the original permission was committed',
+      { variation: 'yes', originalCommitted: 'yes' },
+      '/request-to-use/original-reference'
+    ]
+  ])(
+    'links back to the previous question when %s',
+    async (_, session, expected) => {
+      const { cookie } = await signIn()
+      seededSession = session
+      await loadPage({ requestUrl: ROUTE_PATH, server: getServer(), cookie })
+
+      const document = await loadPage({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        cookie
+      })
+
+      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+        'href',
+        expected
+      )
+    }
+  )
 
   it('shows the name of the signed-in user', async () => {
     const { cookie } = await signIn()

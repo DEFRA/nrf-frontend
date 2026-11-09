@@ -1,5 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getDefraAccountUrl } from '../../auth/get-defra-account-url.js'
+import { getPreSignInBackLinkPath } from '../helpers/get-pre-sign-in-back-link-path/index.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 
 export const pageHeadingIndividual = 'What is your address?'
@@ -20,6 +21,7 @@ export default function getViewModel(data = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
+    backLinkPath: getPreSignInBackLinkPath(data),
     fullName: [data.firstName, data.lastName].filter(Boolean).join(' '),
     orgOrUserName: data.orgOrUserName,
     changeOrganisationUrl: data.changeOrganisationUrl,
