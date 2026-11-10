@@ -6,11 +6,6 @@ import { routePath as acceptLevyPath } from '../accept-levy/route-path.js'
 import { dropoutPageAliases } from '../helpers/change-answer/index.js'
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
 
-// en-CA formats as YYYY-MM-DD. The UK calendar day is used so a user continuing
-// just after midnight BST is not priced against yesterday's charge.
-const getTodayInUk = () =>
-  new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' })
-
 export const reviewQuoteDetailsPostController = {
   async handler(request, h) {
     const quoteData = getQuoteDataFromCache(request)
@@ -28,7 +23,7 @@ export const reviewQuoteDetailsPostController = {
 
     const levy = await recalculateLevy({
       units: quoteData?.housingUnits,
-      requestDate: getTodayInUk()
+      requestDate: new Date().toISOString()
     })
     requestToUseSession.save(request, { levy, acceptLevy: undefined })
 
