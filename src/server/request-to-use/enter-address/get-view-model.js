@@ -1,37 +1,44 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { getDefraAccountUrl } from '../../auth/get-defra-account-url.js'
 import { getPreSignInBackLinkPath } from '../helpers/get-pre-sign-in-back-link-path/index.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { getEnterAddressVariant } from './get-variant.js'
 
 export const pageHeadingIndividual = 'What is your address?'
-export const pageHeadingOrg = 'What is the business or organisation address?'
 
-const representedRelationshipTypes = new Set(['Agent', 'Employee'])
+const guidanceByVariant = {
+  agent:
+    "If you are an agent requesting to use the nature restoration levy on behalf of someone else, enter the developer's full name and address.",
+  individual:
+    'If you are requesting to use the nature restoration levy for yourself, enter your own address.',
+  organisation:
+    'If you are an employee, volunteer or contractor of the business or organisation that is requesting to use the nature restoration levy, enter the address for the business or organisation.'
+}
+
+const headingTemplatesByVariant = {
+  agent: 'What are the details for {organisationName}?',
+  individual: pageHeadingIndividual,
+  organisation: 'What is the address for {organisationName}?'
+}
 
 /**
- * @param {object} [data] - the signed-in user's name, organisation and organisation heading data
+ * @param {object} [data] - the signed-in user's organisation, the saved enter address answers and the earlier answers that decide the back link
  * @returns {object} template data
  */
 export default function getViewModel(data = {}) {
-  const hasOrganisation = representedRelationshipTypes.has(
-    data.userRelationshipType
+  const variant = getEnterAddressVariant(data)
+  const pageHeading = headingTemplatesByVariant[variant].replace(
+    '{organisationName}',
+    data.organisationName ?? ''
   )
-  const pageHeading = hasOrganisation ? pageHeadingOrg : pageHeadingIndividual
 
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
+    guidanceText: guidanceByVariant[variant],
+    // The defra-account pages redirect a signed-in user straight back here,
+    // so Back targets the last question before the sign-in funnel.
     backLinkPath: getPreSignInBackLinkPath(data),
-    fullName: [data.firstName, data.lastName].filter(Boolean).join(' '),
+    formVariant: variant,
     orgOrUserName: data.orgOrUserName,
-    changeOrganisationUrl: data.changeOrganisationUrl,
-    representing: hasOrganisation
-      ? {
-          organisationName: data.organisationName,
-          relationship: data.userRelationshipType?.toLowerCase()
-        }
-      : null,
-    defraAccountUrl: getDefraAccountUrl(),
-    continuePath: checkYourAnswersPath
+    changeOrganisationUrl: data.changeOrganisationUrl
   }
 }

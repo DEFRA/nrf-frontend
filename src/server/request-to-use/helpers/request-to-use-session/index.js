@@ -6,6 +6,7 @@ import originalReferenceValidation from '../../original-reference/form-validatio
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
 import variationValidation from '../../variation/form-validation.js'
 import originalCommittedValidation from '../../original-committed/form-validation.js'
+import { getEnterAddressVariant } from '../../enter-address/get-variant.js'
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
@@ -38,6 +39,17 @@ const levy = joi.object({
   inflationAdjustedAmount: joi.number().required()
 })
 
+// The enter address answers, hand-written rather than extracted from the page
+// schema: the fullName rule is conditional on the hidden formVariant field,
+// which is never saved, and the postcode rule normalises values that are
+// already normalised here.
+const fullName = joi.string().allow('').optional()
+const addressLine1 = joi.string().allow('').optional()
+const addressLine2 = joi.string().allow('').optional()
+const townOrCity = joi.string().allow('').optional()
+const county = joi.string().allow('').optional()
+const postcode = joi.string().allow('').optional()
+
 export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
   schema: joi.object({
@@ -47,7 +59,13 @@ export const requestToUseSession = createSessionNamespace({
     acceptLevy,
     variation,
     originalCommitted,
-    defraId
+    defraId,
+    fullName,
+    addressLine1,
+    addressLine2,
+    townOrCity,
+    county,
+    postcode
   })
 })
 
@@ -77,3 +95,31 @@ export const saveDefraAccountUserType = (request, payload) =>
       userType: payload.defraAccountUserType
     }
   })
+
+/**
+ * Saves the enter address answers, leaving the rest of the request to use
+ * session untouched, and returns the merged data with the server-resolved
+ * form variant so get-next-page can pick the right review page.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {{ fullName?: string, addressLine1: string, addressLine2?: string, townOrCity: string, county?: string, postcode: string }} payload
+ * @returns {object | null} the merged request to use data plus formVariant
+ */
+export const saveEnterAddress = (request, payload) => {
+  const { organisation } = request.auth.credentials?.profile ?? {}
+  const merged = requestToUseSession.save(request, {
+    fullName: payload.fullName ?? '',
+    addressLine1: payload.addressLine1,
+    addressLine2: payload.addressLine2 ?? '',
+    townOrCity: payload.townOrCity,
+    county: payload.county ?? '',
+    postcode: payload.postcode
+  })
+
+  return {
+    ...merged,
+    formVariant: getEnterAddressVariant({
+      defraIdUserType: merged?.defraId?.userType,
+      userRelationshipType: organisation?.userRelationshipType
+    })
+  }
+}
