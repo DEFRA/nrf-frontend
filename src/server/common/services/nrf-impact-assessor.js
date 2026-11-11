@@ -31,8 +31,8 @@ export const getMapTile = async (path, request) => {
 }
 
 /**
- * Recalculates the levy for an EDP, number of housing units and date.
- * @param {{ edpId?: number, units: number, requestDate: string }} params - requestDate is YYYY-MM-DD
+ * Recalculates the levy for an EDP, number of housing units and date-time.
+ * @param {{ edpId?: number, units: number, requestDate: string }} params - requestDate is an ISO 8601 date-time in UTC, e.g. from toISOString()
  * @returns {Promise<{ calculationDate: string, provisionalAmount: number, inflationAdjustedAmount: number }>} calculationDate is an ISO date-time
  * @throws {import('@hapi/boom').Boom} a 500 when the request fails or the impact assessor responds with a non-2xx status
  */

@@ -38,20 +38,8 @@ describe('reviewQuoteDetailsPostController', () => {
     )
 
     expect(requests.map(({ body }) => body)).toEqual([
-      { units: 42, requestDate: '2026-10-14' }
+      { units: 42, requestDate: '2026-10-14T09:30:00.000Z' }
     ])
-  })
-
-  it('should use the UK calendar day as the request date', async () => {
-    vi.setSystemTime(new Date('2026-07-14T23:30:00Z'))
-    const requests = mockRecalculateLevy(mswServer)
-
-    await reviewQuoteDetailsPostController.handler(
-      buildRequest(),
-      createMockRedirectToolkit()
-    )
-
-    expect(requests[0].body.requestDate).toBe('2026-07-15')
   })
 
   it('should save the levy to the request to use session and keep the NRL reference', async () => {

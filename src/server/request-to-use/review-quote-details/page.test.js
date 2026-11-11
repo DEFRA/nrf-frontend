@@ -241,7 +241,9 @@ describe('Review and amend the quote details page', () => {
     expect(requests.map(({ body }) => body)).toEqual([
       {
         units: 42,
-        requestDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+        requestDate: expect.stringMatching(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+        )
       }
     ])
   })
