@@ -30,6 +30,22 @@ function promoteBoundaryToCache(request, cacheData) {
   request.yar.clear('boundaryFailureReason')
 }
 
+/**
+ * Promotes a checked upload from the top-level boundary session keys to the
+ * quote cache. The filename is lifted out of the geojson blob so it posts to
+ * the backend as a top-level field, and every promote must pass it: the cache
+ * save merges per-key, so omitting it leaves the previous upload's filename
+ * stuck to the new boundary.
+ * @param {import('@hapi/hapi').Request} request - the incoming request
+ * @param {object} boundaryGeojson - the checked boundary blob from the
+ *   boundary check, which embeds the filename
+ * @returns {void}
+ */
+function promoteCheckedBoundary(request, boundaryGeojson) {
+  const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
+  promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
+}
+
 function redirectToExcludedArea(
   boundaryGeojson,
   request,
@@ -37,7 +53,7 @@ function redirectToExcludedArea(
   dropoutExcludedAreaPath
 ) {
   if (boundaryGeojson) {
-    promoteBoundaryToCache(request, { boundaryGeojson })
+    promoteCheckedBoundary(request, boundaryGeojson)
   }
   return h.redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
 }
@@ -74,13 +90,8 @@ function createPostHandler({
         .code(statusCodes.redirectAfterPost)
     }
 
-    // Lift the filename out of the geojson blob so it lives at the top of the
-    // quote cache alongside other submit fields, and posts to the backend as a
-    // top-level column rather than a buried property.
-    const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
-
     if (boundaryGeojson) {
-      promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
+      promoteCheckedBoundary(request, boundaryGeojson)
     }
 
     // The GET handler redirects non-intersecting boundaries away before the
@@ -183,6 +194,11 @@ export const createFilePreviewHandlers = ({
         { intersectsEdp },
         'map - boundary does not intersect EDP, redirecting to no-edp'
       )
+      // Cache the ineligible boundary like the other dropout redirects do, so
+      // a continue from the summary page re-runs this dropout decision.
+      if (boundaryGeojson) {
+        promoteCheckedBoundary(request, boundaryGeojson)
+      }
       return h.redirect(appendChangeParam(dropoutNotInEdpPath, request.query))
     }
 
