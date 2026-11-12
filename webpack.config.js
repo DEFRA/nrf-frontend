@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import webpack from 'webpack'
 import CopyPlugin from 'copy-webpack-plugin'
-import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import { WebpackAssetsManifest } from 'webpack-assets-manifest'
 
@@ -61,6 +60,7 @@ export default {
         : 'javascripts/[name].js',
 
     path: path.join(dirname, '.public'),
+    clean: true,
     publicPath: '/public/',
     libraryTarget: 'module',
     module: true
@@ -173,7 +173,6 @@ export default {
     usedExports: true
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new WebpackAssetsManifest(),
     // @defra/interactive-map's datasets plugin lazily loads ESRI and
     // OpenLayers adapter chunks that we never trigger (we only ever
