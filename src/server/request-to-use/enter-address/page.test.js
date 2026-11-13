@@ -156,24 +156,14 @@ describe('Enter address page', () => {
       }
     })
 
-    it('prefers the saved who are you requesting to use the levy for answer over the Defra ID relationship', async () => {
+    it('ignores the saved who are you requesting to use the levy for answer and uses the Defra ID relationship', async () => {
       const document = await loadSignedInPage({
         claims: singleOrgEmployeeClaims,
-        session: { defraId: { userType: 'agent' } }
+        session: { signin: { intendedUserType: 'agent' } }
       })
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        `What are the details for ${firstOrgName}?`
-      )
-    })
-
-    it('falls back to a heading without the organisation name when the profile has none', async () => {
-      const document = await loadSignedInPage({
-        session: { defraId: { userType: 'agent' } }
-      })
-
-      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        'What are the details for the business or organisation?'
+        `What is the address for ${firstOrgName}?`
       )
     })
   })
@@ -305,7 +295,6 @@ describe('Enter address page', () => {
 
     it('bounces a post whose hidden variant field no longer matches the server-resolved variant', async () => {
       const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
-      seededSession = { defraId: { userType: 'agent' } }
       await loadPage({ requestUrl: ROUTE_PATH, server: getServer(), cookie })
 
       const { response, cookie: bouncedCookie } = await submitForm({
@@ -324,7 +313,7 @@ describe('Enter address page', () => {
         cookie: bouncedCookie
       })
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-        `What are the details for ${firstOrgName}?`
+        `What is the address for ${firstOrgName}?`
       )
       expect(getByLabelText(document, 'Address line 1')).toHaveValue('')
     })
