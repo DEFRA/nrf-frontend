@@ -3,6 +3,7 @@ import {
   getByRole,
   getByTestId,
   queryByLabelText,
+  queryByTestId,
   queryByRole
 } from '@testing-library/dom'
 
@@ -220,6 +221,25 @@ describe('Enter address page', () => {
         'href',
         '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Fenter-address'
       )
+    })
+
+    it.each([
+      '/request-to-use/defra-account-user-type',
+      '/request-to-use/variation'
+    ])('does not show the organisation switcher on %s', async (requestUrl) => {
+      const { cookie } = await signIn({ claims: multiOrgEmployeeClaims })
+      const document = await loadPage({
+        requestUrl,
+        server: getServer(),
+        cookie
+      })
+
+      expect(
+        queryByTestId(document, 'app-organisation-heading')
+      ).not.toBeInTheDocument()
+      expect(
+        queryByRole(document, 'link', { name: 'Change organisation' })
+      ).not.toBeInTheDocument()
     })
 
     it('does not offer to change organisation when there is nothing to switch to', async () => {
