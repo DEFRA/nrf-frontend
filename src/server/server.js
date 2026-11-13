@@ -81,7 +81,7 @@ export async function createServer() {
   server.app.sessionCache = server.cache({
     cache: config.get('session.cache.name'),
     segment: 'sessions',
-    expiresIn: 24 * 60 * 60 * 1000 // 24 hours
+    expiresIn: config.get('defraId.sessionTtl')
   })
 
   await server.register({

@@ -11,6 +11,7 @@ const oneWeekMs = 604800000
 const thirtyDaysSeconds = 2592000
 const oneDaySeconds = 86400
 const fiveSecondsMs = 5000
+const twoHoursMs = 7200000
 
 const SESSION_RATE_LIMIT_MAX = 60
 const SESSION_RATE_LIMIT_MAX_TEST = 35
@@ -309,10 +310,15 @@ export const config = convict({
       default: 'service-test',
       env: 'DEFRA_ID_SERVICE_ID'
     },
+    sessionTtl: {
+      doc: 'How long, in milliseconds, a signed-in user stays signed in to this service. Separate from the yar session that holds journey answers.',
+      format: Number,
+      default: twoHoursMs
+    },
     refreshTokens: {
       doc: 'Enable automatic token refresh',
       format: Boolean,
-      default: true,
+      default: false,
       env: 'DEFRA_ID_REFRESH_TOKENS'
     },
     scopes: {
