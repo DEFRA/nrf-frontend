@@ -309,12 +309,6 @@ export const config = convict({
       default: 'service-test',
       env: 'DEFRA_ID_SERVICE_ID'
     },
-    refreshTokens: {
-      doc: 'Enable automatic token refresh',
-      format: Boolean,
-      default: true,
-      env: 'DEFRA_ID_REFRESH_TOKENS'
-    },
     scopes: {
       doc: 'Defra ID Scopes',
       format: Array,

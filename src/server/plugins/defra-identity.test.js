@@ -14,25 +14,7 @@ vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => mockLogger
 }))
 
-vi.mock('../auth/refresh-tokens.js', () => ({
-  refreshTokens: vi.fn()
-}))
-
-vi.mock('../../config/config.js', () => ({
-  config: {
-    get: vi.fn()
-  }
-}))
-
 const { defraIdentity, createUserSession } = await import('./defra-identity.js')
-const { refreshTokens } = await import('../auth/refresh-tokens.js')
-const { config } = await import('../../config/config.js')
-
-const mockRefreshTokens = vi.mocked(refreshTokens)
-
-const defaultConfigValues = {
-  'defraId.refreshTokens': true
-}
 
 const generateToken = (expiresInSec) => {
   const now = Math.floor(Date.now() / 1000)
@@ -63,8 +45,6 @@ describe('defra-identity plugin', () => {
   let server
 
   beforeEach(() => {
-    config.get.mockImplementation((key) => defaultConfigValues[key])
-
     sessionCache = {
       get: vi.fn(),
       set: vi.fn(),
@@ -160,7 +140,7 @@ describe('defra-identity plugin', () => {
       expect(h.unauthenticated).toHaveBeenCalledTimes(1)
     })
 
-    it('authenticates without refreshing when the stored token is valid', async () => {
+    it('authenticates when the stored token is valid', async () => {
       const authenticate = await getAuthenticate()
       sessionCache.get.mockResolvedValue({
         token: generateToken(3600),
@@ -171,97 +151,29 @@ describe('defra-identity plugin', () => {
 
       await authenticate(request, h)
 
-      expect(mockRefreshTokens).not.toHaveBeenCalled()
       expect(sessionCache.drop).not.toHaveBeenCalled()
       expect(h.authenticated).toHaveBeenCalledTimes(1)
     })
 
-    it('refreshes and persists expired tokens before authenticating', async () => {
-      const authenticate = await getAuthenticate()
-      sessionCache.get.mockResolvedValue({
-        token: generateToken(-3600), // expired 1 hour ago
-        refreshToken: 'old-refresh-token'
-      })
-      mockRefreshTokens.mockResolvedValue({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        id_token: 'new-id-token'
-      })
-      const request = createMockRequest('expired-session')
-      const h = createMockH()
+    it.each([
+      ['expired', generateToken(-3600)],
+      ['unparseable', 'not-a-valid-jwt']
+    ])(
+      'drops the session and returns unauthenticated when the stored token is %s',
+      async (_, token) => {
+        const authenticate = await getAuthenticate()
+        sessionCache.get.mockResolvedValue({ token })
+        const request = createMockRequest('expired-session')
+        const h = createMockH()
 
-      await authenticate(request, h)
+        await authenticate(request, h)
 
-      expect(mockRefreshTokens).toHaveBeenCalledWith('old-refresh-token')
-      expect(sessionCache.set).toHaveBeenCalledWith(
-        'expired-session',
-        expect.objectContaining({
-          token: 'new-access-token',
-          refreshToken: 'new-refresh-token',
-          idToken: 'new-id-token'
-        })
-      )
-      expect(sessionCache.drop).not.toHaveBeenCalled()
-      expect(h.authenticated).toHaveBeenCalledTimes(1)
-    })
-
-    it('drops the session and returns unauthenticated when token refresh is disabled', async () => {
-      config.get.mockImplementation((key) =>
-        key === 'defraId.refreshTokens' ? false : defaultConfigValues[key]
-      )
-      const authenticate = await getAuthenticate()
-      sessionCache.get.mockResolvedValue({
-        token: generateToken(-3600),
-        refreshToken: 'old-refresh-token'
-      })
-      const request = createMockRequest('disabled-session')
-      const h = createMockH()
-
-      await authenticate(request, h)
-
-      expect(mockRefreshTokens).not.toHaveBeenCalled()
-      expect(sessionCache.drop).toHaveBeenCalledWith('disabled-session')
-      expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
-      expect(h.unauthenticated).toHaveBeenCalledTimes(1)
-    })
-
-    it('drops the session and returns unauthenticated when token refresh fails', async () => {
-      const authenticate = await getAuthenticate()
-      sessionCache.get.mockResolvedValue({
-        token: generateToken(-3600),
-        refreshToken: 'old-refresh-token'
-      })
-      mockRefreshTokens.mockRejectedValue(new Error('refresh failed'))
-      const request = createMockRequest('failed-session')
-      const h = createMockH()
-
-      await authenticate(request, h)
-
-      expect(sessionCache.set).not.toHaveBeenCalled()
-      expect(sessionCache.drop).toHaveBeenCalledWith('failed-session')
-      expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
-      expect(mockLogger.error).toHaveBeenCalled()
-      expect(h.unauthenticated).toHaveBeenCalledTimes(1)
-    })
-
-    it('treats an unparseable token as invalid and refreshes it', async () => {
-      const authenticate = await getAuthenticate()
-      sessionCache.get.mockResolvedValue({
-        token: 'not-a-valid-jwt',
-        refreshToken: 'old-refresh-token'
-      })
-      mockRefreshTokens.mockResolvedValue({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token'
-      })
-      const request = createMockRequest('garbage-session')
-      const h = createMockH()
-
-      await authenticate(request, h)
-
-      expect(mockRefreshTokens).toHaveBeenCalledWith('old-refresh-token')
-      expect(h.authenticated).toHaveBeenCalledTimes(1)
-    })
+        expect(sessionCache.set).not.toHaveBeenCalled()
+        expect(sessionCache.drop).toHaveBeenCalledWith('expired-session')
+        expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
+        expect(h.unauthenticated).toHaveBeenCalledTimes(1)
+      }
+    )
   })
 
   describe('createUserSession', () => {

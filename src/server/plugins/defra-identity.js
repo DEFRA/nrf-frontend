@@ -1,9 +1,7 @@
 import Jwt from '@hapi/jwt'
 import { createLogger } from '../common/helpers/logging/logger.js'
-import { refreshTokens } from '../auth/refresh-tokens.js'
 import { redirectToSignIn } from '../auth/redirect-to-sign-in.js'
 import { AUTH_STRATEGY_NAME } from '../auth/auth-urls.js'
-import { config } from '../../config/config.js'
 import { randomUUID } from 'node:crypto'
 
 const logger = createLogger()
@@ -66,19 +64,11 @@ function yarSessionScheme(sessionCache) {
           return h.unauthenticated()
         }
 
-        // Refresh the stored token if it is invalid or expired
+        // Tokens are not refreshed: once the access token expires the user signs in again
         if (!isTokenValid(userSession.token)) {
-          const refreshed = await refreshUserSession({
-            sessionId,
-            userSession,
-            sessionCache
-          })
-
-          if (!refreshed) {
-            await sessionCache.drop(sessionId)
-            request.yar.clear('sessionId')
-            return h.unauthenticated()
-          }
+          await sessionCache.drop(sessionId)
+          request.yar.clear('sessionId')
+          return h.unauthenticated()
         }
 
         return h.authenticated({ credentials: userSession })
@@ -104,43 +94,6 @@ function isTokenValid(token) {
     return true
   } catch (error) {
     logger.debug(`Stored token invalid or expired: ${error.message}`)
-    return false
-  }
-}
-
-/**
- * Refreshes a session's expired access token and persists the new tokens.
- * Mutates userSession in place on success.
- * @param {Object} params - Refresh parameters
- * @param {string} params.sessionId - Session identifier, used in log messages
- * @param {Object} params.userSession - User session object with token and refreshToken properties
- * @param {Object} params.sessionCache - Session cache instance used to persist the updated session
- * @returns {Promise<boolean>} True if the tokens were refreshed, false if refresh is disabled or failed
- */
-async function refreshUserSession({ sessionId, userSession, sessionCache }) {
-  if (!config.get('defraId.refreshTokens')) {
-    logger.debug(`Token refresh disabled for session ${sessionId}`)
-    return false
-  }
-
-  try {
-    const {
-      access_token: token,
-      refresh_token: newRefreshToken,
-      id_token: newIdToken
-    } = await refreshTokens(userSession.refreshToken)
-
-    userSession.token = token
-    userSession.refreshToken = newRefreshToken
-    if (newIdToken) {
-      userSession.idToken = newIdToken
-    }
-
-    await sessionCache.set(sessionId, userSession)
-    logger.debug(`Token refreshed successfully for session ${sessionId}`)
-    return true
-  } catch (refreshError) {
-    logger.error(refreshError, `Token refresh failed for session ${sessionId}`)
     return false
   }
 }
