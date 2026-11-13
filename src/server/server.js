@@ -22,6 +22,9 @@ import { cookies } from './plugins/cookies.js'
 import { analyticsCookieMetrics } from './plugins/analytics-cookie-metrics.js'
 import { csrf } from './common/helpers/csrf.js'
 
+const AUTH_SESSION_TTL_HOURS = 2
+const AUTH_SESSION_TTL_MS = AUTH_SESSION_TTL_HOURS * 60 * 60 * 1000
+
 export async function createServer() {
   const { engine: sessionCacheEngine, client: redisClient } = getCacheEngine()
   const server = hapi.server({
@@ -81,7 +84,7 @@ export async function createServer() {
   server.app.sessionCache = server.cache({
     cache: config.get('session.cache.name'),
     segment: 'sessions',
-    expiresIn: config.get('defraId.sessionTtl')
+    expiresIn: AUTH_SESSION_TTL_MS
   })
 
   await server.register({

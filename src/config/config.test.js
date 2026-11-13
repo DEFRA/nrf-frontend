@@ -69,10 +69,6 @@ describe('#config', () => {
       expect(config.get('session.cache.ttl')).toBe(86400000)
     })
 
-    test('defraId.sessionTtl is 7200000', () => {
-      expect(config.get('defraId.sessionTtl')).toBe(7200000)
-    })
-
     test('session.cookie.secure is false', () => {
       expect(config.get('session.cookie.secure')).toBe(false)
     })
