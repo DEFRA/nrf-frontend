@@ -6,6 +6,7 @@ import originalReferenceValidation from '../../original-reference/form-validatio
 import defraAccountUserTypeValidation from '../../defra-account-user-type/form-validation.js'
 import variationValidation from '../../variation/form-validation.js'
 import originalCommittedValidation from '../../original-committed/form-validation.js'
+import { getEnterAddressVariant } from '../get-enter-address-variant/index.js'
 
 const nrlReference = enterNrlReferenceValidation().extract('nrlReference')
 
@@ -38,6 +39,30 @@ const levy = joi.object({
   inflationAdjustedAmount: joi.number().required()
 })
 
+// The enter address answers, hand-written rather than extracted from the page
+// schema: the fullName rule is conditional on the hidden formVariant field,
+// which is never saved, and the postcode rule normalises values that are
+// already normalised here. Length caps mirror the page validation.
+const maxTextLength = 255
+const maxPostcodeLength = 10
+
+const fullName = joi.string().max(maxTextLength).allow('').optional()
+const addressLine1 = joi.string().max(maxTextLength).allow('').optional()
+const addressLine2 = joi.string().max(maxTextLength).allow('').optional()
+const townOrCity = joi.string().max(maxTextLength).allow('').optional()
+const county = joi.string().max(maxTextLength).allow('').optional()
+const postcode = joi.string().max(maxPostcodeLength).allow('').optional()
+
+// A snapshot of who was submitting, taken when the address is confirmed, so
+// the review page and the eventual commitment certificate record have the
+// resolved account type and organisation without re-reading the claims.
+const accountType = joi
+  .string()
+  .valid('individual', 'employee', 'agent')
+  .optional()
+const organisationName = joi.string().max(maxTextLength).allow('').optional()
+const organisationId = joi.string().max(maxTextLength).allow('').optional()
+
 export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
   schema: joi.object({
@@ -47,7 +72,16 @@ export const requestToUseSession = createSessionNamespace({
     acceptLevy,
     variation,
     originalCommitted,
-    defraId
+    defraId,
+    fullName,
+    addressLine1,
+    addressLine2,
+    townOrCity,
+    county,
+    postcode,
+    accountType,
+    organisationName,
+    organisationId
   })
 })
 
@@ -77,3 +111,33 @@ export const saveDefraAccountUserType = (request, payload) =>
       userType: payload.defraAccountUserType
     }
   })
+
+/**
+ * Saves the enter address answers together with a snapshot of the resolved
+ * account type and the organisation, leaving the rest of the request to use
+ * session untouched. The account type is resolved on the server; the hidden
+ * formVariant field is never saved.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {{ fullName?: string, addressLine1: string, addressLine2?: string, townOrCity: string, county?: string, postcode: string }} payload
+ * @returns {object | null} the merged request to use data
+ */
+export const saveEnterAddress = (request, payload) => {
+  const { organisation } = request.auth.credentials?.profile ?? {}
+  const session = requestToUseSession.get(request)
+  const accountType = getEnterAddressVariant({
+    defraIdUserType: session?.defraId?.userType,
+    userRelationshipType: organisation?.userRelationshipType
+  })
+
+  return requestToUseSession.save(request, {
+    fullName: payload.fullName ?? '',
+    addressLine1: payload.addressLine1,
+    addressLine2: payload.addressLine2 ?? '',
+    townOrCity: payload.townOrCity,
+    county: payload.county ?? '',
+    postcode: payload.postcode,
+    accountType,
+    organisationName: organisation?.organisationName ?? '',
+    organisationId: organisation?.organisationId ?? ''
+  })
+}

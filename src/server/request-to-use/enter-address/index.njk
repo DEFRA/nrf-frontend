@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -16,16 +16,86 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds-from-desktop">
-    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
-    <p class="govuk-body">You are signed in as {{ fullName }}.</p>
-    {% if representing and representing.organisationName %}
-      <p class="govuk-body">You are representing {{ representing.organisationName }} as an {{ representing.relationship }}.</p>
-      <p class="govuk-body"><a href="{{ defraAccountUrl }}" class="govuk-link" target="_blank" rel="noopener noreferrer">Your Defra account (opens in new tab)</a></p>
-    {% endif %}
-    {{ govukButton({
-      text: "Continue",
-      href: continuePath
-    }) }}
+
+    <form method="post" novalidate>
+      {% include "partials/csrf-token.njk" %}
+      <input type="hidden" id="formVariant" name="formVariant" value="{{ formVariant }}">
+
+      {% if validationErrors %}
+      {# The hidden formVariant field cannot take focus, so its error links to the first visible field #}
+      {% set firstFieldId = "fullName" if formVariant === "agent" else "addressLine1" %}
+      {% set summaryItems = [] %}
+      {% for error in validationErrors.summary %}
+        {% set summaryItems = summaryItems.concat([
+          { href: "#" + firstFieldId, text: error.text }
+            if error.href === "#formVariant"
+            else error
+        ]) %}
+      {% endfor %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: summaryItems
+      }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+      <p class="govuk-body">{{ guidanceText }}</p>
+
+      {% if formVariant === "agent" %}
+      {{ govukInput({
+        name: "fullName",
+        label: { text: "Full name" },
+        value: formSubmitData.fullName,
+        errorMessage: validationErrors.messagesByFormField.fullName,
+        autocomplete: "name"
+      }) }}
+      {% endif %}
+
+      {{ govukInput({
+        name: "addressLine1",
+        label: { text: "Address line 1" },
+        value: formSubmitData.addressLine1,
+        errorMessage: validationErrors.messagesByFormField.addressLine1,
+        autocomplete: "address-line1"
+      }) }}
+
+      {{ govukInput({
+        name: "addressLine2",
+        label: { text: "Address line 2 (optional)" },
+        value: formSubmitData.addressLine2,
+        autocomplete: "address-line2"
+      }) }}
+
+      {{ govukInput({
+        name: "townOrCity",
+        label: { text: "Town or city" },
+        classes: "govuk-!-width-two-thirds",
+        value: formSubmitData.townOrCity,
+        errorMessage: validationErrors.messagesByFormField.townOrCity,
+        autocomplete: "address-level2"
+      }) }}
+
+      {{ govukInput({
+        name: "county",
+        label: { text: "County (optional)" },
+        classes: "govuk-!-width-two-thirds",
+        value: formSubmitData.county
+      }) }}
+
+      {{ govukInput({
+        name: "postcode",
+        label: { text: "Postcode" },
+        classes: "govuk-input--width-10",
+        value: formSubmitData.postcode,
+        errorMessage: validationErrors.messagesByFormField.postcode,
+        autocomplete: "postal-code"
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Confirm" }) }}
+      </div>
+
+    </form>
   </div>
 </div>
 {% endblock %}

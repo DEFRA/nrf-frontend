@@ -3,17 +3,21 @@ import { getOrganisationHeadingData } from '../../common/helpers/get-organisatio
 
 /**
  * @param {import('@hapi/hapi').Request} request
- * @returns {object} the signed-in user's name, organisation, organisation heading data and the earlier answers that decide the back link
+ * @returns {object} the signed-in user's organisation, the saved enter address answers, the earlier answers that decide the back link and the organisation heading data
  */
 export function getSessionData(request) {
-  const { firstName, lastName, organisation } =
-    request.auth.credentials?.profile ?? {}
+  const { organisation } = request.auth.credentials?.profile ?? {}
   const session = requestToUseSession.get(request)
   return {
-    firstName,
-    lastName,
     organisationName: organisation?.organisationName,
     userRelationshipType: organisation?.userRelationshipType,
+    defraIdUserType: session?.defraId?.userType,
+    fullName: session?.fullName,
+    addressLine1: session?.addressLine1,
+    addressLine2: session?.addressLine2,
+    townOrCity: session?.townOrCity,
+    county: session?.county,
+    postcode: session?.postcode,
     variation: session?.variation,
     originalCommitted: session?.originalCommitted,
     ...getOrganisationHeadingData(request)
