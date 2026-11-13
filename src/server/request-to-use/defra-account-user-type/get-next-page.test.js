@@ -2,19 +2,19 @@ import getNextPage from './get-next-page.js'
 
 describe('getNextPage', () => {
   it('goes to the individual Defra account page for an individual', () => {
-    expect(getNextPage({ defraId: { userType: 'individual' } })).toBe(
+    expect(getNextPage({ signin: { intendedUserType: 'individual' } })).toBe(
       '/request-to-use/defra-account-individual'
     )
   })
 
   it('goes to the organisation Defra account page for an organisation', () => {
-    expect(getNextPage({ defraId: { userType: 'organisation' } })).toBe(
+    expect(getNextPage({ signin: { intendedUserType: 'organisation' } })).toBe(
       '/request-to-use/defra-account-organisation'
     )
   })
 
   it('goes to the agent Defra account page for an agent', () => {
-    expect(getNextPage({ defraId: { userType: 'agent' } })).toBe(
+    expect(getNextPage({ signin: { intendedUserType: 'agent' } })).toBe(
       '/request-to-use/defra-account-agent'
     )
   })

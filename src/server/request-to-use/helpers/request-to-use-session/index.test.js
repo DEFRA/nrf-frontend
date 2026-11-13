@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { requestToUseSession } from './index.js'
+import { clearAccountAnswers, requestToUseSession } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 
@@ -48,12 +48,12 @@ describe('requestToUseSession', () => {
     const request = createRequest()
 
     const result = requestToUseSession.save(request, {
-      defraId: { userType: 'individual' }
+      signin: { intendedUserType: 'individual' }
     })
 
     expect(result).toEqual({
       ...savedNrlReference,
-      defraId: { userType: 'individual' }
+      signin: { intendedUserType: 'individual' }
     })
     expect(request.logger.error).not.toHaveBeenCalled()
   })
@@ -122,5 +122,38 @@ describe('requestToUseSession', () => {
     })
 
     expect(loggedErrorPaths(request)).toContain(originalReferenceKey)
+  })
+
+  describe('clearAccountAnswers', () => {
+    it('clears the address and sign in answers but keeps the intended user type and other answers', () => {
+      const request = createSessionRequest({
+        session: {
+          requestToUse: {
+            ...savedNrlReference,
+            address: { addressLine1: '1 Road', townOrCity: 'Leeds' },
+            signin: {
+              intendedUserType: 'organisation',
+              actualUserType: 'employee',
+              organisation: { organisationName: 'Org', organisationId: '1' }
+            }
+          }
+        }
+      })
+
+      clearAccountAnswers(request)
+
+      expect(requestToUseSession.get(request)).toEqual({
+        ...savedNrlReference,
+        signin: { intendedUserType: 'organisation' }
+      })
+    })
+
+    it('does nothing when there is no request to use session', () => {
+      const request = createSessionRequest({ session: {} })
+
+      clearAccountAnswers(request)
+
+      expect(requestToUseSession.get(request)).toBeNull()
+    })
   })
 })
