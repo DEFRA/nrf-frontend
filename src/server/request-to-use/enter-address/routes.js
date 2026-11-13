@@ -5,6 +5,7 @@ import getViewModel from './get-view-model.js'
 import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import { redirectWhenFormVariantMismatch } from './redirect-when-form-variant-mismatch.js'
 import { routeId, routePath } from './route-path.js'
 
 export { routePath }
@@ -52,7 +53,7 @@ const postController = createPostController({
  *                 type: string
  *                 enum:
  *                   - individual
- *                   - organisation
+ *                   - employee
  *                   - agent
  *               fullName:
  *                 type: string
@@ -69,7 +70,7 @@ const postController = createPostController({
  *                 type: string
  *     responses:
  *       303:
- *         description: Redirect to the review page for the variant, or back to the form on validation failure
+ *         description: Redirect to the review details page, or back to the form on validation failure or a stale or tampered variant field
  */
 export default [
   {
@@ -86,7 +87,10 @@ export default [
     method: 'POST',
     path: routePath,
     rules: { requireAuth: true },
-    options: postController.options,
+    options: {
+      ...postController.options,
+      pre: [{ method: redirectWhenFormVariantMismatch }]
+    },
     handler: postController.handler
   }
 ]

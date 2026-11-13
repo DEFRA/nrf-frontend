@@ -1,6 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getPreSignInBackLinkPath } from '../helpers/get-pre-sign-in-back-link-path/index.js'
-import { getEnterAddressVariant } from './get-variant.js'
+import { getEnterAddressVariant } from '../helpers/get-enter-address-variant/index.js'
 
 export const pageHeadingIndividual = 'What is your address?'
 
@@ -9,14 +9,21 @@ const guidanceByVariant = {
     "If you are an agent requesting to use the nature restoration levy on behalf of someone else, enter the developer's full name and address.",
   individual:
     'If you are requesting to use the nature restoration levy for yourself, enter your own address.',
-  organisation:
+  employee:
     'If you are an employee, volunteer or contractor of the business or organisation that is requesting to use the nature restoration levy, enter the address for the business or organisation.'
 }
 
 const headingTemplatesByVariant = {
   agent: 'What are the details for {organisationName}?',
   individual: pageHeadingIndividual,
-  organisation: 'What is the address for {organisationName}?'
+  employee: 'What is the address for {organisationName}?'
+}
+
+// Defenders for the rare case where the variant implies an organisation but
+// the Defra ID profile carries no organisation name.
+const headingWithoutOrganisationByVariant = {
+  agent: 'What are the details for the business or organisation?',
+  employee: 'What is the address for the business or organisation?'
 }
 
 /**
@@ -25,10 +32,14 @@ const headingTemplatesByVariant = {
  */
 export default function getViewModel(data = {}) {
   const variant = getEnterAddressVariant(data)
-  const pageHeading = headingTemplatesByVariant[variant].replace(
-    '{organisationName}',
-    data.organisationName ?? ''
-  )
+  // A function replacer so `$&` and friends in an organisation name are not
+  // treated as replacement patterns.
+  const pageHeading = data.organisationName
+    ? headingTemplatesByVariant[variant].replace(
+        '{organisationName}',
+        () => data.organisationName
+      )
+    : (headingWithoutOrganisationByVariant[variant] ?? pageHeadingIndividual)
 
   return {
     pageTitle: getPageTitle(pageHeading),

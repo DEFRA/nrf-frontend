@@ -13,7 +13,7 @@ const validRequiredData = {
 
 describe('enter address form validation', () => {
   describe('formVariant', () => {
-    it.each(['individual', 'organisation', 'agent'])(
+    it.each(['individual', 'employee', 'agent'])(
       'passes for %s',
       (formVariant) => {
         const { error } = getSchema().validate({
@@ -96,6 +96,16 @@ describe('enter address form validation', () => {
         'Enter address line 1, typically the building and street'
       )
     })
+
+    it('fails when longer than 255 characters', () => {
+      const { error } = getSchema().validate({
+        ...validRequiredData,
+        addressLine1: 'a'.repeat(256)
+      })
+      expect(error.details[0].message).toBe(
+        'Address line 1 must be 255 characters or fewer'
+      )
+    })
   })
 
   describe('townOrCity', () => {
@@ -112,12 +122,12 @@ describe('enter address form validation', () => {
     it.each([
       ['lower case', 'dv1 6rp', postcode],
       ['upper case', postcode, postcode],
-      ['no spaces', postcodeNoSpace, postcodeNoSpace],
+      ['no spaces', postcodeNoSpace, postcode],
       ['extra spaces at both ends', `  ${postcode}  `, postcode],
       ['extra spaces in the middle', 'DV1   6RP', postcode],
-      ['hyphens', 'DV1-6RP', postcodeNoSpace],
+      ['hyphens', 'DV1-6RP', postcode],
       ['brackets', '(DV1) 6RP', postcode],
-      ['full stops', 'DV1.6RP', postcodeNoSpace]
+      ['full stops', 'DV1.6RP', postcode]
     ])('accepts a postcode with %s', (_, postcode, normalised) => {
       const { error, value } = getSchema().validate({
         ...validRequiredData,
@@ -141,6 +151,16 @@ describe('enter address form validation', () => {
         postcode: '-.-'
       })
       expect(error.details[0].message).toBe('Enter postcode')
+    })
+
+    it('fails when the postcode is longer than 10 characters after normalising', () => {
+      const { error } = getSchema().validate({
+        ...validRequiredData,
+        postcode: 'SW1A 1AA EXTRA'
+      })
+      expect(error.details[0].message).toBe(
+        'Postcode must be 10 characters or fewer'
+      )
     })
   })
 

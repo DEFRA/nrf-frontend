@@ -27,7 +27,7 @@ const agentGuidance =
   "If you are an agent requesting to use the nature restoration levy on behalf of someone else, enter the developer's full name and address."
 const individualGuidance =
   'If you are requesting to use the nature restoration levy for yourself, enter your own address.'
-const organisationGuidance =
+const employeeGuidance =
   'If you are an employee, volunteer or contractor of the business or organisation that is requesting to use the nature restoration levy, enter the address for the business or organisation.'
 
 const validAddress = {
@@ -100,8 +100,8 @@ describe('Enter address page', () => {
         scenario: 'for an employee',
         claims: singleOrgEmployeeClaims,
         heading: `What is the address for ${firstOrgName}?`,
-        guidance: organisationGuidance,
-        formVariant: 'organisation',
+        guidance: employeeGuidance,
+        formVariant: 'employee',
         showsFullName: false
       },
       {
@@ -164,6 +164,16 @@ describe('Enter address page', () => {
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
         `What are the details for ${firstOrgName}?`
+      )
+    })
+
+    it('falls back to a heading without the organisation name when the profile has none', async () => {
+      const document = await loadSignedInPage({
+        session: { defraId: { userType: 'agent' } }
+      })
+
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        'What are the details for the business or organisation?'
       )
     })
   })
@@ -263,26 +273,23 @@ describe('Enter address page', () => {
         scenario: 'an individual',
         claims: undefined,
         formVariant: 'individual',
-        fullName: undefined,
-        location: '/request-to-use/review-your-details'
+        fullName: undefined
       },
       {
-        scenario: 'an organisation user',
+        scenario: 'an employee',
         claims: singleOrgEmployeeClaims,
-        formVariant: 'organisation',
-        fullName: undefined,
-        location: '/request-to-use/review-your-details'
+        formVariant: 'employee',
+        fullName: undefined
       },
       {
         scenario: 'an agent',
         claims: agentClaims,
         formVariant: 'agent',
-        fullName: agentFullName,
-        location: '/request-to-use/review-developer-details'
+        fullName: agentFullName
       }
     ])(
-      'redirects $scenario to the matching review page',
-      async ({ claims, formVariant, fullName, location }) => {
+      'redirects $scenario to the review details page',
+      async ({ claims, formVariant, fullName }) => {
         const { cookie } = await signIn({ claims })
         const { response } = await submitForm({
           requestUrl: ROUTE_PATH,
@@ -292,16 +299,16 @@ describe('Enter address page', () => {
         })
 
         expect(response.statusCode).toBe(303)
-        expect(response.headers.location).toBe(location)
+        expect(response.headers.location).toBe('/request-to-use/review-details')
       }
     )
 
-    it('picks the review page from the resolved variant, not the hidden form field', async () => {
+    it('bounces a post whose hidden variant field no longer matches the server-resolved variant', async () => {
       const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
       seededSession = { defraId: { userType: 'agent' } }
       await loadPage({ requestUrl: ROUTE_PATH, server: getServer(), cookie })
 
-      const { response } = await submitForm({
+      const { response, cookie: bouncedCookie } = await submitForm({
         requestUrl: ROUTE_PATH,
         server: getServer(),
         formData: { formVariant: 'individual', ...validAddress },
@@ -309,9 +316,17 @@ describe('Enter address page', () => {
       })
 
       expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(
-        '/request-to-use/review-developer-details'
+      expect(response.headers.location).toBe(ROUTE_PATH)
+
+      const document = await loadPage({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        cookie: bouncedCookie
+      })
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        `What are the details for ${firstOrgName}?`
       )
+      expect(getByLabelText(document, 'Address line 1')).toHaveValue('')
     })
 
     it('re-shows the saved answers, with the postcode normalised', async () => {

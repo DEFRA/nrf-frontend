@@ -1,17 +1,12 @@
-// Literal paths: the review pages are not built yet. Swap for route-path.js
-// imports when they exist.
-const reviewDeveloperDetailsPath = '/request-to-use/review-developer-details'
-const reviewYourDetailsPath = '/request-to-use/review-your-details'
+// Literal path: the review details page is not built yet. Swap for a
+// route-path.js import when it exists.
+const reviewDetailsPath = '/request-to-use/review-details'
 
 /**
- * The developer details variant is reviewed on its own page; the individual
- * and organisation variants share one. The variant is resolved on the server
- * by saveEnterAddress, never from the submitted form.
- * @param {{ formVariant?: string }} data - the merged request to use session data with the server-resolved variant
+ * Every variant is reviewed on the same page, so the redirect needs no
+ * branching on the submitted data.
  * @returns {string} path of the page to redirect to
  */
-export default function getNextPage(data = {}) {
-  return data.formVariant === 'agent'
-    ? reviewDeveloperDetailsPath
-    : reviewYourDetailsPath
+export default function getNextPage() {
+  return reviewDetailsPath
 }
