@@ -30,16 +30,55 @@ function promoteBoundaryToCache(request, cacheData) {
   request.yar.clear('boundaryFailureReason')
 }
 
-function redirectToExcludedArea(
-  boundaryGeojson,
-  request,
-  h,
-  dropoutExcludedAreaPath
-) {
+/**
+ * Promotes a checked upload from the top-level boundary session keys to the
+ * quote cache. The filename is lifted out of the geojson blob so it posts to
+ * the backend as a top-level field, and every promote must pass it: the cache
+ * save merges per-key, so omitting it leaves the previous upload's filename
+ * stuck to the new boundary.
+ * @param {import('@hapi/hapi').Request} request - the incoming request
+ * @param {object} boundaryGeojson - the checked boundary blob from the
+ *   boundary check, which embeds the filename
+ * @returns {void}
+ */
+function promoteCheckedBoundary(request, boundaryGeojson) {
+  const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
+  promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
+}
+
+/**
+ * Caches a checked boundary that is dropping out, then redirects to the
+ * dropout page. The ineligible boundary is cached the same way an eligible
+ * one is, so a continue from the summary page re-runs the same dropout
+ * decision instead of pricing the previous boundary.
+ * @param {object} boundaryGeojson - the checked boundary blob, when one is in
+ *   session
+ * @param {import('@hapi/hapi').Request} request - the incoming request
+ * @param {import('@hapi/hapi').ResponseToolkit} h - the response toolkit
+ * @param {string} dropoutPath - the dropout page to redirect to
+ * @returns {import('@hapi/hapi').ResponseObject} the redirect response
+ */
+function redirectToBoundaryDropout(boundaryGeojson, request, h, dropoutPath) {
   if (boundaryGeojson) {
-    promoteBoundaryToCache(request, { boundaryGeojson })
+    promoteCheckedBoundary(request, boundaryGeojson)
   }
-  return h.redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
+  return h.redirect(appendChangeParam(dropoutPath, request.query))
+}
+
+/**
+ * Derives the eligibility flags both handlers triage on, from the checked
+ * boundary's intersect lists.
+ * @param {object} resolvedGeojson - the checked boundary blob, from session or
+ *   the quote cache
+ * @returns {{intersectsEdp: boolean, intersectsExcludedArea: boolean}} whether
+ *   the boundary intersects an EDP and an EDP exclusion zone
+ */
+function resolveBoundaryIntersections(resolvedGeojson) {
+  return {
+    intersectsEdp: resolvedGeojson?.intersectingEdps?.length > 0,
+    intersectsExcludedArea:
+      resolvedGeojson?.intersectingExcludedAreas?.length > 0
+  }
 }
 
 /**
@@ -74,21 +113,16 @@ function createPostHandler({
         .code(statusCodes.redirectAfterPost)
     }
 
-    // Lift the filename out of the geojson blob so it lives at the top of the
-    // quote cache alongside other submit fields, and posts to the backend as a
-    // top-level column rather than a buried property.
-    const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null
-
     if (boundaryGeojson) {
-      promoteBoundaryToCache(request, { boundaryGeojson, boundaryFilename })
+      promoteCheckedBoundary(request, boundaryGeojson)
     }
 
     // The GET handler redirects non-intersecting boundaries away before the
     // form renders, but guard the POST too in case of a stale or direct submit.
-    const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
-    const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
-    const intersectsExcludedArea =
-      resolvedGeojson?.intersectingExcludedAreas?.length > 0
+    const { intersectsEdp, intersectsExcludedArea } =
+      resolveBoundaryIntersections(
+        boundaryGeojson || quoteCache.boundaryGeojson
+      )
     if (intersectsExcludedArea) {
       return h
         .redirect(appendChangeParam(dropoutExcludedAreaPath, request.query))
@@ -156,9 +190,8 @@ export const createFilePreviewHandlers = ({
     }
 
     const resolvedGeojson = boundaryGeojson || quoteCache.boundaryGeojson
-    const intersectsEdp = resolvedGeojson?.intersectingEdps?.length > 0
-    const intersectsExcludedArea =
-      resolvedGeojson?.intersectingExcludedAreas?.length > 0
+    const { intersectsEdp, intersectsExcludedArea } =
+      resolveBoundaryIntersections(resolvedGeojson)
 
     // A valid boundary that won't reach the email step has nothing to preview
     // here, so send the user straight to the relevant outcome page. An excluded
@@ -170,7 +203,7 @@ export const createFilePreviewHandlers = ({
         { intersectsExcludedArea },
         'map - boundary intersects an excluded area, redirecting to excluded-area'
       )
-      return redirectToExcludedArea(
+      return redirectToBoundaryDropout(
         boundaryGeojson,
         request,
         h,
@@ -183,7 +216,12 @@ export const createFilePreviewHandlers = ({
         { intersectsEdp },
         'map - boundary does not intersect EDP, redirecting to no-edp'
       )
-      return h.redirect(appendChangeParam(dropoutNotInEdpPath, request.query))
+      return redirectToBoundaryDropout(
+        boundaryGeojson,
+        request,
+        h,
+        dropoutNotInEdpPath
+      )
     }
 
     const boundaryFilename = boundaryGeojson?.boundaryFilename ?? null

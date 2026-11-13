@@ -96,19 +96,44 @@ describe('map controller', () => {
       )
     })
 
-    it('should save boundaryGeojson to cache and redirect to excluded-area when the boundary intersects an excluded area', () => {
+    it('should save the boundary and its filename to the quote cache and redirect to excluded-area when the boundary intersects an excluded area', () => {
       const h = createMockH()
-      const request = createMockRequest(mockExcludedAreaGeojson)
+      const excludedAreaUpload = {
+        ...mockExcludedAreaGeojson,
+        boundaryFilename: 'excluded-boundary.shp'
+      }
+      const request = createMockRequest(excludedAreaUpload)
       getQuoteDataFromCache.mockReturnValue({})
 
       handler(request, h)
 
       expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
-        boundaryGeojson: mockExcludedAreaGeojson
+        boundaryGeojson: excludedAreaUpload,
+        boundaryFilename: 'excluded-boundary.shp'
       })
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
       expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
       expect(h.redirect).toHaveBeenCalledWith(excludedAreaPath)
+    })
+
+    it('should save the boundary and its filename to the quote cache and redirect to not-in-edp when no EDP intersects', () => {
+      const h = createMockH()
+      const noEdpUpload = {
+        ...mockGeojson,
+        boundaryFilename: 'no-edp-boundary.shp'
+      }
+      const request = createMockRequest(noEdpUpload)
+      getQuoteDataFromCache.mockReturnValue({})
+
+      handler(request, h)
+
+      expect(saveQuoteDataToCache).toHaveBeenCalledWith(request, {
+        boundaryGeojson: noEdpUpload,
+        boundaryFilename: 'no-edp-boundary.shp'
+      })
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryGeojson')
+      expect(request.yar.clear).toHaveBeenCalledWith('boundaryFailureReason')
+      expect(h.redirect).toHaveBeenCalledWith('/quote/not-in-edp')
     })
 
     it('should render the view with boundary data when it intersects an EDP', () => {
