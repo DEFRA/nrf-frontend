@@ -5,7 +5,7 @@
 {% endif %}
 
 <p class="govuk-body">
-    Email: <a href="mailto:{{ contactDetails.email }}" class="govuk-link">{{ contactDetails.email }}</a><br>
+    Email: <a href="mailto:{{ contactDetails.email }}{% if mailtoSubject %}?subject={{ mailtoSubject | urlencode }}{% endif %}" class="govuk-link">{{ contactDetails.email }}</a><br>
     Telephone: {{ contactDetails.telephone }}<br>
     {{ contactDetails.openingHours }}
 </p>

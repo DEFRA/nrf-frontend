@@ -5,6 +5,7 @@ import routesEnterEmail from './enter-email/routes.js'
 import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesEnterAddress from './enter-address/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
+import routesReadThis from './read-this/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
 import routesAcceptLevy from './accept-levy/routes.js'
@@ -55,6 +56,7 @@ export const requestToUse = {
         ...routesEmailConfirmation,
         ...routesEnterAddress,
         ...routesCheckYourAnswers,
+        ...routesReadThis,
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,
         ...routesAcceptLevy,

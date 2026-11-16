@@ -48,12 +48,12 @@ describe('Check your answers page', () => {
     ).toBeInTheDocument()
   })
 
-  it('should link back to the enter address page', async () => {
+  it('should link back to the read this page', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/enter-address'
+      '/request-to-use/read-this'
     )
   })
 
