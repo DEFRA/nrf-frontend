@@ -34,6 +34,13 @@ const validAddress = {
 const developerFullName = 'Trevor Barker'
 const accountFullName = 'Test User'
 
+// Summary list row keys (SonarQube S1192)
+const rowKeys = {
+  fullName: 'Full name',
+  businessName: 'Business name',
+  address: 'Address'
+}
+
 const agentSession = {
   address: { ...validAddress, fullName: developerFullName },
   signin: {
@@ -176,7 +183,7 @@ describe('Review and confirm the developer details page', () => {
           `${heading} - Nature restoration levy - GOV.UK`
         )
 
-        expect(findRow(document, 'Full name')).toHaveTextContent(fullName)
+        expect(findRow(document, rowKeys.fullName)).toHaveTextContent(fullName)
         if (canChangeFullName) {
           expect(
             getByRole(document, 'link', { name: /the developer's full name/ })
@@ -188,7 +195,7 @@ describe('Review and confirm the developer details page', () => {
         }
 
         if (businessName) {
-          expect(findRow(document, 'Business name')).toHaveTextContent(
+          expect(findRow(document, rowKeys.businessName)).toHaveTextContent(
             businessName
           )
           if (canChangeBusinessName) {
@@ -200,13 +207,13 @@ describe('Review and confirm the developer details page', () => {
             )
           }
         } else {
-          expect(findRow(document, 'Business name')).toBeUndefined()
+          expect(findRow(document, rowKeys.businessName)).toBeUndefined()
         }
 
-        expect(findRow(document, 'Address')).toHaveTextContent(
+        expect(findRow(document, rowKeys.address)).toHaveTextContent(
           validAddress.addressLine1
         )
-        expect(findRow(document, 'Address')).toHaveTextContent(
+        expect(findRow(document, rowKeys.address)).toHaveTextContent(
           validAddress.postcode
         )
         expect(
@@ -337,7 +344,7 @@ describe('Review and confirm the developer details page', () => {
           server: getServer(),
           cookie: savedCookie
         })
-        expect(findRow(firstView, 'Address')).toHaveTextContent(
+        expect(findRow(firstView, rowKeys.address)).toHaveTextContent(
           validAddress.addressLine1
         )
 
@@ -357,14 +364,14 @@ describe('Review and confirm the developer details page', () => {
           server: getServer(),
           cookie: changedCookie
         })
-        expect(findRow(secondView, 'Address')).toHaveTextContent(
+        expect(findRow(secondView, rowKeys.address)).toHaveTextContent(
           changedAddress.addressLine1
         )
-        expect(findRow(secondView, 'Address')).toHaveTextContent(
+        expect(findRow(secondView, rowKeys.address)).toHaveTextContent(
           changedAddress.townOrCity
         )
         if (changedFullName) {
-          expect(findRow(secondView, 'Full name')).toHaveTextContent(
+          expect(findRow(secondView, rowKeys.fullName)).toHaveTextContent(
             changedFullName
           )
         }
