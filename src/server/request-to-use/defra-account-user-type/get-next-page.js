@@ -6,19 +6,19 @@ import { routePath as defraAccountAgentPath } from '../defra-account-agent/route
 /**
  * Each answer goes to its own Defra account page. Enter address requires sign-in, so this is
  * also where a signed-out user is sent to Defra ID.
- * @param {{ defraId?: { userType?: string } }} data - the merged request to use session data
+ * @param {{ signin?: { intendedUserType?: string } }} data - the merged request to use session data
  * @returns {string} path of the page to redirect to
  */
 export default function getNextPage(data = {}) {
-  if (data.defraId?.userType === 'individual') {
+  if (data.signin?.intendedUserType === 'individual') {
     return defraAccountIndividualPath
   }
 
-  if (data.defraId?.userType === 'organisation') {
+  if (data.signin?.intendedUserType === 'organisation') {
     return defraAccountOrganisationPath
   }
 
-  if (data.defraId?.userType === 'agent') {
+  if (data.signin?.intendedUserType === 'agent') {
     return defraAccountAgentPath
   }
 

@@ -15,6 +15,8 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/route-path.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
+import { clearAccountAnswers } from '../request-to-use/helpers/request-to-use-session/index.js'
+import { clearValidationFlashFromCache } from '../common/helpers/form-validation-session/index.js'
 
 const logger = createLogger()
 
@@ -33,6 +35,31 @@ const signInErrorView = (h, error, statusCode = statusCodes.badRequest) =>
       error
     })
     .code(statusCode)
+
+/**
+ * Drops the session the user had before signing in. Signing in as a different
+ * account (not just re-signing in as the same one) also discards what the
+ * previous account entered.
+ * @param {import('@hapi/hapi').Request} request
+ * @param {string} [newRelationshipId] - currentRelationshipId from the new token
+ * @returns {Promise<void>}
+ */
+async function discardPreviousSession(request, newRelationshipId) {
+  const previousSessionId = request.yar.get('sessionId')
+  if (!previousSessionId) {
+    return
+  }
+  const sessionCache = request.server.app.sessionCache
+  const previousSession = await sessionCache.get(previousSessionId)
+  if (
+    previousSession &&
+    previousSession.profile?.currentRelationshipId !== newRelationshipId
+  ) {
+    clearAccountAnswers(request)
+    clearValidationFlashFromCache(request)
+  }
+  await sessionCache.drop(previousSessionId)
+}
 
 /**
  * Initiate OAuth flow - redirects to DEFRA Identity
@@ -163,8 +190,11 @@ export const signInOidcController = {
       // Create user session
       const userSession = createUserSession(credentials)
 
-      // Store session in cache
       const sessionCache = request.server.app.sessionCache
+
+      await discardPreviousSession(request, payload.currentRelationshipId)
+
+      // Store session in cache
       await sessionCache.set(userSession.sessionId, userSession)
 
       // Store session ID in Yar

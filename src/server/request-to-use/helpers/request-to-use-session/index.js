@@ -19,7 +19,7 @@ const originalNrlReference = originalReferenceValidation()
 
 const acceptLevy = acceptLevyValidation().extract('acceptLevy').optional()
 
-const userType = defraAccountUserTypeValidation().extract(
+const intendedUserType = defraAccountUserTypeValidation().extract(
   'defraAccountUserType'
 )
 
@@ -28,10 +28,6 @@ const variation = variationValidation().extract('variation').optional()
 const originalCommitted = originalCommittedValidation()
   .extract('originalCommitted')
   .optional()
-
-const defraId = joi.object({
-  userType
-})
 
 const levy = joi.object({
   calculationDate: joi.string().required(),
@@ -56,12 +52,34 @@ const postcode = joi.string().max(maxPostcodeLength).allow('').optional()
 // A snapshot of who was submitting, taken when the address is confirmed, so
 // the review page and the eventual commitment certificate record have the
 // resolved account type and organisation without re-reading the claims.
-const accountType = joi
+const actualUserType = joi
   .string()
   .valid('individual', 'employee', 'agent')
   .optional()
-const organisationName = joi.string().max(maxTextLength).allow('').optional()
-const organisationId = joi.string().max(maxTextLength).allow('').optional()
+const organisation = joi
+  .object({
+    organisationName: joi.string().max(maxTextLength).allow('').optional(),
+    organisationId: joi.string().max(maxTextLength).allow('').optional()
+  })
+  .optional()
+
+// intendedUserType is the user's answer before signing in, kept as a record
+// only. actualUserType and organisation come from the Defra ID account the
+// user signed in with and are cleared when they switch account.
+const signin = joi.object({
+  intendedUserType: intendedUserType.optional(),
+  actualUserType,
+  organisation
+})
+
+const address = joi.object({
+  fullName,
+  addressLine1,
+  addressLine2,
+  townOrCity,
+  county,
+  postcode
+})
 
 export const requestToUseSession = createSessionNamespace({
   key: 'requestToUse',
@@ -72,16 +90,8 @@ export const requestToUseSession = createSessionNamespace({
     acceptLevy,
     variation,
     originalCommitted,
-    defraId,
-    fullName,
-    addressLine1,
-    addressLine2,
-    townOrCity,
-    county,
-    postcode,
-    accountType,
-    organisationName,
-    organisationId
+    signin,
+    address
   })
 })
 
@@ -98,46 +108,73 @@ export const saveOriginalReference = (request, payload) =>
   })
 
 /**
- * Saves the who are you requesting to use the levy for answer under defraId,
- * keeping any other post-login values already saved there.
+ * Saves the who are you requesting to use the levy for answer as the user's
+ * intended user type, keeping any other sign in values already saved.
  * @param {import('@hapi/hapi').Request} request
  * @param {{ defraAccountUserType: string }} payload
  * @returns {object | null} the merged request to use data
  */
 export const saveDefraAccountUserType = (request, payload) =>
   requestToUseSession.save(request, {
-    defraId: {
-      ...requestToUseSession.get(request)?.defraId,
-      userType: payload.defraAccountUserType
+    signin: {
+      ...requestToUseSession.get(request)?.signin,
+      intendedUserType: payload.defraAccountUserType
     }
   })
 
 /**
  * Saves the enter address answers together with a snapshot of the resolved
- * account type and the organisation, leaving the rest of the request to use
- * session untouched. The account type is resolved on the server; the hidden
- * formVariant field is never saved.
+ * user type and the organisation, leaving the rest of the request to use
+ * session untouched. The user type is resolved on the server from the Defra ID
+ * relationship; the hidden formVariant field is never saved.
  * @param {import('@hapi/hapi').Request} request
  * @param {{ fullName?: string, addressLine1: string, addressLine2?: string, townOrCity: string, county?: string, postcode: string }} payload
  * @returns {object | null} the merged request to use data
  */
 export const saveEnterAddress = (request, payload) => {
-  const { organisation } = request.auth.credentials?.profile ?? {}
-  const session = requestToUseSession.get(request)
-  const accountType = getEnterAddressVariant({
-    defraIdUserType: session?.defraId?.userType,
-    userRelationshipType: organisation?.userRelationshipType
+  const profileOrganisation =
+    request.auth.credentials?.profile?.organisation ?? {}
+  const actualUserType = getEnterAddressVariant({
+    userRelationshipType: profileOrganisation.userRelationshipType
   })
 
   return requestToUseSession.save(request, {
-    fullName: payload.fullName ?? '',
-    addressLine1: payload.addressLine1,
-    addressLine2: payload.addressLine2 ?? '',
-    townOrCity: payload.townOrCity,
-    county: payload.county ?? '',
-    postcode: payload.postcode,
-    accountType,
-    organisationName: organisation?.organisationName ?? '',
-    organisationId: organisation?.organisationId ?? ''
+    address: {
+      fullName: payload.fullName ?? '',
+      addressLine1: payload.addressLine1,
+      addressLine2: payload.addressLine2 ?? '',
+      townOrCity: payload.townOrCity,
+      county: payload.county ?? '',
+      postcode: payload.postcode
+    },
+    signin: {
+      ...requestToUseSession.get(request)?.signin,
+      actualUserType,
+      organisation: {
+        organisationName: profileOrganisation.organisationName ?? '',
+        organisationId: profileOrganisation.organisationId ?? ''
+      }
+    }
+  })
+}
+
+/**
+ * Clears what belongs to the Defra ID account the user signed in with (the
+ * address, the organisation and the resolved user type), keeping the intended
+ * user type and every other answer.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {void}
+ */
+export const clearAccountAnswers = (request) => {
+  const session = requestToUseSession.get(request)
+  if (!session) {
+    return
+  }
+  const { address: _address, signin, ...rest } = session
+  const { intendedUserType } = signin ?? {}
+  requestToUseSession.clear(request)
+  requestToUseSession.save(request, {
+    ...rest,
+    ...(intendedUserType && { signin: { intendedUserType } })
   })
 }

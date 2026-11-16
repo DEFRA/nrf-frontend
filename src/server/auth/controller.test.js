@@ -9,6 +9,15 @@ import { http, HttpResponse } from 'msw'
 import { getOidcConfig } from './get-oidc-config.js'
 import { setupMswServer } from '../../test-utils/setup-msw-server.js'
 import { describe, it, expect, vi } from 'vitest'
+import { clearAccountAnswers } from '../request-to-use/helpers/request-to-use-session/index.js'
+import { clearValidationFlashFromCache } from '../common/helpers/form-validation-session/index.js'
+
+vi.mock('../request-to-use/helpers/request-to-use-session/index.js', () => ({
+  clearAccountAnswers: vi.fn()
+}))
+vi.mock('../common/helpers/form-validation-session/index.js', () => ({
+  clearValidationFlashFromCache: vi.fn()
+}))
 
 const { tokenEndpoint } = vi.hoisted(() => ({
   tokenEndpoint: 'https://auth.example.com/token'
@@ -161,6 +170,7 @@ describe('Auth Controllers', () => {
 
     beforeEach(() => {
       mockSessionCache = {
+        get: vi.fn(),
         set: vi.fn(),
         drop: vi.fn()
       }
@@ -289,9 +299,10 @@ describe('Auth Controllers', () => {
     it('should successfully complete authentication flow', async () => {
       request.query.code = 'auth-code'
       request.query.state = 'matching-state'
-      request.yar.get
-        .mockReturnValueOnce('matching-state') // oauth_state
-        .mockReturnValueOnce('/dashboard') // redirectTo
+      request.yar.get.mockImplementation(
+        (key) =>
+          ({ oauth_state: 'matching-state', redirectTo: '/dashboard' })[key]
+      )
 
       const userPayload = {
         sub: 'user-123',
@@ -340,6 +351,64 @@ describe('Auth Controllers', () => {
       // Verify redirect state is cleared and user is redirected
       expect(request.yar.clear).toHaveBeenCalledWith('redirectTo')
       expect(h.redirect).toHaveBeenCalledWith('/dashboard')
+    })
+
+    describe('when signing in over an existing session', () => {
+      const signInWithRelationship = async (
+        previousRelationshipId,
+        newRelationshipId
+      ) => {
+        request.query.code = 'auth-code'
+        request.query.state = 'matching-state'
+        request.yar.get.mockImplementation(
+          (key) =>
+            ({
+              oauth_state: 'matching-state',
+              sessionId: previousRelationshipId ? 'old-session-id' : undefined
+            })[key]
+        )
+        mockSessionCache.get.mockResolvedValue(
+          previousRelationshipId
+            ? { profile: { currentRelationshipId: previousRelationshipId } }
+            : undefined
+        )
+        const idToken = Jwt.token.generate(
+          { sub: 'user-123', currentRelationshipId: newRelationshipId },
+          { key: 'test-secret' }
+        )
+        mswServer.use(
+          http.post(tokenEndpoint, () =>
+            HttpResponse.json({
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              id_token: idToken,
+              expires_in: 3600
+            })
+          )
+        )
+        await signInOidcController.handler(request, h)
+      }
+
+      it('clears the previous account answers when the account changed', async () => {
+        await signInWithRelationship('rel-old', 'rel-new')
+
+        expect(clearAccountAnswers).toHaveBeenCalledWith(request)
+        expect(clearValidationFlashFromCache).toHaveBeenCalledWith(request)
+        expect(mockSessionCache.drop).toHaveBeenCalledWith('old-session-id')
+      })
+
+      it('keeps the answers when the same account is chosen again', async () => {
+        await signInWithRelationship('rel-same', 'rel-same')
+
+        expect(clearAccountAnswers).not.toHaveBeenCalled()
+        expect(clearValidationFlashFromCache).not.toHaveBeenCalled()
+      })
+
+      it('keeps the answers when there was no previous session', async () => {
+        await signInWithRelationship(undefined, 'rel-new')
+
+        expect(clearAccountAnswers).not.toHaveBeenCalled()
+      })
     })
   })
 

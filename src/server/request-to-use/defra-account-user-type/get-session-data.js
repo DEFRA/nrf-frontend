@@ -8,7 +8,7 @@ export function getSessionData(request) {
   const session = requestToUseSession.get(request)
 
   return {
-    defraAccountUserType: session?.defraId?.userType,
+    defraAccountUserType: session?.signin?.intendedUserType,
     variation: session?.variation,
     originalCommitted: session?.originalCommitted
   }
