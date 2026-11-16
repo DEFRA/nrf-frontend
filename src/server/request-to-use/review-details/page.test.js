@@ -13,6 +13,14 @@ import {
   multiOrgEmployeeClaims,
   singleOrgEmployeeClaims
 } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import {
+  accountFullName,
+  agentOrganisationName,
+  developerFullName,
+  reviewDetailsAddress,
+  reviewDetailsSessions
+} from '../../../test-utils/fixtures/review-details-personas.js'
+import { findSummaryListRowElement } from '../../../test-utils/find-summary-list-row.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { seedRequestToUseSessionWith } from '../../../test-utils/setup-seeded-request-to-use-server.js'
@@ -21,48 +29,17 @@ const ROUTE_PATH = '/request-to-use/review-details'
 const ENTER_ADDRESS_PATH = '/request-to-use/enter-address'
 const { getServer, signIn } = setupSignedInTestServer()
 
-const agentOrganisationName = 'CDP Beneficiary Org'
-
-const validAddress = {
-  addressLine1: '1 Development Road',
-  addressLine2: 'Building 2',
-  townOrCity: 'Development',
-  county: 'Devonshire',
-  postcode: 'DV1 6RP'
-}
-
-const developerFullName = 'Trevor Barker'
-const accountFullName = 'Test User'
+const {
+  agent: agentSession,
+  employee: employeeSession,
+  individual: individualSession
+} = reviewDetailsSessions
 
 // Summary list row keys (SonarQube S1192)
 const rowKeys = {
   fullName: 'Full name',
   businessName: 'Business name',
   address: 'Address'
-}
-
-const agentSession = {
-  address: { ...validAddress, fullName: developerFullName },
-  signin: {
-    actualUserType: 'agent',
-    organisation: { organisationName: agentOrganisationName }
-  }
-}
-
-const employeeSession = {
-  address: { ...validAddress, fullName: '' },
-  signin: {
-    actualUserType: 'employee',
-    organisation: { organisationName: firstOrgName }
-  }
-}
-
-const individualSession = {
-  address: { ...validAddress, fullName: '' },
-  signin: {
-    actualUserType: 'individual',
-    organisation: { organisationName: '' }
-  }
 }
 
 let seededSession = null
@@ -81,19 +58,6 @@ const loadSignedInPage = async ({ claims, session } = {}) => {
   const { cookie } = await signIn({ claims })
   return loadPage({ requestUrl: ROUTE_PATH, server: getServer(), cookie })
 }
-
-/**
- * Finds the summary list row whose key matches, so value text and change
- * links can be asserted within the right row.
- * @param {Document} document - the loaded page
- * @param {string} key - the row's key text
- * @returns {HTMLElement | undefined} the row element
- */
-const findRow = (document, key) =>
-  Array.from(document.querySelectorAll('.govuk-summary-list__row')).find(
-    (row) =>
-      row.querySelector('.govuk-summary-list__key')?.textContent.trim() === key
-  )
 
 describe('Review and confirm the developer details page', () => {
   it('redirects a signed-out visitor to sign in', async () => {
@@ -183,7 +147,9 @@ describe('Review and confirm the developer details page', () => {
           `${heading} - Nature restoration levy - GOV.UK`
         )
 
-        expect(findRow(document, rowKeys.fullName)).toHaveTextContent(fullName)
+        expect(
+          findSummaryListRowElement(document, rowKeys.fullName)
+        ).toHaveTextContent(fullName)
         if (canChangeFullName) {
           expect(
             getByRole(document, 'link', { name: /the developer's full name/ })
@@ -195,9 +161,9 @@ describe('Review and confirm the developer details page', () => {
         }
 
         if (businessName) {
-          expect(findRow(document, rowKeys.businessName)).toHaveTextContent(
-            businessName
-          )
+          expect(
+            findSummaryListRowElement(document, rowKeys.businessName)
+          ).toHaveTextContent(businessName)
           if (canChangeBusinessName) {
             expect(
               getByRole(document, 'link', { name: /the business name/ })
@@ -207,15 +173,17 @@ describe('Review and confirm the developer details page', () => {
             )
           }
         } else {
-          expect(findRow(document, rowKeys.businessName)).toBeUndefined()
+          expect(
+            findSummaryListRowElement(document, rowKeys.businessName)
+          ).toBeUndefined()
         }
 
-        expect(findRow(document, rowKeys.address)).toHaveTextContent(
-          validAddress.addressLine1
-        )
-        expect(findRow(document, rowKeys.address)).toHaveTextContent(
-          validAddress.postcode
-        )
+        expect(
+          findSummaryListRowElement(document, rowKeys.address)
+        ).toHaveTextContent(reviewDetailsAddress.addressLine1)
+        expect(
+          findSummaryListRowElement(document, rowKeys.address)
+        ).toHaveTextContent(reviewDetailsAddress.postcode)
         expect(
           getByRole(document, 'link', {
             name: /the developer's address|your address/
@@ -298,7 +266,7 @@ describe('Review and confirm the developer details page', () => {
 
   describe('changing an answer from a change link', () => {
     const changedAddress = {
-      ...validAddress,
+      ...reviewDetailsAddress,
       addressLine1: '2 Amended Street',
       townOrCity: 'Amended'
     }
@@ -335,7 +303,7 @@ describe('Review and confirm the developer details page', () => {
         const { cookie: savedCookie } = await submitForm({
           requestUrl: ENTER_ADDRESS_PATH,
           server: getServer(),
-          formData: { formVariant, fullName, ...validAddress },
+          formData: { formVariant, fullName, ...reviewDetailsAddress },
           cookie
         })
 
@@ -344,9 +312,9 @@ describe('Review and confirm the developer details page', () => {
           server: getServer(),
           cookie: savedCookie
         })
-        expect(findRow(firstView, rowKeys.address)).toHaveTextContent(
-          validAddress.addressLine1
-        )
+        expect(
+          findSummaryListRowElement(firstView, rowKeys.address)
+        ).toHaveTextContent(reviewDetailsAddress.addressLine1)
 
         const { cookie: changedCookie } = await submitForm({
           requestUrl: ENTER_ADDRESS_PATH,
@@ -364,16 +332,16 @@ describe('Review and confirm the developer details page', () => {
           server: getServer(),
           cookie: changedCookie
         })
-        expect(findRow(secondView, rowKeys.address)).toHaveTextContent(
-          changedAddress.addressLine1
-        )
-        expect(findRow(secondView, rowKeys.address)).toHaveTextContent(
-          changedAddress.townOrCity
-        )
+        expect(
+          findSummaryListRowElement(secondView, rowKeys.address)
+        ).toHaveTextContent(changedAddress.addressLine1)
+        expect(
+          findSummaryListRowElement(secondView, rowKeys.address)
+        ).toHaveTextContent(changedAddress.townOrCity)
         if (changedFullName) {
-          expect(findRow(secondView, rowKeys.fullName)).toHaveTextContent(
-            changedFullName
-          )
+          expect(
+            findSummaryListRowElement(secondView, rowKeys.fullName)
+          ).toHaveTextContent(changedFullName)
         }
       }
     )

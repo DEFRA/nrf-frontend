@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
+import { firstOrgName } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import {
+  accountFullName,
+  agentOrganisationName,
+  developerFullName,
+  reviewDetailsAddress,
+  reviewDetailsSessions
+} from '../../../test-utils/fixtures/review-details-personas.js'
+
+// Declared as a literal rather than imported: a wrong change to the route must
+// fail this test (tests.md, constants vs literals).
+const enterAddressPath = '/request-to-use/enter-address'
 
 // Row keys and change link hidden texts are the user-visible summary list
 // contract; consts keep each literal to one occurrence (SonarQube S1192).
@@ -10,34 +22,25 @@ const rowKeys = {
   address: 'Address'
 }
 
-const address = {
-  fullName: 'Trevor Barker',
-  addressLine1: '1 Development Road',
-  addressLine2: 'Building 2',
-  townOrCity: 'Development',
-  county: 'Devonshire',
-  postcode: 'DV1 6RP'
-}
-
 const agentData = {
   variant: 'agent',
-  accountFullName: 'Test User',
-  businessName: 'CDP Beneficiary Org',
-  address
+  accountFullName,
+  businessName: agentOrganisationName,
+  address: reviewDetailsSessions.agent.address
 }
 
 const employeeData = {
   variant: 'employee',
-  accountFullName: 'Test User',
-  businessName: 'CDP Child Org 1',
-  address: { ...address, fullName: '' }
+  accountFullName,
+  businessName: firstOrgName,
+  address: reviewDetailsSessions.employee.address
 }
 
 const individualData = {
   variant: 'individual',
-  accountFullName: 'Test User',
+  accountFullName,
   businessName: '',
-  address: { ...address, fullName: '' }
+  address: reviewDetailsSessions.individual.address
 }
 
 describe('Review and confirm the developer details view model', () => {
@@ -74,9 +77,7 @@ describe('Review and confirm the developer details view model', () => {
   )
 
   it('links back to the enter address page', () => {
-    expect(getViewModel(agentData).backLinkPath).toBe(
-      '/request-to-use/enter-address'
-    )
+    expect(getViewModel(agentData).backLinkPath).toBe(enterAddressPath)
   })
 
   it('builds the agent rows in order with the saved answers', () => {
@@ -88,10 +89,10 @@ describe('Review and confirm the developer details view model', () => {
       rowKeys.address
     ])
     expect(findSummaryListRow(view, rowKeys.fullName).value.text).toBe(
-      'Trevor Barker'
+      developerFullName
     )
     expect(findSummaryListRow(view, rowKeys.businessName).value.text).toBe(
-      'CDP Beneficiary Org'
+      agentOrganisationName
     )
   })
 
@@ -99,7 +100,7 @@ describe('Review and confirm the developer details view model', () => {
     for (const data of [employeeData, individualData]) {
       expect(
         findSummaryListRow(getViewModel(data), rowKeys.fullName).value.text
-      ).toBe('Test User')
+      ).toBe(accountFullName)
     }
   })
 
@@ -117,14 +118,14 @@ describe('Review and confirm the developer details view model', () => {
 
     expect(findSummaryListRow(view, rowKeys.fullName).actions.items).toEqual([
       {
-        href: '/request-to-use/enter-address',
+        href: enterAddressPath,
         text: 'Change',
         visuallyHiddenText: "the developer's full name"
       }
     ])
     expect(findSummaryListRow(view, rowKeys.address).actions.items).toEqual([
       {
-        href: '/request-to-use/enter-address',
+        href: enterAddressPath,
         text: 'Change',
         visuallyHiddenText: "the developer's address"
       }
@@ -155,7 +156,7 @@ describe('Review and confirm the developer details view model', () => {
     ).toBeUndefined()
     expect(findSummaryListRow(view, rowKeys.address).actions.items).toEqual([
       {
-        href: '/request-to-use/enter-address',
+        href: enterAddressPath,
         text: 'Change',
         visuallyHiddenText: 'your address'
       }
@@ -166,14 +167,17 @@ describe('Review and confirm the developer details view model', () => {
     const view = getViewModel(agentData)
 
     expect(findSummaryListRow(view, rowKeys.address).value.html).toBe(
-      '1 Development Road<br>Building 2<br>Development<br>Devonshire<br>DV1 6RP'
+      `${reviewDetailsAddress.addressLine1}<br>${reviewDetailsAddress.addressLine2}<br>${reviewDetailsAddress.townOrCity}<br>${reviewDetailsAddress.county}<br>${reviewDetailsAddress.postcode}`
     )
   })
 
   it('escapes user-controlled address lines', () => {
     const view = getViewModel({
       ...agentData,
-      address: { ...address, addressLine1: '<script>alert(1)</script>' }
+      address: {
+        ...reviewDetailsAddress,
+        addressLine1: '<script>alert(1)</script>'
+      }
     })
 
     expect(findSummaryListRow(view, rowKeys.address).value.html).toBe(
