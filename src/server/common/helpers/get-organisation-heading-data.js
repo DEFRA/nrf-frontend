@@ -1,6 +1,16 @@
 import { CHANGE_ORGANISATION_PATH } from '../../auth/auth-urls.js'
 
 /**
+ * The signed-in user's name: the account display name when the profile has
+ * one, otherwise the first and last name joined.
+ * @param {object} [profile] - the Defra ID profile from the auth credentials
+ * @returns {string} the display name, empty when the profile has none
+ */
+export const getDisplayName = (profile) =>
+  profile?.name ||
+  [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
+
+/**
  * Builds the view data for the organisation heading component. Returns nothing
  * to show when the request is unauthenticated or the session has no organisation.
  * The change organisation link returns the user to the page they clicked it on.
@@ -15,9 +25,7 @@ export const getOrganisationHeadingData = (request) => {
     shouldShowCitizenName
   } = profile?.organisation ?? {}
 
-  const displayName =
-    profile?.name ||
-    [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
+  const displayName = getDisplayName(profile)
 
   const nameToShow = hasMultipleOrgPickerEntries
     ? organisationName || displayName

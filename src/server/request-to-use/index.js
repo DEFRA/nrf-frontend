@@ -4,6 +4,7 @@ import routesEnterNrlReference from './enter-nrl-reference/routes.js'
 import routesEnterEmail from './enter-email/routes.js'
 import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesEnterAddress from './enter-address/routes.js'
+import routesReviewDetails from './review-details/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
 import routesReadThis from './read-this/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
@@ -55,6 +56,7 @@ export const requestToUse = {
         ...routesEnterEmail,
         ...routesEmailConfirmation,
         ...routesEnterAddress,
+        ...routesReviewDetails,
         ...routesCheckYourAnswers,
         ...routesReadThis,
         ...routesQuoteNotMatched,
