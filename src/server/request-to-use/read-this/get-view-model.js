@@ -1,7 +1,7 @@
+import { formatCurrency } from '@defra/nrf-library'
 import { EDP_NAME } from '../../../shared/edp.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
-import { formatLevyAmount } from '../helpers/format-levy-amount/index.js'
 
 export const pageHeading =
   'Details to read before you request to use the nature restoration levy'
@@ -27,7 +27,11 @@ export default function getViewModel(data) {
     continuePath: checkYourAnswersPath,
     edpName: EDP_NAME,
     nrlReference: data?.nrlReference,
-    provisionalAmount: formatLevyAmount(data.levy.provisionalAmount),
-    inflationAdjustedAmount: formatLevyAmount(data.levy.inflationAdjustedAmount)
+    provisionalAmount: formatCurrency(data.levy.provisionalAmount, {
+      hideZeroPence: true
+    }),
+    inflationAdjustedAmount: formatCurrency(data.levy.inflationAdjustedAmount, {
+      hideZeroPence: true
+    })
   }
 }

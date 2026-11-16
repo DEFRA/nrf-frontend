@@ -1,7 +1,7 @@
+import { formatCurrency } from '@defra/nrf-library'
 import { EDP_NAME } from '../../../shared/edp.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
-import { formatLevyAmount } from '../helpers/format-levy-amount/index.js'
 import { acceptLevyOptions } from './options.js'
 
 export const pageHeading = 'Do you accept this nature restoration levy amount?'
@@ -21,10 +21,12 @@ export default function getViewModel(data) {
     pageHeading,
     backLinkPath: reviewQuoteDetailsPath,
     edpName: EDP_NAME,
-    provisionalAmount: formatLevyAmount(data.levy.provisionalAmount),
-    inflationAdjustedAmount: formatLevyAmount(
-      data.levy.inflationAdjustedAmount
-    ),
+    provisionalAmount: formatCurrency(data.levy.provisionalAmount, {
+      hideZeroPence: true
+    }),
+    inflationAdjustedAmount: formatCurrency(data.levy.inflationAdjustedAmount, {
+      hideZeroPence: true
+    }),
     acceptLevyOptions
   }
 }
