@@ -4,10 +4,14 @@ import { getByRole } from '@testing-library/dom'
  * Asserts the shared "Get help with the nature restoration levy" block shows
  * the Natural England contact details and support hours.
  * @param {Document} container - rendered page document to assert against
- * @param {{ intro?: boolean }} [options] - set intro false where the intro
- * sentence is hidden (page not found error page)
+ * @param {{ intro?: boolean, mailtoSubject?: string }} [options] - set intro
+ * false where the intro sentence is hidden (page not found error page); pass
+ * mailtoSubject where the page prefills the email subject (read this page)
  */
-export const assertContactDetails = (container, { intro = true } = {}) => {
+export const assertContactDetails = (
+  container,
+  { intro = true, mailtoSubject = null } = {}
+) => {
   const main = getByRole(container, 'main')
   expect(
     getByRole(container, 'heading', {
@@ -33,7 +37,9 @@ export const assertContactDetails = (container, { intro = true } = {}) => {
   })
   expect(emailLink).toHaveAttribute(
     'href',
-    'mailto:enquiries@naturalengland.org.uk'
+    mailtoSubject
+      ? `mailto:enquiries@naturalengland.org.uk?subject=${mailtoSubject}`
+      : 'mailto:enquiries@naturalengland.org.uk'
   )
   const callChargesLink = getByRole(container, 'link', {
     name: 'Find out about call charges (opens in new tab)'

@@ -1,0 +1,98 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    <h2 class="govuk-heading-m">When you will receive your commitment certificate</h2>
+
+    <p class="govuk-body">Once Natural England accepts your request to use this levy, you will be issued a commitment certificate.</p>
+
+    <p class="govuk-body">You will receive an email within 5 minutes of submitting your request.</p>
+
+    <p class="govuk-body">Your commitment certificate will expire after 6 months from the date of issue, unless an application for planning permission is made.</p>
+
+    <h2 class="govuk-heading-m">The Environmental Delivery Plan (EDP) your development is planned in</h2>
+
+    <p class="govuk-body">{{ edpName }}.</p>
+
+    <p class="govuk-body">This commitment may be relied upon through the planning application process to disapply the relevant environmental obligations that would otherwise have arisen because of the environmental impact of the development.</p>
+
+    <p class="govuk-body">Environmental impacts of development not covered by this EDP will need to be addressed through other environmental assessment processes such as a <a href="https://www.gov.uk/guidance/habitats-regulations-assessments-protecting-a-european-site" class="govuk-link" target="_blank" rel="noopener noreferrer">habitats regulations assessment (opens in new tab)</a>.</p>
+
+    <h2 class="govuk-heading-m">Details of your levy amount</h2>
+
+    <h3 class="govuk-heading-s">Provisional nature restoration levy amount: {{ provisionalAmount }} (excluding VAT)</h3>
+
+    <p class="govuk-body">The provisional amount is calculated from the charging schedule in the relevant EDP.</p>
+
+    <h3 class="govuk-heading-s">Inflation-adjusted nature restoration levy amount: {{ inflationAdjustedAmount }} (excluding VAT)</h3>
+
+    <p class="govuk-body">The inflation-adjusted amount shows the indicative levy amount for the year this commitment was issued. Inflation adjustments will continue to apply until the total levy amount has been paid.</p>
+
+    {% set calculationDetailsHtml %}
+      <p class="govuk-body">The levy has been calculated from the details you submitted and the charging schedule for the relevant EDP. <a href="#" class="govuk-link" target="_blank" rel="noreferrer noopener">Read about the charging schedule for the EDP (opens in new tab)</a>.</p>
+    {% endset %}
+
+    {{ govukDetails({
+      summaryText: "How the nature restoration levy was calculated",
+      html: calculationDetailsHtml
+    }) }}
+
+    <h2 class="govuk-heading-m">Planning conditions to be imposed</h2>
+
+    <p class="govuk-body">Regulation 5 of the nature restoration levy Regulations ("Levy Regulations") 2026 requires the local planning authority to impose the statutory pre-commencement planning condition, requiring payment of the levy in full or the first instalment prior to commencement. This applies to any grant of planning permission, where development has not yet commenced, relying on a commitment to pay the nature restoration levy.</p>
+
+    <p class="govuk-body">In accordance with the requirements of the Environmental Delivery Plan set out above the local planning authority may be required to impose additional conditions as conservation measures where relevant.</p>
+
+    {{ govukTable({
+      caption: "Planning conditions to be imposed",
+      captionClasses: "govuk-visually-hidden",
+      firstCellIsHeader: true,
+      head: [
+        { text: "Planning condition" },
+        { text: "Condition to be imposed*" }
+      ],
+      rows: [
+        [
+          { text: "Statutory Nature Restoration Levy Condition" },
+          { text: "Development must not begin before either: liability to pay the levy is discharged, or if the levy is to be paid by instalments, liability to pay the first instalment is discharged." }
+        ],
+        [
+          { text: "Non-mains drainage (where relevant)" },
+          { text: "The development shall not be occupied unless a package treatment plant is installed on the site and operational to manage foul water; with operating efficiency rates achieving a discharge concentration of 5mg/l for Total Phosphorus and 27 mg/l for Total Nitrogen or lower, that will be maintained thereafter for the lifetime of the development." }
+        ]
+      ]
+    }) }}
+
+    <p class="govuk-body">*Planning decision-makers may make limited and reasonable amendments to planning conditions (with the exception of the statutory pre-commencement condition), to ensure conditions are operable for specific developments providing the intended outcome is maintained.</p>
+
+    <p class="govuk-body">See guidance for local planning authorities for <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">more information on handling commitments through the planning process (opens in new tab)</a>.</p>
+
+    <h2 class="govuk-heading-m">When you need to pay the nature restoration levy</h2>
+
+    <p class="govuk-body">If planning permission has been granted and you are ready to commence your development, you must assume liability to pay the levy. <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">Learn more about paying the nature restoration levy (opens in new tab)</a>.</p>
+
+    <p class="govuk-body"><a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">Read about nature restoration levy instalment plans (opens in new tab)</a> to understand your options for paying the levy.</p>
+
+    {% set mailtoSubject = nrlReference %}
+    {% include "partials/contact-details.njk" %}
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Continue",
+        href: continuePath
+      }) }}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

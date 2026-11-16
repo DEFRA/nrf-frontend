@@ -30,6 +30,7 @@ const defraAccountOrganisationPath =
   '/request-to-use/defra-account-organisation'
 const defraAccountAgentPath = '/request-to-use/defra-account-agent'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const readThisPath = '/request-to-use/read-this'
 
 describe('checkForValidReviewQuoteSession', () => {
   it('continues on the review quote details page when the session is valid', () => {
@@ -187,6 +188,7 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountOrganisationPath,
     defraAccountAgentPath,
     checkYourAnswersPath,
+    readThisPath,
     '/request-to-use/original-reference-not-matched',
     '/request-to-use/original-boundary-not-matched'
   ])('continues on %s when the session is valid', (path) => {
@@ -209,6 +211,7 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountOrganisationPath,
     defraAccountAgentPath,
     checkYourAnswersPath,
+    readThisPath,
     '/request-to-use/original-reference-not-matched',
     '/request-to-use/original-boundary-not-matched'
   ])('redirects %s to the start page when there is no session', (path) => {
