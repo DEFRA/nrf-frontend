@@ -77,13 +77,14 @@ export default function formValidation() {
     postcode: joi
       .string()
       .trim()
-      // Accept postcodes in any format: strip punctuation, collapse spaces,
-      // uppercase and restore the missing space rather than rejecting the
-      // value.
+      // Accept postcodes in any format: strip punctuation, collapse
+      // whitespace runs and uppercase. Keep a space only when it sits
+      // between the two postcode parts (before the final three
+      // characters); strip every other space. Never add or move one.
       .replace(/[^a-zA-Z0-9 ]/g, '')
       .replace(/\s+/g, ' ')
       .uppercase()
-      .replace(/^([A-Z0-9]{2,4})([A-Z0-9]{3})$/, '$1 $2')
+      .replace(/ (?![A-Z0-9]{3}$)/g, '')
       .max(maxPostcodeLength)
       .required()
       .messages({

@@ -122,12 +122,14 @@ describe('enter address form validation', () => {
     it.each([
       ['lower case', 'dv1 6rp', postcode],
       ['upper case', postcode, postcode],
-      ['no spaces', postcodeNoSpace, postcode],
+      ['no spaces', postcodeNoSpace, postcodeNoSpace],
+      ['a space in the wrong place', 'AB12C D', 'AB12CD'],
+      ['several misplaced spaces', 'D V16 RP', postcodeNoSpace],
       ['extra spaces at both ends', `  ${postcode}  `, postcode],
       ['extra spaces in the middle', 'DV1   6RP', postcode],
-      ['hyphens', 'DV1-6RP', postcode],
+      ['hyphens', 'DV1-6RP', postcodeNoSpace],
       ['brackets', '(DV1) 6RP', postcode],
-      ['full stops', 'DV1.6RP', postcode]
+      ['full stops', 'DV1.6RP', postcodeNoSpace]
     ])('accepts a postcode with %s', (_, postcode, normalised) => {
       const { error, value } = getSchema().validate({
         ...validRequiredData,
