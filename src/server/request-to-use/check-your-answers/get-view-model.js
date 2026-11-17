@@ -43,12 +43,13 @@ const boundaryAnswerText = (quote) => {
  * from their Defra ID account. Omitted rather than shown blank: a name is
  * only missing when the Defra ID profile carries none, and an individual
  * never has a business name.
- * @param {object} requestToUse - the request to use session data
- * @param {object} [address] - the saved enter address answers, already checked against the signed-in relationship
- * @param {string} [accountFullName] - the signed-in user's own name
+ * @param {object} params
+ * @param {object} params.requestToUse - the request to use session data
+ * @param {object} [params.address] - the saved enter address answers, already checked against the signed-in relationship
+ * @param {string} [params.accountFullName] - the signed-in user's own name
  * @returns {Array<object>} summary list rows for the request to use answers
  */
-const requestToUseRows = (requestToUse, address, accountFullName) => {
+const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
   const variant = requestToUse?.signin?.actualUserType
   const isAgent = variant === 'agent'
   const fullName = isAgent ? address?.fullName : accountFullName
@@ -153,7 +154,11 @@ export default function getViewModel({ session, signedInUser } = {}) {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
     backLinkPath: readThisPath,
-    rows: requestToUseRows(requestToUse, address, signedInUser?.displayName),
+    rows: requestToUseRows({
+      requestToUse,
+      address,
+      accountFullName: signedInUser?.displayName
+    }),
     developmentDetailsRows: developmentDetailsRows(session?.quote),
     confirmInformationOptions,
     reviewQuotePath: reviewQuoteDetailsPath,

@@ -1,5 +1,4 @@
 import { getByRole, getByText } from '@testing-library/dom'
-import { setupTestServer } from '../../../test-utils/setup-test-server.js'
 import { seedRequestToUseSessionWith } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -31,8 +30,6 @@ const startPath = '/manage/start-page'
 // own name, so the page tests sign in as each persona. The backend mocks are
 // registered on the same msw server as the Defra ID handlers.
 const { getServer: getAppServer, signIn, mswServer } = setupSignedInTestServer()
-
-const getPlainServer = setupTestServer()
 
 let seededSession = null
 beforeAll(() => {
@@ -80,15 +77,35 @@ const personaSession = (session) => ({
   acceptLevy: 'yes'
 })
 
+// A quote session plus a Defra ID sign-in: the page requires sign-in to view
+const signedInCookie = async (claims = citizenClaims) => {
+  const quoteCookie = await withCompleteQuoteSession(getAppServer())
+  const { cookie } = await signIn({ claims, cookie: quoteCookie })
+  return cookie
+}
+
 describe('Check your answers page', () => {
   it('should redirect to the start page when there is no session', async () => {
+    const { cookie } = await signIn({ claims: citizenClaims })
+
     const response = await getResponse({
-      server: getPlainServer(),
-      requestUrl: pagePath
+      server: getAppServer(),
+      requestUrl: pagePath,
+      cookie
     })
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe(startPath)
+  })
+
+  it('should redirect a signed-out visitor to sign in', async () => {
+    const response = await getAppServer().inject({
+      method: 'GET',
+      url: pagePath
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/auth/sign-in')
   })
 
   it('should render the heading, title and submit button', async () => {
@@ -285,7 +302,7 @@ describe('Check your answers page', () => {
       requestUrl: pagePath,
       server: getAppServer(),
       formData: { confirmInformation: 'Yes' },
-      cookie: await withCompleteQuoteSession(getAppServer())
+      cookie: await signedInCookie()
     })
 
     expect(response.statusCode).toBe(303)
@@ -295,7 +312,7 @@ describe('Check your answers page', () => {
 
   it('should redirect back with a validation error when the confirmation box is not ticked', async () => {
     seededSession = personaSession(employeeSession)
-    const cookie = await withCompleteQuoteSession(getAppServer())
+    const cookie = await signedInCookie(singleOrgEmployeeClaims)
 
     const { response } = await submitForm({
       requestUrl: pagePath,
@@ -325,11 +342,13 @@ describe('Check your answers page', () => {
 
   it('should redirect to the start page without calling the backend when there is no session', async () => {
     const requests = mockCommitmentCertificate(mswServer)
+    const { cookie } = await signIn({ claims: citizenClaims })
 
     const { response } = await submitForm({
       requestUrl: pagePath,
-      server: getPlainServer(),
-      formData: { confirmInformation: 'Yes' }
+      server: getAppServer(),
+      formData: { confirmInformation: 'Yes' },
+      cookie
     })
 
     expect(response.statusCode).toBe(303)
@@ -347,7 +366,7 @@ describe('Check your answers page', () => {
         requestUrl: pagePath,
         server: getAppServer(),
         formData: { confirmInformation: 'Yes' },
-        cookie: await withCompleteQuoteSession(getAppServer())
+        cookie: await signedInCookie()
       })
 
       expect(response.statusCode).toBe(500)

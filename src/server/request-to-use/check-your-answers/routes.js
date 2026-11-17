@@ -14,7 +14,7 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Check your answers page
- *     description: Renders the answers given in the request to use journey for checking before the request is submitted. Without a valid request to use session it redirects to the start page.
+ *     description: Renders the answers given in the request to use journey for checking before the request is submitted. The user must be signed in with Defra ID. Without a valid request to use session it redirects to the start page.
  *     responses:
  *       200:
  *         description: HTML page
@@ -23,7 +23,7 @@ export { routePath }
  *             schema:
  *               type: string
  *       302:
- *         description: Redirect to the start page without a valid session
+ *         description: Redirect to Defra ID sign-in if not authenticated, or to the start page without a valid session
  *   post:
  *     tags:
  *       - RequestToUse
@@ -52,11 +52,13 @@ export default [
   {
     method: 'GET',
     path: routePath,
+    rules: { requireAuth: true },
     ...requestToUseController({ routeId, getViewModel })
   },
   {
     method: 'POST',
     path: routePath,
+    rules: { requireAuth: true },
     options: {
       validate: {
         payload: formValidation(),
