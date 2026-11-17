@@ -4,10 +4,17 @@ import { routePath as originalCommittedPath } from '../original-committed/route-
 export const pageHeading =
   'Enter the NRL reference for the original planning permission'
 
-export default function getViewModel() {
+/**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the enter the original reference page
+ */
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    backLinkPath: originalCommittedPath
+    backLinkPath: originalCommittedPath,
+    formData: {
+      originalReference: session?.requestToUse?.originalNrlReference
+    }
   }
 }

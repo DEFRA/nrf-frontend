@@ -5,15 +5,15 @@ import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/rou
 const pageHeading = 'Details do not match'
 
 /**
- * @param {{ originalNrlReference: string }} data - the request to use session data, which the route guarantees holds the original reference
- * @param {object} [_query] - unused: the parsed request query
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the original boundary not matched page
  */
-export default function getViewModel(data, _query = {}) {
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    originalNrlReference: data.originalNrlReference.toUpperCase(),
+    originalNrlReference:
+      session.requestToUse.originalNrlReference.toUpperCase(),
     backLinkPath: originalReferencePath,
     originalReferencePath,
     reviewQuoteDetailsPath

@@ -63,8 +63,7 @@ export default [
     path: routePath,
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData: retrieveQuoteSession.get
+      getViewModel
     })
   },
   {

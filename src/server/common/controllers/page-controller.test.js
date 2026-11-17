@@ -153,6 +153,36 @@ describe('createPageController', () => {
     expect(result.model.formSubmitData).toEqual(flash.formSubmitData)
   })
 
+  it('renders what a custom resolvePageData returns instead of reading the session', async () => {
+    const resolvePageData = vi.fn().mockResolvedValue({
+      viewModel: { pageTitle: 'Custom' },
+      formSubmitData: { field1: 'saved' },
+      context: { orgOrUserName: 'Org', pageTitle: 'Overridden' }
+    })
+    const controller = createPageController({
+      viewsDir: 'request-to-use',
+      resolvePageData
+    })({ routeId, getViewModel })
+    const request = buildRequest()
+    saveValidationFlashToCache(request, flash)
+
+    const result = await controller.handler(request, buildH())
+
+    expect(resolvePageData).toHaveBeenCalledWith({
+      request,
+      flash,
+      getViewModel,
+      getSessionData: undefined
+    })
+    expect(result.model).toEqual({
+      orgOrUserName: 'Org',
+      pageTitle: 'Custom',
+      formSubmitData: { field1: 'saved' },
+      validationErrors: flash.validationErrors
+    })
+    expect(getValidationFlashFromCache(request)).toBeNull()
+  })
+
   it('clears the flash after reading it', async () => {
     const controller = createPageController({ viewsDir: 'quote' })({
       routeId,

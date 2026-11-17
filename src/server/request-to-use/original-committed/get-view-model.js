@@ -5,11 +5,18 @@ import { originalCommittedOptions } from './options.js'
 export const pageHeading =
   'Was the original planning permission committed to using the nature restoration levy?'
 
-export default function getViewModel() {
+/**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the original committed page
+ */
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
     backLinkPath: variationPath,
-    originalCommittedOptions
+    originalCommittedOptions,
+    formData: {
+      originalCommitted: session?.requestToUse?.originalCommitted
+    }
   }
 }

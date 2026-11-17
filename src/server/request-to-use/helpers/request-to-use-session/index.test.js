@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { clearAccountAnswers, requestToUseSession } from './index.js'
+import {
+  clearAccountAnswers,
+  getAddressForCurrentAccount,
+  requestToUseSession,
+  saveEnterAddress
+} from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 
@@ -155,5 +160,82 @@ describe('requestToUseSession', () => {
 
       expect(requestToUseSession.get(request)).toBeNull()
     })
+  })
+
+  describe('address for the signed in relationship', () => {
+    const address = { addressLine1: '1 Road', townOrCity: 'Leeds' }
+    const addressPayload = { ...address, postcode: 'LS1 1AA' }
+
+    const createSignedInRequest = ({ currentRelationshipId, requestToUse }) =>
+      createSessionRequest({
+        session: { requestToUse },
+        auth: { credentials: { profile: { currentRelationshipId } } }
+      })
+
+    it('stamps the saved address with the signed in relationship', () => {
+      const request = createSignedInRequest({ currentRelationshipId: 'rel-1' })
+
+      saveEnterAddress(request, addressPayload)
+
+      expect(requestToUseSession.get(request).signin.relationshipId).toBe(
+        'rel-1'
+      )
+    })
+
+    it('replaces the stamp from an earlier relationship when the address is saved again', () => {
+      const request = createSignedInRequest({
+        currentRelationshipId: 'rel-2',
+        requestToUse: { signin: { relationshipId: 'rel-1' } }
+      })
+
+      saveEnterAddress(request, addressPayload)
+
+      expect(requestToUseSession.get(request).signin.relationshipId).toBe(
+        'rel-2'
+      )
+    })
+
+    it('leaves no stamp when the user has no relationship', () => {
+      const request = createSignedInRequest({
+        requestToUse: { signin: { relationshipId: 'rel-1' } }
+      })
+
+      saveEnterAddress(request, addressPayload)
+
+      expect(requestToUseSession.get(request).signin).not.toHaveProperty(
+        'relationshipId'
+      )
+    })
+
+    it('returns the address when it was entered under the signed in relationship', () => {
+      const request = createSignedInRequest({
+        currentRelationshipId: 'rel-1',
+        requestToUse: { address, signin: { relationshipId: 'rel-1' } }
+      })
+
+      expect(getAddressForCurrentAccount(request)).toEqual(address)
+    })
+
+    it('returns the address for a user with no relationship when none was stamped', () => {
+      const request = createSignedInRequest({ requestToUse: { address } })
+
+      expect(getAddressForCurrentAccount(request)).toEqual(address)
+    })
+
+    it.each([
+      ['a different relationship', 'rel-2', { relationshipId: 'rel-1' }],
+      ['no stamp', 'rel-1', {}],
+      ['no relationship now', undefined, { relationshipId: 'rel-1' }]
+    ])(
+      'ignores the address entered under %s',
+      (_, currentRelationshipId, signin) => {
+        const request = createSignedInRequest({
+          currentRelationshipId,
+          requestToUse: { address, signin }
+        })
+
+        expect(getAddressForCurrentAccount(request)).toBeUndefined()
+      }
+    )
   })
 })

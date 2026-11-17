@@ -1,5 +1,4 @@
 import { requestToUseController } from '../controller-get.js'
-import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -29,8 +28,7 @@ export default [
     path: routePath,
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData: retrieveQuoteSession.get
+      getViewModel
     })
   }
 ]

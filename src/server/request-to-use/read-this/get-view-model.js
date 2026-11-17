@@ -8,12 +8,13 @@ export const pageHeading =
   'Details to read before you request to use the nature restoration levy'
 
 /**
- * @param {{ levy?: { provisionalAmount: number, inflationAdjustedAmount: number }, nrlReference?: string }} [data] - the request to use session data
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the details to read before you request to use the nature restoration levy page
  * @throws {Error} when the session holds no levy: the review and amend quote details page saves it before the user reaches this page
  */
-export default function getViewModel(data) {
-  if (!data?.levy) {
+export default function getViewModel({ session } = {}) {
+  const { levy, nrlReference } = session?.requestToUse ?? {}
+  if (!levy) {
     throw new Error('No levy in the request to use session')
   }
 
@@ -23,11 +24,11 @@ export default function getViewModel(data) {
     backLinkPath: reviewDetailsPath,
     continuePath: checkYourAnswersPath,
     edpName: EDP_NAME,
-    nrlReference: data?.nrlReference,
-    provisionalAmount: formatCurrency(data.levy.provisionalAmount, {
+    nrlReference,
+    provisionalAmount: formatCurrency(levy.provisionalAmount, {
       hideZeroPence: true
     }),
-    inflationAdjustedAmount: formatCurrency(data.levy.inflationAdjustedAmount, {
+    inflationAdjustedAmount: formatCurrency(levy.inflationAdjustedAmount, {
       hideZeroPence: true
     })
   }

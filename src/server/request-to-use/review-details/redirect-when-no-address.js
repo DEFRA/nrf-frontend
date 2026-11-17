@@ -1,5 +1,5 @@
 import { statusCodes } from '../../common/constants/status-codes.js'
-import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
+import { getAddressForCurrentAccount } from '../helpers/request-to-use-session/index.js'
 import { routePath as enterAddressPath } from '../enter-address/route-path.js'
 
 /**
@@ -11,9 +11,7 @@ import { routePath as enterAddressPath } from '../enter-address/route-path.js'
  * @returns {import('@hapi/hapi').Lifecycle.ReturnValue} continue, or a redirect to the enter address page
  */
 export function redirectWhenNoAddress(request, h) {
-  const hasAddress = Boolean(
-    requestToUseSession.get(request)?.address?.addressLine1
-  )
+  const hasAddress = Boolean(getAddressForCurrentAccount(request)?.addressLine1)
 
   if (hasAddress) {
     return h.continue

@@ -8,7 +8,7 @@ export const pageHeading = 'These details do not match our records'
  * @param {object} [_query] - unused: the parsed request query
  * @returns {object} view model for the quote not matched page
  */
-export default function getViewModel(_data = {}, _query = {}) {
+export default function getViewModel() {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,

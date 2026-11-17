@@ -42,12 +42,16 @@ const boundaryAnswer = (data) => {
 }
 
 /**
- * @param {object} [data] - the quote session data saved when the quote was
- * created, merged with the NRL reference from the request to use session
- * @param {object} [_query] - unused: the parsed request query
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the review and amend the quote details page
  */
-export default function getViewModel(data = {}, _query = {}) {
+export default function getViewModel({ session } = {}) {
+  // The quote answers plus the NRL reference the heading names, which lives in
+  // the request to use session rather than the quote session.
+  const data = {
+    ...session?.quote,
+    nrlReference: session?.requestToUse?.nrlReference
+  }
   const pageHeading = `Review and amend the quote details for ${data?.nrlReference}`
   const boundary = boundaryAnswer(data)
 

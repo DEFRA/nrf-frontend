@@ -2,7 +2,6 @@ import { requestToUseController } from '../controller-get.js'
 import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
 import { originalReferencePostController } from './controller-post.js'
 import getViewModel from './get-view-model.js'
-import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
 import { routeId, routePath } from './route-path.js'
 
@@ -55,8 +54,7 @@ export default [
     path: routePath,
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData
+      getViewModel
     })
   },
   {

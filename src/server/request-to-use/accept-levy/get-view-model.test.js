@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import getViewModel from './get-view-model.js'
 
 const levy = (provisionalAmount, inflationAdjustedAmount) => ({
-  levy: { provisionalAmount, inflationAdjustedAmount }
+  session: {
+    requestToUse: { levy: { provisionalAmount, inflationAdjustedAmount } }
+  }
 })
 
 describe('accept-levy getViewModel', () => {
@@ -27,10 +29,13 @@ describe('accept-levy getViewModel', () => {
   })
 
   it.each([
-    { scenario: 'there is no session data', data: undefined },
-    { scenario: 'the session holds no levy', data: { nrlReference: 'NRL-1' } }
-  ])('should throw when $scenario', ({ data }) => {
-    expect(() => getViewModel(data)).toThrow(
+    { scenario: 'there is no session data', input: undefined },
+    {
+      scenario: 'the session holds no levy',
+      input: { session: { requestToUse: { nrlReference: 'NRL-1' } } }
+    }
+  ])('should throw when $scenario', ({ input }) => {
+    expect(() => getViewModel(input)).toThrow(
       'No levy in the request to use session'
     )
   })

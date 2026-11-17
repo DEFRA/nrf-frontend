@@ -40,9 +40,9 @@ describe('Do you accept this nature restoration levy amount page', () => {
   it('should render the heading, title and content', async () => {
     const document = await load()
 
-    const { pageTitle, pageHeading } = getViewModel(
-      acceptLevySession.requestToUse
-    )
+    const { pageTitle, pageHeading } = getViewModel({
+      session: { requestToUse: acceptLevySession.requestToUse }
+    })
     expect(document.title).toBe(pageTitle)
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       pageHeading
@@ -178,7 +178,7 @@ describe('Do you accept this nature restoration levy amount page', () => {
         getByRole(document, 'link', { name: errorMessage })
       ).toHaveAttribute('href', '#acceptLevy')
       expect(document.title).toBe(
-        `Error: ${getViewModel(acceptLevySession.requestToUse).pageTitle}`
+        `Error: ${getViewModel({ session: { requestToUse: acceptLevySession.requestToUse } }).pageTitle}`
       )
     }
   )

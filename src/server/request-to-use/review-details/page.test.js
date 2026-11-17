@@ -84,6 +84,23 @@ describe('Review and confirm the developer details page', () => {
     expect(response.headers.location).toBe(ENTER_ADDRESS_PATH)
   })
 
+  it('redirects to the enter address page when the saved address was entered under a different relationship', async () => {
+    const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
+    seededSession = {
+      ...employeeSession,
+      signin: { ...employeeSession.signin, relationshipId: 'another-rel-id' }
+    }
+
+    const response = await getServer().inject({
+      method: 'GET',
+      url: ROUTE_PATH,
+      headers: { cookie }
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(ENTER_ADDRESS_PATH)
+  })
+
   describe('variants', () => {
     it.each([
       {
@@ -190,7 +207,10 @@ describe('Review and confirm the developer details page', () => {
   })
 
   it('links back to the enter address page', async () => {
-    const document = await loadSignedInPage({ session: individualSession })
+    const document = await loadSignedInPage({
+      claims: citizenClaims,
+      session: individualSession
+    })
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
@@ -217,7 +237,10 @@ describe('Review and confirm the developer details page', () => {
     })
 
     it('does not offer to change organisation when there is nothing to switch to', async () => {
-      const document = await loadSignedInPage({ session: individualSession })
+      const document = await loadSignedInPage({
+        claims: citizenClaims,
+        session: individualSession
+      })
 
       expect(
         queryByTestId(document, 'app-organisation-heading')
@@ -229,7 +252,10 @@ describe('Review and confirm the developer details page', () => {
   })
 
   it('confirms with a button link to the details to read page', async () => {
-    const document = await loadSignedInPage({ session: individualSession })
+    const document = await loadSignedInPage({
+      claims: citizenClaims,
+      session: individualSession
+    })
 
     expect(getByRole(document, 'button', { name: 'Confirm' })).toHaveAttribute(
       'href',

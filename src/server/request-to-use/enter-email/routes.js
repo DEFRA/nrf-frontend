@@ -1,5 +1,4 @@
 import { requestToUseController } from '../controller-get.js'
-import { retrieveQuoteSession } from '../helpers/retrieve-quote-session/index.js'
 import { redirectToFormWithValidationErrors } from '../../common/helpers/redirect-to-form-with-validation-errors.js'
 import { enterEmailPostController } from './controller-post.js'
 import formValidation from './form-validation.js'
@@ -52,8 +51,7 @@ export default [
     path: routePath,
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData: retrieveQuoteSession.get
+      getViewModel
     })
   },
   {

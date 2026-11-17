@@ -9,7 +9,7 @@ export const pageHeading =
  * @param {object} [_query] - unused: the parsed request query
  * @returns {object} view model for the no NRL reference page
  */
-export default function getViewModel(_data = {}, _query = {}) {
+export default function getViewModel() {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,

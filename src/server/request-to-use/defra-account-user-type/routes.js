@@ -3,7 +3,6 @@ import { createPostController } from '../../common/controllers/post-controller.j
 import { saveDefraAccountUserType } from '../helpers/request-to-use-session/index.js'
 import { redirectWhenSignedIn } from '../helpers/redirect-when-signed-in/index.js'
 import getViewModel from './get-view-model.js'
-import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
 import { routeId, routePath } from './route-path.js'
@@ -12,8 +11,7 @@ export { routePath }
 
 const getController = requestToUseController({
   routeId,
-  getViewModel,
-  getSessionData
+  getViewModel
 })
 const postController = createPostController({
   formValidation,

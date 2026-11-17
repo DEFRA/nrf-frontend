@@ -4,11 +4,16 @@ import { hasNrlReferenceOptions } from './options.js'
 
 export const pageHeading = 'Do you have an NRL reference?'
 
-export default function getViewModel() {
+/**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the do you have an NRL reference page
+ */
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
     backLinkPath: whatWouldYouLikeToDoPath,
-    hasNrlReferenceOptions
+    hasNrlReferenceOptions,
+    formData: { hasNrlReference: session?.retrieveQuote?.hasNrlReference }
   }
 }
