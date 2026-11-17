@@ -18,7 +18,7 @@ describe('enter-nrl-reference getViewModel', () => {
     { scenario: 'an invalid reference', query: { nrlReference: 'ABC-123' } },
     { scenario: 'an empty reference', query: { nrlReference: '' } }
   ])('returns no back link when the query has $scenario', ({ query }) => {
-    expect(getViewModel({}, query).backLinkPath).toBeUndefined()
+    expect(getViewModel({ query }).backLinkPath).toBeUndefined()
   })
 
   it('does not return a cancel link', () => {
@@ -33,9 +33,9 @@ describe('enter-nrl-reference getViewModel', () => {
   ])(
     'pre-fills the normalised reference when the query is $scenario',
     ({ query }) => {
-      expect(getViewModel({}, { nrlReference: query }).nrlReference).toBe(
-        validReference
-      )
+      expect(
+        getViewModel({ query: { nrlReference: query } }).nrlReference
+      ).toBe(validReference)
     }
   )
 
@@ -48,12 +48,24 @@ describe('enter-nrl-reference getViewModel', () => {
       query: { nrlReference: [validReference, validReference] }
     }
   ])('does not pre-fill when the query is $scenario', ({ query }) => {
-    expect(getViewModel({}, query).nrlReference).toBeUndefined()
+    expect(getViewModel({ query }).nrlReference).toBeUndefined()
   })
 
   it('pre-fills from the query when there is no session data', () => {
     expect(
-      getViewModel(null, { nrlReference: validReference }).nrlReference
+      getViewModel({
+        session: { retrieveQuote: null },
+        query: { nrlReference: validReference }
+      }).nrlReference
+    ).toBe(validReference)
+  })
+
+  it('pre-fills the reference saved in the retrieve quote session over the query', () => {
+    expect(
+      getViewModel({
+        session: { retrieveQuote: { nrlReference: validReference } },
+        query: { nrlReference: 'ABC-123' }
+      }).nrlReference
     ).toBe(validReference)
   })
 
@@ -61,10 +73,10 @@ describe('enter-nrl-reference getViewModel', () => {
     { scenario: 'a previously submitted value', submitted: 'ABC-123' },
     { scenario: 'an empty submitted value', submitted: '' }
   ])('prefers $scenario over the query', ({ submitted }) => {
-    const viewModel = getViewModel(
-      { nrlReference: submitted },
-      { nrlReference: validReference }
-    )
+    const viewModel = getViewModel({
+      formSubmitData: { nrlReference: submitted },
+      query: { nrlReference: validReference }
+    })
     expect(viewModel.nrlReference).toBe(submitted)
   })
 })

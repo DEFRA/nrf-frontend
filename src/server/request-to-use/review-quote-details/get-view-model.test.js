@@ -3,12 +3,14 @@ import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
 import { reviewQuoteSession } from '../../../test-utils/fixtures/session.js'
 
-// What the page controller hands the view model: quote session data merged
-// with the NRL reference from the request to use session.
-const completeQuote = {
-  ...reviewQuoteSession.quote,
-  nrlReference: reviewQuoteSession.requestToUse.nrlReference
-}
+const completeQuote = reviewQuoteSession.quote
+
+// The heading names the NRL reference, which lives in the request to use
+// session rather than the quote session.
+const viewFor = (quote) =>
+  getViewModel({
+    session: { quote, requestToUse: reviewQuoteSession.requestToUse }
+  })
 
 // Row keys and change link hidden texts are the user-visible summary list
 // contract; consts keep each literal to one occurrence (SonarQube S1192).
@@ -33,7 +35,7 @@ const uploadedBoundaryHiddenText = 'uploaded red line boundary'
 
 describe('Review and amend your quote details view model', () => {
   it('returns the page heading and title', () => {
-    const view = getViewModel(completeQuote)
+    const view = viewFor(completeQuote)
 
     expect(view.pageHeading).toBe(
       'Review and amend the quote details for NRL-123456'
@@ -44,7 +46,7 @@ describe('Review and amend your quote details view model', () => {
   })
 
   it('builds the summary rows in order with the saved answers', () => {
-    const view = getViewModel(completeQuote)
+    const view = viewFor(completeQuote)
 
     expect(view.rows.map((row) => row.key.text)).toEqual(expectedRowKeys)
     expect(view.rows.map((row) => row.value.text)).toEqual([
@@ -57,10 +59,7 @@ describe('Review and amend your quote details view model', () => {
   })
 
   it('links the planning permission type change to the change planning type page', () => {
-    const row = findSummaryListRow(
-      getViewModel(completeQuote),
-      rowKeys.planningType
-    )
+    const row = findSummaryListRow(viewFor(completeQuote), rowKeys.planningType)
 
     expect(row.actions.items).toEqual([
       {
@@ -85,7 +84,7 @@ describe('Review and amend your quote details view model', () => {
   ])(
     'links the %s change to the change alias page',
     (key, hiddenText, href) => {
-      const row = findSummaryListRow(getViewModel(completeQuote), key)
+      const row = findSummaryListRow(viewFor(completeQuote), key)
 
       expect(row.actions.items).toEqual([
         { href, text: 'Change', visuallyHiddenText: hiddenText }
@@ -94,13 +93,13 @@ describe('Review and amend your quote details view model', () => {
   )
 
   it('gives the email address row no change link', () => {
-    const row = findSummaryListRow(getViewModel(completeQuote), rowKeys.email)
+    const row = findSummaryListRow(viewFor(completeQuote), rowKeys.email)
 
     expect(row.actions).toBeUndefined()
   })
 
   it('omits rows whose answers are missing', () => {
-    const view = getViewModel({})
+    const view = viewFor({})
 
     expect(view.rows.map((row) => row.key.text)).toEqual([rowKeys.boundary])
     expect(findSummaryListRow(view, rowKeys.boundary).value.text).toBe(
@@ -109,7 +108,7 @@ describe('Review and amend your quote details view model', () => {
   })
 
   it('omits the number of housing units row when it has not been answered', () => {
-    const view = getViewModel({ ...completeQuote, housingUnits: null })
+    const view = viewFor({ ...completeQuote, housingUnits: null })
 
     expect(view.rows.map((row) => row.key.text)).not.toContain(
       rowKeys.housingUnits
@@ -117,7 +116,7 @@ describe('Review and amend your quote details view model', () => {
   })
 
   it('shows No and omits the housing units row when there is no housing', () => {
-    const view = getViewModel({ ...completeQuote, isHousing: 'no' })
+    const view = viewFor({ ...completeQuote, isHousing: 'no' })
 
     expect(findSummaryListRow(view, rowKeys.housing).value.text).toBe('No')
     expect(view.rows.map((row) => row.key.text)).not.toContain(
@@ -167,7 +166,7 @@ describe('Review and amend your quote details view model', () => {
       hiddenText: boundaryHiddenText
     }
   ])('shows "$text" for $scenario', ({ quote, text, hiddenText }) => {
-    const row = findSummaryListRow(getViewModel(quote), rowKeys.boundary)
+    const row = findSummaryListRow(viewFor(quote), rowKeys.boundary)
 
     expect(row.value.text).toBe(text)
     expect(row.actions.items).toEqual([

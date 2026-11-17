@@ -2,6 +2,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { CHANGE_ORGANISATION_PATH } from '../../auth/auth-urls.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
+import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
 import { routePath as enterAddressPath } from '../enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
 import { routePath } from './route-path.js'
@@ -19,18 +20,25 @@ const changeBusinessNameUrl = `${CHANGE_ORGANISATION_PATH}?redirectTo=${encodeUR
  * reviews their own. The agent's full name and business name can be changed;
  * the individual's and employee's name and the employee's business name come
  * from the Defra ID account and cannot.
- * @param {object} [data] - the persona snapshot, the saved enter address answers, the signed-in user's own name and the organisation heading data
- * @param {object} [_query] - unused: the parsed request query
+ * The persona is the snapshot taken when the address was confirmed: the
+ * resolved account type and organisation are written to the session once, so
+ * this and any later page read them back without re-reading the claims.
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the review and confirm the developer details page
  */
-export default function getViewModel(data = {}, _query = {}) {
-  const isAgent = data?.variant === 'agent'
+export default function getViewModel({ session, signedInUser } = {}) {
+  const { signin } = session?.requestToUse ?? {}
+  const address = getAddressForRelationship({
+    requestToUse: session?.requestToUse,
+    currentRelationshipId: signedInUser?.currentRelationshipId
+  })
+  const isAgent = signin?.actualUserType === 'agent'
   const pageHeading = isAgent ? pageHeadingAgent : pageHeadingPersonal
 
   // The agent typed the developer's full name on the enter address page;
   // everyone else's name comes from their Defra ID account.
-  const fullName = isAgent ? data?.address?.fullName : data?.accountFullName
-  const businessName = data?.businessName
+  const fullName = isAgent ? address?.fullName : signedInUser?.displayName
+  const businessName = signin?.organisation?.organisationName
 
   // Change actions open the enter address page, whose only next page is this
   // one, so amending an answer returns here.
@@ -64,7 +72,7 @@ export default function getViewModel(data = {}, _query = {}) {
       : []),
     {
       key: { text: 'Address' },
-      value: { html: addressAnswerHtml(data?.address) },
+      value: { html: addressAnswerHtml(address) },
       actions: changeAction(
         isAgent ? "the developer's address" : 'your address',
         enterAddressPath
@@ -78,8 +86,6 @@ export default function getViewModel(data = {}, _query = {}) {
     sectionHeading: isAgent ? 'Developer details' : 'Your details',
     backLinkPath: enterAddressPath,
     continuePath: readThisPath,
-    rows,
-    orgOrUserName: data?.orgOrUserName,
-    changeOrganisationUrl: data?.changeOrganisationUrl
+    rows
   }
 }

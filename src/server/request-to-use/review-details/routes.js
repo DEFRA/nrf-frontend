@@ -1,6 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
-import { getSessionData } from './get-session-data.js'
 import { redirectWhenNoAddress } from './redirect-when-no-address.js'
 import { routeId, routePath } from './route-path.js'
 
@@ -8,8 +7,7 @@ export { routePath }
 
 const getController = requestToUseController({
   routeId,
-  getViewModel,
-  getSessionData
+  getViewModel
 })
 
 /**
