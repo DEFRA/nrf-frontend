@@ -9,12 +9,13 @@ const CONTINUE = Symbol.for('hapi.continue')
 describe('redirectToSignIn', () => {
   it.each([
     [
-      'when the request is not a GET',
+      'when the request is not a GET and there is no page at the path to return to',
       {
         method: 'post',
         path: PROFILE_PATH,
         route: { settings: { auth: DEFRA_SESSION } },
-        auth: {}
+        auth: {},
+        server: { match: () => null }
       }
     ],
     [
@@ -81,6 +82,35 @@ describe('redirectToSignIn', () => {
 
     expect(yar.set).toHaveBeenCalledWith('redirectTo', PROFILE_PATH)
     expect(result.location).toBe('/auth/sign-in')
+  })
+
+  it('sends a POST to sign-in and returns to the page at its path as a GET', () => {
+    const yar = { set: vi.fn() }
+    const request = {
+      method: 'post',
+      path: PROFILE_PATH,
+      route: { settings: { auth: DEFRA_SESSION } },
+      auth: {},
+      server: { match: vi.fn().mockReturnValue({}) },
+      yar
+    }
+    const code = vi.fn().mockReturnThis()
+    const h = {
+      redirect: (url) => ({
+        location: url,
+        code,
+        takeover() {
+          return this
+        }
+      })
+    }
+
+    const result = redirectToSignIn(request, h)
+
+    expect(request.server.match).toHaveBeenCalledWith('get', PROFILE_PATH)
+    expect(yar.set).toHaveBeenCalledWith('redirectTo', PROFILE_PATH)
+    expect(result.location).toBe('/auth/sign-in')
+    expect(code).toHaveBeenCalledWith(303)
   })
 
   it('falls back to the home page when the requested path is not a safe redirect', () => {
