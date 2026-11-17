@@ -5,11 +5,18 @@ import { defraAccountUserTypeOptions } from './options.js'
 export const pageHeading =
   'Who are you requesting to use the nature restoration levy for?'
 
-export default function getViewModel(sessionData) {
+/**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the who are you requesting to use the levy for page
+ */
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    backLinkPath: getPreSignInBackLinkPath(sessionData),
-    defraAccountUserTypeOptions
+    backLinkPath: getPreSignInBackLinkPath(session?.requestToUse ?? {}),
+    defraAccountUserTypeOptions,
+    formData: {
+      defraAccountUserType: session?.requestToUse?.signin?.intendedUserType
+    }
   }
 }

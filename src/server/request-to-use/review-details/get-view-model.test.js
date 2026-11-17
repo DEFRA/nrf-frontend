@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
-import { firstOrgName } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import { currentRelationshipId } from '../../../test-utils/fixtures/defra-id-org-claims.js'
 import {
   accountFullName,
   agentOrganisationName,
@@ -22,25 +22,21 @@ const rowKeys = {
   address: 'Address'
 }
 
+const signedInUser = { displayName: accountFullName, currentRelationshipId }
+
 const agentData = {
-  variant: 'agent',
-  accountFullName,
-  businessName: agentOrganisationName,
-  address: reviewDetailsSessions.agent.address
+  session: { requestToUse: reviewDetailsSessions.agent },
+  signedInUser
 }
 
 const employeeData = {
-  variant: 'employee',
-  accountFullName,
-  businessName: firstOrgName,
-  address: reviewDetailsSessions.employee.address
+  session: { requestToUse: reviewDetailsSessions.employee },
+  signedInUser
 }
 
 const individualData = {
-  variant: 'individual',
-  accountFullName,
-  businessName: '',
-  address: reviewDetailsSessions.individual.address
+  session: { requestToUse: reviewDetailsSessions.individual },
+  signedInUser
 }
 
 describe('Review and confirm the developer details view model', () => {
@@ -172,7 +168,10 @@ describe('Review and confirm the developer details view model', () => {
   })
 
   it('omits the full name row when there is no name to show', () => {
-    const view = getViewModel({ ...individualData, accountFullName: '' })
+    const view = getViewModel({
+      ...individualData,
+      signedInUser: { ...signedInUser, displayName: '' }
+    })
 
     expect(view.rows.map((row) => row.key.text)).toEqual([rowKeys.address])
   })

@@ -1,4 +1,4 @@
-import { firstOrgName } from './defra-id-org-claims.js'
+import { currentRelationshipId, firstOrgName } from './defra-id-org-claims.js'
 
 // The developer's name the agent types on the enter address page, and the
 // name Defra ID reports for the signed-in employee or individual.
@@ -16,27 +16,31 @@ export const reviewDetailsAddress = {
 }
 
 // Seeded request to use sessions for each persona, in the shape saveEnterAddress
-// writes: the address answers plus the snapshot of who confirmed them.
+// writes: the address answers plus the snapshot of who confirmed them and the
+// relationship they were entered under (the one in the persona's claims).
 export const reviewDetailsSessions = {
   agent: {
     address: { ...reviewDetailsAddress, fullName: developerFullName },
     signin: {
       actualUserType: 'agent',
-      organisation: { organisationName: agentOrganisationName }
+      organisation: { organisationName: agentOrganisationName },
+      relationshipId: currentRelationshipId
     }
   },
   employee: {
     address: { ...reviewDetailsAddress, fullName: '' },
     signin: {
       actualUserType: 'employee',
-      organisation: { organisationName: firstOrgName }
+      organisation: { organisationName: firstOrgName },
+      relationshipId: currentRelationshipId
     }
   },
   individual: {
     address: { ...reviewDetailsAddress, fullName: '' },
     signin: {
       actualUserType: 'individual',
-      organisation: { organisationName: '' }
+      organisation: { organisationName: '' },
+      relationshipId: currentRelationshipId
     }
   }
 }

@@ -1,5 +1,4 @@
 import { requestToUseController } from '../controller-get.js'
-import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
 import getViewModel from './get-view-model.js'
 import { routeId, routePath } from './route-path.js'
 
@@ -27,8 +26,7 @@ export default [
     path: routePath,
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData: requestToUseSession.get
+      getViewModel
     })
   }
 ]

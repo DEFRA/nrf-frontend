@@ -1,4 +1,4 @@
-const currentRelationshipId = '81d48d6c-6e94-f011-b4cc-000d3ac28f39'
+export const currentRelationshipId = '81d48d6c-6e94-f011-b4cc-000d3ac28f39'
 
 export const firstOrgId = '27d48d6c-6e94-f011-b4cc-000d3ac28f39'
 export const firstOrgName = 'CDP Child Org 1'

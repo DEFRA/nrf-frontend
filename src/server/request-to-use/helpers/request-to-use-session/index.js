@@ -63,13 +63,19 @@ const organisation = joi
   })
   .optional()
 
+// The Defra ID relationship (the account or organisation picked in the org
+// picker) the address was entered under. The address is only read back while
+// it matches the signed-in relationship.
+const relationshipId = joi.string().max(maxTextLength).optional()
+
 // intendedUserType is the user's answer before signing in, kept as a record
-// only. actualUserType and organisation come from the Defra ID account the
-// user signed in with and are cleared when they switch account.
+// only. actualUserType, organisation and relationshipId come from the Defra ID
+// account the user signed in with and are cleared when they switch account.
 const signin = joi.object({
   intendedUserType: intendedUserType.optional(),
   actualUserType,
-  organisation
+  organisation,
+  relationshipId
 })
 
 const address = joi.object({
@@ -132,11 +138,13 @@ export const saveDefraAccountUserType = (request, payload) =>
  * @returns {object | null} the merged request to use data
  */
 export const saveEnterAddress = (request, payload) => {
-  const profileOrganisation =
-    request.auth.credentials?.profile?.organisation ?? {}
+  const { organisation: profileOrganisation = {}, currentRelationshipId } =
+    request.auth.credentials?.profile ?? {}
   const actualUserType = getEnterAddressVariant({
     userRelationshipType: profileOrganisation.userRelationshipType
   })
+  const { relationshipId: _previous, ...savedSignin } =
+    requestToUseSession.get(request)?.signin ?? {}
 
   return requestToUseSession.save(request, {
     address: {
@@ -148,15 +156,45 @@ export const saveEnterAddress = (request, payload) => {
       postcode: payload.postcode
     },
     signin: {
-      ...requestToUseSession.get(request)?.signin,
+      ...savedSignin,
       actualUserType,
       organisation: {
         organisationName: profileOrganisation.organisationName ?? '',
         organisationId: profileOrganisation.organisationId ?? ''
-      }
+      },
+      ...(currentRelationshipId && { relationshipId: currentRelationshipId })
     }
   })
 }
+
+/**
+ * The saved enter address answers, but only while they were entered under the
+ * Defra ID relationship the user is signed in with now. This holds even when
+ * the sign in callback could not compare with the previous session (for
+ * example the cached session had expired before the user switched account).
+ * @param {object} params
+ * @param {object | null} [params.requestToUse] - the request to use session
+ * @param {string} [params.currentRelationshipId] - the signed-in user's relationship
+ * @returns {object | undefined} the saved address, or undefined when there is none for this account
+ */
+export const getAddressForRelationship = ({
+  requestToUse,
+  currentRelationshipId
+}) =>
+  requestToUse?.signin?.relationshipId === currentRelationshipId
+    ? requestToUse?.address
+    : undefined
+
+/**
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {object | undefined} the saved address for the signed-in relationship
+ */
+export const getAddressForCurrentAccount = (request) =>
+  getAddressForRelationship({
+    requestToUse: requestToUseSession.get(request),
+    currentRelationshipId:
+      request.auth.credentials?.profile?.currentRelationshipId
+  })
 
 /**
  * Clears what belongs to the Defra ID account the user signed in with (the

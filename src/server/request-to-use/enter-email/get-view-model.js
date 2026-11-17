@@ -4,12 +4,14 @@ import { routePath as enterNrlReferencePath } from '../enter-nrl-reference/route
 export const pageHeading = 'Enter your email address'
 
 /**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} template data
  */
-export default function getViewModel() {
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
-    backLinkPath: enterNrlReferencePath
+    backLinkPath: enterNrlReferencePath,
+    formData: { email: session?.retrieveQuote?.email }
   }
 }

@@ -5,11 +5,16 @@ import { variationOptions } from './options.js'
 export const pageHeading =
   'Is the development an amendment to an existing planning permission?'
 
-export default function getViewModel() {
+/**
+ * @param {import('../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the variation page
+ */
+export default function getViewModel({ session } = {}) {
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
     backLinkPath: acceptLevyPath,
-    variationOptions
+    variationOptions,
+    formData: { variation: session?.requestToUse?.variation }
   }
 }

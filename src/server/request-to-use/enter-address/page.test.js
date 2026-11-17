@@ -373,6 +373,19 @@ describe('Enter address page', () => {
       )
       expect(getByLabelText(document, 'Postcode')).toHaveValue('SW1A 2PQ')
     })
+
+    it('does not show an address entered under a different organisation', async () => {
+      const document = await loadSignedInPage({
+        claims: singleOrgEmployeeClaims,
+        session: {
+          address: validAddress,
+          signin: { relationshipId: 'another-rel-id' }
+        }
+      })
+
+      expect(getByLabelText(document, 'Address line 1')).toHaveValue('')
+      expect(getByLabelText(document, 'Town or city')).toHaveValue('')
+    })
   })
 
   describe('validation errors', () => {

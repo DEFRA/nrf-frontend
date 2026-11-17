@@ -4,12 +4,11 @@ import { routePath as enterOriginalReferencePath } from '../original-reference/r
 const fallbackHeading = 'This NRL reference does not match our records'
 
 /**
- * @param {{ originalNrlReference?: string } | null} [data] - the request to use session data
- * @param {object} [_query] - unused: the parsed request query
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the original reference not matched page
  */
-export default function getViewModel(data, _query = {}) {
-  const reference = data?.originalNrlReference
+export default function getViewModel({ session } = {}) {
+  const reference = session?.requestToUse?.originalNrlReference
   const pageHeading = reference
     ? `${reference.toUpperCase()} does not match our records`
     : fallbackHeading

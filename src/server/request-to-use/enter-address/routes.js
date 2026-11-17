@@ -2,7 +2,6 @@ import { requestToUseController } from '../controller-get.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
 import { saveEnterAddress } from '../helpers/request-to-use-session/index.js'
 import getViewModel from './get-view-model.js'
-import { getSessionData } from './get-session-data.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
 import { redirectWhenFormVariantMismatch } from './redirect-when-form-variant-mismatch.js'
@@ -79,8 +78,7 @@ export default [
     rules: { requireAuth: true },
     ...requestToUseController({
       routeId,
-      getViewModel,
-      getSessionData
+      getViewModel
     })
   },
   {

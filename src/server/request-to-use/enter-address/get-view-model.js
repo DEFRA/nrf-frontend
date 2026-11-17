@@ -1,6 +1,7 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { getPreSignInBackLinkPath } from '../helpers/get-pre-sign-in-back-link-path/index.js'
 import { getEnterAddressVariant } from '../helpers/get-enter-address-variant/index.js'
+import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
 
 export const pageHeadingIndividual = 'What is your address?'
 
@@ -27,17 +28,18 @@ const headingWithoutOrganisationByVariant = {
 }
 
 /**
- * @param {object} [data] - the signed-in user's organisation, the saved enter address answers and the earlier answers that decide the back link
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} template data
  */
-export default function getViewModel(data = {}) {
-  const variant = getEnterAddressVariant(data)
+export default function getViewModel({ session, signedInUser } = {}) {
+  const { organisation } = signedInUser ?? {}
+  const variant = getEnterAddressVariant(organisation)
   // A function replacer so `$&` and friends in an organisation name are not
   // treated as replacement patterns.
-  const pageHeading = data.organisationName
+  const pageHeading = organisation?.organisationName
     ? headingTemplatesByVariant[variant].replace(
         '{organisationName}',
-        () => data.organisationName
+        () => organisation.organisationName
       )
     : (headingWithoutOrganisationByVariant[variant] ?? pageHeadingIndividual)
 
@@ -47,9 +49,11 @@ export default function getViewModel(data = {}) {
     guidanceText: guidanceByVariant[variant],
     // The defra-account pages redirect a signed-in user straight back here,
     // so Back targets the last question before the sign-in funnel.
-    backLinkPath: getPreSignInBackLinkPath(data),
+    backLinkPath: getPreSignInBackLinkPath(session?.requestToUse ?? {}),
     formVariant: variant,
-    orgOrUserName: data.orgOrUserName,
-    changeOrganisationUrl: data.changeOrganisationUrl
+    formData: getAddressForRelationship({
+      requestToUse: session?.requestToUse,
+      currentRelationshipId: signedInUser?.currentRelationshipId
+    })
   }
 }
