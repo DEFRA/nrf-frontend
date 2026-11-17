@@ -2,13 +2,10 @@ import { formatCurrency } from '@defra/nrf-library'
 import { EDP_NAME } from '../../../shared/edp.js'
 import { getPageTitle } from '../../common/helpers/page-title.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
+import { routePath as reviewDetailsPath } from '../review-details/route-path.js'
 
 export const pageHeading =
   'Details to read before you request to use the nature restoration levy'
-
-// Literal path: the review details page is not built yet. Swap for a
-// route-path.js import when it exists.
-const reviewDetailsPath = '/request-to-use/review-details'
 
 /**
  * @param {{ levy?: { provisionalAmount: number, inflationAdjustedAmount: number }, nrlReference?: string }} [data] - the request to use session data

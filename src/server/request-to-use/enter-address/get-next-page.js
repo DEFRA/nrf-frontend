@@ -1,6 +1,4 @@
-// Literal path: the review details page is not built yet. Swap for a
-// route-path.js import when it exists.
-const reviewDetailsPath = '/request-to-use/review-details'
+import { routePath as reviewDetailsPath } from '../review-details/route-path.js'
 
 /**
  * Every variant is reviewed on the same page, so the redirect needs no

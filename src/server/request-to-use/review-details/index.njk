@@ -1,0 +1,35 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block beforeContent %}
+  {{ backLink({href: backLinkPath}) }}
+{% endblock %}
+
+{% block organisationHeading %}
+  {{ appOrganisationHeading({
+    orgOrUserName: orgOrUserName,
+    changeOrganisationUrl: changeOrganisationUrl
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+      <h2 class="govuk-heading-m">{{ sectionHeading }}</h2>
+
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-9",
+        rows: rows
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Confirm",
+          href: continuePath
+        }) }}
+      </div>
+    </div>
+</div>
+{% endblock %}

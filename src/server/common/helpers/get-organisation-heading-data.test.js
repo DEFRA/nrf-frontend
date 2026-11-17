@@ -1,4 +1,7 @@
-import { getOrganisationHeadingData } from './get-organisation-heading-data.js'
+import {
+  getDisplayName,
+  getOrganisationHeadingData
+} from './get-organisation-heading-data.js'
 import { getOrganisationFromToken } from '../../auth/get-organisation-from-auth-token.js'
 import {
   agentClaims,
@@ -74,5 +77,27 @@ describe('#getOrganisationHeadingData', () => {
     expect(result.changeOrganisationUrl).toBe(
       '/auth/change-organisation?redirectTo=%2Fquote%2Fsummary%3Ftab%3Da%26b%3Dc'
     )
+  })
+})
+
+describe('#getDisplayName', () => {
+  it('prefers the account display name', () => {
+    expect(
+      getDisplayName({ name: 'Test User', firstName: 'Test', lastName: 'User' })
+    ).toBe('Test User')
+  })
+
+  it('joins the first and last name when there is no display name', () => {
+    expect(getDisplayName({ firstName: 'Test', lastName: 'User' })).toBe(
+      'Test User'
+    )
+  })
+
+  it('drops the missing half of a name', () => {
+    expect(getDisplayName({ firstName: 'Test' })).toBe('Test')
+  })
+
+  it('is empty when the profile has no name', () => {
+    expect(getDisplayName()).toBe('')
   })
 })
