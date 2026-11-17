@@ -1,5 +1,4 @@
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
-import { getEnterAddressVariant } from '../helpers/get-enter-address-variant/index.js'
 import {
   getDisplayName,
   getOrganisationHeadingData
@@ -11,19 +10,15 @@ import {
  */
 export function getSessionData(request) {
   const { profile } = request.auth.credentials ?? {}
-  const session = requestToUseSession.get(request)
+  // The persona is the snapshot taken when the address was confirmed: the
+  // resolved account type and organisation are written to the session once, so
+  // this and any later page read them back without re-reading the claims.
+  const { signin, address } = requestToUseSession.get(request) ?? {}
   return {
-    // The snapshot taken when the address was confirmed decides the persona;
-    // the live relationship is only a fallback for sessions saved before the
-    // snapshot existed.
-    variant:
-      session?.signin?.actualUserType ??
-      getEnterAddressVariant({
-        userRelationshipType: profile?.organisation?.userRelationshipType
-      }),
+    variant: signin?.actualUserType,
     accountFullName: getDisplayName(profile),
-    businessName: session?.signin?.organisation?.organisationName,
-    address: session?.address,
+    businessName: signin?.organisation?.organisationName,
+    address,
     ...getOrganisationHeadingData(request)
   }
 }

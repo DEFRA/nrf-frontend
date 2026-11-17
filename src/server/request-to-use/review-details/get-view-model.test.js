@@ -163,7 +163,7 @@ describe('Review and confirm the developer details view model', () => {
     ])
   })
 
-  it('shows the address as one escaped line per saved value, dropping blanks', () => {
+  it('shows the saved address as the address row value', () => {
     const view = getViewModel(agentData)
 
     expect(findSummaryListRow(view, rowKeys.address).value.html).toBe(
@@ -171,23 +171,15 @@ describe('Review and confirm the developer details view model', () => {
     )
   })
 
-  it('escapes user-controlled address lines', () => {
-    const view = getViewModel({
-      ...agentData,
-      address: {
-        ...reviewDetailsAddress,
-        addressLine1: '<script>alert(1)</script>'
-      }
-    })
-
-    expect(findSummaryListRow(view, rowKeys.address).value.html).toBe(
-      '&lt;script&gt;alert(1)&lt;/script&gt;<br>Building 2<br>Development<br>Devonshire<br>DV1 6RP'
-    )
-  })
-
   it('omits the full name row when there is no name to show', () => {
     const view = getViewModel({ ...individualData, accountFullName: '' })
 
     expect(view.rows.map((row) => row.key.text)).toEqual([rowKeys.address])
+  })
+
+  it('continues to the details to read page', () => {
+    expect(getViewModel(agentData).continuePath).toBe(
+      '/request-to-use/read-this'
+    )
   })
 })

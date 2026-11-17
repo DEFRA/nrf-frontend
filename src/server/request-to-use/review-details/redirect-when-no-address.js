@@ -15,13 +15,9 @@ export function redirectWhenNoAddress(request, h) {
     requestToUseSession.get(request)?.address?.addressLine1
   )
 
-  if (!hasAddress) {
-    const code = ['get', 'head'].includes(request.method)
-      ? statusCodes.found
-      : statusCodes.redirectAfterPost
-
-    return h.redirect(enterAddressPath).code(code).takeover()
+  if (hasAddress) {
+    return h.continue
   }
 
-  return h.continue
+  return h.redirect(enterAddressPath).code(statusCodes.found).takeover()
 }

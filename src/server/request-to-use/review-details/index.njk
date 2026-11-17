@@ -24,14 +24,12 @@
         rows: rows
       }) }}
 
-      <form method="post" novalidate data-disable-on-submit>
-        {% include "partials/csrf-token.njk" %}
-        <div class="govuk-button-group">
-          {{ govukButton({
-            text: "Confirm"
-          }) }}
-        </div>
-      </form>
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Confirm",
+          href: continuePath
+        }) }}
+      </div>
     </div>
 </div>
 {% endblock %}

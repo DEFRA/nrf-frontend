@@ -70,23 +70,19 @@ describe('Review and confirm the developer details page', () => {
     expect(response.headers.location).toBe('/auth/sign-in')
   })
 
-  it.each(['GET', 'POST'])(
-    'redirects a visitor with no saved address to the enter address page on %s',
-    async (method) => {
-      const { cookie } = await signIn()
-      seededSession = { signin: { actualUserType: 'individual' } }
+  it('redirects a visitor with no saved address to the enter address page', async () => {
+    const { cookie } = await signIn()
+    seededSession = { signin: { actualUserType: 'individual' } }
 
-      const response = await getServer().inject({
-        method,
-        url: ROUTE_PATH,
-        payload: method === 'POST' ? {} : undefined,
-        headers: { cookie }
-      })
+    const response = await getServer().inject({
+      method: 'GET',
+      url: ROUTE_PATH,
+      headers: { cookie }
+    })
 
-      expect(response.statusCode).toBe(method === 'GET' ? 302 : 303)
-      expect(response.headers.location).toBe(ENTER_ADDRESS_PATH)
-    }
-  )
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(ENTER_ADDRESS_PATH)
+  })
 
   describe('variants', () => {
     it.each([
@@ -232,36 +228,16 @@ describe('Review and confirm the developer details page', () => {
     })
   })
 
-  it('contains a CSRF token in the form', async () => {
+  it('confirms with a button link to the details to read page', async () => {
     const document = await loadSignedInPage({ session: individualSession })
 
-    expect(
-      document.querySelector('form input[name="csrfToken"]')
-    ).toBeInTheDocument()
-  })
-
-  describe('confirming the details', () => {
-    it.each([
-      ['an agent', agentClaims, agentSession],
-      ['an employee', singleOrgEmployeeClaims, employeeSession],
-      ['an individual', citizenClaims, individualSession]
-    ])(
-      'redirects %s to the details to read page',
-      async (_, claims, session) => {
-        seededSession = session
-        const { cookie } = await signIn({ claims })
-
-        const { response } = await submitForm({
-          requestUrl: ROUTE_PATH,
-          server: getServer(),
-          formData: {},
-          cookie
-        })
-
-        expect(response.statusCode).toBe(303)
-        expect(response.headers.location).toBe('/request-to-use/read-this')
-      }
+    expect(getByRole(document, 'button', { name: 'Confirm' })).toHaveAttribute(
+      'href',
+      '/request-to-use/read-this'
     )
+    expect(
+      document.querySelector('form[action="/request-to-use/review-details"]')
+    ).not.toBeInTheDocument()
   })
 
   describe('changing an answer from a change link', () => {
