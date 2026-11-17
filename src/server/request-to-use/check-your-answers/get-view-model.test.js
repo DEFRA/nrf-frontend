@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
-import { firstOrgName } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import { boundaryGeojson } from '../../../test-utils/fixtures/boundary-geojson.js'
+import {
+  currentRelationshipId,
+  firstOrgName
+} from '../../../test-utils/fixtures/defra-id-org-claims.js'
 import {
   accountFullName,
   agentOrganisationName,
@@ -9,7 +13,6 @@ import {
   reviewDetailsAddress,
   reviewDetailsSessions
 } from '../../../test-utils/fixtures/review-details-personas.js'
-import { boundaryGeojson } from '../../../test-utils/fixtures/boundary-geojson.js'
 
 // Declared as literals rather than imports: a wrong change to a route must
 // fail these tests (tests.md, constants vs literals).
@@ -37,8 +40,7 @@ const rowKeys = {
 const findDevelopmentDetailsRow = (view, key) =>
   view.developmentDetailsRows.find((row) => row.key.text === key)
 
-const baseData = {
-  acceptLevy: 'yes',
+const quote = {
   planningType: 'full-planning-permission',
   isHousing: 'yes',
   housingUnits: 42,
@@ -46,29 +48,30 @@ const baseData = {
   email: 'test@example.com'
 }
 
-const agentData = {
-  ...baseData,
-  variant: 'agent',
-  accountFullName,
-  businessName: agentOrganisationName,
-  address: reviewDetailsSessions.agent.address
+const signedInUser = {
+  displayName: accountFullName,
+  currentRelationshipId
 }
 
-const employeeData = {
-  ...baseData,
-  variant: 'employee',
-  accountFullName,
-  businessName: firstOrgName,
-  address: reviewDetailsSessions.employee.address
-}
+const dataFor = (session) => ({
+  session: { quote, requestToUse: session },
+  signedInUser
+})
 
-const individualData = {
-  ...baseData,
-  variant: 'individual',
-  accountFullName,
-  businessName: '',
-  address: reviewDetailsSessions.individual.address
-}
+const agentData = dataFor({
+  ...reviewDetailsSessions.agent,
+  acceptLevy: 'yes'
+})
+
+const employeeData = dataFor({
+  ...reviewDetailsSessions.employee,
+  acceptLevy: 'yes'
+})
+
+const individualData = dataFor({
+  ...reviewDetailsSessions.individual,
+  acceptLevy: 'yes'
+})
 
 describe('Check your answers view model', () => {
   it('returns the page heading, title and back link to the read this page', () => {
@@ -123,6 +126,24 @@ describe('Check your answers view model', () => {
       )
     }
   )
+
+  it('drops the saved address when it was entered under a different relationship', () => {
+    const view = getViewModel({
+      session: {
+        quote,
+        requestToUse: {
+          ...reviewDetailsSessions.agent,
+          signin: {
+            ...reviewDetailsSessions.agent.signin,
+            relationshipId: 'another-relationship'
+          }
+        }
+      },
+      signedInUser
+    })
+
+    expect(findSummaryListRow(view, rowKeys.address).value.html).toBe('')
+  })
 
   it('links each changeable answer to the page that changes it', () => {
     const view = getViewModel(agentData)
@@ -184,7 +205,10 @@ describe('Check your answers view model', () => {
   it('shows the uploaded boundary filename in place of Added', () => {
     const view = getViewModel({
       ...agentData,
-      boundaryFilename: 'boundary.geojson'
+      session: {
+        ...agentData.session,
+        quote: { ...quote, boundaryFilename: 'boundary.geojson' }
+      }
     })
 
     expect(
@@ -193,7 +217,10 @@ describe('Check your answers view model', () => {
   })
 
   it('omits the housing units row when the development has no housing', () => {
-    const view = getViewModel({ ...agentData, isHousing: 'no' })
+    const view = getViewModel({
+      ...agentData,
+      session: { ...agentData.session, quote: { ...quote, isHousing: 'no' } }
+    })
 
     expect(
       findDevelopmentDetailsRow(view, rowKeys.housingUnits)

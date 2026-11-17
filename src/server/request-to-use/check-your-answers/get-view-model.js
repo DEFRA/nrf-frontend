@@ -4,6 +4,7 @@ import { housingOptions } from '../../quote/confirm-housing/options.js'
 import { acceptLevyOptions } from '../accept-levy/options.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
+import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
 import { routePath as acceptLevyPath } from '../accept-levy/route-path.js'
 import { routePath as enterAddressPath } from '../enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
@@ -25,15 +26,15 @@ const userTypeLabels = {
  * Red line boundary answer, derived from the saved boundary rather than
  * boundaryEntryType. boundaryFilename is user-controlled: it only ever flows
  * into value.text, which govukSummaryList escapes (value.html would not be).
- * @param {object} data - the quote session data
+ * @param {object} quote - the quote session data
  * @returns {string} the row value for the red line boundary
  */
-const boundaryAnswerText = (data) => {
-  if (data?.boundaryFilename) {
-    return data.boundaryFilename
+const boundaryAnswerText = (quote) => {
+  if (quote?.boundaryFilename) {
+    return quote.boundaryFilename
   }
 
-  return data?.boundaryGeojson ? 'Added' : 'Not added'
+  return quote?.boundaryGeojson ? 'Added' : 'Not added'
 }
 
 /**
@@ -42,20 +43,23 @@ const boundaryAnswerText = (data) => {
  * from their Defra ID account. Omitted rather than shown blank: a name is
  * only missing when the Defra ID profile carries none, and an individual
  * never has a business name.
- * @param {object} data - the request to use session data merged with the signed-in user's own name
+ * @param {object} requestToUse - the request to use session data
+ * @param {object} [address] - the saved enter address answers, already checked against the signed-in relationship
+ * @param {string} [accountFullName] - the signed-in user's own name
  * @returns {Array<object>} summary list rows for the request to use answers
  */
-const requestToUseRows = (data) => {
-  const isAgent = data?.variant === 'agent'
-  const fullName = isAgent ? data?.address?.fullName : data?.accountFullName
-  const businessName = data?.businessName
+const requestToUseRows = (requestToUse, address, accountFullName) => {
+  const variant = requestToUse?.signin?.actualUserType
+  const isAgent = variant === 'agent'
+  const fullName = isAgent ? address?.fullName : accountFullName
+  const businessName = requestToUse?.signin?.organisation?.organisationName
 
   return [
     {
       key: { text: 'Accept levy amount' },
       value: {
         text: acceptLevyOptions.find(
-          (option) => option.value === data?.acceptLevy
+          (option) => option.value === requestToUse?.acceptLevy
         )?.text
       },
       actions: changeAction(
@@ -65,7 +69,7 @@ const requestToUseRows = (data) => {
     },
     {
       key: { text: 'Requesting to use the levy as' },
-      value: { text: userTypeLabels[data?.variant] }
+      value: { text: userTypeLabels[variant] }
     },
     ...(fullName
       ? [
@@ -86,7 +90,7 @@ const requestToUseRows = (data) => {
       : []),
     {
       key: { text: 'Address' },
-      value: { html: addressAnswerHtml(data?.address) },
+      value: { html: addressAnswerHtml(address) },
       actions: changeAction('address', enterAddressPath)
     }
   ].filter((row) => row.value.text != null || row.value.html != null)
@@ -96,57 +100,61 @@ const requestToUseRows = (data) => {
  * The saved quote's own answers, read-only: changes go through the review
  * and amend page, linked below the list. Housing units only apply when the
  * development has housing.
- * @param {object} data - the quote session data saved when the quote was created
+ * @param {object} quote - the quote session data saved when the quote was created
  * @returns {Array<object>} summary list rows for the quote's development details
  */
-const developmentDetailsRows = (data) =>
+const developmentDetailsRows = (quote) =>
   [
     {
       key: { text: 'Planning permission type' },
       value: {
         text: planningTypeOptions.find(
-          (option) => option.value === data?.planningType
+          (option) => option.value === quote?.planningType
         )?.text
       }
     },
     {
       key: { text: 'Housing' },
       value: {
-        text: housingOptions.find((option) => option.value === data?.isHousing)
+        text: housingOptions.find((option) => option.value === quote?.isHousing)
           ?.text
       }
     },
-    ...(data?.isHousing === 'yes'
+    ...(quote?.isHousing === 'yes'
       ? [
           {
             key: { text: 'Number of housing units' },
-            value: { text: data?.housingUnits }
+            value: { text: quote?.housingUnits }
           }
         ]
       : []),
     {
       key: { text: 'Red line boundary' },
-      value: { text: boundaryAnswerText(data) }
+      value: { text: boundaryAnswerText(quote) }
     },
     {
       key: { text: 'Email address' },
-      value: { text: data?.email }
+      value: { text: quote?.email }
     }
   ].filter((row) => row.value.text != null)
 
 /**
- * @param {object} [data] - the quote session data merged with the request to
- * use session data (see get-session-data.js)
- * @param {object} [_query] - unused: the parsed request query
+ * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} view model for the check your answers page
  */
-export default function getViewModel(data = {}, _query = {}) {
+export default function getViewModel({ session, signedInUser } = {}) {
+  const requestToUse = session?.requestToUse
+  const address = getAddressForRelationship({
+    requestToUse,
+    currentRelationshipId: signedInUser?.currentRelationshipId
+  })
+
   return {
     pageTitle: getPageTitle(pageHeading),
     pageHeading,
     backLinkPath: readThisPath,
-    rows: requestToUseRows(data),
-    developmentDetailsRows: developmentDetailsRows(data),
+    rows: requestToUseRows(requestToUse, address, signedInUser?.displayName),
+    developmentDetailsRows: developmentDetailsRows(session?.quote),
     confirmInformationOptions,
     reviewQuotePath: reviewQuoteDetailsPath,
     deleteQuotePath
