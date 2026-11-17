@@ -14,7 +14,7 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Are you sure you want to delete this quote page
- *     description: Renders the quote journey's delete quote page when the levy amount is declined on the accept levy page
+ *     description: Renders the quote journey's delete quote page for the request to use journey, reached from the Delete quote details link on the check your answers page or by declining the levy amount on the accept levy page
  *     responses:
  *       200:
  *         description: HTML form page

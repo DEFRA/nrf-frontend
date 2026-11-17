@@ -7,14 +7,19 @@ import { seedRequestToUseSession } from './setup-seeded-request-to-use-server.js
 
 /**
  * Sets up a test server with mocked Defra ID endpoints, for pages behind requireAuth.
- * @returns {{ getServer: () => import('@hapi/hapi').Server, signIn: (options?: { claims?: object, cookie?: string, signInUrl?: string }) => ReturnType<typeof completeDefraSignIn> }}
+ * @returns {{ getServer: () => import('@hapi/hapi').Server, signIn: (options?: { claims?: object, cookie?: string, signInUrl?: string }) => ReturnType<typeof completeDefraSignIn>, mswServer: import('msw/node').SetupServerApi }}
  * Pass `seedRequestToUse: true` to seed the request to use session after every response.
  * signIn takes optional `claims` (e.g. organisation claims) merged over the default mock user for that sign-in only
+ * mswServer is the server the Defra ID handlers run on: register further
+ * handlers (e.g. backend mocks) on it rather than creating a second msw
+ * server, which would intercept and reject the Defra ID requests.
  */
 export function setupSignedInTestServer({ seedRequestToUse = false } = {}) {
   let tokenClaims = mockUser
 
-  setupMswServer(...defraIdSignInHandlers({ getClaims: () => tokenClaims }))
+  const mswServer = setupMswServer(
+    ...defraIdSignInHandlers({ getClaims: () => tokenClaims })
+  )
   const getServer = setupTestServer()
 
   if (seedRequestToUse) {
@@ -28,5 +33,5 @@ export function setupSignedInTestServer({ seedRequestToUse = false } = {}) {
     return completeDefraSignIn({ server: getServer(), ...options })
   }
 
-  return { getServer, signIn }
+  return { getServer, signIn, mswServer }
 }

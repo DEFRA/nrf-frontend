@@ -57,12 +57,12 @@ describe('Are you sure you want to delete this quote page', () => {
     expectPhaseBannerSurveyLink({ document, journey: 'RequestToUse' })
   })
 
-  it('should link back to the accept levy page', async () => {
+  it('should link back to the check your answers page', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/accept-levy'
+      '/request-to-use/check-your-answers'
     )
   })
 
