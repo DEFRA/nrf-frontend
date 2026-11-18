@@ -17,7 +17,7 @@ import {
 // Declared as literals rather than imports: a wrong change to a route must
 // fail these tests (tests.md, constants vs literals).
 const acceptLevyPath = '/request-to-use/accept-levy'
-const enterAddressPath = '/request-to-use/enter-address'
+const changeEnterAddressPath = '/request-to-use/enter-address?change=true'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const deleteQuotePath = '/request-to-use/delete-quote'
@@ -159,14 +159,14 @@ describe('Check your answers view model', () => {
     ])
     expect(findSummaryListRow(view, rowKeys.fullName).actions.items).toEqual([
       {
-        href: enterAddressPath,
+        href: changeEnterAddressPath,
         text: 'Change',
         visuallyHiddenText: 'full name'
       }
     ])
     expect(findSummaryListRow(view, rowKeys.address).actions.items).toEqual([
       {
-        href: enterAddressPath,
+        href: changeEnterAddressPath,
         text: 'Change',
         visuallyHiddenText: 'address'
       }

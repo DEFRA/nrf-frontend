@@ -54,6 +54,9 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
   const isAgent = variant === 'agent'
   const fullName = isAgent ? address?.fullName : accountFullName
   const businessName = requestToUse?.signin?.organisation?.organisationName
+  // An edit from this page opens the enter address page in change mode, so
+  // its back link and submit return here rather than walking the journey on.
+  const changeEnterAddressPath = `${enterAddressPath}?change=true`
 
   return [
     {
@@ -77,7 +80,7 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
           {
             key: { text: 'Full name' },
             value: { text: fullName },
-            actions: changeAction('full name', enterAddressPath)
+            actions: changeAction('full name', changeEnterAddressPath)
           }
         ]
       : []),
@@ -92,7 +95,7 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
     {
       key: { text: 'Address' },
       value: { html: addressAnswerHtml(address) },
-      actions: changeAction('address', enterAddressPath)
+      actions: changeAction('address', changeEnterAddressPath)
     }
   ].filter((row) => row.value.text != null || row.value.html != null)
 }

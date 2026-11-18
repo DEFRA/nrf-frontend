@@ -71,4 +71,13 @@ describe('enter address getViewModel', () => {
       ).toBe(expected)
     }
   )
+
+  it('links back to the check your answers page in change mode', () => {
+    expect(
+      getViewModel({
+        session: { requestToUse: { variation: 'yes' } },
+        query: { change: 'true' }
+      }).backLinkPath
+    ).toBe('/request-to-use/check-your-answers')
+  })
 })

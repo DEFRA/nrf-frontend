@@ -1,4 +1,6 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
+import { isChangeMode } from '../../quote/helpers/change-mode/index.js'
+import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { getPreSignInBackLinkPath } from '../helpers/get-pre-sign-in-back-link-path/index.js'
 import { getEnterAddressVariant } from '../helpers/get-enter-address-variant/index.js'
 import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
@@ -31,7 +33,7 @@ const headingWithoutOrganisationByVariant = {
  * @param {import('../controller-get.js').ViewModelInput} [input]
  * @returns {object} template data
  */
-export default function getViewModel({ session, signedInUser } = {}) {
+export default function getViewModel({ session, signedInUser, query } = {}) {
   const { organisation } = signedInUser ?? {}
   const variant = getEnterAddressVariant(organisation)
   // A function replacer so `$&` and friends in an organisation name are not
@@ -48,8 +50,11 @@ export default function getViewModel({ session, signedInUser } = {}) {
     pageHeading,
     guidanceText: guidanceByVariant[variant],
     // The defra-account pages redirect a signed-in user straight back here,
-    // so Back targets the last question before the sign-in funnel.
-    backLinkPath: getPreSignInBackLinkPath(session?.requestToUse ?? {}),
+    // so Back targets the last question before the sign-in funnel. An edit
+    // from the check your answers page instead returns there.
+    backLinkPath: isChangeMode(query)
+      ? checkYourAnswersPath
+      : getPreSignInBackLinkPath(session?.requestToUse ?? {}),
     formVariant: variant,
     formData: getAddressForRelationship({
       requestToUse: session?.requestToUse,

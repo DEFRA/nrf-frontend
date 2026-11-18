@@ -228,11 +228,11 @@ describe('Check your answers page', () => {
     ).toHaveAttribute('href', '/request-to-use/accept-levy')
     expect(getByRole(document, 'link', { name: /full name/ })).toHaveAttribute(
       'href',
-      '/request-to-use/enter-address'
+      '/request-to-use/enter-address?change=true'
     )
     expect(
       getByRole(document, 'link', { name: /^Change\s*address$/ })
-    ).toHaveAttribute('href', '/request-to-use/enter-address')
+    ).toHaveAttribute('href', '/request-to-use/enter-address?change=true')
   })
 
   it('should show the development details of the saved quote', async () => {
