@@ -20,7 +20,7 @@ const changeAcceptLevyPath = '/request-to-use/accept-levy?change=true'
 const changeEnterAddressPath = '/request-to-use/enter-address?change=true'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
-const deleteQuotePath = '/request-to-use/delete-quote'
+const changeDeleteQuotePath = '/request-to-use/delete-quote?change=true'
 
 // Row keys are the user-visible summary list contract; consts keep each
 // literal to one occurrence (SonarQube S1192).
@@ -237,6 +237,6 @@ describe('Check your answers view model', () => {
       }
     ])
     expect(view.reviewQuotePath).toBe(reviewQuoteDetailsPath)
-    expect(view.deleteQuotePath).toBe(deleteQuotePath)
+    expect(view.deleteQuotePath).toBe(changeDeleteQuotePath)
   })
 })

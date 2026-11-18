@@ -57,8 +57,21 @@ describe('Are you sure you want to delete this quote page', () => {
     expectPhaseBannerSurveyLink({ document, journey: 'RequestToUse' })
   })
 
-  it('should link back to the check your answers page', async () => {
+  it('should link back to the accept levy page by default', async () => {
     const document = await load()
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/request-to-use/accept-levy'
+    )
+  })
+
+  it('should link back to the check your answers page when the change flag is set', async () => {
+    const document = await loadPage({
+      requestUrl: '/request-to-use/delete-quote?change=true',
+      server: getSeededServer(),
+      cookie: await withCompleteQuoteSession(getSeededServer())
+    })
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',

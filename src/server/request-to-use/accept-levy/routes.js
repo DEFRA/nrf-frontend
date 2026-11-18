@@ -1,7 +1,10 @@
 import { requestToUseController } from '../controller-get.js'
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
-import { isChangeMode } from '../../quote/helpers/change-mode/index.js'
+import {
+  appendChangeParam,
+  isChangeMode
+} from '../../quote/helpers/change-mode/index.js'
 import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { routePath as deleteQuotePath } from '../delete-quote/route-path.js'
 import getViewModel from './get-view-model.js'
@@ -65,12 +68,16 @@ export default [
       getNextPage,
       saveToSession: requestToUseSession.save,
       // An edit from the check your answers page returns there, but
-      // declining the levy amount still takes the delete quote path: the
-      // deliberate destructive answer wins over the return.
+      // declining the levy amount still takes the delete quote path — the
+      // deliberate destructive answer wins over the return — carrying the
+      // change flag so the delete page's back link returns to the page the
+      // user came from.
       resolveRedirect: ({ nextPage, request }) =>
-        nextPage === deleteQuotePath || !isChangeMode(request.query)
-          ? nextPage
-          : checkYourAnswersPath
+        nextPage === deleteQuotePath
+          ? appendChangeParam(nextPage, request.query)
+          : isChangeMode(request.query)
+            ? checkYourAnswersPath
+            : nextPage
     })
   }
 ]

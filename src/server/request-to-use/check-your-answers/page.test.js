@@ -291,7 +291,7 @@ describe('Check your answers page', () => {
 
     expect(
       getByRole(document, 'link', { name: /^Delete\s*quote details$/ })
-    ).toHaveAttribute('href', '/request-to-use/delete-quote')
+    ).toHaveAttribute('href', '/request-to-use/delete-quote?change=true')
   })
 
   it('should record the commitment certificate and redirect to the confirmation page on submit', async () => {

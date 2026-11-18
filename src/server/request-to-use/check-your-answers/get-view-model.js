@@ -167,6 +167,8 @@ export default function getViewModel({ session, signedInUser } = {}) {
     developmentDetailsRows: developmentDetailsRows(session?.quote),
     confirmInformationOptions,
     reviewQuotePath: reviewQuoteDetailsPath,
-    deleteQuotePath
+    // The Delete quote details link carries the change flag so the delete
+    // page's back link returns here rather than to the accept levy page.
+    deleteQuotePath: `${deleteQuotePath}?change=true`
   }
 }

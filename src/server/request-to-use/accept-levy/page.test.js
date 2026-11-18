@@ -149,9 +149,10 @@ describe('Do you accept this nature restoration levy amount page', () => {
       changeMode: true
     },
     {
-      scenario: 'no in change mode, which still takes the delete quote path',
+      scenario:
+        'no in change mode, which still takes the delete quote path, carrying the change flag',
       answer: 'no',
-      nextPage: '/request-to-use/delete-quote',
+      nextPage: '/request-to-use/delete-quote?change=true',
       changeMode: true
     }
   ])(
