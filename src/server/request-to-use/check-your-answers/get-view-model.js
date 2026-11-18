@@ -54,9 +54,11 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
   const isAgent = variant === 'agent'
   const fullName = isAgent ? address?.fullName : accountFullName
   const businessName = requestToUse?.signin?.organisation?.organisationName
-  // An edit from this page opens the enter address page in change mode, so
-  // its back link and submit return here rather than walking the journey on.
+  // An edit from this page opens the enter address and accept levy pages in
+  // change mode, so their back links and submits return here rather than
+  // walking the journey on.
   const changeEnterAddressPath = `${enterAddressPath}?change=true`
+  const changeAcceptLevyPath = `${acceptLevyPath}?change=true`
 
   return [
     {
@@ -68,7 +70,7 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
       },
       actions: changeAction(
         'whether you accept the levy amount',
-        acceptLevyPath
+        changeAcceptLevyPath
       )
     },
     {

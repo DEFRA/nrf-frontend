@@ -16,7 +16,7 @@ import {
 
 // Declared as literals rather than imports: a wrong change to a route must
 // fail these tests (tests.md, constants vs literals).
-const acceptLevyPath = '/request-to-use/accept-levy'
+const changeAcceptLevyPath = '/request-to-use/accept-levy?change=true'
 const changeEnterAddressPath = '/request-to-use/enter-address?change=true'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
@@ -152,7 +152,7 @@ describe('Check your answers view model', () => {
       findSummaryListRow(view, rowKeys.acceptLevyAmount).actions.items
     ).toEqual([
       {
-        href: acceptLevyPath,
+        href: changeAcceptLevyPath,
         text: 'Change',
         visuallyHiddenText: 'whether you accept the levy amount'
       }

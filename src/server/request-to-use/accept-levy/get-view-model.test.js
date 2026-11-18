@@ -14,6 +14,12 @@ describe('accept-levy getViewModel', () => {
     )
   })
 
+  it('should link back to the check your answers page in change mode', () => {
+    expect(
+      getViewModel({ ...levy(1, 1), query: { change: 'true' } }).backLinkPath
+    ).toBe('/request-to-use/check-your-answers')
+  })
+
   it('should show whole pound amounts without pence', () => {
     const viewModel = getViewModel(levy(26750, 27000))
 

@@ -225,7 +225,7 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: /whether you accept the levy amount/
       })
-    ).toHaveAttribute('href', '/request-to-use/accept-levy')
+    ).toHaveAttribute('href', '/request-to-use/accept-levy?change=true')
     expect(getByRole(document, 'link', { name: /full name/ })).toHaveAttribute(
       'href',
       '/request-to-use/enter-address?change=true'
