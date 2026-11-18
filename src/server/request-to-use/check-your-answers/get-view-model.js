@@ -9,7 +9,7 @@ import { routePath as changeAcceptLevyPath } from '../change/accept-levy/route-p
 import { routePath as changeEnterAddressPath } from '../change/enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
-import { routePath as changeDeleteQuotePath } from '../change/delete-quote/route-path.js'
+import { routePath as changeDeleteQuoteDetailsPath } from '../change/delete-quote-details/route-path.js'
 import { confirmInformationOptions } from './options.js'
 
 export const pageHeading = 'Check your answers'
@@ -167,6 +167,6 @@ export default function getViewModel({ session, signedInUser } = {}) {
     reviewQuotePath: reviewQuoteDetailsPath,
     // The Delete quote details link opens the delete page's change alias,
     // whose back link and Cancel link return here.
-    deleteQuotePath: changeDeleteQuotePath
+    deleteQuotePath: changeDeleteQuoteDetailsPath
   }
 }

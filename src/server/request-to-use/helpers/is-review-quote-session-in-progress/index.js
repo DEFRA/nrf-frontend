@@ -13,6 +13,7 @@ import { routePath as checkYourAnswersPath } from '../../check-your-answers/rout
 import { routePath as changeEnterAddressPath } from '../../change/enter-address/route-path.js'
 import { routePath as changeAcceptLevyPath } from '../../change/accept-levy/route-path.js'
 import { routePath as changeDeleteQuotePath } from '../../change/delete-quote/route-path.js'
+import { routePath as changeDeleteQuoteDetailsPath } from '../../change/delete-quote-details/route-path.js'
 import { routePath as readThisPath } from '../../read-this/route-path.js'
 import { routePath as originalReferenceNotMatchedPath } from '../../original-reference-not-matched/route-path.js'
 import { routePath as originalBoundaryNotMatchedPath } from '../../original-boundary-not-matched/route-path.js'
@@ -78,7 +79,8 @@ const completeQuotePaths = new Set([
   readThisPath,
   changeEnterAddressPath,
   changeAcceptLevyPath,
-  changeDeleteQuotePath
+  changeDeleteQuotePath,
+  changeDeleteQuoteDetailsPath
 ])
 
 /** @type {import('@hapi/hapi').Lifecycle.Method} */

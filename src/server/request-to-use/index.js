@@ -34,6 +34,7 @@ import routesChangeExcludedArea from './change/excluded-area/routes.js'
 import routesChangeEnterAddress from './change/enter-address/routes.js'
 import routesChangeAcceptLevy from './change/accept-levy/routes.js'
 import routesChangeDeleteQuote from './change/delete-quote/routes.js'
+import routesChangeDeleteQuoteDetails from './change/delete-quote-details/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
 import routesOriginalReferenceNotMatched from './original-reference-not-matched/routes.js'
@@ -89,6 +90,7 @@ export const requestToUse = {
         ...routesChangeEnterAddress,
         ...routesChangeAcceptLevy,
         ...routesChangeDeleteQuote,
+        ...routesChangeDeleteQuoteDetails,
         ...routesRetrieveQuote,
         ...routesLinkExpired,
         ...routesOriginalReferenceNotMatched,

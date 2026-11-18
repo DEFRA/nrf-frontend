@@ -20,7 +20,7 @@ const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
 const changeEnterAddressPath = '/request-to-use/change/enter-address'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
-const changeDeleteQuotePath = '/request-to-use/change/delete-quote'
+const changeDeleteQuotePath = '/request-to-use/change/delete-quote-details'
 
 // Row keys are the user-visible summary list contract; consts keep each
 // literal to one occurrence (SonarQube S1192).
