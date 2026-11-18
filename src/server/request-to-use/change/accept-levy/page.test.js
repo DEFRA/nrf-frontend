@@ -5,9 +5,11 @@ import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 import { mockRecalculateLevy } from '../../../../test-utils/mock-recalculate-levy.js'
-import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 
+// Declared as literals rather than imports: a wrong change to a route must
+// fail these tests (tests.md, constants vs literals).
 const ROUTE_PATH = '/request-to-use/change/accept-levy'
+const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 
 const mswServer = setupMswServer()
 
