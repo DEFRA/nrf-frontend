@@ -15,21 +15,21 @@ describe('Change delete quote page', () => {
       cookie: await withCompleteQuoteSession(getSeededServer())
     })
 
-  it('should link back to the check your answers page', async () => {
+  it('should link back to the change accept levy page', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/check-your-answers'
+      '/request-to-use/change/accept-levy'
     )
   })
 
-  it('should link to the check your answers page from Cancel', async () => {
+  it('should link to the change accept levy page from Cancel', async () => {
     const document = await load()
 
     expect(getByRole(document, 'link', { name: /Cancel/ })).toHaveAttribute(
       'href',
-      '/request-to-use/check-your-answers'
+      '/request-to-use/change/accept-levy'
     )
   })
 })

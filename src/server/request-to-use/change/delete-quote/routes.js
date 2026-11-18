@@ -14,7 +14,7 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Are you sure you want to delete this quote page
- *     description: Renders the quote journey's delete quote page when the Delete quote details link on the check your answers page is followed. The back link and Cancel link return to the check your answers page.
+ *     description: Renders the quote journey's delete quote page when the Delete quote details link on the check your answers page is followed or the levy amount is declined on the change accept levy page. The back link and Cancel link return to the change accept levy page.
  *     responses:
  *       200:
  *         description: HTML form page
