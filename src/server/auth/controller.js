@@ -62,6 +62,18 @@ async function discardPreviousSession(request, newRelationshipId) {
 }
 
 /**
+ * Clears what the signed-in user entered (their address and the account answers,
+ * and any form values flashed after a failed post), so whoever signs in next on
+ * this browser starts clean.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {void}
+ */
+function clearSignedInUserAnswers(request) {
+  clearAccountAnswers(request)
+  clearValidationFlashFromCache(request)
+}
+
+/**
  * Initiate OAuth flow - redirects to DEFRA Identity
  */
 export const signInController = {
@@ -245,6 +257,7 @@ export const signOutController = {
     const sessionCache = request.server.app.sessionCache
     await sessionCache.drop(sessionId)
     request.yar.clear('sessionId')
+    clearSignedInUserAnswers(request)
 
     logger.info(`User session ${sessionId} signed out`)
 
@@ -298,6 +311,7 @@ export const signOutOidcController = {
       const sessionCache = request.server.app.sessionCache
       await sessionCache.drop(sessionId)
       request.yar.clear('sessionId')
+      clearSignedInUserAnswers(request)
     }
 
     logger.info('Sign-out callback completed')

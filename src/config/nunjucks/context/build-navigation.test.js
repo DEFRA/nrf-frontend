@@ -9,6 +9,8 @@ describe('#buildNavigation', () => {
 
   it.each([
     '/request-to-use/enter-address',
+    '/request-to-use/review-details',
+    '/request-to-use/read-this',
     '/request-to-use/check-your-answers',
     '/request-to-use/confirmation'
   ])('Should provide a sign out link on %s when signed in', (path) => {
