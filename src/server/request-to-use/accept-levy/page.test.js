@@ -116,50 +116,14 @@ describe('Do you accept this nature restoration levy amount page', () => {
     ).toBeInTheDocument()
   })
 
-  it('should link back to the check your answers page in change mode', async () => {
-    const document = await loadPage({
-      requestUrl: `${routePath}?change=true`,
-      server: getServer(),
-      cookie: sessionCookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/request-to-use/check-your-answers'
-    )
-  })
-
   it.each([
-    {
-      scenario: 'yes',
-      answer: 'yes',
-      nextPage: '/request-to-use/variation',
-      changeMode: false
-    },
-    {
-      scenario: 'no',
-      answer: 'no',
-      nextPage: '/request-to-use/delete-quote',
-      changeMode: false
-    },
-    {
-      scenario: 'yes in change mode',
-      answer: 'yes',
-      nextPage: '/request-to-use/check-your-answers',
-      changeMode: true
-    },
-    {
-      scenario:
-        'no in change mode, which still takes the delete quote path, carrying the change flag',
-      answer: 'no',
-      nextPage: '/request-to-use/delete-quote?change=true',
-      changeMode: true
-    }
+    { answer: 'yes', nextPage: '/request-to-use/variation' },
+    { answer: 'no', nextPage: '/request-to-use/delete-quote' }
   ])(
-    'should redirect to $nextPage when $scenario is selected',
-    async ({ answer, nextPage, changeMode }) => {
+    'should redirect to $nextPage when "$answer" is selected',
+    async ({ answer, nextPage }) => {
       const { response } = await submitForm({
-        requestUrl: changeMode ? `${routePath}?change=true` : routePath,
+        requestUrl: routePath,
         server: getServer(),
         formData: { acceptLevy: answer },
         cookie: sessionCookie

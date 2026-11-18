@@ -31,6 +31,9 @@ import routesChangeCheckingFile from './change/checking-file/routes.js'
 import routesChangeFilePreview from './change/file-preview/routes.js'
 import routesChangeNotInEdp from './change/not-in-edp/routes.js'
 import routesChangeExcludedArea from './change/excluded-area/routes.js'
+import routesChangeEnterAddress from './change/enter-address/routes.js'
+import routesChangeAcceptLevy from './change/accept-levy/routes.js'
+import routesChangeDeleteQuote from './change/delete-quote/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
 import routesLinkExpired from './link-expired/routes.js'
 import routesOriginalReferenceNotMatched from './original-reference-not-matched/routes.js'
@@ -83,6 +86,9 @@ export const requestToUse = {
         ...routesChangeFilePreview,
         ...routesChangeNotInEdp,
         ...routesChangeExcludedArea,
+        ...routesChangeEnterAddress,
+        ...routesChangeAcceptLevy,
+        ...routesChangeDeleteQuote,
         ...routesRetrieveQuote,
         ...routesLinkExpired,
         ...routesOriginalReferenceNotMatched,

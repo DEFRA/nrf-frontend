@@ -5,11 +5,11 @@ import { acceptLevyOptions } from '../accept-levy/options.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
 import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
-import { routePath as acceptLevyPath } from '../accept-levy/route-path.js'
-import { routePath as enterAddressPath } from '../enter-address/route-path.js'
+import { routePath as changeAcceptLevyPath } from '../change/accept-levy/route-path.js'
+import { routePath as changeEnterAddressPath } from '../change/enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
-import { routePath as deleteQuotePath } from '../delete-quote/route-path.js'
+import { routePath as changeDeleteQuotePath } from '../change/delete-quote/route-path.js'
 import { confirmInformationOptions } from './options.js'
 
 export const pageHeading = 'Check your answers'
@@ -54,11 +54,9 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
   const isAgent = variant === 'agent'
   const fullName = isAgent ? address?.fullName : accountFullName
   const businessName = requestToUse?.signin?.organisation?.organisationName
-  // An edit from this page opens the enter address and accept levy pages in
-  // change mode, so their back links and submits return here rather than
+  // An edit from this page opens the change aliases of the enter address and
+  // accept levy pages, whose back links and submits return here rather than
   // walking the journey on.
-  const changeEnterAddressPath = `${enterAddressPath}?change=true`
-  const changeAcceptLevyPath = `${acceptLevyPath}?change=true`
 
   return [
     {
@@ -167,8 +165,8 @@ export default function getViewModel({ session, signedInUser } = {}) {
     developmentDetailsRows: developmentDetailsRows(session?.quote),
     confirmInformationOptions,
     reviewQuotePath: reviewQuoteDetailsPath,
-    // The Delete quote details link carries the change flag so the delete
-    // page's back link returns here rather than to the accept levy page.
-    deleteQuotePath: `${deleteQuotePath}?change=true`
+    // The Delete quote details link opens the delete page's change alias,
+    // whose back link and Cancel link return here.
+    deleteQuotePath: changeDeleteQuotePath
   }
 }

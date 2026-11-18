@@ -16,11 +16,11 @@ import {
 
 // Declared as literals rather than imports: a wrong change to a route must
 // fail these tests (tests.md, constants vs literals).
-const changeAcceptLevyPath = '/request-to-use/accept-levy?change=true'
-const changeEnterAddressPath = '/request-to-use/enter-address?change=true'
+const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
+const changeEnterAddressPath = '/request-to-use/change/enter-address'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
-const changeDeleteQuotePath = '/request-to-use/delete-quote?change=true'
+const changeDeleteQuotePath = '/request-to-use/change/delete-quote'
 
 // Row keys are the user-visible summary list contract; consts keep each
 // literal to one occurrence (SonarQube S1192).

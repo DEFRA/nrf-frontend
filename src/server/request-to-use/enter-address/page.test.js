@@ -206,22 +206,6 @@ describe('Enter address page', () => {
     }
   )
 
-  it('links back to the check your answers page in change mode', async () => {
-    const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
-    seededSession = { variation: 'yes', originalCommitted: 'yes' }
-
-    const document = await loadPage({
-      requestUrl: `${ROUTE_PATH}?change=true`,
-      server: getServer(),
-      cookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      '/request-to-use/check-your-answers'
-    )
-  })
-
   describe('organisation heading', () => {
     it('shows the organisation switcher above the page heading', async () => {
       const document = await loadSignedInPage({
@@ -328,21 +312,6 @@ describe('Enter address page', () => {
         expect(response.headers.location).toBe('/request-to-use/review-details')
       }
     )
-
-    it('redirects a change back to the check your answers page', async () => {
-      const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
-      const { response } = await submitForm({
-        requestUrl: `${ROUTE_PATH}?change=true`,
-        server: getServer(),
-        formData: { formVariant: 'employee', ...validAddress },
-        cookie
-      })
-
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(
-        '/request-to-use/check-your-answers'
-      )
-    })
 
     it('bounces a post whose hidden variant field no longer matches the server-resolved variant', async () => {
       const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })

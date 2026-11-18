@@ -1,7 +1,5 @@
 import { requestToUseController } from '../controller-get.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
-import { isChangeMode } from '../../quote/helpers/change-mode/index.js'
-import { routePath as checkYourAnswersPath } from '../check-your-answers/route-path.js'
 import { saveEnterAddress } from '../helpers/request-to-use-session/index.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
@@ -14,11 +12,7 @@ export { routePath }
 const postController = createPostController({
   formValidation,
   getNextPage,
-  saveToSession: saveEnterAddress,
-  // An edit from the check your answers page returns there instead of
-  // walking the journey on to the review details page.
-  resolveRedirect: ({ nextPage, request }) =>
-    isChangeMode(request.query) ? checkYourAnswersPath : nextPage
+  saveToSession: saveEnterAddress
 })
 
 /**
@@ -75,7 +69,7 @@ const postController = createPostController({
  *                 type: string
  *     responses:
  *       303:
- *         description: Redirect to the review details page, to the check your answers page when the change flag is set, or back to the form on validation failure or a stale or tampered variant field
+ *         description: Redirect to the review details page, or back to the form on validation failure or a stale or tampered variant field
  */
 export default [
   {

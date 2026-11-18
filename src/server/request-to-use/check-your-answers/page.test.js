@@ -225,14 +225,14 @@ describe('Check your answers page', () => {
       getByRole(document, 'link', {
         name: /whether you accept the levy amount/
       })
-    ).toHaveAttribute('href', '/request-to-use/accept-levy?change=true')
+    ).toHaveAttribute('href', '/request-to-use/change/accept-levy')
     expect(getByRole(document, 'link', { name: /full name/ })).toHaveAttribute(
       'href',
-      '/request-to-use/enter-address?change=true'
+      '/request-to-use/change/enter-address'
     )
     expect(
       getByRole(document, 'link', { name: /^Change\s*address$/ })
-    ).toHaveAttribute('href', '/request-to-use/enter-address?change=true')
+    ).toHaveAttribute('href', '/request-to-use/change/enter-address')
   })
 
   it('should show the development details of the saved quote', async () => {
@@ -291,7 +291,7 @@ describe('Check your answers page', () => {
 
     expect(
       getByRole(document, 'link', { name: /^Delete\s*quote details$/ })
-    ).toHaveAttribute('href', '/request-to-use/delete-quote?change=true')
+    ).toHaveAttribute('href', '/request-to-use/change/delete-quote')
   })
 
   it('should record the commitment certificate and redirect to the confirmation page on submit', async () => {
