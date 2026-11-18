@@ -1,9 +1,9 @@
 import { requestToUseController } from '../controller-get.js'
-import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
 import { createPostController } from '../../common/controllers/post-controller.js'
 import getViewModel from './get-view-model.js'
 import formValidation from './form-validation.js'
 import getNextPage from './get-next-page.js'
+import { saveAcceptedLevy } from './save-to-session.js'
 import { routeId, routePath } from './route-path.js'
 
 export { routePath }
@@ -60,7 +60,7 @@ export default [
     ...createPostController({
       formValidation,
       getNextPage,
-      saveToSession: requestToUseSession.save
+      saveToSession: saveAcceptedLevy
     })
   }
 ]

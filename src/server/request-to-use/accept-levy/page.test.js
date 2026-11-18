@@ -134,24 +134,36 @@ describe('Do you accept this nature restoration levy amount page', () => {
     }
   )
 
-  it.each([
-    { answer: 'yes', label: 'Yes, accept this amount' },
-    { answer: 'no', label: 'No, delete my quote details' }
-  ])(
-    'should reselect "$answer" when the user returns to the page',
-    async ({ answer, label }) => {
-      const { cookie } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { acceptLevy: answer },
-        cookie: sessionCookie
-      })
+  it('should reselect an accepted amount when the user returns to the page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { acceptLevy: 'yes' },
+      cookie: sessionCookie
+    })
 
-      const document = await load(cookie)
+    const document = await load(cookie)
 
-      expect(getByLabelText(document, label)).toBeChecked()
-    }
-  )
+    expect(getByLabelText(document, 'Yes, accept this amount')).toBeChecked()
+  })
+
+  it('should not save a declined amount', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { acceptLevy: 'no' },
+      cookie: sessionCookie
+    })
+
+    const document = await load(cookie)
+
+    expect(
+      getByLabelText(document, 'Yes, accept this amount')
+    ).not.toBeChecked()
+    expect(
+      getByLabelText(document, 'No, delete my quote details')
+    ).not.toBeChecked()
+  })
 
   it.each([
     { scenario: 'no option is selected', formData: {} },

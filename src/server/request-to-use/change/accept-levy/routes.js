@@ -1,5 +1,4 @@
 import { requestToUseController } from '../../controller-get.js'
-import { requestToUseSession } from '../../helpers/request-to-use-session/index.js'
 import { createPostController } from '../../../common/controllers/post-controller.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import { routePath as deleteQuotePath } from '../../delete-quote/route-path.js'
@@ -7,6 +6,7 @@ import { routePath as changeDeleteQuotePath } from '../delete-quote/route-path.j
 import getViewModel from './get-view-model.js'
 import formValidation from '../../accept-levy/form-validation.js'
 import getNextPage from '../../accept-levy/get-next-page.js'
+import { saveAcceptedLevy } from '../../accept-levy/save-to-session.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -14,7 +14,7 @@ export { routePath }
 const postController = createPostController({
   formValidation,
   getNextPage,
-  saveToSession: requestToUseSession.save,
+  saveToSession: saveAcceptedLevy,
   // An edit returns to the check your answers page, but declining the levy
   // amount still takes the delete quote path — the deliberate destructive
   // answer wins over the return — at its own change alias, whose back link
