@@ -78,6 +78,65 @@ describe('Enter address page', () => {
     expect(response.headers.location).toBe(ROUTE_PATH)
   })
 
+  describe('when the session ends', () => {
+    const signOut = (cookie) =>
+      getServer().inject({
+        method: 'GET',
+        url: '/auth/sign-out',
+        headers: { cookie }
+      })
+
+    it('does not save the address of a signed-out visitor, and returns to the page after signing in', async () => {
+      const challenge = await getServer().inject({
+        method: 'POST',
+        url: ROUTE_PATH,
+        payload: { formVariant: 'individual', ...validAddress }
+      })
+
+      expect(challenge.statusCode).toBe(303)
+      expect(challenge.headers.location).toBe('/auth/sign-in')
+
+      const { response, cookie } = await signIn({
+        cookie: getYarCookie(challenge)
+      })
+      expect(response.headers.location).toBe(ROUTE_PATH)
+
+      const document = await loadPage({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        cookie
+      })
+      expect(getByLabelText(document, 'Address line 1')).toHaveValue('')
+    })
+
+    it('clears the saved address when the user signs out and signs back in', async () => {
+      const { cookie } = await signIn({ claims: singleOrgEmployeeClaims })
+      await submitForm({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        formData: { formVariant: 'employee', ...validAddress },
+        cookie
+      })
+
+      const signedOut = await signOut(cookie)
+      expect(signedOut.statusCode).toBe(302)
+
+      const { cookie: signedBackInCookie } = await signIn({
+        claims: singleOrgEmployeeClaims,
+        cookie: getYarCookie(signedOut) || cookie
+      })
+      const document = await loadPage({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        cookie: signedBackInCookie
+      })
+
+      expect(getByLabelText(document, 'Address line 1')).toHaveValue('')
+      expect(getByLabelText(document, 'Town or city')).toHaveValue('')
+      expect(getByLabelText(document, 'Postcode')).toHaveValue('')
+    })
+  })
+
   it('shows the sign out link for a signed-in user', async () => {
     const document = await loadSignedInPage()
 

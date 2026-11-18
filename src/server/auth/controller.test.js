@@ -477,6 +477,10 @@ describe('Auth Controllers', () => {
       expect(mockSessionCache.drop).toHaveBeenCalledWith('test-session-id')
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
 
+      // What the user entered goes too, so whoever signs in next starts clean
+      expect(clearAccountAnswers).toHaveBeenCalledWith(request)
+      expect(clearValidationFlashFromCache).toHaveBeenCalledWith(request)
+
       // A CSRF state is stored for the callback to verify
       const [[stateKey, stateValue]] = request.yar.set.mock.calls
       expect(stateKey).toBe('signout_state')
@@ -530,6 +534,7 @@ describe('Auth Controllers', () => {
 
       // Local sign-out still completes
       expect(mockSessionCache.drop).toHaveBeenCalledWith('test-session-id')
+      expect(clearAccountAnswers).toHaveBeenCalledWith(request)
       expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })
@@ -605,6 +610,7 @@ describe('Auth Controllers', () => {
 
       expect(mockSessionCache.drop).toHaveBeenCalledWith('remaining-session-id')
       expect(request.yar.clear).toHaveBeenCalledWith('sessionId')
+      expect(clearAccountAnswers).toHaveBeenCalledWith(request)
       expect(h.redirect).toHaveBeenCalledWith('/manage/start-page')
     })
   })
