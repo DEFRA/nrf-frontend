@@ -12,7 +12,7 @@ export const pageHeadingPersonal = 'Review and confirm your details'
 
 // The business name is the organisation from the sign-in snapshot: changing it
 // means re-picking the organisation, exactly like the change organisation link
-// in the organisation heading.
+// on the enter address page.
 const changeBusinessNameUrl = `${CHANGE_ORGANISATION_PATH}?redirectTo=${encodeURIComponent(routePath)}`
 
 /**
