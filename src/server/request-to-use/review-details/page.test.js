@@ -1,9 +1,4 @@
-import {
-  getByRole,
-  getByTestId,
-  queryByRole,
-  queryByTestId
-} from '@testing-library/dom'
+import { getByRole, queryByRole, queryByTestId } from '@testing-library/dom'
 
 import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-test-server.js'
 import {
@@ -219,34 +214,14 @@ describe('Review and confirm the developer details page', () => {
   })
 
   describe('organisation heading', () => {
-    it('shows the organisation switcher above the page heading', async () => {
+    it('does not show the organisation switcher', async () => {
       const document = await loadSignedInPage({
         claims: multiOrgEmployeeClaims,
         session: employeeSession
       })
 
       expect(
-        getByTestId(document, 'app-organisation-heading')
-      ).toHaveTextContent(firstOrgName)
-      expect(
-        getByRole(document, 'link', { name: 'Change organisation' })
-      ).toHaveAttribute(
-        'href',
-        '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Freview-details'
-      )
-    })
-
-    it('does not offer to change organisation when there is nothing to switch to', async () => {
-      const document = await loadSignedInPage({
-        claims: citizenClaims,
-        session: individualSession
-      })
-
-      expect(
         queryByTestId(document, 'app-organisation-heading')
-      ).not.toBeInTheDocument()
-      expect(
-        queryByRole(document, 'link', { name: 'Change organisation' })
       ).not.toBeInTheDocument()
     })
   })
