@@ -4,7 +4,11 @@ import getViewModel from './get-view-model.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
 import { acceptLevySession } from '../../../test-utils/fixtures/session.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
-import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import {
+  setupSeededRequestToUseServer,
+  seedRequestToUseSessionWith
+} from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { mockRecalculateLevy } from '../../../test-utils/mock-recalculate-levy.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
@@ -211,7 +215,13 @@ describe('Do you accept this nature restoration levy amount page without a sessi
 })
 
 describe('Do you accept this nature restoration levy amount page without a levy', () => {
-  const getServer = setupSeededRequestToUseServer()
+  const getServer = setupTestServer()
+
+  beforeAll(() => {
+    seedRequestToUseSessionWith(getServer(), () => ({
+      nrlReference: fullQuote.reference
+    }))
+  })
 
   it('should show a server error when the levy has not been calculated', async () => {
     const response = await getResponse({

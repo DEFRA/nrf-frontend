@@ -7,6 +7,7 @@ import {
 } from './index.js'
 import { createSessionRequest } from '../../../../test-utils/create-session-request.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
+import { recalculatedLevy } from '../../../../test-utils/fixtures/levy.js'
 
 const originalReferenceKey = 'originalNrlReference'
 
@@ -37,11 +38,7 @@ describe('requestToUseSession', () => {
     const request = createSessionRequest({
       session: { requestToUse: { nrlReference: fullQuote.reference } }
     })
-    const levy = {
-      calculationDate: '2026-01-01',
-      provisionalAmount: 100,
-      inflationAdjustedAmount: 110
-    }
+    const levy = recalculatedLevy
 
     const result = requestToUseSession.save(request, { levy })
 

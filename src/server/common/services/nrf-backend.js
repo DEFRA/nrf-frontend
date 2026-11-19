@@ -168,17 +168,22 @@ export const deleteRequestToBackend = async ({ endpointPath }) => {
 }
 
 /**
- * Records that the commitment certificate has been created for the quote. The
- * backend rejects a repeat call, and whatever went wrong upstream the user sees
- * the 500 error page, so every failure is wrapped as an internal error.
- * @param {{ reference: string }} params
+ * Records that the commitment certificate has been created for the quote,
+ * with the levy calculation the user accepted, which the backend adds to the
+ * quote's calculation history. The backend rejects a repeat call, and whatever
+ * went wrong upstream the user sees the 500 error page, so every failure is
+ * wrapped as an internal error.
+ * @param {{ reference: string, levy: object }} params levy is the impact assessor's recalculation, as saved in the request to use session
  * @returns {Promise<object>} the Wreck response ({ res, payload })
  */
-export const createCommitmentCertificateInBackend = async ({ reference }) => {
+export const createCommitmentCertificateInBackend = async ({
+  reference,
+  levy
+}) => {
   try {
     return await patchRequestToBackend({
       endpointPath: `/quotes/${reference}/commitment-certificate`,
-      payload: { createCommitmentCertificate: true }
+      payload: { createCommitmentCertificate: true, levy }
     })
   } catch (error) {
     logger.error(

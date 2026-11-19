@@ -15,7 +15,6 @@ export const fullQuote = {
     {
       edpId: 'EDP-001',
       edpName: 'Norfolk Fens East',
-      edpType: 'NUTRIENT',
       impact: {
         nitrogenTotal: {
           amount: 1.5,
@@ -33,7 +32,6 @@ export const fullQuote = {
     {
       edpId: 'EDP-002',
       edpName: 'Broadland Rivers',
-      edpType: 'NUTRIENT',
       impact: {
         nitrogenTotal: {
           amount: 2.1,
