@@ -22,6 +22,7 @@ import {
   reviewDetailsSessions
 } from '../../../test-utils/fixtures/review-details-personas.js'
 import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { recalculatedLevy } from '../../../test-utils/fixtures/levy.js'
 
 const pagePath = '/request-to-use/check-your-answers'
 const startPath = '/manage/start-page'
@@ -296,7 +297,10 @@ describe('Check your answers page', () => {
 
   it('should record the commitment certificate and redirect to the confirmation page on submit', async () => {
     const requests = mockCommitmentCertificate(mswServer)
-    seededSession = { nrlReference: fullQuote.reference }
+    seededSession = {
+      nrlReference: fullQuote.reference,
+      levy: recalculatedLevy
+    }
 
     const { response } = await submitForm({
       requestUrl: pagePath,
@@ -307,7 +311,9 @@ describe('Check your answers page', () => {
 
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe('/request-to-use/confirmation')
-    expect(requests).toEqual([{ createCommitmentCertificate: true }])
+    expect(requests).toEqual([
+      { createCommitmentCertificate: true, levy: recalculatedLevy }
+    ])
   })
 
   it('should redirect back with a validation error when the confirmation box is not ticked', async () => {
@@ -356,11 +362,30 @@ describe('Check your answers page', () => {
     expect(requests).toEqual([])
   })
 
+  it('should redirect to the start page without calling the backend when the session has no levy calculation', async () => {
+    const requests = mockCommitmentCertificate(mswServer)
+    seededSession = { nrlReference: fullQuote.reference }
+
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      formData: { confirmInformation: 'Yes' },
+      cookie: await signedInCookie()
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(startPath)
+    expect(requests).toEqual([])
+  })
+
   it.each([404, 409, 500])(
     'should show the 500 error page when the backend responds with %i',
     async (status) => {
       mockCommitmentCertificate(mswServer, { status })
-      seededSession = { nrlReference: fullQuote.reference }
+      seededSession = {
+        nrlReference: fullQuote.reference,
+        levy: recalculatedLevy
+      }
 
       const { response, document } = await submitForm({
         requestUrl: pagePath,
