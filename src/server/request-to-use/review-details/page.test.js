@@ -106,8 +106,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Developer details',
         fullName: developerFullName,
         businessName: agentOrganisationName,
-        canChangeFullName: true,
-        canChangeBusinessName: true
+        canChangeFullName: true
       },
       {
         scenario: 'for an employee',
@@ -117,8 +116,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Your details',
         fullName: accountFullName,
         businessName: firstOrgName,
-        canChangeFullName: false,
-        canChangeBusinessName: false
+        canChangeFullName: false
       },
       {
         scenario: 'for an individual',
@@ -128,8 +126,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Your details',
         fullName: accountFullName,
         businessName: null,
-        canChangeFullName: false,
-        canChangeBusinessName: false
+        canChangeFullName: false
       }
     ])(
       'reviews the details $scenario',
@@ -140,8 +137,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading,
         fullName,
         businessName,
-        canChangeFullName,
-        canChangeBusinessName
+        canChangeFullName
       }) => {
         const document = await loadSignedInPage({ claims, session })
 
@@ -172,14 +168,9 @@ describe('Review and confirm the developer details page', () => {
           expect(
             findSummaryListRowElement(document, rowKeys.businessName)
           ).toHaveTextContent(businessName)
-          if (canChangeBusinessName) {
-            expect(
-              getByRole(document, 'link', { name: /the business name/ })
-            ).toHaveAttribute(
-              'href',
-              '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Freview-details'
-            )
-          }
+          expect(
+            queryByRole(document, 'link', { name: /the business name/ })
+          ).not.toBeInTheDocument()
         } else {
           expect(
             findSummaryListRowElement(document, rowKeys.businessName)

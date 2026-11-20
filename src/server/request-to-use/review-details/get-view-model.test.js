@@ -128,19 +128,13 @@ describe('Review and confirm the developer details view model', () => {
     ])
   })
 
-  it('links the agent business name change to the change organisation flow, returning here', () => {
+  it('gives the agent business name row no change link', () => {
     const row = findSummaryListRow(
       getViewModel(agentData),
       rowKeys.businessName
     )
 
-    expect(row.actions.items).toEqual([
-      {
-        href: '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Freview-details',
-        text: 'Change',
-        visuallyHiddenText: 'the business name'
-      }
-    ])
+    expect(row.actions).toBeUndefined()
   })
 
   it('gives the employee full name and business name rows no change link', () => {
