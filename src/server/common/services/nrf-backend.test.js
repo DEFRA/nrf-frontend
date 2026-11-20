@@ -3,6 +3,7 @@ import Wreck from '@hapi/wreck'
 import Boom from '@hapi/boom'
 import { config } from '../../../config/config.js'
 import { boundaryGeojsonWithEdp } from '../../../test-utils/fixtures/boundary-geojson.js'
+import { recalculatedLevy } from '../../../test-utils/fixtures/levy.js'
 import {
   getRequestFromBackend,
   getQuoteFromBackend,
@@ -247,12 +248,31 @@ describe('nrf-backend service', () => {
   })
 
   describe('createCommitmentCertificateInBackend', () => {
+    it('should send the levy calculation with the commitment', async () => {
+      vi.mocked(Wreck.patch).mockResolvedValue({ payload: {} })
+
+      await createCommitmentCertificateInBackend({
+        reference: 'NRL-000001',
+        levy: recalculatedLevy
+      })
+
+      expect(Wreck.patch).toHaveBeenCalledWith(
+        `${backendUrl}/quotes/NRL-000001/commitment-certificate`,
+        expect.objectContaining({
+          payload: { createCommitmentCertificate: true, levy: recalculatedLevy }
+        })
+      )
+    })
+
     it('should log the quote reference and throw an internal error when the request fails', async () => {
       const error = new Error('Network error')
       vi.mocked(Wreck.patch).mockRejectedValue(error)
 
       await expect(
-        createCommitmentCertificateInBackend({ reference: 'NRL-000001' })
+        createCommitmentCertificateInBackend({
+          reference: 'NRL-000001',
+          levy: recalculatedLevy
+        })
       ).rejects.toThrow('Commitment certificate request to backend failed')
 
       expect(mockLogger.error).toHaveBeenCalledWith(
