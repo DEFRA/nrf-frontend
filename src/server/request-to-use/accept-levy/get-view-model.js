@@ -25,6 +25,7 @@ export default function getViewModel({ session } = {}) {
     provisionalAmount: formatCurrency(levy.provisionalAmount, {
       hideZeroPence: true
     }),
+    baseChargePerUnit: levy.baseChargePerUnit,
     inflationAdjustedAmount: formatCurrency(levy.inflationAdjustedAmount, {
       hideZeroPence: true
     }),
