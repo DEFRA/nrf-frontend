@@ -91,6 +91,16 @@ describe('Do you accept this nature restoration levy amount page', () => {
     ).toBeInTheDocument()
   })
 
+  it('should expose the latest base charge per unit as an unformatted number on the provisional amount heading', async () => {
+    const document = await load()
+
+    expect(
+      getByRole(document, 'heading', {
+        name: /^Provisional nature restoration levy amount/
+      })
+    ).toHaveAttribute('data-base-charge-per-unit', '2675')
+  })
+
   it('should name the EDP the development is planned in', async () => {
     const document = await load()
 
