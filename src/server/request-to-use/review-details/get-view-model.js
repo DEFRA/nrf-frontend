@@ -1,25 +1,19 @@
 import { getPageTitle } from '../../common/helpers/page-title.js'
-import { CHANGE_ORGANISATION_PATH } from '../../auth/auth-urls.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
 import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
 import { routePath as enterAddressPath } from '../enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
-import { routePath } from './route-path.js'
 
 export const pageHeadingAgent = 'Review and confirm the developer details'
 export const pageHeadingPersonal = 'Review and confirm your details'
 
-// The business name is the organisation from the sign-in snapshot: changing it
-// means re-picking the organisation, exactly like the change organisation link
-// on the enter address page.
-const changeBusinessNameUrl = `${CHANGE_ORGANISATION_PATH}?redirectTo=${encodeURIComponent(routePath)}`
-
 /**
  * An agent reviews the developer's details; an individual or an employee
- * reviews their own. The agent's full name and business name can be changed;
- * the individual's and employee's name and the employee's business name come
- * from the Defra ID account and cannot.
+ * reviews their own. Only the agent's full name has a change link — the
+ * developer typed it on the enter address page; every other name and
+ * business name comes from the Defra ID account or the organisation
+ * picked at sign in.
  * The persona is the snapshot taken when the address was confirmed: the
  * resolved account type and organisation are written to the session once, so
  * this and any later page read them back without re-reading the claims.
@@ -63,10 +57,7 @@ export default function getViewModel({ session, signedInUser } = {}) {
       ? [
           {
             key: { text: 'Business name' },
-            value: { text: businessName },
-            ...(isAgent && {
-              actions: changeAction('the business name', changeBusinessNameUrl)
-            })
+            value: { text: businessName }
           }
         ]
       : []),
