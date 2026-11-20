@@ -46,6 +46,23 @@ describe('requestToUseSession', () => {
     expect(request.logger.error).not.toHaveBeenCalled()
   })
 
+  it.each([
+    ['calculationDate', 'not a date'],
+    ['provisionalAmount', -1],
+    ['inflationAdjustedAmount', -1],
+    ['originalBaseAmount', -1]
+  ])('logs a schema error when the levy %s is %s', (field, value) => {
+    const request = createSessionRequest({
+      session: { requestToUse: { nrlReference: fullQuote.reference } }
+    })
+
+    requestToUseSession.save(request, {
+      levy: { ...recalculatedLevy, [field]: value }
+    })
+
+    expect(request.logger.error).toHaveBeenCalled()
+  })
+
   it('allows other answers to be saved before variation has been answered', () => {
     const request = createRequest()
 
