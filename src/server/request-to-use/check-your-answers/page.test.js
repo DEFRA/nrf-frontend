@@ -154,7 +154,7 @@ describe('Check your answers page', () => {
       scenario: 'an agent',
       claims: agentClaims,
       session: agentSession,
-      userType: 'Agent',
+      userType: 'A client you act for as an agent or third party',
       fullName: developerFullName,
       businessName: agentOrganisationName
     },
@@ -162,7 +162,7 @@ describe('Check your answers page', () => {
       scenario: 'an employee',
       claims: singleOrgEmployeeClaims,
       session: employeeSession,
-      userType: 'Employee',
+      userType: 'The business or organisation you work for',
       fullName: accountFullName,
       businessName: firstOrgName
     },
@@ -170,7 +170,7 @@ describe('Check your answers page', () => {
       scenario: 'an individual',
       claims: citizenClaims,
       session: individualSession,
-      userType: 'Individual',
+      userType: 'Yourself, as an individual',
       fullName: accountFullName,
       businessName: null
     }

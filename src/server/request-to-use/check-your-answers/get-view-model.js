@@ -2,6 +2,7 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { planningTypeOptions } from '../../quote/planning-type/options.js'
 import { housingOptions } from '../../quote/confirm-housing/options.js'
 import { acceptLevyOptions } from '../accept-levy/options.js'
+import { defraAccountUserTypeOptions } from '../defra-account-user-type/options.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
 import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
@@ -15,11 +16,12 @@ import { confirmInformationOptions } from './options.js'
 export const pageHeading = 'Check your answers'
 
 // The user type is resolved from the Defra ID relationship when the address
-// is confirmed; it cannot be changed from this page.
-const userTypeLabels = {
-  individual: 'Individual',
-  employee: 'Employee',
-  agent: 'Agent'
+// is confirmed; it cannot be changed from this page. The row shows the wording
+// of the matching who are you requesting to use the levy for option.
+const userTypeOptionValues = {
+  individual: 'individual',
+  employee: 'organisation',
+  agent: 'agent'
 }
 
 /**
@@ -54,6 +56,9 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
   const isAgent = variant === 'agent'
   const fullName = isAgent ? address?.fullName : accountFullName
   const businessName = requestToUse?.signin?.organisation?.organisationName
+  const userTypeText = defraAccountUserTypeOptions.find(
+    (option) => option.value === userTypeOptionValues[variant]
+  )?.text
   // An edit from this page opens the change aliases of the enter address and
   // accept levy pages, whose back links and submits return here rather than
   // walking the journey on.
@@ -73,7 +78,7 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
     },
     {
       key: { text: 'Requesting to use the levy as' },
-      value: { text: userTypeLabels[variant] }
+      value: { text: userTypeText }
     },
     ...(fullName
       ? [
