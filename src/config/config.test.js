@@ -65,16 +65,16 @@ describe('#config', () => {
       expect(config.get('session.cache.name')).toBe('session')
     })
 
-    test('session.cache.ttl is 86400000', () => {
-      expect(config.get('session.cache.ttl')).toBe(86400000)
+    test('session.cache.ttl is 7200000 (2 hours)', () => {
+      expect(config.get('session.cache.ttl')).toBe(7200000)
     })
 
     test('session.cookie.secure is false', () => {
       expect(config.get('session.cookie.secure')).toBe(false)
     })
 
-    test('session.cookie.ttl is 86400000', () => {
-      expect(config.get('session.cookie.ttl')).toBe(86400000)
+    test('session.cookie.ttl is 7200000 (2 hours)', () => {
+      expect(config.get('session.cookie.ttl')).toBe(7200000)
     })
 
     test('redis.port is 6380', () => {
