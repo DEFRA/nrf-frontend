@@ -85,9 +85,27 @@ describe('Check your answers view model', () => {
   })
 
   it.each([
-    ['an agent', agentData, 'Agent', developerFullName, agentOrganisationName],
-    ['an employee', employeeData, 'Employee', accountFullName, firstOrgName],
-    ['an individual', individualData, 'Individual', accountFullName, null]
+    [
+      'an agent',
+      agentData,
+      'A client you act for as an agent or third party',
+      developerFullName,
+      agentOrganisationName
+    ],
+    [
+      'an employee',
+      employeeData,
+      'The business or organisation you work for',
+      accountFullName,
+      firstOrgName
+    ],
+    [
+      'an individual',
+      individualData,
+      'Yourself, as an individual',
+      accountFullName,
+      null
+    ]
   ])(
     'builds the summary rows for %s',
     (_scenario, data, userType, fullName, businessName) => {
