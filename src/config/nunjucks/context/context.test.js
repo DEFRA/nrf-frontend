@@ -139,7 +139,7 @@ describe('context and cache', () => {
           '/request-to-use/review-quote-details',
           'Request to use the nature restoration levy'
         ],
-        ['/cookies', 'Get a quote for the nature restoration levy'],
+        ['/cookies', 'Manage the nature restoration levy'],
         ['/accessibility', 'Manage the nature restoration levy'],
         ['/about', 'Nature restoration levy']
       ])(
