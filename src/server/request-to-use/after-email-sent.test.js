@@ -32,6 +32,10 @@ import { routePath as changeCheckingFilePath } from './change/checking-file/rout
 import { routePath as changeFilePreviewPath } from './change/file-preview/route-path.js'
 import { routePath as changeNotInEdpPath } from './change/not-in-edp/route-path.js'
 import { routePath as changeExcludedAreaPath } from './change/excluded-area/route-path.js'
+import { routePath as changeEnterAddressPath } from './change/enter-address/route-path.js'
+import { routePath as changeAcceptLevyPath } from './change/accept-levy/route-path.js'
+import { routePath as changeDeleteQuotePath } from './change/delete-quote/route-path.js'
+import { routePath as changeDeleteQuoteDetailsPath } from './change/delete-quote-details/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
 
 const mswServer = setupMswServer()
@@ -96,6 +100,10 @@ const pathsWithOwnSessionChecks = [
   changeFilePreviewPath,
   changeNotInEdpPath,
   changeExcludedAreaPath,
+  changeEnterAddressPath,
+  changeAcceptLevyPath,
+  changeDeleteQuotePath,
+  changeDeleteQuoteDetailsPath,
   '/request-to-use/link-expired',
   '/request-to-use/enter-address',
   '/request-to-use/review-details',

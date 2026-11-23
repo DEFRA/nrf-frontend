@@ -8,13 +8,14 @@ const confirmationPath = '/request-to-use/confirmation'
 
 export const checkYourAnswersPostController = {
   async handler(request, h) {
-    const reference = requestToUseSession.get(request)?.nrlReference
+    const { nrlReference: reference, levy } =
+      requestToUseSession.get(request) ?? {}
 
-    if (referenceParam.validate(reference).error !== undefined) {
+    if (referenceParam.validate(reference).error !== undefined || !levy) {
       return h.redirect(startPath).code(statusCodes.redirectAfterPost)
     }
 
-    await createCommitmentCertificateInBackend({ reference })
+    await createCommitmentCertificateInBackend({ reference, levy })
     return h.redirect(confirmationPath).code(statusCodes.redirectAfterPost)
   }
 }

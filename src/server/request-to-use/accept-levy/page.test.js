@@ -4,7 +4,11 @@ import getViewModel from './get-view-model.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
 import { acceptLevySession } from '../../../test-utils/fixtures/session.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
-import { setupSeededRequestToUseServer } from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import {
+  setupSeededRequestToUseServer,
+  seedRequestToUseSessionWith
+} from '../../../test-utils/setup-seeded-request-to-use-server.js'
+import { fullQuote } from '../../../test-utils/fixtures/quote.js'
 import { setupMswServer } from '../../../test-utils/setup-msw-server.js'
 import { mockRecalculateLevy } from '../../../test-utils/mock-recalculate-levy.js'
 import { setupTestServer } from '../../../test-utils/setup-test-server.js'
@@ -87,6 +91,16 @@ describe('Do you accept this nature restoration levy amount page', () => {
     ).toBeInTheDocument()
   })
 
+  it('should expose the latest base charge per unit as an unformatted number on the provisional amount heading', async () => {
+    const document = await load()
+
+    expect(
+      getByRole(document, 'heading', {
+        name: /^Provisional nature restoration levy amount/
+      })
+    ).toHaveAttribute('data-base-charge-per-unit', '2675')
+  })
+
   it('should name the EDP the development is planned in', async () => {
     const document = await load()
 
@@ -134,24 +148,36 @@ describe('Do you accept this nature restoration levy amount page', () => {
     }
   )
 
-  it.each([
-    { answer: 'yes', label: 'Yes, accept this amount' },
-    { answer: 'no', label: 'No, delete my quote details' }
-  ])(
-    'should reselect "$answer" when the user returns to the page',
-    async ({ answer, label }) => {
-      const { cookie } = await submitForm({
-        requestUrl: routePath,
-        server: getServer(),
-        formData: { acceptLevy: answer },
-        cookie: sessionCookie
-      })
+  it('should reselect an accepted amount when the user returns to the page', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { acceptLevy: 'yes' },
+      cookie: sessionCookie
+    })
 
-      const document = await load(cookie)
+    const document = await load(cookie)
 
-      expect(getByLabelText(document, label)).toBeChecked()
-    }
-  )
+    expect(getByLabelText(document, 'Yes, accept this amount')).toBeChecked()
+  })
+
+  it('should not save a declined amount', async () => {
+    const { cookie } = await submitForm({
+      requestUrl: routePath,
+      server: getServer(),
+      formData: { acceptLevy: 'no' },
+      cookie: sessionCookie
+    })
+
+    const document = await load(cookie)
+
+    expect(
+      getByLabelText(document, 'Yes, accept this amount')
+    ).not.toBeChecked()
+    expect(
+      getByLabelText(document, 'No, delete my quote details')
+    ).not.toBeChecked()
+  })
 
   it.each([
     { scenario: 'no option is selected', formData: {} },
@@ -199,7 +225,13 @@ describe('Do you accept this nature restoration levy amount page without a sessi
 })
 
 describe('Do you accept this nature restoration levy amount page without a levy', () => {
-  const getServer = setupSeededRequestToUseServer()
+  const getServer = setupTestServer()
+
+  beforeAll(() => {
+    seedRequestToUseSessionWith(getServer(), () => ({
+      nrlReference: fullQuote.reference
+    }))
+  })
 
   it('should show a server error when the levy has not been calculated', async () => {
     const response = await getResponse({

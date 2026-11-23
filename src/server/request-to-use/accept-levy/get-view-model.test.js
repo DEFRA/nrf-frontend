@@ -28,6 +28,22 @@ describe('accept-levy getViewModel', () => {
     expect(viewModel.inflationAdjustedAmount).toBe('£27,123.45')
   })
 
+  it('should pass the latest base charge per unit as an unformatted number', () => {
+    const viewModel = getViewModel({
+      session: {
+        requestToUse: {
+          levy: {
+            provisionalAmount: 1,
+            inflationAdjustedAmount: 1,
+            baseChargePerUnit: 2675.5
+          }
+        }
+      }
+    })
+
+    expect(viewModel.baseChargePerUnit).toBe(2675.5)
+  })
+
   it.each([
     { scenario: 'there is no session data', input: undefined },
     {

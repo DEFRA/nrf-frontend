@@ -1,9 +1,4 @@
-import {
-  getByRole,
-  getByTestId,
-  queryByRole,
-  queryByTestId
-} from '@testing-library/dom'
+import { getByRole, queryByRole, queryByTestId } from '@testing-library/dom'
 
 import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-test-server.js'
 import {
@@ -111,8 +106,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Developer details',
         fullName: developerFullName,
         businessName: agentOrganisationName,
-        canChangeFullName: true,
-        canChangeBusinessName: true
+        canChangeFullName: true
       },
       {
         scenario: 'for an employee',
@@ -122,8 +116,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Your details',
         fullName: accountFullName,
         businessName: firstOrgName,
-        canChangeFullName: false,
-        canChangeBusinessName: false
+        canChangeFullName: false
       },
       {
         scenario: 'for an individual',
@@ -133,8 +126,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading: 'Your details',
         fullName: accountFullName,
         businessName: null,
-        canChangeFullName: false,
-        canChangeBusinessName: false
+        canChangeFullName: false
       }
     ])(
       'reviews the details $scenario',
@@ -145,8 +137,7 @@ describe('Review and confirm the developer details page', () => {
         sectionHeading,
         fullName,
         businessName,
-        canChangeFullName,
-        canChangeBusinessName
+        canChangeFullName
       }) => {
         const document = await loadSignedInPage({ claims, session })
 
@@ -177,14 +168,9 @@ describe('Review and confirm the developer details page', () => {
           expect(
             findSummaryListRowElement(document, rowKeys.businessName)
           ).toHaveTextContent(businessName)
-          if (canChangeBusinessName) {
-            expect(
-              getByRole(document, 'link', { name: /the business name/ })
-            ).toHaveAttribute(
-              'href',
-              '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Freview-details'
-            )
-          }
+          expect(
+            queryByRole(document, 'link', { name: /the business name/ })
+          ).not.toBeInTheDocument()
         } else {
           expect(
             findSummaryListRowElement(document, rowKeys.businessName)
@@ -219,34 +205,14 @@ describe('Review and confirm the developer details page', () => {
   })
 
   describe('organisation heading', () => {
-    it('shows the organisation switcher above the page heading', async () => {
+    it('does not show the organisation switcher', async () => {
       const document = await loadSignedInPage({
         claims: multiOrgEmployeeClaims,
         session: employeeSession
       })
 
       expect(
-        getByTestId(document, 'app-organisation-heading')
-      ).toHaveTextContent(firstOrgName)
-      expect(
-        getByRole(document, 'link', { name: 'Change organisation' })
-      ).toHaveAttribute(
-        'href',
-        '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Freview-details'
-      )
-    })
-
-    it('does not offer to change organisation when there is nothing to switch to', async () => {
-      const document = await loadSignedInPage({
-        claims: citizenClaims,
-        session: individualSession
-      })
-
-      expect(
         queryByTestId(document, 'app-organisation-heading')
-      ).not.toBeInTheDocument()
-      expect(
-        queryByRole(document, 'link', { name: 'Change organisation' })
       ).not.toBeInTheDocument()
     })
   })

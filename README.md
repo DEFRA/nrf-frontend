@@ -24,12 +24,12 @@ See the [nrf-solution README](https://github.com/DEFRA/nrf-solution/blob/main/RE
 
 ## Interactive map
 
-The boundary check result page uses [@defra/interactive-map](https://github.com/DEFRA/interactive-map) with MapLibre GL to display uploaded red line boundaries. The map client code is in `src/client/javascripts/boundary-map.js`.
+The boundary check result page and the draw boundary page use [@defra/interactive-map](https://github.com/DEFRA/interactive-map) with MapLibre GL to display and draw red line boundaries. The map client code is in `src/client/javascripts/map/`, built as two webpack entries: `map/upload/index.js` (`upload-preview-map`) and `map/draw/index.js` (`draw-boundary-map`).
 
 ### Key details
 
 - **UMD builds via CopyPlugin** — the ESM distribution has its own webpack runtime which conflicts with ours. The UMD builds are copied to `.public/interactive-map/` instead (see `CopyPlugin` in `webpack.config.js`). Core and MapLibre provider go in separate subdirectories because both ship an `index.js`.
-- **Separate webpack entry point** — `boundary-map.js` is its own entry so map code is only loaded on pages that need it.
+- **Separate webpack entry points** — each map page has its own entry (`upload-preview-map`, `draw-boundary-map`) so map code is only loaded on pages that need it.
 - **Server-side coordinate projection** — the impact assessor API defaults to returning geometry in WGS84 (EPSG:4326), which MapLibre requires. No client-side reprojection is needed.
 - **CSP** — map `<script>` tags must include `nonce="{{ nonce }}"` (Blankie). MapLibre needs `workerSrc`/`childSrc` set to `['self', 'blob:']` for web workers, and the `MAP_STYLE_URL` origin is added to `connectSrc` automatically.
 - **`MAP_STYLE_URL`** — set this env var to a [Mapbox Style Spec](https://maplibre.org/maplibre-style-spec/) URL (e.g. OS Maps). Defaults to MapLibre demo tiles for local dev.

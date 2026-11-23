@@ -1,6 +1,6 @@
 {% extends "layouts/page.njk" %}
 
-{% block pageTitle %}{{ pageTitle }}{% endblock %}
+{% block pageTitle %}{% if validationErrors %}Error: {% endif %}{{ pageTitle }}{% endblock %}
 
 {% block beforeContent %}
   {{ backLink({href: backLinkPath}) }}
@@ -9,16 +9,63 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds-from-desktop">
+
     <h1 class="govuk-heading-l">{{ pageHeading }}</h1>
+
+    {% if validationErrors %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: validationErrors.summary
+      }) }}
+    {% endif %}
+
+    {{ govukSummaryList({
+      classes: "govuk-!-margin-bottom-9",
+      rows: rows
+    }) }}
+
+    <h2 class="govuk-heading-m">Development details</h2>
+
+    {{ govukSummaryList({
+      classes: "govuk-!-margin-bottom-9",
+      rows: developmentDetailsRows
+    }) }}
+
+    <p class="govuk-body">To update the details of this development, <a href="{{ reviewQuotePath }}" class="govuk-link">review your quote</a>.</p>
+
+    {{ govukWarningText({
+      text: "Updates may result in a recalculation of available capacity and the levy amount.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    <h2 class="govuk-heading-m">Requesting to use the nature restoration levy</h2>
+
+    <p class="govuk-body">By confirming and submitting these details, you are submitting a request to use the nature restoration levy.</p>
 
     <form method="post" novalidate data-disable-on-submit>
       {% include "partials/csrf-token.njk" %}
+
+      {{ govukCheckboxes({
+        name: "confirmInformation",
+        fieldset: {
+          legend: {
+            text: pageHeading,
+            classes: "govuk-visually-hidden"
+          }
+        },
+        errorMessage: validationErrors.messagesByFormField.confirmInformation,
+        values: formSubmitData.confirmInformation,
+        items: confirmInformationOptions
+      }) }}
+
       <div class="govuk-button-group">
         {{ govukButton({
           text: "Confirm and submit"
         }) }}
+        <a class="govuk-link" href="{{ deleteQuotePath }}">Delete<span class="govuk-visually-hidden"> quote details</span></a>
       </div>
     </form>
+
   </div>
 </div>
 {% endblock %}

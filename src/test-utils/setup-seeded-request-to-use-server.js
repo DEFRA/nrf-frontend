@@ -2,6 +2,7 @@ import { createServer } from '../server/server.js'
 import { ensureRedis } from './ensure-redis.js'
 import { requestToUseSession } from '../server/request-to-use/helpers/request-to-use-session/index.js'
 import { fullQuote } from './fixtures/quote.js'
+import { recalculatedLevy } from './fixtures/levy.js'
 
 /**
  * onPostHandler extension that seeds the request to use session after every response.
@@ -10,7 +11,10 @@ import { fullQuote } from './fixtures/quote.js'
  * @returns {symbol} continue
  */
 export function seedRequestToUseSession(request, h) {
-  requestToUseSession.save(request, { nrlReference: fullQuote.reference })
+  requestToUseSession.save(request, {
+    nrlReference: fullQuote.reference,
+    levy: recalculatedLevy
+  })
   return h.continue
 }
 

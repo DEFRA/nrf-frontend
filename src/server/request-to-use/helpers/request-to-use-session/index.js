@@ -29,10 +29,19 @@ const originalCommitted = originalCommittedValidation()
   .extract('originalCommitted')
   .optional()
 
+const maxInteger = 2147483647
+
+// The levy calculation exactly as the impact assessor returned it, so check
+// your answers can send every field to the backend as the calculation history.
 const levy = joi.object({
-  calculationDate: joi.string().required(),
-  provisionalAmount: joi.number().required(),
-  inflationAdjustedAmount: joi.number().required()
+  calculationDate: joi.string().isoDate().raw().required(),
+  provisionalAmount: joi.number().precision(2).min(0).required(),
+  inflationAdjustedAmount: joi.number().precision(2).min(0).required(),
+  originalBaseAmount: joi.number().precision(2).min(0).required(),
+  baseChargePerUnit: joi.number().precision(2).positive().required(),
+  originalBaseChargePerUnit: joi.number().precision(2).positive().required(),
+  calculatorVersion: joi.number().integer().min(1).required(),
+  units: joi.number().integer().min(1).max(maxInteger).required()
 })
 
 // The enter address answers, hand-written rather than extracted from the page
