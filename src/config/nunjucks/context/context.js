@@ -37,7 +37,7 @@ const SERVICE_NAME_BY_ROUTE_PREFIX = [
   },
   {
     prefix: '/cookies',
-    serviceName: QUOTE_SERVICE_NAME
+    serviceName: MANAGE_SERVICE_NAME
   }
 ]
 
