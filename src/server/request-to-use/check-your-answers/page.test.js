@@ -1,4 +1,4 @@
-import { getByRole, getByText } from '@testing-library/dom'
+import { getByRole, getByText, queryByRole } from '@testing-library/dom'
 import { seedRequestToUseSessionWith } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-test-server.js'
 import { loadPage } from '../../../test-utils/load-page.js'
@@ -156,7 +156,8 @@ describe('Check your answers page', () => {
       session: agentSession,
       userType: 'A client you act for as an agent or third party',
       fullName: developerFullName,
-      businessName: agentOrganisationName
+      businessName: agentOrganisationName,
+      hasFullNameLink: true
     },
     {
       scenario: 'an employee',
@@ -164,7 +165,8 @@ describe('Check your answers page', () => {
       session: employeeSession,
       userType: 'The business or organisation you work for',
       fullName: accountFullName,
-      businessName: firstOrgName
+      businessName: firstOrgName,
+      hasFullNameLink: false
     },
     {
       scenario: 'an individual',
@@ -172,11 +174,19 @@ describe('Check your answers page', () => {
       session: individualSession,
       userType: 'Yourself, as an individual',
       fullName: accountFullName,
-      businessName: null
+      businessName: null,
+      hasFullNameLink: false
     }
   ])(
     'should show the summary rows for $scenario',
-    async ({ claims, session, userType, fullName, businessName }) => {
+    async ({
+      claims,
+      session,
+      userType,
+      fullName,
+      businessName,
+      hasFullNameLink
+    }) => {
       const document = await loadSignedInPage({
         claims,
         session: personaSession(session)
@@ -196,6 +206,14 @@ describe('Check your answers page', () => {
       expect(
         findSummaryListRowElement(document, rowKeys.fullName)
       ).toHaveTextContent(fullName)
+      expect(
+        Boolean(
+          queryByRole(
+            findSummaryListRowElement(document, rowKeys.fullName),
+            'link'
+          )
+        )
+      ).toBe(hasFullNameLink)
 
       if (businessName) {
         const businessNameRow = findSummaryListRowElement(
