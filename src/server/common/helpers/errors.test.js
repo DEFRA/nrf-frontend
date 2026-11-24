@@ -36,6 +36,7 @@ describe('#catchAll', () => {
   const mockStack = 'Mock error stack'
   const errorPage = 'error/index'
   const mockRequest = (statusCode) => ({
+    path: '/quote/check-your-answers',
     response: {
       isBoom: true,
       stack: mockStack,

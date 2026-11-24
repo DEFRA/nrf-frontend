@@ -1,5 +1,8 @@
+import { routePath as reviewQuoteDetailsPath } from '../../request-to-use/review-quote-details/route-path.js'
 import { statusCodes } from '../constants/status-codes.js'
 import { getPageTitle } from './page-title.js'
+
+const requestToUsePrefix = '/request-to-use'
 
 const errorTemplates = {
   [statusCodes.badRequest]: 'error/400',
@@ -29,21 +32,36 @@ function statusCodeMessage(statusCode) {
 }
 
 /**
+ * Where the incomplete details page sends the user to complete them. Only the
+ * request to use journey restarts somewhere other than the service root: at
+ * its review page, which keeps the saved quote.
+ * @param {import('@hapi/hapi').Request} request
+ * @returns {string | undefined} the path for this journey, or undefined where the page's own link applies
+ */
+function completeDetailsPath(request) {
+  return request.path.startsWith(requestToUsePrefix)
+    ? reviewQuoteDetailsPath
+    : undefined
+}
+
+/**
  * Renders the error page for a Boom response status. Dedicated pages exist
  * for 400, 404, 500 and 503; all other statuses use the generic error page.
  * @param {object} options - error page options
  * @param {number} options.statusCode - HTTP status of the Boom response
  * @param {string} options.errorMessage - human-readable message for the status
+ * @param {import('@hapi/hapi').Request} options.request - the request that failed
  * @param {object} options.h - Hapi response toolkit
  * @returns {object} Hapi view response
  */
-function renderErrorPage({ statusCode, errorMessage, h }) {
+function renderErrorPage({ statusCode, errorMessage, request, h }) {
   const template = errorTemplates[statusCode] ?? 'error/index'
 
   return h.view(template, {
     pageTitle: getPageTitle(errorMessage),
     pageHeading: errorMessage,
-    statusCode
+    statusCode,
+    completeDetailsPath: completeDetailsPath(request)
   })
 }
 
@@ -61,5 +79,7 @@ export function catchAll(request, h) {
     request.logger.error(response, errorMessage)
   }
 
-  return renderErrorPage({ statusCode, errorMessage, h }).code(statusCode)
+  return renderErrorPage({ statusCode, errorMessage, request, h }).code(
+    statusCode
+  )
 }

@@ -3,9 +3,12 @@ export const currentRelationshipId = '81d48d6c-6e94-f011-b4cc-000d3ac28f39'
 export const firstOrgId = '27d48d6c-6e94-f011-b4cc-000d3ac28f39'
 export const firstOrgName = 'CDP Child Org 1'
 
+// A relationship none of the test users is signed in with: the users with
+// several organisations only have it as a second link
+export const secondRelationshipId = '91d48d6c-6e94-f011-b4cc-000d3ac28f39'
+
 const employeeRelationship = `${currentRelationshipId}:${firstOrgId}:${firstOrgName}:0:Employee:0`
-const secondEmployeeRelationship =
-  '91d48d6c-6e94-f011-b4cc-000d3ac28f39:37d48d6c-6e94-f011-b4cc-000d3ac28f39:CDP Child Org 2:0:Employee:0'
+const secondEmployeeRelationship = `${secondRelationshipId}:37d48d6c-6e94-f011-b4cc-000d3ac28f39:CDP Child Org 2:0:Employee:0`
 
 // Defra ID token claims describing the organisation the user signed in as
 export const singleOrgEmployeeClaims = {
