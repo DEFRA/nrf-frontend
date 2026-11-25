@@ -8,16 +8,15 @@ import { routePath as originalBoundaryNotMatchedPath } from '../original-boundar
 import getNextPage from './get-next-page.js'
 
 /**
- * @param {{ originalFound: boolean, boundariesMatch?: boolean }} comparison
- * @param {object} sessionData - the saved request to use session data
- * @param {(sessionData: object) => string} nextPageAfterMatch
+ * @param {object} params
+ * @param {{ originalFound: boolean, boundariesMatch?: boolean }} params.comparison
+ * @param {object} params.sessionData - the saved request to use session data
+ * @param {(sessionData: object) => string} params.nextPageAfterMatch
  * @returns {string} path of the page to redirect to
  */
-const getRedirectPath = (
-  { originalFound, boundariesMatch },
-  sessionData,
-  nextPageAfterMatch
-) => {
+const getRedirectPath = ({ comparison, sessionData, nextPageAfterMatch }) => {
+  const { originalFound, boundariesMatch } = comparison
+
   if (!originalFound) {
     return originalReferenceNotMatchedPath
   }
@@ -49,7 +48,9 @@ export const createOriginalReferencePostController = (
     })
 
     return h
-      .redirect(getRedirectPath(comparison, sessionData, nextPageAfterMatch))
+      .redirect(
+        getRedirectPath({ comparison, sessionData, nextPageAfterMatch })
+      )
       .code(statusCodes.redirectAfterPost)
   }
 })

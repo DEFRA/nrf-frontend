@@ -1,28 +1,17 @@
 import { saveOriginalCommitted } from './save-to-session.js'
 import { requestToUseSession } from '../helpers/request-to-use-session/index.js'
-
-const createRequest = (requestToUse) => {
-  const store = { requestToUse }
-  return {
-    yar: {
-      get: (key) => store[key] ?? null,
-      set: (key, value) => {
-        store[key] = value
-      }
-    },
-    logger: { error: vi.fn() }
-  }
-}
+import { createSessionRequest } from '../../../test-utils/create-session-request.js'
+import { originalNrlReference } from '../../../test-utils/fixtures/quote.js'
 
 const saved = {
   variation: 'yes',
   originalCommitted: 'yes',
-  originalNrlReference: 'NRL-123456'
+  originalNrlReference
 }
 
 describe('saveOriginalCommitted', () => {
   it('discards the original NRL reference when the answer is no', () => {
-    const request = createRequest(saved)
+    const request = createSessionRequest({ session: { requestToUse: saved } })
 
     saveOriginalCommitted(request, { originalCommitted: 'no' })
 
@@ -33,7 +22,7 @@ describe('saveOriginalCommitted', () => {
   })
 
   it('keeps the original NRL reference when the answer is yes', () => {
-    const request = createRequest(saved)
+    const request = createSessionRequest({ session: { requestToUse: saved } })
 
     saveOriginalCommitted(request, { originalCommitted: 'yes' })
 

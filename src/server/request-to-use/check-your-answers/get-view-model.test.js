@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
 import { boundaryGeojson } from '../../../test-utils/fixtures/boundary-geojson.js'
+import { originalNrlReference } from '../../../test-utils/fixtures/quote.js'
 import {
   currentRelationshipId,
   firstOrgName
@@ -18,6 +19,9 @@ import {
 // fail these tests (tests.md, constants vs literals).
 const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
 const changeEnterAddressPath = '/request-to-use/change/enter-address'
+const changeVariationPath = '/request-to-use/change/variation'
+const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
+const changeOriginalReferencePath = '/request-to-use/change/original-reference'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const changeDeleteQuotePath = '/request-to-use/change/delete-quote-details'
@@ -34,7 +38,10 @@ const rowKeys = {
   housing: 'Housing',
   housingUnits: 'Number of housing units',
   redLineBoundary: 'Red line boundary',
-  emailAddress: 'Email address'
+  emailAddress: 'Email address',
+  variation: 'Amendment to an existing planning permission',
+  originalCommitted: 'Original planning permission committed to the levy',
+  originalReference: 'Original NRL reference'
 }
 
 const findDevelopmentDetailsRow = (view, key) =>
@@ -73,14 +80,6 @@ const individualData = dataFor({
   acceptLevy: 'yes'
 })
 
-const changeVariationPath = '/request-to-use/change/variation'
-const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
-const changeOriginalReferencePath = '/request-to-use/change/original-reference'
-const variationKey = 'Amendment to an existing planning permission'
-const originalCommittedKey =
-  'Original planning permission committed to the levy'
-const originalReferenceKey = 'Original NRL reference'
-
 describe('Check your answers view model', () => {
   describe('planning amendment rows', () => {
     const viewFor = (planning) =>
@@ -90,36 +89,42 @@ describe('Check your answers view model', () => {
       const view = viewFor({
         variation: 'no',
         originalCommitted: 'yes',
-        originalNrlReference: 'NRL-123456'
+        originalNrlReference
       })
 
-      expect(findSummaryListRow(view, variationKey).value.text).toBe('No')
-      expect(findSummaryListRow(view, variationKey).actions.items[0].href).toBe(
-        changeVariationPath
-      )
-      expect(findSummaryListRow(view, originalCommittedKey)).toBeUndefined()
-      expect(findSummaryListRow(view, originalReferenceKey)).toBeUndefined()
+      expect(findSummaryListRow(view, rowKeys.variation).value.text).toBe('No')
+      expect(
+        findSummaryListRow(view, rowKeys.variation).actions.items[0].href
+      ).toBe(changeVariationPath)
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted)
+      ).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference)
+      ).toBeUndefined()
     })
 
     it('shows all three rows with change links for an amendment to a committed permission', () => {
       const view = viewFor({
         variation: 'yes',
         originalCommitted: 'yes',
-        originalNrlReference: 'NRL-123456'
+        originalNrlReference
       })
 
-      expect(findSummaryListRow(view, variationKey).value.text).toBe('Yes')
-      expect(findSummaryListRow(view, originalCommittedKey).value.text).toBe(
-        'Yes'
-      )
+      expect(findSummaryListRow(view, rowKeys.variation).value.text).toBe('Yes')
       expect(
-        findSummaryListRow(view, originalCommittedKey).actions.items[0].href
+        findSummaryListRow(view, rowKeys.originalCommitted).value.text
+      ).toBe('Yes')
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted).actions.items[0]
+          .href
       ).toBe(changeOriginalCommittedPath)
-      expect(findSummaryListRow(view, originalReferenceKey).value.text).toBe(
-        'NRL-123456'
-      )
       expect(
-        findSummaryListRow(view, originalReferenceKey).actions.items[0].href
+        findSummaryListRow(view, rowKeys.originalReference).value.text
+      ).toBe(originalNrlReference)
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions.items[0]
+          .href
       ).toBe(changeOriginalReferencePath)
     })
 
@@ -127,23 +132,57 @@ describe('Check your answers view model', () => {
       const view = viewFor({
         variation: 'yes',
         originalCommitted: 'no',
-        originalNrlReference: 'NRL-123456'
+        originalNrlReference
       })
 
-      expect(findSummaryListRow(view, originalCommittedKey).value.text).toBe(
-        'No'
-      )
-      expect(findSummaryListRow(view, originalReferenceKey).value.text).toBe(
-        'Not applicable'
-      )
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted).value.text
+      ).toBe('No')
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).value.text
+      ).toBe('Not applicable')
     })
+
+    it.each([
+      ['the original permission is unanswered', { variation: 'yes' }, '', ''],
+      [
+        'the reference is unanswered',
+        { variation: 'yes', originalCommitted: 'yes' },
+        'Yes',
+        ''
+      ]
+    ])(
+      'keeps the change links for an amendment when %s',
+      (_scenario, planning, committedText, referenceText) => {
+        const view = viewFor(planning)
+
+        expect(
+          findSummaryListRow(view, rowKeys.originalCommitted).value.text
+        ).toBe(committedText)
+        expect(
+          findSummaryListRow(view, rowKeys.originalCommitted).actions.items[0]
+            .href
+        ).toBe(changeOriginalCommittedPath)
+        expect(
+          findSummaryListRow(view, rowKeys.originalReference).value.text
+        ).toBe(referenceText)
+        expect(
+          findSummaryListRow(view, rowKeys.originalReference).actions.items[0]
+            .href
+        ).toBe(changeOriginalReferencePath)
+      }
+    )
 
     it('omits all three rows when the amendment question is unanswered', () => {
       const view = viewFor({})
 
-      expect(findSummaryListRow(view, variationKey)).toBeUndefined()
-      expect(findSummaryListRow(view, originalCommittedKey)).toBeUndefined()
-      expect(findSummaryListRow(view, originalReferenceKey)).toBeUndefined()
+      expect(findSummaryListRow(view, rowKeys.variation)).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted)
+      ).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference)
+      ).toBeUndefined()
     })
   })
 

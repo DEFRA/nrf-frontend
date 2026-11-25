@@ -1,12 +1,10 @@
 import { requestToUseController } from '../../controller-get.js'
 import { createPostController } from '../../../common/controllers/post-controller.js'
-import { requestToUseSession } from '../../helpers/request-to-use-session/index.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import getViewModel from './get-view-model.js'
 import formValidation from '../../variation/form-validation.js'
 import getNextPage from '../../variation/get-next-page.js'
 import { saveVariation } from '../../variation/save-to-session.js'
-import { routePath as changeOriginalCommittedPath } from '../original-committed/route-path.js'
+import resolveRedirect from './resolve-redirect.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -15,13 +13,7 @@ const postController = createPostController({
   formValidation,
   getNextPage,
   saveToSession: saveVariation,
-  // Changing to yes with no original permission answers (never given, or
-  // discarded by an earlier no) continues through them before returning.
-  resolveRedirect: ({ request }) =>
-    requestToUseSession.get(request)?.variation === 'yes' &&
-    requestToUseSession.get(request)?.originalCommitted === undefined
-      ? changeOriginalCommittedPath
-      : checkYourAnswersPath
+  resolveRedirect
 })
 
 /**
@@ -59,7 +51,7 @@ const postController = createPostController({
  *                   - 'no'
  *     responses:
  *       303:
- *         description: Redirect to the check your answers page on success, or back to the form on validation failure
+ *         description: Redirect to the original committed change page when the answer is yes and the original permission is unanswered, to the check your answers page otherwise, or back to the form on validation failure
  */
 export default [
   {

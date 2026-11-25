@@ -1,12 +1,10 @@
 import { requestToUseController } from '../../controller-get.js'
 import { createPostController } from '../../../common/controllers/post-controller.js'
-import { requestToUseSession } from '../../helpers/request-to-use-session/index.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import getViewModel from './get-view-model.js'
 import formValidation from '../../original-committed/form-validation.js'
 import getNextPage from '../../original-committed/get-next-page.js'
 import { saveOriginalCommitted } from '../../original-committed/save-to-session.js'
-import { routePath as changeOriginalReferencePath } from '../original-reference/route-path.js'
+import resolveRedirect from './resolve-redirect.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -15,13 +13,7 @@ const postController = createPostController({
   formValidation,
   getNextPage,
   saveToSession: saveOriginalCommitted,
-  // A yes with no reference (never given, or discarded by an earlier no)
-  // continues to the reference page before returning.
-  resolveRedirect: ({ request }) =>
-    requestToUseSession.get(request)?.originalCommitted === 'yes' &&
-    requestToUseSession.get(request)?.originalNrlReference === undefined
-      ? changeOriginalReferencePath
-      : checkYourAnswersPath
+  resolveRedirect
 })
 
 /**
@@ -59,7 +51,7 @@ const postController = createPostController({
  *                   - 'no'
  *     responses:
  *       303:
- *         description: Redirect to the check your answers page on success, or back to the form on validation failure
+ *         description: Redirect to the original reference change page when the answer is yes and there is no reference, to the check your answers page otherwise, or back to the form on validation failure
  */
 export default [
   {
