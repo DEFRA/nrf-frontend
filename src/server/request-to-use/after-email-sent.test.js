@@ -34,6 +34,9 @@ import { routePath as changeNotInEdpPath } from './change/not-in-edp/route-path.
 import { routePath as changeExcludedAreaPath } from './change/excluded-area/route-path.js'
 import { routePath as changeEnterAddressPath } from './change/enter-address/route-path.js'
 import { routePath as changeAcceptLevyPath } from './change/accept-levy/route-path.js'
+import { routePath as changeVariationPath } from './change/variation/route-path.js'
+import { routePath as changeOriginalCommittedPath } from './change/original-committed/route-path.js'
+import { routePath as changeOriginalReferencePath } from './change/original-reference/route-path.js'
 import { routePath as changeDeleteQuotePath } from './change/delete-quote/route-path.js'
 import { routePath as changeDeleteQuoteDetailsPath } from './change/delete-quote-details/route-path.js'
 import { routePath as linkExpiredPath } from './link-expired/route-path.js'
@@ -102,6 +105,9 @@ const pathsWithOwnSessionChecks = [
   changeExcludedAreaPath,
   changeEnterAddressPath,
   changeAcceptLevyPath,
+  changeVariationPath,
+  changeOriginalCommittedPath,
+  changeOriginalReferencePath,
   changeDeleteQuotePath,
   changeDeleteQuoteDetailsPath,
   '/request-to-use/link-expired',

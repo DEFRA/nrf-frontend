@@ -2,11 +2,16 @@ import { getPageTitle } from '../../common/helpers/page-title.js'
 import { planningTypeOptions } from '../../quote/planning-type/options.js'
 import { housingOptions } from '../../quote/confirm-housing/options.js'
 import { acceptLevyOptions } from '../accept-levy/options.js'
+import { variationOptions } from '../variation/options.js'
+import { originalCommittedOptions } from '../original-committed/options.js'
 import { defraAccountUserTypeOptions } from '../defra-account-user-type/options.js'
 import { changeAction } from '../helpers/change-action/index.js'
 import { addressAnswerHtml } from '../helpers/address-answer-html/index.js'
 import { getAddressForRelationship } from '../helpers/request-to-use-session/index.js'
 import { routePath as changeAcceptLevyPath } from '../change/accept-levy/route-path.js'
+import { routePath as changeVariationPath } from '../change/variation/route-path.js'
+import { routePath as changeOriginalCommittedPath } from '../change/original-committed/route-path.js'
+import { routePath as changeOriginalReferencePath } from '../change/original-reference/route-path.js'
 import { routePath as changeEnterAddressPath } from '../change/enter-address/route-path.js'
 import { routePath as readThisPath } from '../read-this/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
@@ -37,6 +42,70 @@ const boundaryAnswerText = (quote) => {
   }
 
   return quote?.boundaryGeojson ? 'Added' : 'Not added'
+}
+
+const notApplicableText = 'Not applicable'
+
+/**
+ * The planning amendment answers. The original permission rows only apply to
+ * an amendment, and the reference only applies when the original permission
+ * was committed to using the levy; answers saved before a later change made
+ * them inapplicable are never shown.
+ * @param {object} [requestToUse] - the request to use session data
+ * @returns {Array<object>} summary list rows for the planning amendment answers
+ */
+const planningAmendmentRows = (requestToUse) => {
+  if (requestToUse?.variation == null) {
+    return []
+  }
+
+  const rows = [
+    {
+      key: { text: 'Amendment to an existing planning permission' },
+      value: {
+        text: variationOptions.find(
+          (option) => option.value === requestToUse.variation
+        )?.text
+      },
+      actions: changeAction(
+        'whether the development is an amendment to an existing planning permission',
+        changeVariationPath
+      )
+    }
+  ]
+
+  if (requestToUse.variation !== 'yes') {
+    return rows
+  }
+
+  const originalCommitted = originalCommittedOptions.find(
+    (option) => option.value === requestToUse.originalCommitted
+  )?.text
+
+  return [
+    ...rows,
+    {
+      key: { text: 'Original planning permission committed to the levy' },
+      value: { text: originalCommitted },
+      actions: changeAction(
+        'whether the original planning permission was committed to using the nature restoration levy',
+        changeOriginalCommittedPath
+      )
+    },
+    {
+      key: { text: 'Original NRL reference' },
+      value: {
+        text:
+          requestToUse.originalCommitted === 'no'
+            ? notApplicableText
+            : requestToUse.originalNrlReference
+      },
+      actions: changeAction(
+        'original NRL reference',
+        changeOriginalReferencePath
+      )
+    }
+  ]
 }
 
 /**
@@ -76,6 +145,7 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
         changeAcceptLevyPath
       )
     },
+    ...planningAmendmentRows(requestToUse),
     {
       key: { text: 'Requesting to use the levy as' },
       value: { text: userTypeText }

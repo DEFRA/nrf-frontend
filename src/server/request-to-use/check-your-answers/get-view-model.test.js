@@ -73,7 +73,80 @@ const individualData = dataFor({
   acceptLevy: 'yes'
 })
 
+const changeVariationPath = '/request-to-use/change/variation'
+const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
+const changeOriginalReferencePath = '/request-to-use/change/original-reference'
+const variationKey = 'Amendment to an existing planning permission'
+const originalCommittedKey =
+  'Original planning permission committed to the levy'
+const originalReferenceKey = 'Original NRL reference'
+
 describe('Check your answers view model', () => {
+  describe('planning amendment rows', () => {
+    const viewFor = (planning) =>
+      getViewModel(dataFor({ ...reviewDetailsSessions.agent, ...planning }))
+
+    it('shows only the amendment row when the development is not an amendment', () => {
+      const view = viewFor({
+        variation: 'no',
+        originalCommitted: 'yes',
+        originalNrlReference: 'NRL-123456'
+      })
+
+      expect(findSummaryListRow(view, variationKey).value.text).toBe('No')
+      expect(findSummaryListRow(view, variationKey).actions.items[0].href).toBe(
+        changeVariationPath
+      )
+      expect(findSummaryListRow(view, originalCommittedKey)).toBeUndefined()
+      expect(findSummaryListRow(view, originalReferenceKey)).toBeUndefined()
+    })
+
+    it('shows all three rows with change links for an amendment to a committed permission', () => {
+      const view = viewFor({
+        variation: 'yes',
+        originalCommitted: 'yes',
+        originalNrlReference: 'NRL-123456'
+      })
+
+      expect(findSummaryListRow(view, variationKey).value.text).toBe('Yes')
+      expect(findSummaryListRow(view, originalCommittedKey).value.text).toBe(
+        'Yes'
+      )
+      expect(
+        findSummaryListRow(view, originalCommittedKey).actions.items[0].href
+      ).toBe(changeOriginalCommittedPath)
+      expect(findSummaryListRow(view, originalReferenceKey).value.text).toBe(
+        'NRL-123456'
+      )
+      expect(
+        findSummaryListRow(view, originalReferenceKey).actions.items[0].href
+      ).toBe(changeOriginalReferencePath)
+    })
+
+    it('shows Not applicable for the reference when the original permission was not committed', () => {
+      const view = viewFor({
+        variation: 'yes',
+        originalCommitted: 'no',
+        originalNrlReference: 'NRL-123456'
+      })
+
+      expect(findSummaryListRow(view, originalCommittedKey).value.text).toBe(
+        'No'
+      )
+      expect(findSummaryListRow(view, originalReferenceKey).value.text).toBe(
+        'Not applicable'
+      )
+    })
+
+    it('omits all three rows when the amendment question is unanswered', () => {
+      const view = viewFor({})
+
+      expect(findSummaryListRow(view, variationKey)).toBeUndefined()
+      expect(findSummaryListRow(view, originalCommittedKey)).toBeUndefined()
+      expect(findSummaryListRow(view, originalReferenceKey)).toBeUndefined()
+    })
+  })
+
   it('returns the page heading, title and back link to the read this page', () => {
     const view = getViewModel(agentData)
 
