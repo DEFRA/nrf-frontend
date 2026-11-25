@@ -1,8 +1,28 @@
 import getOriginalReferenceViewModel from '../../original-reference/get-view-model.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { routePath as changeOriginalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
+import { routePath as changeOriginalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
 import { withBackLink } from '../../helpers/change-answer/index.js'
+import {
+  boundaryNotMatchedSource,
+  referenceNotMatchedSource
+} from './not-matched-source.js'
 
-export default withBackLink({
-  backLinkPath: checkYourAnswersPath,
-  getQuotePageViewModel: getOriginalReferenceViewModel
-})
+const notMatchedBackLinks = {
+  [referenceNotMatchedSource]: changeOriginalReferenceNotMatchedPath,
+  [boundaryNotMatchedSource]: changeOriginalBoundaryNotMatchedPath
+}
+
+/**
+ * A retry from a not matched page returns to that page until the reference is
+ * corrected; any other edit returns to the check your answers page.
+ * @param {import('../../controller-get.js').ViewModelInput} [input]
+ * @returns {object} view model for the change original-reference page
+ */
+export default function getViewModel(input) {
+  return withBackLink({
+    backLinkPath:
+      notMatchedBackLinks[input?.query?.from] ?? checkYourAnswersPath,
+    getQuotePageViewModel: getOriginalReferenceViewModel
+  })(input)
+}

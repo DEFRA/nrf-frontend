@@ -3,6 +3,8 @@ import { redirectToFormWithValidationErrors } from '../../../common/helpers/redi
 import { createOriginalReferencePostController } from '../../original-reference/controller-post.js'
 import formValidation from '../../original-reference/form-validation.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { routePath as changeOriginalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
+import { routePath as changeOriginalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -58,6 +60,10 @@ export default [
         failAction: redirectToFormWithValidationErrors
       }
     },
-    ...createOriginalReferencePostController(() => checkYourAnswersPath)
+    ...createOriginalReferencePostController({
+      nextPageAfterMatch: () => checkYourAnswersPath,
+      referenceNotMatchedPath: changeOriginalReferenceNotMatchedPath,
+      boundaryNotMatchedPath: changeOriginalBoundaryNotMatchedPath
+    })
   }
 ]

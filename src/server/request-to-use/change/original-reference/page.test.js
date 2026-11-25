@@ -8,8 +8,9 @@ import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change
 
 const pagePath = '/request-to-use/change/original-reference'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
-const notMatchedPath = '/request-to-use/original-reference-not-matched'
-const boundaryNotMatchedPath = '/request-to-use/original-boundary-not-matched'
+const notMatchedPath = '/request-to-use/change/original-reference-not-matched'
+const boundaryNotMatchedPath =
+  '/request-to-use/change/original-boundary-not-matched'
 const startPath = '/manage/start-page'
 const originalReferenceKey = 'Original NRL reference'
 
@@ -46,6 +47,40 @@ describe('Change the NRL reference for the original planning permission page', (
   it('links back to the check your answers page', async () => {
     const document = await loadPage({
       requestUrl: pagePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      checkYourAnswersPath
+    )
+  })
+
+  it.each([
+    { from: 'reference-not-matched', backPath: notMatchedPath },
+    { from: 'boundary-not-matched', backPath: boundaryNotMatchedPath }
+  ])(
+    'links back to the $from page when reached from it',
+    async ({ from, backPath }) => {
+      mockCompareBoundaries(mswServer)
+      const document = await loadPage({
+        requestUrl: `${pagePath}?from=${from}`,
+        server: getServer(),
+        cookie: sessionCookie
+      })
+
+      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+        'href',
+        backPath
+      )
+    }
+  )
+
+  it('links back to the check your answers page for an unknown source', async () => {
+    mockCompareBoundaries(mswServer)
+    const document = await loadPage({
+      requestUrl: `${pagePath}?from=https://example.com`,
       server: getServer(),
       cookie: sessionCookie
     })

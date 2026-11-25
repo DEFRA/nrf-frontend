@@ -105,6 +105,8 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/change/variation',
   '/request-to-use/change/original-committed',
   '/request-to-use/change/original-reference',
+  '/request-to-use/change/original-reference-not-matched',
+  '/request-to-use/change/original-boundary-not-matched',
   changeDeleteQuotePath,
   changeDeleteQuoteDetailsPath,
   '/request-to-use/link-expired',
