@@ -50,6 +50,11 @@ describe('areRequiredAnswersComplete', () => {
       address: complete.address
     },
     {
+      scenario: 'the NRL reference is malformed',
+      requestToUse: { ...complete, nrlReference: 'not-a-reference' },
+      address: complete.address
+    },
+    {
       scenario: 'the levy amount was declined',
       requestToUse: { ...complete, acceptLevy: 'no' },
       address: complete.address

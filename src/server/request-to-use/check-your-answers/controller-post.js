@@ -6,6 +6,7 @@ const confirmationPath = '/request-to-use/confirmation'
 
 export const checkYourAnswersPostController = {
   async handler(request, h) {
+    // The route prerequisite has already rejected incomplete answers
     const { nrlReference: reference, levy } = requestToUseSession.get(request)
 
     await createCommitmentCertificateInBackend({ reference, levy })

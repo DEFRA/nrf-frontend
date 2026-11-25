@@ -124,6 +124,17 @@ describe('Check your answers page', () => {
     expect(response.headers.location).toBe('/auth/sign-in')
   })
 
+  it('should redirect a signed-out submit to sign in', async () => {
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      formData: { confirmInformation: 'Yes' }
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe('/auth/sign-in')
+  })
+
   it('should render the heading, title and submit button', async () => {
     const document = await loadSignedInPage({
       claims: singleOrgEmployeeClaims,

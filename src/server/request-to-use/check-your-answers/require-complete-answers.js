@@ -5,10 +5,12 @@ import {
   getAddressForCurrentAccount,
   requestToUseSession
 } from '../helpers/request-to-use-session/index.js'
+import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
 
 /**
  * Fails an incomplete request with the incomplete answers error page rather
- * than letting it reach the view or the submit controller.
+ * than letting it reach the view or the submit controller. The shared error
+ * handler renders `data.completeDetailsPath` as that page's link.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const requireCompleteAnswers = (request, h) => {
@@ -21,7 +23,9 @@ export const requireCompleteAnswers = (request, h) => {
     // An unticked submit saves its error for this page to show on redirect,
     // but the error page replaces it
     clearValidationFlashFromCache(request)
-    throw Boom.badRequest()
+    throw Boom.badRequest('Request to use answers are incomplete', {
+      completeDetailsPath: reviewQuoteDetailsPath
+    })
   }
 
   return h.continue
