@@ -191,6 +191,22 @@ describe('Check your answers view model', () => {
     ])
   })
 
+  it.each([
+    ['an employee', employeeData],
+    ['an individual', individualData]
+  ])('does not link the full name for %s', (_scenario, data) => {
+    const view = getViewModel(data)
+
+    expect(findSummaryListRow(view, rowKeys.fullName).actions).toBeUndefined()
+    expect(findSummaryListRow(view, rowKeys.address).actions.items).toEqual([
+      {
+        href: changeEnterAddressPath,
+        text: 'Change',
+        visuallyHiddenText: 'address'
+      }
+    ])
+  })
+
   it('omits rows whose answer is missing', () => {
     const view = getViewModel({})
 

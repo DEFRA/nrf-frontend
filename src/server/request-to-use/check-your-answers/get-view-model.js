@@ -85,7 +85,9 @@ const requestToUseRows = ({ requestToUse, address, accountFullName }) => {
           {
             key: { text: 'Full name' },
             value: { text: fullName },
-            actions: changeAction('full name', changeEnterAddressPath)
+            ...(isAgent && {
+              actions: changeAction('full name', changeEnterAddressPath)
+            })
           }
         ]
       : []),
