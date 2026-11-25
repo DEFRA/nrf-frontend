@@ -6,6 +6,7 @@ import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-q
 
 const pagePath = '/request-to-use/change/original-committed'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const changeOriginalReferencePath = '/request-to-use/change/original-reference'
 
 describe('Change whether the original planning permission was committed page', () => {
   const getServer = setupSeededRequestToUseServer()
@@ -28,20 +29,29 @@ describe('Change whether the original planning permission was committed page', (
     )
   })
 
-  it.each(['yes', 'no'])(
-    'redirects to the check your answers page when the answer is %s',
-    async (originalCommitted) => {
-      const { response } = await submitForm({
-        requestUrl: pagePath,
-        server: getServer(),
-        formData: { originalCommitted },
-        cookie: sessionCookie
-      })
+  it('redirects to the check your answers page when the answer is no', async () => {
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { originalCommitted: 'no' },
+      cookie: sessionCookie
+    })
 
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(checkYourAnswersPath)
-    }
-  )
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(checkYourAnswersPath)
+  })
+
+  it('continues to the original reference change page when the answer is yes and there is no reference', async () => {
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { originalCommitted: 'yes' },
+      cookie: sessionCookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(changeOriginalReferencePath)
+  })
 
   it('redirects back to the form when no answer is selected', async () => {
     const { response } = await submitForm({

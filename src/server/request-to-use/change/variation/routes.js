@@ -5,6 +5,8 @@ import { routePath as checkYourAnswersPath } from '../../check-your-answers/rout
 import getViewModel from './get-view-model.js'
 import formValidation from '../../variation/form-validation.js'
 import getNextPage from '../../variation/get-next-page.js'
+import { saveVariation } from '../../variation/save-to-session.js'
+import { routePath as changeOriginalCommittedPath } from '../original-committed/route-path.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -12,8 +14,14 @@ export { routePath }
 const postController = createPostController({
   formValidation,
   getNextPage,
-  saveToSession: requestToUseSession.save,
-  resolveRedirect: () => checkYourAnswersPath
+  saveToSession: saveVariation,
+  // Changing to yes with no original permission answers (never given, or
+  // discarded by an earlier no) continues through them before returning.
+  resolveRedirect: ({ request }) =>
+    requestToUseSession.get(request)?.variation === 'yes' &&
+    requestToUseSession.get(request)?.originalCommitted === undefined
+      ? changeOriginalCommittedPath
+      : checkYourAnswersPath
 })
 
 /**

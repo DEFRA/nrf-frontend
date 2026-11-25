@@ -5,6 +5,8 @@ import { routePath as checkYourAnswersPath } from '../../check-your-answers/rout
 import getViewModel from './get-view-model.js'
 import formValidation from '../../original-committed/form-validation.js'
 import getNextPage from '../../original-committed/get-next-page.js'
+import { saveOriginalCommitted } from '../../original-committed/save-to-session.js'
+import { routePath as changeOriginalReferencePath } from '../original-reference/route-path.js'
 import { routePath } from './route-path.js'
 
 export { routePath }
@@ -12,8 +14,14 @@ export { routePath }
 const postController = createPostController({
   formValidation,
   getNextPage,
-  saveToSession: requestToUseSession.save,
-  resolveRedirect: () => checkYourAnswersPath
+  saveToSession: saveOriginalCommitted,
+  // A yes with no reference (never given, or discarded by an earlier no)
+  // continues to the reference page before returning.
+  resolveRedirect: ({ request }) =>
+    requestToUseSession.get(request)?.originalCommitted === 'yes' &&
+    requestToUseSession.get(request)?.originalNrlReference === undefined
+      ? changeOriginalReferencePath
+      : checkYourAnswersPath
 })
 
 /**

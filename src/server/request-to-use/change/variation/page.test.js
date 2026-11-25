@@ -6,6 +6,7 @@ import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-q
 
 const pagePath = '/request-to-use/change/variation'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
 
 describe('Change whether the development is an amendment page', () => {
   const getServer = setupSeededRequestToUseServer()
@@ -28,20 +29,83 @@ describe('Change whether the development is an amendment page', () => {
     )
   })
 
-  it.each(['yes', 'no'])(
-    'redirects to the check your answers page when the answer is %s',
-    async (variation) => {
-      const { response } = await submitForm({
-        requestUrl: pagePath,
-        server: getServer(),
-        formData: { variation },
-        cookie: sessionCookie
-      })
+  it('redirects to the check your answers page when the answer is no', async () => {
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'no' },
+      cookie: sessionCookie
+    })
 
-      expect(response.statusCode).toBe(303)
-      expect(response.headers.location).toBe(checkYourAnswersPath)
-    }
-  )
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(checkYourAnswersPath)
+  })
+
+  it('continues to the original committed change page when the answer is yes and the original permission is unanswered', async () => {
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie: sessionCookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(changeOriginalCommittedPath)
+  })
+
+  it('returns to the check your answers page when the answer is yes and the original permission is already answered', async () => {
+    let { cookie } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie: sessionCookie
+    })
+    ;({ cookie } = await submitForm({
+      requestUrl: changeOriginalCommittedPath,
+      server: getServer(),
+      formData: { originalCommitted: 'no' },
+      cookie
+    }))
+
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie
+    })
+
+    expect(response.headers.location).toBe(checkYourAnswersPath)
+  })
+
+  it('discards the original permission answers when the answer changes to no, so a later yes asks again', async () => {
+    let { cookie } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie: sessionCookie
+    })
+    ;({ cookie } = await submitForm({
+      requestUrl: changeOriginalCommittedPath,
+      server: getServer(),
+      formData: { originalCommitted: 'no' },
+      cookie
+    }))
+    ;({ cookie } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'no' },
+      cookie
+    }))
+
+    const { response } = await submitForm({
+      requestUrl: pagePath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie
+    })
+
+    expect(response.headers.location).toBe(changeOriginalCommittedPath)
+  })
 
   it('redirects back to the form when no answer is selected', async () => {
     const { response } = await submitForm({
