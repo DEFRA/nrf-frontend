@@ -23,6 +23,8 @@ const { levy: _calculated, ...answersWithoutLevy } =
   checkYourAnswersSessions.employee
 const { acceptLevy: _accepted, ...answersWithoutAcceptedLevy } =
   checkYourAnswersSessions.employee
+const { nrlReference: _reference, ...answersWithoutReference } =
+  checkYourAnswersSessions.employee
 const { signin: employeeSignin, ...employeeAnswers } =
   checkYourAnswersSessions.employee
 
@@ -31,6 +33,7 @@ const { signin: employeeSignin, ...employeeAnswers } =
 export const incompleteCheckYourAnswersSessions = {
   withoutLevyCalculation: answersWithoutLevy,
   withoutAcceptedLevy: answersWithoutAcceptedLevy,
+  withoutNrlReference: answersWithoutReference,
   // The address is only read back while it was entered under the signed in
   // relationship
   addressForAnotherAccount: {

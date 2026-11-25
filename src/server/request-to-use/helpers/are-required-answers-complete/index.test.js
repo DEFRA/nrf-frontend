@@ -45,6 +45,11 @@ describe('areRequiredAnswersComplete', () => {
       address: complete.address
     },
     {
+      scenario: 'the NRL reference is missing',
+      requestToUse: incompleteCheckYourAnswersSessions.withoutNrlReference,
+      address: complete.address
+    },
+    {
       scenario: 'the levy amount was declined',
       requestToUse: { ...complete, acceptLevy: 'no' },
       address: complete.address
