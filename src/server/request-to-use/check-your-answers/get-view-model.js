@@ -51,7 +51,9 @@ const notApplicableText = 'Not applicable'
  * an amendment, and the reference only applies when the original permission
  * was committed to using the levy; answers saved before a later change made
  * them inapplicable are never shown. A required row whose answer is blank
- * stays, with its change link, so the answer can be given from this page.
+ * stays, with its change link, so the answer can be given from this page. The
+ * reference only has a change link once the original permission is committed:
+ * until then the committed answer's own change page leads to it.
  * @param {object} [requestToUse] - the request to use session data
  * @returns {Array<object>} summary list rows for the planning amendment answers
  */
@@ -102,10 +104,12 @@ const planningAmendmentRows = (requestToUse) => {
             ? notApplicableText
             : (requestToUse.originalNrlReference ?? '')
       },
-      actions: changeAction(
-        'original NRL reference',
-        changeOriginalReferencePath
-      )
+      ...(requestToUse.originalCommitted === 'yes' && {
+        actions: changeAction(
+          'original NRL reference',
+          changeOriginalReferencePath
+        )
+      })
     }
   ]
 }

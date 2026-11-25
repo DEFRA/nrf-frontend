@@ -141,37 +141,29 @@ describe('Check your answers view model', () => {
       expect(
         findSummaryListRow(view, rowKeys.originalReference).value.text
       ).toBe('Not applicable')
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions
+      ).toBeUndefined()
     })
 
-    it.each([
-      ['the original permission is unanswered', { variation: 'yes' }, '', ''],
-      [
-        'the reference is unanswered',
-        { variation: 'yes', originalCommitted: 'yes' },
-        'Yes',
-        ''
-      ]
-    ])(
-      'keeps the change links for an amendment when %s',
-      (_scenario, planning, committedText, referenceText) => {
-        const view = viewFor(planning)
+    it('keeps the original permission row and its change link when it is unanswered', () => {
+      const view = viewFor({ variation: 'yes' })
+      const row = findSummaryListRow(view, rowKeys.originalCommitted)
 
-        expect(
-          findSummaryListRow(view, rowKeys.originalCommitted).value.text
-        ).toBe(committedText)
-        expect(
-          findSummaryListRow(view, rowKeys.originalCommitted).actions.items[0]
-            .href
-        ).toBe(changeOriginalCommittedPath)
-        expect(
-          findSummaryListRow(view, rowKeys.originalReference).value.text
-        ).toBe(referenceText)
-        expect(
-          findSummaryListRow(view, rowKeys.originalReference).actions.items[0]
-            .href
-        ).toBe(changeOriginalReferencePath)
-      }
-    )
+      expect(row.value.text).toBe('')
+      expect(row.actions.items[0].href).toBe(changeOriginalCommittedPath)
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions
+      ).toBeUndefined()
+    })
+
+    it('keeps the reference row and its change link when the reference is unanswered', () => {
+      const view = viewFor({ variation: 'yes', originalCommitted: 'yes' })
+      const row = findSummaryListRow(view, rowKeys.originalReference)
+
+      expect(row.value.text).toBe('')
+      expect(row.actions.items[0].href).toBe(changeOriginalReferencePath)
+    })
 
     it('omits all three rows when the amendment question is unanswered', () => {
       const view = viewFor({})
