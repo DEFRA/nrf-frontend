@@ -30,6 +30,7 @@ const pagePath = '/request-to-use/check-your-answers'
 const startPath = '/manage/start-page'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const incompleteAnswersHeading = 'Your details are incomplete'
+const acceptLevyPath = '/request-to-use/accept-levy'
 
 // The summary rows come from the persona snapshot and the signed-in user's
 // own name, so the page tests sign in as each persona. The backend mocks are
@@ -435,6 +436,54 @@ describe('Check your answers page', () => {
       errorMessage:
         'Tick the box to confirm the information is true, accurate and complete'
     })
+  })
+
+  it('should not show the validation error on the next form page when the answers are incomplete', async () => {
+    const cookie = await signInWithAnswers({
+      claims: singleOrgEmployeeClaims,
+      session: checkYourAnswersSessions.employee
+    })
+
+    // The seed is saved after a response, so this request is what makes the
+    // answers incomplete behind the form the user has open
+    seededSession = incompleteCheckYourAnswersSessions.addressForAnotherAccount
+    const openForm = await loadPage({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      cookie
+    })
+    expect(openForm.title).toBe(
+      'Check your answers - Nature restoration levy - GOV.UK'
+    )
+
+    const { response, cookie: submittedCookie } = await submitForm({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      formData: {},
+      cookie
+    })
+
+    expect(response.statusCode).toBe(303)
+    expect(response.headers.location).toBe(pagePath)
+
+    const errorPage = await loadPage({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      cookie: submittedCookie
+    })
+    expect(errorPage.title).toBe(
+      `${incompleteAnswersHeading} - Nature restoration levy - GOV.UK`
+    )
+
+    const nextPage = await loadPage({
+      requestUrl: acceptLevyPath,
+      server: getAppServer(),
+      cookie: submittedCookie
+    })
+    expect(nextPage.title).toBe(
+      'Do you accept this nature restoration levy amount? - Nature restoration levy - GOV.UK'
+    )
+    expect(queryByRole(nextPage, 'alert')).toBeNull()
   })
 
   it.each([404, 409, 500])(
