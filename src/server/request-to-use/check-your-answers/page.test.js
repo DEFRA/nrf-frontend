@@ -208,7 +208,8 @@ describe('Check your answers page', () => {
       session: checkYourAnswersSessions.agent,
       userType: 'A client you act for as an agent or third party',
       fullName: developerFullName,
-      businessName: agentOrganisationName
+      businessName: agentOrganisationName,
+      hasFullNameLink: true
     },
     {
       scenario: 'an employee',
@@ -216,7 +217,8 @@ describe('Check your answers page', () => {
       session: checkYourAnswersSessions.employee,
       userType: 'The business or organisation you work for',
       fullName: accountFullName,
-      businessName: firstOrgName
+      businessName: firstOrgName,
+      hasFullNameLink: false
     },
     {
       scenario: 'an individual',
@@ -224,11 +226,19 @@ describe('Check your answers page', () => {
       session: checkYourAnswersSessions.individual,
       userType: 'Yourself, as an individual',
       fullName: accountFullName,
-      businessName: null
+      businessName: null,
+      hasFullNameLink: false
     }
   ])(
     'should show the summary rows for $scenario',
-    async ({ claims, session, userType, fullName, businessName }) => {
+    async ({
+      claims,
+      session,
+      userType,
+      fullName,
+      businessName,
+      hasFullNameLink
+    }) => {
       const document = await loadSignedInPage({ claims, session })
 
       expect(
@@ -245,6 +255,14 @@ describe('Check your answers page', () => {
       expect(
         findSummaryListRowElement(document, rowKeys.fullName)
       ).toHaveTextContent(fullName)
+      expect(
+        Boolean(
+          queryByRole(
+            findSummaryListRowElement(document, rowKeys.fullName),
+            'link'
+          )
+        )
+      ).toBe(hasFullNameLink)
 
       if (businessName) {
         const businessNameRow = findSummaryListRowElement(
