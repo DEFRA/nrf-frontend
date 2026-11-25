@@ -10,19 +10,19 @@ import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-p
 import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 
 /**
- * Wraps a quote question page's view model for its change alias: the alias
- * serves the quote page's own template, so the view model spreads the quote
- * page's and swaps the back link — an edit from the review page returns
- * there, not to the quote journey's previous page.
+ * Wraps a question page's view model for its change alias: the alias serves
+ * the page's own template, so the view model spreads the page's and swaps the
+ * back link — an edit from the review or check your answers page returns
+ * there, not to the journey's previous page.
  * @param {object} params
  * @param {string} params.backLinkPath - where the change page's back link goes
- * @param {Function} params.getQuotePageViewModel - the quote page's view model
- * @returns {(quoteData: object, query: object) => object} the change page's view model
+ * @param {(...args: any[]) => object} params.getQuotePageViewModel - the page's view model
+ * @returns {(...args: any[]) => object} the change page's view model, taking the same arguments
  */
 export const withBackLink =
   ({ backLinkPath, getQuotePageViewModel }) =>
-  (quoteData, query) => ({
-    ...getQuotePageViewModel(quoteData, query),
+  (...args) => ({
+    ...getQuotePageViewModel(...args),
     backLinkPath
   })
 
