@@ -57,8 +57,6 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    // The routeId is the variation page's template dir: this route renders
-    // the variation page itself under the change prefix.
     ...requestToUseController({ routeId: 'variation', getViewModel })
   },
   {

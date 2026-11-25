@@ -6,9 +6,7 @@ import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 
-// Declared as literals rather than imports: a wrong change to a route must
-// fail these tests (tests.md, constants vs literals).
-const ROUTE_PATH = '/request-to-use/change/original-reference'
+const pagePath = '/request-to-use/change/original-reference'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
 const notMatchedPath = '/request-to-use/original-reference-not-matched'
 const boundaryNotMatchedPath = '/request-to-use/original-boundary-not-matched'
@@ -24,7 +22,7 @@ describe('Change the NRL reference for the original planning permission page', (
 
   const submit = () =>
     submitForm({
-      requestUrl: ROUTE_PATH,
+      requestUrl: pagePath,
       server: getServer(),
       formData: { originalReference: 'NRL-123456' },
       cookie: sessionCookie
@@ -33,7 +31,7 @@ describe('Change the NRL reference for the original planning permission page', (
   it('links back to the check your answers page', async () => {
     mockCompareBoundaries(mswServer)
     const document = await loadPage({
-      requestUrl: ROUTE_PATH,
+      requestUrl: pagePath,
       server: getServer(),
       cookie: sessionCookie
     })

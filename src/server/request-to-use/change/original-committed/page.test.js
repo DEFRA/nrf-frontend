@@ -4,9 +4,7 @@ import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 
-// Declared as literals rather than imports: a wrong change to a route must
-// fail these tests (tests.md, constants vs literals).
-const ROUTE_PATH = '/request-to-use/change/original-committed'
+const pagePath = '/request-to-use/change/original-committed'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
 
 describe('Change whether the original planning permission was committed page', () => {
@@ -19,7 +17,7 @@ describe('Change whether the original planning permission was committed page', (
 
   it('links back to the check your answers page', async () => {
     const document = await loadPage({
-      requestUrl: ROUTE_PATH,
+      requestUrl: pagePath,
       server: getServer(),
       cookie: sessionCookie
     })
@@ -34,7 +32,7 @@ describe('Change whether the original planning permission was committed page', (
     'redirects to the check your answers page when the answer is %s',
     async (originalCommitted) => {
       const { response } = await submitForm({
-        requestUrl: ROUTE_PATH,
+        requestUrl: pagePath,
         server: getServer(),
         formData: { originalCommitted },
         cookie: sessionCookie
@@ -47,13 +45,13 @@ describe('Change whether the original planning permission was committed page', (
 
   it('redirects back to the form when no answer is selected', async () => {
     const { response } = await submitForm({
-      requestUrl: ROUTE_PATH,
+      requestUrl: pagePath,
       server: getServer(),
       formData: {},
       cookie: sessionCookie
     })
 
     expect(response.statusCode).toBe(303)
-    expect(response.headers.location).toBe(ROUTE_PATH)
+    expect(response.headers.location).toBe(pagePath)
   })
 })

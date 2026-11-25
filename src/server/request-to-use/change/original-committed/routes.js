@@ -57,8 +57,6 @@ export default [
   {
     method: 'GET',
     path: routePath,
-    // The routeId is the original-committed page's template dir: this route renders
-    // the original-committed page itself under the change prefix.
     ...requestToUseController({ routeId: 'original-committed', getViewModel })
   },
   {
