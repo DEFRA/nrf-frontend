@@ -8,20 +8,30 @@ import { routePath as originalBoundaryNotMatchedPath } from '../original-boundar
 import getNextPage from './get-next-page.js'
 
 /**
- * @param {{ originalFound: boolean, boundariesMatch?: boolean }} comparison
- * @param {object} sessionData - the saved request to use session data
+ * @param {object} params
+ * @param {{ originalFound: boolean, boundariesMatch?: boolean }} params.comparison
+ * @param {object} params.sessionData - the saved request to use session data
+ * @param {(sessionData: object) => string} params.nextPageAfterMatch
  * @returns {string} path of the page to redirect to
  */
-const getRedirectPath = ({ originalFound, boundariesMatch }, sessionData) => {
+const getRedirectPath = ({ comparison, sessionData, nextPageAfterMatch }) => {
+  const { originalFound, boundariesMatch } = comparison
+
   if (!originalFound) {
     return originalReferenceNotMatchedPath
   }
   return boundariesMatch
-    ? getNextPage(sessionData)
+    ? nextPageAfterMatch(sessionData)
     : originalBoundaryNotMatchedPath
 }
 
-export const originalReferencePostController = {
+/**
+ * @param {(sessionData: object) => string} [nextPageAfterMatch] - where a matching reference continues to
+ * @returns {{ handler: import('@hapi/hapi').Lifecycle.Method }} the POST controller
+ */
+export const createOriginalReferencePostController = (
+  nextPageAfterMatch = getNextPage
+) => ({
   async handler(request, h) {
     const currentBoundaryGeoJson =
       getQuoteDataFromCache(request)?.boundaryGeojson?.boundaryGeometryWgs84
@@ -38,7 +48,12 @@ export const originalReferencePostController = {
     })
 
     return h
-      .redirect(getRedirectPath(comparison, sessionData))
+      .redirect(
+        getRedirectPath({ comparison, sessionData, nextPageAfterMatch })
+      )
       .code(statusCodes.redirectAfterPost)
   }
-}
+})
+
+export const originalReferencePostController =
+  createOriginalReferencePostController()
