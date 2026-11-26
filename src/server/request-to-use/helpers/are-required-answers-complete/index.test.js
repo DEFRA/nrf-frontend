@@ -1,8 +1,10 @@
 import { areRequiredAnswersComplete } from './index.js'
 import {
   checkYourAnswersSessions,
+  committedAmendmentAnswers,
   incompleteCheckYourAnswersSessions
 } from '../../../../test-utils/fixtures/check-your-answers-sessions.js'
+import { malformedReference } from '../../../../test-utils/fixtures/quote.js'
 
 const complete = checkYourAnswersSessions.employee
 
@@ -33,6 +35,26 @@ describe('areRequiredAnswersComplete', () => {
   })
 
   it.each([
+    {
+      scenario: 'the development is an amendment to a committed permission',
+      requestToUse: { ...complete, ...committedAmendmentAnswers }
+    },
+    {
+      scenario: 'the original permission was not committed to the levy',
+      requestToUse: { ...complete, variation: 'yes', originalCommitted: 'no' }
+    },
+    {
+      scenario:
+        'the original permission answer is left over from before the amendment answer changed to no',
+      requestToUse: { ...complete, originalCommitted: 'yes' }
+    }
+  ])('should be complete when $scenario', ({ requestToUse }) => {
+    expect(
+      areRequiredAnswersComplete({ requestToUse, address: complete.address })
+    ).toBe(true)
+  })
+
+  it.each([
     { scenario: 'there is no session', requestToUse: null, address: undefined },
     {
       scenario: 'the levy calculation is missing',
@@ -50,8 +72,36 @@ describe('areRequiredAnswersComplete', () => {
       address: complete.address
     },
     {
+      scenario: 'the amendment answer is missing',
+      requestToUse: incompleteCheckYourAnswersSessions.withoutAmendmentAnswer,
+      address: complete.address
+    },
+    {
+      scenario:
+        'the development is an amendment but the original permission answer is missing',
+      requestToUse:
+        incompleteCheckYourAnswersSessions.amendmentWithoutOriginalPermission,
+      address: complete.address
+    },
+    {
+      scenario:
+        'the original permission was committed but its NRL reference is missing',
+      requestToUse:
+        incompleteCheckYourAnswersSessions.committedWithoutOriginalReference,
+      address: complete.address
+    },
+    {
       scenario: 'the NRL reference is malformed',
-      requestToUse: { ...complete, nrlReference: 'not-a-reference' },
+      requestToUse: { ...complete, nrlReference: malformedReference },
+      address: complete.address
+    },
+    {
+      scenario: 'the original NRL reference is malformed',
+      requestToUse: {
+        ...complete,
+        ...committedAmendmentAnswers,
+        originalNrlReference: malformedReference
+      },
       address: complete.address
     },
     {

@@ -97,6 +97,25 @@ const incompleteSessions = [
     scenario: 'an agent has not entered the full name',
     claims: agentClaims,
     session: incompleteCheckYourAnswersSessions.agentWithoutFullName
+  },
+  {
+    scenario: 'the amendment answer is missing',
+    claims: citizenClaims,
+    session: incompleteCheckYourAnswersSessions.withoutAmendmentAnswer
+  },
+  {
+    scenario:
+      'the development is an amendment but the original permission answer is missing',
+    claims: citizenClaims,
+    session:
+      incompleteCheckYourAnswersSessions.amendmentWithoutOriginalPermission
+  },
+  {
+    scenario:
+      'the original permission was committed but its NRL reference is missing',
+    claims: citizenClaims,
+    session:
+      incompleteCheckYourAnswersSessions.committedWithoutOriginalReference
   }
 ]
 

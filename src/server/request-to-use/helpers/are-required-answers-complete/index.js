@@ -1,4 +1,32 @@
 import { referenceParam } from '@defra/nrf-library'
+import { originalCommittedOptions } from '../../original-committed/options.js'
+import { variationOptions } from '../../variation/options.js'
+
+/**
+ * Whether the planning amendment answers that apply have been given: the
+ * original permission answer only applies to an amendment, and its reference
+ * only when the original permission was committed to the levy.
+ * @param {object | null} requestToUse - the request to use session data
+ * @returns {boolean}
+ */
+const hasPlanningAmendmentAnswers = (requestToUse) => {
+  const { variation, originalCommitted, originalNrlReference } =
+    requestToUse ?? {}
+  const isAmendmentAnswered = variationOptions.some(
+    ({ value }) => value === variation
+  )
+  const isOriginalPermissionAnswered = originalCommittedOptions.some(
+    ({ value }) => value === originalCommitted
+  )
+
+  return (
+    isAmendmentAnswered &&
+    (variation !== 'yes' ||
+      (isOriginalPermissionAnswered &&
+        (originalCommitted !== 'yes' ||
+          referenceParam.validate(originalNrlReference).error === undefined)))
+  )
+}
 
 /**
  * Whether every answer the check your answers page confirms has been given for
@@ -28,6 +56,7 @@ export function areRequiredAnswersComplete({ requestToUse, address } = {}) {
     hasValidReference &&
     Boolean(requestToUse?.levy) &&
     requestToUse?.acceptLevy === 'yes' &&
+    hasPlanningAmendmentAnswers(requestToUse) &&
     Boolean(actualUserType) &&
     requiredAddressLines.every(Boolean) &&
     hasFullName
