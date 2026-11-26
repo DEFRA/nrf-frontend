@@ -1,10 +1,11 @@
-import { statusCodes } from '../../common/constants/status-codes.js'
-import { areRequiredAnswersComplete } from '../helpers/are-required-answers-complete/index.js'
+import { statusCodes } from '../../../common/constants/status-codes.js'
+import { clearValidationFlashFromCache } from '../../../common/helpers/form-validation-session/index.js'
+import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
+import { areRequiredAnswersComplete } from '../are-required-answers-complete/index.js'
 import {
   getAddressForCurrentAccount,
   requestToUseSession
-} from '../helpers/request-to-use-session/index.js'
-import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/route-path.js'
+} from '../request-to-use-session/index.js'
 
 /**
  * Sends a signed-in visitor whose earlier request to use answers are
@@ -23,6 +24,10 @@ export function redirectWhenAnswersIncomplete(request, h) {
   if (complete) {
     return h.continue
   }
+
+  // A failed submit saves its error for a form page to show when its redirect
+  // is followed, but the review page replaces that page
+  clearValidationFlashFromCache(request)
 
   return h.redirect(reviewQuoteDetailsPath).code(statusCodes.found).takeover()
 }

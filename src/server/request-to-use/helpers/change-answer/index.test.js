@@ -4,8 +4,12 @@ import { routePath as notHousingPath } from '../../../quote/not-housing/route-pa
 import { routePath as notInEdpPath } from '../../../quote/not-in-edp/route-path.js'
 import { routePath as excludedAreaPath } from '../../../quote/excluded-area/route-path.js'
 import { routePath as quotePlanningTypePath } from '../../../quote/planning-type/route-path.js'
-import { dropoutPaths } from '../../../quote/helpers/change-mode/index.js'
 import {
+  dropoutPaths,
+  isChangeMode
+} from '../../../quote/helpers/change-mode/index.js'
+import {
+  checkYourAnswersBackLinkPath,
   dropoutPageAliases,
   redirectToReviewPageUnlessDropout,
   withBackLink
@@ -29,6 +33,23 @@ describe('change answer helpers', () => {
         savedAnswer: 'other',
         backLinkPath: '/request-to-use/review-quote-details'
       })
+    })
+  })
+
+  describe('checkYourAnswersBackLinkPath', () => {
+    it('is the check your answers page carrying the change flag', () => {
+      expect(checkYourAnswersBackLinkPath).toBe(
+        '/request-to-use/check-your-answers?change=true'
+      )
+    })
+
+    it('is seen as a change by the check the check your answers page makes', () => {
+      const query = Object.fromEntries(
+        new URLSearchParams(checkYourAnswersBackLinkPath.split('?')[1])
+      )
+
+      expect(isChangeMode(query)).toBe(true)
+      expect(isChangeMode({})).toBe(false)
     })
   })
 

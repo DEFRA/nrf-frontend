@@ -1,4 +1,8 @@
-import { isDropoutPage } from '../../../quote/helpers/change-mode/index.js'
+import {
+  appendChangeParam,
+  isDropoutPage
+} from '../../../quote/helpers/change-mode/index.js'
+import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
@@ -8,6 +12,17 @@ import { routePath as changeApplicationTypeNotAvailablePath } from '../../change
 import { routePath as changeNotHousingPath } from '../../change/not-housing/route-path.js'
 import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-path.js'
 import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
+
+/**
+ * The check your answers page as a change page's back link. The change flag
+ * tells that page the user is backing out of an edit made from it: with an
+ * answer missing it then keeps the incomplete answers error page, where a
+ * direct load is sent back to the review and amend page.
+ */
+export const checkYourAnswersBackLinkPath = appendChangeParam(
+  checkYourAnswersPath,
+  { change: 'true' }
+)
 
 /**
  * Wraps a question page's view model for its change alias: the alias serves

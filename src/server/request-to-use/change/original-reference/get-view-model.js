@@ -1,8 +1,10 @@
 import getOriginalReferenceViewModel from '../../original-reference/get-view-model.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
-import { withBackLink } from '../../helpers/change-answer/index.js'
+import {
+  checkYourAnswersBackLinkPath,
+  withBackLink
+} from '../../helpers/change-answer/index.js'
 
 export default withBackLink({
-  backLinkPath: checkYourAnswersPath,
+  backLinkPath: checkYourAnswersBackLinkPath,
   getQuotePageViewModel: getOriginalReferenceViewModel
 })

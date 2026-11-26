@@ -7,9 +7,13 @@ import { originalNrlReference } from '../../../../test-utils/fixtures/quote.js'
 import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change-planning-page-test.js'
 
 const pagePath = '/request-to-use/change/original-committed'
+const changeVariationPath = '/request-to-use/change/variation'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const checkYourAnswersBackLink =
+  '/request-to-use/check-your-answers?change=true'
 const changeOriginalReferencePath = '/request-to-use/change/original-reference'
 const startPath = '/manage/start-page'
+const incompleteAnswersHeading = 'Your details are incomplete'
 const originalCommittedKey =
   'Original planning permission committed to the levy'
 const originalReferenceKey = 'Original NRL reference'
@@ -53,7 +57,42 @@ describe('Change whether the original planning permission was committed page', (
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      checkYourAnswersPath
+      checkYourAnswersBackLink
+    )
+  })
+
+  it('shows the incomplete answers page when the user backs out before answering', async () => {
+    // Changing the amendment to yes continues here for the original permission
+    // answer, which leaves the answers incomplete until it is given
+    const { cookie } = await submitForm({
+      requestUrl: changeVariationPath,
+      server: getServer(),
+      formData: { variation: 'yes' },
+      cookie: sessionCookie
+    })
+    const walkedOnTo = await loadPage({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie
+    })
+    const backLinkHref = getByRole(walkedOnTo, 'link', {
+      name: 'Back'
+    }).getAttribute('href')
+
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: backLinkHref,
+      cookie
+    })
+    const document = await loadPage({
+      requestUrl: backLinkHref,
+      server: getServer(),
+      cookie
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      incompleteAnswersHeading
     )
   })
 
