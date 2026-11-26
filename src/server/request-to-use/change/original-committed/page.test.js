@@ -2,6 +2,10 @@ import { getByRole } from '@testing-library/dom'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
+import {
+  expectBackToShowIncompleteAnswers,
+  followBackLink
+} from '../../../../test-utils/follow-back-link.js'
 import { mockCompareBoundaries } from '../../../../test-utils/mock-get-quote.js'
 import { originalNrlReference } from '../../../../test-utils/fixtures/quote.js'
 import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change-planning-page-test.js'
@@ -55,6 +59,27 @@ describe('Change whether the original planning permission was committed page', (
       'href',
       checkYourAnswersPath
     )
+  })
+
+  it('shows the incomplete answers page after back when the answer is blank', async () => {
+    await expectBackToShowIncompleteAnswers({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+  })
+
+  it('shows the previous answer on the check your answers page after back without changing it', async () => {
+    const { cookie } = await submitOriginalCommitted('no')
+
+    const backPath = await followBackLink({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie
+    })
+
+    expect(backPath).toBe(checkYourAnswersPath)
+    expect(await rowText({ cookie, key: originalCommittedKey })).toBe('No')
   })
 
   it('redirects to the check your answers page when the answer is no', async () => {

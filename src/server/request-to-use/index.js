@@ -36,6 +36,8 @@ import routesChangeAcceptLevy from './change/accept-levy/routes.js'
 import routesChangeVariation from './change/variation/routes.js'
 import routesChangeOriginalCommitted from './change/original-committed/routes.js'
 import routesChangeOriginalReference from './change/original-reference/routes.js'
+import routesChangeOriginalReferenceNotMatched from './change/original-reference-not-matched/routes.js'
+import routesChangeOriginalBoundaryNotMatched from './change/original-boundary-not-matched/routes.js'
 import routesChangeDeleteQuote from './change/delete-quote/routes.js'
 import routesChangeDeleteQuoteDetails from './change/delete-quote-details/routes.js'
 import routesRetrieveQuote from './retrieve-quote/routes.js'
@@ -95,6 +97,8 @@ export const requestToUse = {
         ...routesChangeVariation,
         ...routesChangeOriginalCommitted,
         ...routesChangeOriginalReference,
+        ...routesChangeOriginalReferenceNotMatched,
+        ...routesChangeOriginalBoundaryNotMatched,
         ...routesChangeDeleteQuote,
         ...routesChangeDeleteQuoteDetails,
         ...routesRetrieveQuote,

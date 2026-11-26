@@ -15,6 +15,8 @@ import { routePath as changeAcceptLevyPath } from '../../change/accept-levy/rout
 import { routePath as changeVariationPath } from '../../change/variation/route-path.js'
 import { routePath as changeOriginalCommittedPath } from '../../change/original-committed/route-path.js'
 import { routePath as changeOriginalReferencePath } from '../../change/original-reference/route-path.js'
+import { routePath as changeOriginalReferenceNotMatchedPath } from '../../change/original-reference-not-matched/route-path.js'
+import { routePath as changeOriginalBoundaryNotMatchedPath } from '../../change/original-boundary-not-matched/route-path.js'
 import { routePath as changeDeleteQuotePath } from '../../change/delete-quote/route-path.js'
 import { routePath as changeDeleteQuoteDetailsPath } from '../../change/delete-quote-details/route-path.js'
 import { routePath as readThisPath } from '../../read-this/route-path.js'
@@ -85,6 +87,8 @@ const completeQuotePaths = new Set([
   changeVariationPath,
   changeOriginalCommittedPath,
   changeOriginalReferencePath,
+  changeOriginalReferenceNotMatchedPath,
+  changeOriginalBoundaryNotMatchedPath,
   changeDeleteQuotePath,
   changeDeleteQuoteDetailsPath
 ])

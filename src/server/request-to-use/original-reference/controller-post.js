@@ -8,30 +8,47 @@ import { routePath as originalBoundaryNotMatchedPath } from '../original-boundar
 import getNextPage from './get-next-page.js'
 
 /**
+ * @typedef {object} OriginalReferenceRedirects
+ * @property {(sessionData: object) => string} nextPageAfterMatch - where a matching reference continues to
+ * @property {string} referenceNotMatchedPath - where an unknown reference goes
+ * @property {string} boundaryNotMatchedPath - where a reference with a different boundary goes
+ */
+
+/**
  * @param {object} params
  * @param {{ originalFound: boolean, boundariesMatch?: boolean }} params.comparison
  * @param {object} params.sessionData - the saved request to use session data
- * @param {(sessionData: object) => string} params.nextPageAfterMatch
+ * @param {OriginalReferenceRedirects} params.redirects
  * @returns {string} path of the page to redirect to
  */
-const getRedirectPath = ({ comparison, sessionData, nextPageAfterMatch }) => {
+const getRedirectPath = ({
+  comparison,
+  sessionData,
+  redirects: {
+    nextPageAfterMatch,
+    referenceNotMatchedPath,
+    boundaryNotMatchedPath
+  }
+}) => {
   const { originalFound, boundariesMatch } = comparison
 
   if (!originalFound) {
-    return originalReferenceNotMatchedPath
+    return referenceNotMatchedPath
   }
   return boundariesMatch
     ? nextPageAfterMatch(sessionData)
-    : originalBoundaryNotMatchedPath
+    : boundaryNotMatchedPath
 }
 
 /**
- * @param {(sessionData: object) => string} [nextPageAfterMatch] - where a matching reference continues to
+ * @param {Partial<OriginalReferenceRedirects>} [redirects] - overrides for the journey's own pages
  * @returns {{ handler: import('@hapi/hapi').Lifecycle.Method }} the POST controller
  */
-export const createOriginalReferencePostController = (
-  nextPageAfterMatch = getNextPage
-) => ({
+export const createOriginalReferencePostController = ({
+  nextPageAfterMatch = getNextPage,
+  referenceNotMatchedPath = originalReferenceNotMatchedPath,
+  boundaryNotMatchedPath = originalBoundaryNotMatchedPath
+} = {}) => ({
   async handler(request, h) {
     const currentBoundaryGeoJson =
       getQuoteDataFromCache(request)?.boundaryGeojson?.boundaryGeometryWgs84
@@ -49,7 +66,15 @@ export const createOriginalReferencePostController = (
 
     return h
       .redirect(
-        getRedirectPath({ comparison, sessionData, nextPageAfterMatch })
+        getRedirectPath({
+          comparison,
+          sessionData,
+          redirects: {
+            nextPageAfterMatch,
+            referenceNotMatchedPath,
+            boundaryNotMatchedPath
+          }
+        })
       )
       .code(statusCodes.redirectAfterPost)
   }
