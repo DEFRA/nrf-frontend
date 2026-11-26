@@ -50,10 +50,11 @@ const notApplicableText = 'Not applicable'
  * The planning amendment answers. The original permission rows only apply to
  * an amendment, and the reference only applies when the original permission
  * was committed to using the levy; answers saved before a later change made
- * them inapplicable are never shown. A required row whose answer is blank
- * stays, with its change link, so the answer can be given from this page. The
- * reference only has a change link once the original permission is committed:
- * until then the committed answer's own change page leads to it.
+ * them inapplicable are never shown. A required row whose answer is blank is
+ * kept rather than dropped, although the page's route prerequisite stops it
+ * rendering while one is blank. The reference only has a change link once the
+ * original permission is committed: until then the committed answer's own
+ * change page leads to it.
  * @param {object} [requestToUse] - the request to use session data
  * @returns {Array<object>} summary list rows for the planning amendment answers
  */

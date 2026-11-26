@@ -15,7 +15,10 @@ import { statusCodes } from '../common/constants/status-codes.js'
 import { buildFrontendUrl } from '../common/helpers/build-frontend-url.js'
 import { routePath as startPath } from '../manage/start-page/route-path.js'
 import { getOrganisationFromToken } from './get-organisation-from-auth-token.js'
-import { clearAccountAnswers } from '../request-to-use/helpers/request-to-use-session/index.js'
+import {
+  clearAccountAnswers,
+  requestToUseSession
+} from '../request-to-use/helpers/request-to-use-session/index.js'
 import { clearValidationFlashFromCache } from '../common/helpers/form-validation-session/index.js'
 
 const logger = createLogger()
@@ -39,26 +42,40 @@ const signInErrorView = (h, error, statusCode = statusCodes.badRequest) =>
 /**
  * Drops the session the user had before signing in. Signing in as a different
  * account (not just re-signing in as the same one) also discards what the
- * previous account entered.
+ * previous account entered. The new relationship is compared with the
+ * previous sign-in's, while that session is still cached, and with the
+ * relationship the address was entered under, which outlives it. If either
+ * differs, the answers are cleared.
  * @param {import('@hapi/hapi').Request} request
  * @param {string} [newRelationshipId] - currentRelationshipId from the new token
  * @returns {Promise<void>}
  */
 async function discardPreviousSession(request, newRelationshipId) {
-  const previousSessionId = request.yar.get('sessionId')
-  if (!previousSessionId) {
-    return
-  }
   const sessionCache = request.server.app.sessionCache
-  const previousSession = await sessionCache.get(previousSessionId)
+  const previousSessionId = request.yar.get('sessionId')
+  let previousSession
+  if (previousSessionId) {
+    previousSession = await sessionCache.get(previousSessionId)
+    await sessionCache.drop(previousSessionId)
+  }
+
+  const addressRelationshipId =
+    requestToUseSession.get(request)?.signin?.relationshipId
+  // null where there is nothing to compare with
+  const previousRelationshipIds = [
+    previousSession ? previousSession.profile?.currentRelationshipId : null,
+    addressRelationshipId ?? null
+  ]
+
   if (
-    previousSession &&
-    previousSession.profile?.currentRelationshipId !== newRelationshipId
+    previousRelationshipIds.some(
+      (relationshipId) =>
+        relationshipId !== null && relationshipId !== newRelationshipId
+    )
   ) {
     clearAccountAnswers(request)
     clearValidationFlashFromCache(request)
   }
-  await sessionCache.drop(previousSessionId)
 }
 
 /**
