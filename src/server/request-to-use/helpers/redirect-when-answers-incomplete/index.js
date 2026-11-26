@@ -10,7 +10,8 @@ import {
 /**
  * Sends a signed-in visitor whose earlier request to use answers are
  * incomplete back to the review and amend page, where the steps after it
- * start again. Nothing is rendered or saved.
+ * start again. The error a failed submit left is cleared first, as the review
+ * page replaces the form that would have shown it. Nothing is rendered.
  * @param {import('@hapi/hapi').Request} request
  * @param {import('@hapi/hapi').ResponseToolkit} h
  * @returns {import('@hapi/hapi').Lifecycle.ReturnValue} continue, or a redirect to the review and amend page
@@ -25,8 +26,6 @@ export function redirectWhenAnswersIncomplete(request, h) {
     return h.continue
   }
 
-  // A failed submit saves its error for a form page to show when its redirect
-  // is followed, but the review page replaces that page
   clearValidationFlashFromCache(request)
 
   return h.redirect(reviewQuoteDetailsPath).code(statusCodes.found).takeover()

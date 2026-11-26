@@ -1,5 +1,5 @@
 import { incompleteCheckYourAnswersSessions } from './check-your-answers-sessions.js'
-import { agentClaims, citizenClaims } from './defra-id-org-claims.js'
+import { agentClaims, singleOrgEmployeeClaims } from './defra-id-org-claims.js'
 
 // The complete request to use answers with one required answer left blank
 // each, and the claims of the persona who gave them. An address only counts
@@ -7,22 +7,22 @@ import { agentClaims, citizenClaims } from './defra-id-org-claims.js'
 export const incompleteCheckYourAnswersScenarios = [
   {
     scenario: 'the levy calculation is missing',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session: incompleteCheckYourAnswersSessions.withoutLevyCalculation
   },
   {
     scenario: 'the levy amount has not been accepted',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session: incompleteCheckYourAnswersSessions.withoutAcceptedLevy
   },
   {
     scenario: 'the NRL reference is missing',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session: incompleteCheckYourAnswersSessions.withoutNrlReference
   },
   {
     scenario: 'the address was entered under another Defra ID account',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session: incompleteCheckYourAnswersSessions.addressForAnotherAccount
   },
   {
@@ -32,20 +32,20 @@ export const incompleteCheckYourAnswersScenarios = [
   },
   {
     scenario: 'the amendment answer is missing',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session: incompleteCheckYourAnswersSessions.withoutAmendmentAnswer
   },
   {
     scenario:
       'the development is an amendment but the original permission answer is missing',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session:
       incompleteCheckYourAnswersSessions.amendmentWithoutOriginalPermission
   },
   {
     scenario:
       'the original permission was committed but its NRL reference is missing',
-    claims: citizenClaims,
+    claims: singleOrgEmployeeClaims,
     session:
       incompleteCheckYourAnswersSessions.committedWithoutOriginalReference
   }

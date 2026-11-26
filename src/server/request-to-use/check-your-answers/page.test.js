@@ -123,14 +123,17 @@ describe('Check your answers page', () => {
     }
   )
 
-  it('should return a signed-out visitor to the page after signing in', async () => {
+  it('should return a signed-out visitor to the page without the change flag after signing in', async () => {
     seededSession = checkYourAnswersSessions.individual
-    // The challenge's cookie carries the remembered path
+    // Only the page's path is remembered across sign-in, so a back link's
+    // change flag is dropped
     const challenge = await getResponse({
       server: getAppServer(),
-      requestUrl: pagePath,
+      requestUrl: pageBackLinkPath,
       cookie: await withCompleteQuoteSession(getAppServer())
     })
+
+    expect(challenge.headers.location).toBe('/auth/sign-in')
 
     const { response: returned, cookie } = await signIn({
       claims: citizenClaims,
