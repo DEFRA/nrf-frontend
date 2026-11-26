@@ -2,6 +2,10 @@ import { getByRole } from '@testing-library/dom'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
+import {
+  expectBackToShowIncompleteAnswers,
+  followBackLink
+} from '../../../../test-utils/follow-back-link.js'
 import { mockCompareBoundaries } from '../../../../test-utils/mock-get-quote.js'
 import { originalNrlReference } from '../../../../test-utils/fixtures/quote.js'
 import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change-planning-page-test.js'
@@ -10,8 +14,9 @@ const pagePath = '/request-to-use/change/original-reference'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
 const checkYourAnswersBackLink =
   '/request-to-use/check-your-answers?change=true'
-const notMatchedPath = '/request-to-use/original-reference-not-matched'
-const boundaryNotMatchedPath = '/request-to-use/original-boundary-not-matched'
+const notMatchedPath = '/request-to-use/change/original-reference-not-matched'
+const boundaryNotMatchedPath =
+  '/request-to-use/change/original-boundary-not-matched'
 const startPath = '/manage/start-page'
 const originalReferenceKey = 'Original NRL reference'
 
@@ -57,6 +62,71 @@ describe('Change the NRL reference for the original planning permission page', (
       checkYourAnswersBackLink
     )
   })
+
+  it.each(['https://example.com', 'constructor', 'toString', '__proto__'])(
+    'links back to the check your answers page for the unknown source %s',
+    async (source) => {
+      const document = await loadPage({
+        requestUrl: `${pagePath}?from=${source}`,
+        server: getServer(),
+        cookie: sessionCookie
+      })
+
+      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+        'href',
+        checkYourAnswersBackLink
+      )
+    }
+  )
+
+  it('shows the incomplete answers page after back when the reference is blank', async () => {
+    await expectBackToShowIncompleteAnswers({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+  })
+
+  it('shows the previous reference on the check your answers page after back without changing it', async () => {
+    mockCompareBoundaries(mswServer)
+    const { cookie } = await submit()
+
+    const backPath = await followBackLink({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie
+    })
+
+    expect(backPath).toBe(checkYourAnswersBackLink)
+    expect(await rowText({ cookie, key: originalReferenceKey })).toBe(
+      originalNrlReference
+    )
+  })
+
+  it.each([
+    { source: 'reference-not-matched', notMatchedPagePath: notMatchedPath },
+    {
+      source: 'boundary-not-matched',
+      notMatchedPagePath: boundaryNotMatchedPath
+    }
+  ])(
+    'goes back from the $source page to this page and back again to the $source page, not check your answers',
+    async ({ source, notMatchedPagePath }) => {
+      seedSession({
+        variation: 'yes',
+        originalCommitted: 'yes',
+        originalNrlReference
+      })
+      const cookie = await signedInCookie()
+      const backFrom = (requestUrl) =>
+        followBackLink({ requestUrl, server: getServer(), cookie })
+
+      const firstBackPath = await backFrom(notMatchedPagePath)
+      expect(firstBackPath).toBe(`${pagePath}?from=${source}`)
+
+      expect(await backFrom(firstBackPath)).toBe(notMatchedPagePath)
+    }
+  )
 
   it.each([
     ['the reference and boundary match', {}, checkYourAnswersPath],

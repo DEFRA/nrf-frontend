@@ -2,6 +2,10 @@ import { getByRole } from '@testing-library/dom'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
+import {
+  expectBackToShowIncompleteAnswers,
+  followBackLink
+} from '../../../../test-utils/follow-back-link.js'
 import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change-planning-page-test.js'
 
 const pagePath = '/request-to-use/change/variation'
@@ -54,6 +58,27 @@ describe('Change whether the development is an amendment page', () => {
       'href',
       checkYourAnswersBackLink
     )
+  })
+
+  it('shows the incomplete answers page after back when the answer is blank', async () => {
+    await expectBackToShowIncompleteAnswers({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie: sessionCookie
+    })
+  })
+
+  it('shows the previous answer on the check your answers page after back without changing it', async () => {
+    const { cookie } = await submitVariation('no')
+
+    const backPath = await followBackLink({
+      requestUrl: pagePath,
+      server: getServer(),
+      cookie
+    })
+
+    expect(backPath).toBe(checkYourAnswersBackLink)
+    expect(await rowText({ cookie, key: variationKey })).toBe('No')
   })
 
   it('redirects to the check your answers page when the answer is no', async () => {

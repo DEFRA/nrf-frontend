@@ -3,6 +3,8 @@ import { redirectToFormWithValidationErrors } from '../../../common/helpers/redi
 import { createOriginalReferencePostController } from '../../original-reference/controller-post.js'
 import formValidation from '../../original-reference/form-validation.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { routePath as changeOriginalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
+import { routePath as changeOriginalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
 import getViewModel from './get-view-model.js'
 import { routePath } from './route-path.js'
 
@@ -15,7 +17,14 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Change the NRL reference for the original planning permission page
- *     description: Renders the original reference page to edit the answer from the check your answers page
+ *     description: Renders the original reference page to edit the answer from the check your answers page. The Back link returns to the not matched page named by the from query parameter, and to the check your answers page otherwise.
+ *     parameters:
+ *       - in: query
+ *         name: from
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [reference-not-matched, boundary-not-matched]
  *     responses:
  *       200:
  *         description: HTML form page
@@ -58,6 +67,10 @@ export default [
         failAction: redirectToFormWithValidationErrors
       }
     },
-    ...createOriginalReferencePostController(() => checkYourAnswersPath)
+    ...createOriginalReferencePostController({
+      nextPageAfterMatch: () => checkYourAnswersPath,
+      referenceNotMatchedPath: changeOriginalReferenceNotMatchedPath,
+      boundaryNotMatchedPath: changeOriginalBoundaryNotMatchedPath
+    })
   }
 ]
