@@ -43,7 +43,7 @@ describe('change answer helpers', () => {
       )
     })
 
-    it('is seen as a change by the check the check your answers page makes', () => {
+    it('is seen as a change by the check your answers page', () => {
       const query = Object.fromEntries(
         new URLSearchParams(checkYourAnswersBackLinkPath.split('?')[1])
       )

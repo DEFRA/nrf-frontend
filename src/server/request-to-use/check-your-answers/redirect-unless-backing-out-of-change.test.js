@@ -15,16 +15,6 @@ import { redirectUnlessBackingOutOfChange } from './redirect-unless-backing-out-
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const backLinkFromChangePage = { change: 'true' }
 
-// The error a function throws, so that its details can be asserted
-const thrownBy = (fn) => {
-  try {
-    fn()
-  } catch (error) {
-    return error
-  }
-  return undefined
-}
-
 describe('redirectUnlessBackingOutOfChange', () => {
   it.each([
     ['a direct load', {}],
@@ -67,13 +57,15 @@ describe('redirectUnlessBackingOutOfChange', () => {
     // Left by a failed submit whose form page the error page replaces
     saveValidationFlashToCache(request, validationFlash)
 
-    const thrown = thrownBy(() =>
+    expect(() =>
       redirectUnlessBackingOutOfChange(request, createMockRedirectToolkit())
+    ).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 400 }),
+        data: { completeDetailsPath: reviewQuoteDetailsPath }
+      })
     )
-
-    expect(thrown.isBoom).toBe(true)
-    expect(thrown.output.statusCode).toBe(400)
-    expect(thrown.data.completeDetailsPath).toBe(reviewQuoteDetailsPath)
     expect(getValidationFlashFromCache(request)).toBeNull()
   })
 })

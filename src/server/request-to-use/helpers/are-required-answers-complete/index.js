@@ -32,8 +32,8 @@ const hasPlanningAmendmentAnswers = (requestToUse) => {
  * Whether every answer the check your answers page confirms has been given for
  * the signed in account, and the quote's reference the submit sends is saved
  * and well formed. A blank or malformed one means the request cannot be
- * checked or submitted, so the page fails with the incomplete answers error
- * page.
+ * checked or submitted: the page fails with the incomplete answers error page,
+ * except that a direct load is redirected to the review and amend page.
  * @param {object} params
  * @param {object | null} params.requestToUse - the request to use session data
  * @param {object} [params.address] - the saved enter address answers, already checked against the signed in relationship
