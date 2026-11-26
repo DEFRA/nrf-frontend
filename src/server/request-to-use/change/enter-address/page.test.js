@@ -3,9 +3,11 @@ import { setupSignedInTestServer } from '../../../../test-utils/setup-signed-in-
 import { seedRequestToUseSessionWith } from '../../../../test-utils/setup-seeded-request-to-use-server.js'
 import { singleOrgEmployeeClaims } from '../../../../test-utils/fixtures/defra-id-org-claims.js'
 import { reviewDetailsSessions } from '../../../../test-utils/fixtures/review-details-personas.js'
+import { checkYourAnswersSessions } from '../../../../test-utils/fixtures/check-your-answers-sessions.js'
 import { fullQuote } from '../../../../test-utils/fixtures/quote.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { submitForm } from '../../../../test-utils/submit-form.js'
+import { expectBackToShowIncompleteAnswers } from '../../../../test-utils/follow-back-link.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
 
 const ROUTE_PATH = '/request-to-use/change/enter-address'
@@ -22,11 +24,13 @@ afterEach(() => {
 
 // The page's guard needs the completed quote, and the form needs the persona
 // snapshot, over one signed-in session.
-const signedInCookie = async () => {
-  seededSession = {
+const signedInCookie = async (
+  session = {
     ...reviewDetailsSessions.employee,
     nrlReference: fullQuote.reference
   }
+) => {
+  seededSession = session
   const quoteCookie = await withCompleteQuoteSession(getServer())
   const { cookie } = await signIn({
     claims: singleOrgEmployeeClaims,
@@ -47,6 +51,20 @@ describe('Change the address or full name page', () => {
       'href',
       '/request-to-use/check-your-answers'
     )
+  })
+
+  it('shows the incomplete answers page after back when the address is blank', async () => {
+    const { employee } = checkYourAnswersSessions
+    const cookie = await signedInCookie({
+      ...employee,
+      address: { ...employee.address, postcode: '' }
+    })
+
+    await expectBackToShowIncompleteAnswers({
+      requestUrl: ROUTE_PATH,
+      server: getServer(),
+      cookie
+    })
   })
 
   it('redirects a changed address to the check your answers page', async () => {
