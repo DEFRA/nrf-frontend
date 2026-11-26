@@ -178,9 +178,9 @@ export const saveEnterAddress = (request, payload) => {
 
 /**
  * The saved enter address answers, but only while they were entered under the
- * Defra ID relationship the user is signed in with now. This holds even when
- * the sign in callback could not compare with the previous session (for
- * example the cached session had expired before the user switched account).
+ * Defra ID relationship the user is signed in with now. The sign in callback
+ * removes such an address when another account signs in; this is the read-side
+ * check, so one left behind for any other reason is never shown either.
  * @param {object} params
  * @param {object | null} [params.requestToUse] - the request to use session
  * @param {string} [params.currentRelationshipId] - the signed-in user's relationship

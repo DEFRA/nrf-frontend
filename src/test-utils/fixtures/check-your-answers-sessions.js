@@ -6,7 +6,7 @@ import { reviewDetailsSessions } from './review-details-personas.js'
 // What the pages after the review page add to the enter address answers: the
 // NRL reference, the levy calculation, the accepted levy and the planning
 // answers of a development that is not an amendment
-const acceptedRequest = {
+export const acceptedRequest = {
   nrlReference: fullQuote.reference,
   levy: recalculatedLevy,
   acceptLevy: 'yes',

@@ -13,7 +13,8 @@ import { clearAccountAnswers } from '../request-to-use/helpers/request-to-use-se
 import { clearValidationFlashFromCache } from '../common/helpers/form-validation-session/index.js'
 
 vi.mock('../request-to-use/helpers/request-to-use-session/index.js', () => ({
-  clearAccountAnswers: vi.fn()
+  clearAccountAnswers: vi.fn(),
+  requestToUseSession: { get: vi.fn(() => null) }
 }))
 vi.mock('../common/helpers/form-validation-session/index.js', () => ({
   clearValidationFlashFromCache: vi.fn()
