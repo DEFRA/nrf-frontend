@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import getViewModel from './get-view-model.js'
 import { findSummaryListRow } from '../../../test-utils/find-summary-list-row.js'
 import { boundaryGeojson } from '../../../test-utils/fixtures/boundary-geojson.js'
+import { originalNrlReference } from '../../../test-utils/fixtures/quote.js'
 import {
   currentRelationshipId,
   firstOrgName
@@ -18,6 +19,9 @@ import {
 // fail these tests (tests.md, constants vs literals).
 const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
 const changeEnterAddressPath = '/request-to-use/change/enter-address'
+const changeVariationPath = '/request-to-use/change/variation'
+const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
+const changeOriginalReferencePath = '/request-to-use/change/original-reference'
 const readThisPath = '/request-to-use/read-this'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const changeDeleteQuotePath = '/request-to-use/change/delete-quote-details'
@@ -34,7 +38,10 @@ const rowKeys = {
   housing: 'Housing',
   housingUnits: 'Number of housing units',
   redLineBoundary: 'Red line boundary',
-  emailAddress: 'Email address'
+  emailAddress: 'Email address',
+  variation: 'Amendment to an existing planning permission',
+  originalCommitted: 'Original planning permission committed to the levy',
+  originalReference: 'Original NRL reference'
 }
 
 const findDevelopmentDetailsRow = (view, key) =>
@@ -74,6 +81,103 @@ const individualData = dataFor({
 })
 
 describe('Check your answers view model', () => {
+  describe('planning amendment rows', () => {
+    const viewFor = (planning) =>
+      getViewModel(dataFor({ ...reviewDetailsSessions.agent, ...planning }))
+
+    it('shows only the amendment row when the development is not an amendment', () => {
+      const view = viewFor({
+        variation: 'no',
+        originalCommitted: 'yes',
+        originalNrlReference
+      })
+
+      expect(findSummaryListRow(view, rowKeys.variation).value.text).toBe('No')
+      expect(
+        findSummaryListRow(view, rowKeys.variation).actions.items[0].href
+      ).toBe(changeVariationPath)
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted)
+      ).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference)
+      ).toBeUndefined()
+    })
+
+    it('shows all three rows with change links for an amendment to a committed permission', () => {
+      const view = viewFor({
+        variation: 'yes',
+        originalCommitted: 'yes',
+        originalNrlReference
+      })
+
+      expect(findSummaryListRow(view, rowKeys.variation).value.text).toBe('Yes')
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted).value.text
+      ).toBe('Yes')
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted).actions.items[0]
+          .href
+      ).toBe(changeOriginalCommittedPath)
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).value.text
+      ).toBe(originalNrlReference)
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions.items[0]
+          .href
+      ).toBe(changeOriginalReferencePath)
+    })
+
+    it('shows Not applicable for the reference when the original permission was not committed', () => {
+      const view = viewFor({
+        variation: 'yes',
+        originalCommitted: 'no',
+        originalNrlReference
+      })
+
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted).value.text
+      ).toBe('No')
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).value.text
+      ).toBe('Not applicable')
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions
+      ).toBeUndefined()
+    })
+
+    it('keeps the original permission row and its change link when it is unanswered', () => {
+      const view = viewFor({ variation: 'yes' })
+      const row = findSummaryListRow(view, rowKeys.originalCommitted)
+
+      expect(row.value.text).toBe('')
+      expect(row.actions.items[0].href).toBe(changeOriginalCommittedPath)
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference).actions
+      ).toBeUndefined()
+    })
+
+    it('keeps the reference row and its change link when the reference is unanswered', () => {
+      const view = viewFor({ variation: 'yes', originalCommitted: 'yes' })
+      const row = findSummaryListRow(view, rowKeys.originalReference)
+
+      expect(row.value.text).toBe('')
+      expect(row.actions.items[0].href).toBe(changeOriginalReferencePath)
+    })
+
+    it('omits all three rows when the amendment question is unanswered', () => {
+      const view = viewFor({})
+
+      expect(findSummaryListRow(view, rowKeys.variation)).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalCommitted)
+      ).toBeUndefined()
+      expect(
+        findSummaryListRow(view, rowKeys.originalReference)
+      ).toBeUndefined()
+    })
+  })
+
   it('returns the page heading, title and back link to the read this page', () => {
     const view = getViewModel(agentData)
 

@@ -33,6 +33,9 @@ const checkYourAnswersPath = '/request-to-use/check-your-answers'
 const readThisPath = '/request-to-use/read-this'
 const changeEnterAddressPath = '/request-to-use/change/enter-address'
 const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
+const changeVariationPath = '/request-to-use/change/variation'
+const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
+const changeOriginalReferencePath = '/request-to-use/change/original-reference'
 const changeDeleteQuotePath = '/request-to-use/change/delete-quote'
 const changeDeleteQuoteDetailsPath =
   '/request-to-use/change/delete-quote-details'
@@ -196,6 +199,9 @@ describe('checkForValidReviewQuoteSession', () => {
     readThisPath,
     changeEnterAddressPath,
     changeAcceptLevyPath,
+    changeVariationPath,
+    changeOriginalCommittedPath,
+    changeOriginalReferencePath,
     changeDeleteQuotePath,
     changeDeleteQuoteDetailsPath,
     '/request-to-use/original-reference-not-matched',
@@ -223,6 +229,9 @@ describe('checkForValidReviewQuoteSession', () => {
     readThisPath,
     changeEnterAddressPath,
     changeAcceptLevyPath,
+    changeVariationPath,
+    changeOriginalCommittedPath,
+    changeOriginalReferencePath,
     changeDeleteQuotePath,
     changeDeleteQuoteDetailsPath,
     '/request-to-use/original-reference-not-matched',
