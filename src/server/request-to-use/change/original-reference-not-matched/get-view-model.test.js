@@ -1,3 +1,4 @@
+import { originalNrlReference } from '../../../../test-utils/fixtures/quote.js'
 import getViewModel from './get-view-model.js'
 
 const changeOriginalReferencePath =
@@ -6,10 +7,16 @@ const changeOriginalReferencePath =
 describe('change original-reference-not-matched getViewModel', () => {
   it('keeps the reference in the heading', () => {
     const viewModel = getViewModel({
-      session: { requestToUse: { originalNrlReference: 'nrl-123456' } }
+      session: {
+        requestToUse: {
+          originalNrlReference: originalNrlReference.toLowerCase()
+        }
+      }
     })
 
-    expect(viewModel.pageHeading).toBe('NRL-123456 does not match our records')
+    expect(viewModel.pageHeading).toBe(
+      `${originalNrlReference} does not match our records`
+    )
   })
 
   it('links back and to the enter again link on the change original reference page', () => {

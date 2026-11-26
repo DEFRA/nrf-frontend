@@ -17,7 +17,14 @@ export { routePath }
  *     tags:
  *       - RequestToUse
  *     summary: Change the NRL reference for the original planning permission page
- *     description: Renders the original reference page to edit the answer from the check your answers page
+ *     description: Renders the original reference page to edit the answer from the check your answers page. The Back link returns to the not matched page named by the from query parameter, and to the check your answers page otherwise.
+ *     parameters:
+ *       - in: query
+ *         name: from
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [reference-not-matched, boundary-not-matched]
  *     responses:
  *       200:
  *         description: HTML form page

@@ -4,6 +4,7 @@ import { setupTestServer } from '../../../../test-utils/setup-test-server.js'
 import { loadPage } from '../../../../test-utils/load-page.js'
 import { getResponse } from '../../../../test-utils/get-response.js'
 import { withCompleteQuoteSession } from '../../../../test-utils/with-complete-quote-session.js'
+import { withValidQuoteSession } from '../../../../test-utils/with-valid-quote-session.js'
 import {
   fullQuote,
   originalNrlReference
@@ -14,6 +15,7 @@ const changeOriginalReferencePath =
   '/request-to-use/change/original-reference?from=boundary-not-matched'
 const changeOriginalReferenceNotMatchedPath =
   '/request-to-use/change/original-reference-not-matched'
+const startPagePath = '/manage/start-page'
 
 describe('Change details do not match page', () => {
   const getServer = setupTestServer()
@@ -59,5 +61,28 @@ describe('Change details do not match page', () => {
     expect(response.headers.location).toBe(
       changeOriginalReferenceNotMatchedPath
     )
+  })
+
+  it('redirects to the start page without a request to use session', async () => {
+    sessionToSeed = null
+
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: pagePath
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(startPagePath)
+  })
+
+  it('redirects to the start page when the saved quote is incomplete', async () => {
+    const response = await getResponse({
+      server: getServer(),
+      requestUrl: pagePath,
+      cookie: await withValidQuoteSession(getServer())
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(startPagePath)
   })
 })

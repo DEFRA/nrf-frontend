@@ -8,10 +8,10 @@ import {
   referenceNotMatchedSource
 } from './not-matched-source.js'
 
-const notMatchedBackLinks = {
-  [referenceNotMatchedSource]: changeOriginalReferenceNotMatchedPath,
-  [boundaryNotMatchedSource]: changeOriginalBoundaryNotMatchedPath
-}
+const notMatchedBackLinks = new Map([
+  [referenceNotMatchedSource, changeOriginalReferenceNotMatchedPath],
+  [boundaryNotMatchedSource, changeOriginalBoundaryNotMatchedPath]
+])
 
 /**
  * A retry from a not matched page returns to that page until the reference is
@@ -22,7 +22,7 @@ const notMatchedBackLinks = {
 export default function getViewModel(input) {
   return withBackLink({
     backLinkPath:
-      notMatchedBackLinks[input?.query?.from] ?? checkYourAnswersPath,
+      notMatchedBackLinks.get(input?.query?.from) ?? checkYourAnswersPath,
     getQuotePageViewModel: getOriginalReferenceViewModel
   })(input)
 }

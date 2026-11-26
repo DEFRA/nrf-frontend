@@ -61,39 +61,21 @@ describe('Change the NRL reference for the original planning permission page', (
     )
   })
 
-  it.each([
-    { from: 'reference-not-matched', backPath: notMatchedPath },
-    { from: 'boundary-not-matched', backPath: boundaryNotMatchedPath }
-  ])(
-    'links back to the $from page when reached from it',
-    async ({ from, backPath }) => {
-      mockCompareBoundaries(mswServer)
+  it.each(['https://example.com', 'constructor', 'toString', '__proto__'])(
+    'links back to the check your answers page for the unknown source %s',
+    async (source) => {
       const document = await loadPage({
-        requestUrl: `${pagePath}?from=${from}`,
+        requestUrl: `${pagePath}?from=${source}`,
         server: getServer(),
         cookie: sessionCookie
       })
 
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',
-        backPath
+        checkYourAnswersPath
       )
     }
   )
-
-  it('links back to the check your answers page for an unknown source', async () => {
-    mockCompareBoundaries(mswServer)
-    const document = await loadPage({
-      requestUrl: `${pagePath}?from=https://example.com`,
-      server: getServer(),
-      cookie: sessionCookie
-    })
-
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      checkYourAnswersPath
-    )
-  })
 
   it('shows the incomplete answers page after back when the reference is blank', async () => {
     await expectBackToShowIncompleteAnswers({
@@ -128,7 +110,6 @@ describe('Change the NRL reference for the original planning permission page', (
   ])(
     'goes back from the $source page to this page and back again to the $source page, not check your answers',
     async ({ source, notMatchedPagePath }) => {
-      mockCompareBoundaries(mswServer)
       seedSession({
         variation: 'yes',
         originalCommitted: 'yes',

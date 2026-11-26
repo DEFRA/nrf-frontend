@@ -9,8 +9,8 @@ import { routePath as originalReferenceNotMatchedPath } from '../original-refere
  * @param {string} notFoundPath - the reference not found dropout to redirect to
  * @returns {import('@hapi/hapi').Lifecycle.Method} the pre-handler
  */
-export const createRedirectWithoutOriginalReference =
-  (notFoundPath) => (request, h) => {
+export const createRedirectWithoutOriginalReference = (notFoundPath) =>
+  function redirectToNotFoundWithoutOriginalReference(request, h) {
     if (requestToUseSession.get(request)?.originalNrlReference) {
       return h.continue
     }
