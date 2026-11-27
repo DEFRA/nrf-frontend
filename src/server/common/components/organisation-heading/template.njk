@@ -2,7 +2,7 @@
   <div class="app-organisation-heading govuk-body-s govuk-!-padding-top-2 govuk-!-padding-bottom-2 govuk-!-margin-bottom-0" role="region" aria-label="Organisation" data-testid="app-organisation-heading">
     <span class="govuk-!-font-weight-bold govuk-!-margin-right-4">{{ params.orgOrUserName }}</span>
     {% if params.changeOrganisationUrl %}
-      <a href="{{ params.changeOrganisationUrl }}" class="govuk-link govuk-link--no-visited-state">Change organisation</a>
+      <a href="{{ params.changeOrganisationUrl }}" class="govuk-link govuk-link--no-visited-state">Change<span class="govuk-visually-hidden"> who you are representing</span></a>
     {% endif %}
   </div>
 {% endif %}
