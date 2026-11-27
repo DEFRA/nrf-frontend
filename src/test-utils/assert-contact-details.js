@@ -4,13 +4,15 @@ import { getByRole } from '@testing-library/dom'
  * Asserts the shared "Get help with the nature restoration levy" block shows
  * the Natural England contact details and support hours.
  * @param {Document} container - rendered page document to assert against
- * @param {{ intro?: boolean, mailtoSubject?: string }} [options] - set intro
+ * @param {{ intro?: boolean, mailtoSubject?: string, introSuffix?: string }} [options] - set intro
  * false where the intro sentence is hidden (page not found error page); pass
- * mailtoSubject where the page prefills the email subject (read this page)
+ * mailtoSubject where the page prefills the email subject (read this page);
+ * introSuffix is what the page adds after the organisation's name (request to
+ * use confirmation page)
  */
 export const assertContactDetails = (
   container,
-  { intro = true, mailtoSubject = null } = {}
+  { intro = true, mailtoSubject = null, introSuffix = '' } = {}
 ) => {
   const main = getByRole(container, 'main')
   expect(
@@ -21,7 +23,7 @@ export const assertContactDetails = (
   ).toBeInTheDocument()
   if (intro) {
     expect(main).toHaveTextContent(
-      'If you need help with the nature restoration levy, contact Natural England.'
+      `If you need help with the nature restoration levy, contact Natural England${introSuffix}.`
     )
   } else {
     expect(main).not.toHaveTextContent(
@@ -49,4 +51,5 @@ export const assertContactDetails = (
     'https://www.gov.uk/call-charges'
   )
   expect(callChargesLink).toHaveAttribute('target', '_blank')
+  expect(callChargesLink).toHaveAttribute('rel', 'noopener noreferrer')
 }

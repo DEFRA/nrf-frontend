@@ -114,6 +114,7 @@ const pathsWithOwnSessionChecks = [
   '/request-to-use/review-details',
   '/request-to-use/read-this',
   '/request-to-use/check-your-answers',
+  '/request-to-use/confirmation',
   '/request-to-use/original-reference-not-matched',
   '/request-to-use/original-boundary-not-matched'
 ]

@@ -1,7 +1,8 @@
+{# A page may set these before including: hideContactIntro, mailtoSubject, contactIntroSuffix #}
 <h2 class="govuk-heading-m">Get help with the nature restoration levy</h2>
 
 {% if not hideContactIntro %}
-<p class="govuk-body">If you need help with the nature restoration levy, contact {{ contactDetails.organisation }}.</p>
+<p class="govuk-body">If you need help with the nature restoration levy, contact {{ contactDetails.organisation }}{{ contactIntroSuffix }}.</p>
 {% endif %}
 
 <p class="govuk-body">

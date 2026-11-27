@@ -10,6 +10,7 @@ import { routePath as defraAccountIndividualPath } from '../../defra-account-ind
 import { routePath as defraAccountOrganisationPath } from '../../defra-account-organisation/route-path.js'
 import { routePath as defraAccountAgentPath } from '../../defra-account-agent/route-path.js'
 import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { routePath as confirmationPath } from '../../confirmation/route-path.js'
 import { routePath as changeEnterAddressPath } from '../../change/enter-address/route-path.js'
 import { routePath as changeAcceptLevyPath } from '../../change/accept-levy/route-path.js'
 import { routePath as changeVariationPath } from '../../change/variation/route-path.js'
@@ -82,6 +83,7 @@ const completeQuotePaths = new Set([
   originalBoundaryNotMatchedPath,
   checkYourAnswersPath,
   readThisPath,
+  confirmationPath,
   changeEnterAddressPath,
   changeAcceptLevyPath,
   changeVariationPath,

@@ -3,9 +3,7 @@ import { routePath as enterAddressPath } from '../../../server/request-to-use/en
 import { routePath as reviewDetailsPath } from '../../../server/request-to-use/review-details/route-path.js'
 import { routePath as readThisPath } from '../../../server/request-to-use/read-this/route-path.js'
 import { routePath as checkYourAnswersPath } from '../../../server/request-to-use/check-your-answers/route-path.js'
-
-// The confirmation page is not built yet, so its path is not imported
-const confirmationPath = '/request-to-use/confirmation'
+import { routePath as confirmationPath } from '../../../server/request-to-use/confirmation/route-path.js'
 
 // Request to use pages from the enter address page onwards, where the user is signed in
 const signOutPaths = new Set([

@@ -31,6 +31,7 @@ const defraAccountOrganisationPath =
 const defraAccountAgentPath = '/request-to-use/defra-account-agent'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
 const readThisPath = '/request-to-use/read-this'
+const confirmationPath = '/request-to-use/confirmation'
 const changeEnterAddressPath = '/request-to-use/change/enter-address'
 const changeAcceptLevyPath = '/request-to-use/change/accept-levy'
 const changeVariationPath = '/request-to-use/change/variation'
@@ -201,6 +202,7 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountAgentPath,
     checkYourAnswersPath,
     readThisPath,
+    confirmationPath,
     changeEnterAddressPath,
     changeAcceptLevyPath,
     changeVariationPath,
@@ -233,6 +235,7 @@ describe('checkForValidReviewQuoteSession', () => {
     defraAccountAgentPath,
     checkYourAnswersPath,
     readThisPath,
+    confirmationPath,
     changeEnterAddressPath,
     changeAcceptLevyPath,
     changeVariationPath,
