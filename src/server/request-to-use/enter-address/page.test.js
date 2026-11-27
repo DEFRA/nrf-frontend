@@ -9,19 +9,28 @@ import {
 
 import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-test-server.js'
 import { getYarCookie } from '../../../test-utils/yar-cookie.js'
+import { mergeCookies } from '../../../test-utils/merge-cookies.js'
 import {
   agentClaims,
   citizenClaims,
   firstOrgName,
+  multiOrgAgentClaims,
+  multiOrgCitizenClaims,
   multiOrgEmployeeClaims,
   singleOrgEmployeeClaims
 } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import {
+  accountFullName,
+  agentOrganisationName
+} from '../../../test-utils/fixtures/review-details-personas.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { expectInputError } from '../../../test-utils/assertions.js'
 import { seedRequestToUseSessionWith } from '../../../test-utils/setup-seeded-request-to-use-server.js'
 
 const ROUTE_PATH = '/request-to-use/enter-address'
+const changeLinkName = /^Change\s*who you are representing$/
+const organisationHeading = 'app-organisation-heading'
 const { getServer, signIn } = setupSignedInTestServer()
 
 const agentGuidance =
@@ -167,7 +176,7 @@ describe('Enter address page', () => {
       {
         scenario: 'for an agent',
         claims: agentClaims,
-        heading: 'What are the details for CDP Beneficiary Org?',
+        heading: `What are the details for ${agentOrganisationName}?`,
         guidance: agentGuidance,
         formVariant: 'agent',
         showsFullName: true
@@ -266,20 +275,65 @@ describe('Enter address page', () => {
   )
 
   describe('organisation heading', () => {
-    it('shows the organisation switcher above the page heading', async () => {
-      const document = await loadSignedInPage({
-        claims: multiOrgEmployeeClaims
+    it.each([
+      ['an agent', multiOrgAgentClaims, agentOrganisationName],
+      ['an employee', multiOrgEmployeeClaims, firstOrgName],
+      ['an individual', multiOrgCitizenClaims, accountFullName]
+    ])(
+      'shows %s with several enrolments who they are signed in as, followed by a Change link',
+      async (_, claims, signedInAs) => {
+        const document = await loadSignedInPage({ claims })
+
+        expect(getByTestId(document, organisationHeading)).toHaveTextContent(
+          new RegExp(`^${signedInAs}\\s+Change\\s*who you are representing$`)
+        )
+        expect(
+          getByRole(document, 'link', { name: changeLinkName })
+        ).toHaveAttribute(
+          'href',
+          '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Fenter-address'
+        )
+      }
+    )
+
+    it('takes the user to choose who they are representing, then back to this page', async () => {
+      const { cookie } = await signIn({ claims: multiOrgEmployeeClaims })
+      const document = await loadPage({
+        requestUrl: ROUTE_PATH,
+        server: getServer(),
+        cookie
+      })
+      const changeUrl = getByRole(document, 'link', {
+        name: changeLinkName
+      }).getAttribute('href')
+
+      const change = await getServer().inject({
+        method: 'GET',
+        url: changeUrl,
+        headers: { cookie }
+      })
+      expect(change.statusCode).toBe(302)
+      expect(change.headers.location).toBe(
+        '/auth/sign-in?change-organisation=true'
+      )
+      const changeCookie = mergeCookies(cookie, change.headers['set-cookie'])
+
+      const choose = await getServer().inject({
+        method: 'GET',
+        url: change.headers.location,
+        headers: { cookie: changeCookie }
+      })
+      expect(
+        new URL(choose.headers.location).searchParams.get('forceReselection')
+      ).toBe('true')
+
+      const { response } = await signIn({
+        claims: multiOrgEmployeeClaims,
+        cookie: changeCookie,
+        signInUrl: change.headers.location
       })
 
-      expect(
-        getByTestId(document, 'app-organisation-heading')
-      ).toHaveTextContent(firstOrgName)
-      expect(
-        getByRole(document, 'link', { name: 'Change organisation' })
-      ).toHaveAttribute(
-        'href',
-        '/auth/change-organisation?redirectTo=%2Frequest-to-use%2Fenter-address'
-      )
+      expect(response.headers.location).toBe(ROUTE_PATH)
     })
 
     it.each([
@@ -294,10 +348,10 @@ describe('Enter address page', () => {
       })
 
       expect(
-        queryByTestId(document, 'app-organisation-heading')
+        queryByTestId(document, organisationHeading)
       ).not.toBeInTheDocument()
       expect(
-        queryByRole(document, 'link', { name: 'Change organisation' })
+        queryByRole(document, 'link', { name: changeLinkName })
       ).not.toBeInTheDocument()
     })
 
@@ -306,7 +360,7 @@ describe('Enter address page', () => {
 
       expect(
         queryByRole(document, 'link', {
-          name: 'Change organisation'
+          name: changeLinkName
         })
       ).not.toBeInTheDocument()
     })

@@ -3,7 +3,10 @@ import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-tes
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
-import { agentClaims } from '../../../test-utils/fixtures/defra-id-org-claims.js'
+import {
+  agentClaims,
+  multiOrgAgentClaims
+} from '../../../test-utils/fixtures/defra-id-org-claims.js'
 
 const ROUTE_PATH = '/request-to-use/enter-address'
 const { getServer, signIn } = setupSignedInTestServer()
@@ -13,6 +16,11 @@ describe('Enter address page accessibility checks', () => {
     {
       variant: 'agent',
       claims: agentClaims,
+      formData: { formVariant: 'agent' }
+    },
+    {
+      variant: 'agent with several enrolments',
+      claims: multiOrgAgentClaims,
       formData: { formVariant: 'agent' }
     },
     {

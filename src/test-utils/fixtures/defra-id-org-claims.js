@@ -51,7 +51,16 @@ export const multiOrgAgentClaims = {
   roles: ['role1', 'role2']
 }
 
+const citizenRelationship = `${currentRelationshipId}:${firstOrgId}:CDP Org:0:Citizen:0`
+
 export const citizenClaims = {
   ...singleOrgEmployeeClaims,
-  relationships: [`${currentRelationshipId}:${firstOrgId}:CDP Org:0:Citizen:0`]
+  relationships: [citizenRelationship]
+}
+
+// The user themselves, and an organisation they work for
+export const multiOrgCitizenClaims = {
+  ...citizenClaims,
+  relationships: [citizenRelationship, secondEmployeeRelationship],
+  enrolmentCount: 2
 }

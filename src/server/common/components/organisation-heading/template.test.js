@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom'
 import { within } from '@testing-library/dom'
 import { renderComponent } from '../../test-helpers/component-helpers.js'
 
-const changeOrganisationLinkName = 'Change organisation'
+const changeLinkName = /^Change\s*who you are representing$/
 
 const render = (params) =>
   within(
@@ -34,7 +34,7 @@ describe('appOrganisationHeading Component', () => {
       changeOrganisationUrl: '/auth/change-organisation?redirectTo=%2Fprofile'
     })
 
-    const link = view.getByRole('link', { name: changeOrganisationLinkName })
+    const link = view.getByRole('link', { name: changeLinkName })
     expect(link).toHaveAttribute(
       'href',
       '/auth/change-organisation?redirectTo=%2Fprofile'
@@ -42,11 +42,24 @@ describe('appOrganisationHeading Component', () => {
     expect(link).toHaveClass('govuk-link')
   })
 
+  it('shows "Change" and hides who the user is representing from sight', () => {
+    const view = render({
+      orgOrUserName: 'Test Org',
+      changeOrganisationUrl: '/auth/change-organisation'
+    })
+
+    const link = view.getByRole('link', { name: changeLinkName })
+    expect(link).toHaveTextContent(/^Change\s+who you are representing$/)
+    expect(within(link).getByText('who you are representing')).toHaveClass(
+      'govuk-visually-hidden'
+    )
+  })
+
   it('does not show the change organisation link without a URL', () => {
     const view = render({ orgOrUserName: 'Test Org' })
 
     expect(
-      view.queryByRole('link', { name: changeOrganisationLinkName })
+      view.queryByRole('link', { name: changeLinkName })
     ).not.toBeInTheDocument()
   })
 })

@@ -7,6 +7,7 @@ import {
   agentClaims,
   citizenClaims,
   firstOrgName,
+  multiOrgCitizenClaims,
   multiOrgEmployeeClaims,
   singleOrgEmployeeClaims
 } from '../../../test-utils/fixtures/defra-id-org-claims.js'
@@ -51,7 +52,7 @@ describe('#getOrganisationHeadingData', () => {
 
   it('shows the user name and a change link for a Citizen with several enrolments', () => {
     const result = getOrganisationHeadingData(
-      buildRequest({ claims: { ...citizenClaims, enrolmentCount: 2 } })
+      buildRequest({ claims: multiOrgCitizenClaims })
     )
 
     expect(result).toEqual({
