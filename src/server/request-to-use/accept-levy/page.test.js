@@ -81,12 +81,12 @@ describe('Do you accept this nature restoration levy amount page', () => {
 
     expect(
       getByRole(document, 'heading', {
-        name: 'Provisional nature restoration levy amount: £26,750 (excluding VAT)'
+        name: 'Provisional nature restoration levy amount: £26,750 (plus VAT)'
       })
     ).toBeInTheDocument()
     expect(
       getByRole(document, 'heading', {
-        name: 'Inflation-adjusted nature restoration levy amount: £27,123.50 (excluding VAT)'
+        name: 'Inflation-adjusted nature restoration levy amount: £27,123.50 (plus VAT)'
       })
     ).toBeInTheDocument()
   })
