@@ -10,6 +10,8 @@ import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change
 
 const pagePath = '/request-to-use/change/variation'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const checkYourAnswersBackLink =
+  '/request-to-use/check-your-answers?change=true'
 const changeOriginalCommittedPath = '/request-to-use/change/original-committed'
 const startPath = '/manage/start-page'
 const variationKey = 'Amendment to an existing planning permission'
@@ -54,7 +56,7 @@ describe('Change whether the development is an amendment page', () => {
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      checkYourAnswersPath
+      checkYourAnswersBackLink
     )
   })
 
@@ -75,7 +77,7 @@ describe('Change whether the development is an amendment page', () => {
       cookie
     })
 
-    expect(backPath).toBe(checkYourAnswersPath)
+    expect(backPath).toBe(checkYourAnswersBackLink)
     expect(await rowText({ cookie, key: variationKey })).toBe('No')
   })
 

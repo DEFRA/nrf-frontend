@@ -1,8 +1,10 @@
 import getOriginalReferenceViewModel from '../../original-reference/get-view-model.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import { routePath as changeOriginalReferenceNotMatchedPath } from '../original-reference-not-matched/route-path.js'
 import { routePath as changeOriginalBoundaryNotMatchedPath } from '../original-boundary-not-matched/route-path.js'
-import { withBackLink } from '../../helpers/change-answer/index.js'
+import {
+  checkYourAnswersBackLinkPath,
+  withBackLink
+} from '../../helpers/change-answer/index.js'
 import {
   boundaryNotMatchedSource,
   referenceNotMatchedSource
@@ -22,7 +24,8 @@ const notMatchedBackLinks = new Map([
 export default function getViewModel(input) {
   return withBackLink({
     backLinkPath:
-      notMatchedBackLinks.get(input?.query?.from) ?? checkYourAnswersPath,
+      notMatchedBackLinks.get(input?.query?.from) ??
+      checkYourAnswersBackLinkPath,
     getQuotePageViewModel: getOriginalReferenceViewModel
   })(input)
 }

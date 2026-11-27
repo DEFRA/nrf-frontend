@@ -1,6 +1,6 @@
 import { requestToUseController } from '../controller-get.js'
 import getViewModel from './get-view-model.js'
-import { redirectWhenAnswersIncomplete } from './redirect-when-answers-incomplete.js'
+import { redirectWhenAnswersIncomplete } from '../helpers/redirect-when-answers-incomplete/index.js'
 import { routeId, routePath } from './route-path.js'
 
 export { routePath }

@@ -4,6 +4,7 @@ import { setupSignedInTestServer } from '../../../test-utils/setup-signed-in-tes
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { getResponse } from '../../../test-utils/get-response.js'
+import { getYarCookie } from '../../../test-utils/yar-cookie.js'
 import { withCompleteQuoteSession } from '../../../test-utils/with-complete-quote-session.js'
 import { mockCommitmentCertificate } from '../../../test-utils/mock-get-quote.js'
 import { findSummaryListRowElement } from '../../../test-utils/find-summary-list-row.js'
@@ -24,9 +25,16 @@ import {
   checkYourAnswersSessions,
   incompleteCheckYourAnswersSessions
 } from '../../../test-utils/fixtures/check-your-answers-sessions.js'
+import { incompleteCheckYourAnswersScenarios } from '../../../test-utils/fixtures/incomplete-check-your-answers-scenarios.js'
 import { recalculatedLevy } from '../../../test-utils/fixtures/levy.js'
+import { reviewQuoteSession } from '../../../test-utils/fixtures/session.js'
 
 const pagePath = '/request-to-use/check-your-answers'
+// A change page's back link: the flag tells the page the user is backing out
+// of an edit made from it, not loading it directly
+const pageBackLinkPath = '/request-to-use/check-your-answers?change=true'
+const pageHeading = 'Check your answers'
+const readThisPath = '/request-to-use/read-this'
 const startPath = '/manage/start-page'
 const reviewQuoteDetailsPath = '/request-to-use/review-quote-details'
 const incompleteAnswersHeading = 'Your details are incomplete'
@@ -75,50 +83,6 @@ const loadSignedInPage = async ({ claims, session }) => {
   return loadPage({ requestUrl: pagePath, server: getAppServer(), cookie })
 }
 
-// Each leaves one answer the page confirms blank. An address only counts
-// while it was entered under the signed in Defra ID relationship.
-const incompleteSessions = [
-  {
-    scenario: 'the levy calculation is missing',
-    claims: citizenClaims,
-    session: incompleteCheckYourAnswersSessions.withoutLevyCalculation
-  },
-  {
-    scenario: 'the levy amount has not been accepted',
-    claims: citizenClaims,
-    session: incompleteCheckYourAnswersSessions.withoutAcceptedLevy
-  },
-  {
-    scenario: 'the address was entered under another Defra ID account',
-    claims: citizenClaims,
-    session: incompleteCheckYourAnswersSessions.addressForAnotherAccount
-  },
-  {
-    scenario: 'an agent has not entered the full name',
-    claims: agentClaims,
-    session: incompleteCheckYourAnswersSessions.agentWithoutFullName
-  },
-  {
-    scenario: 'the amendment answer is missing',
-    claims: citizenClaims,
-    session: incompleteCheckYourAnswersSessions.withoutAmendmentAnswer
-  },
-  {
-    scenario:
-      'the development is an amendment but the original permission answer is missing',
-    claims: citizenClaims,
-    session:
-      incompleteCheckYourAnswersSessions.amendmentWithoutOriginalPermission
-  },
-  {
-    scenario:
-      'the original permission was committed but its NRL reference is missing',
-    claims: citizenClaims,
-    session:
-      incompleteCheckYourAnswersSessions.committedWithoutOriginalReference
-  }
-]
-
 describe('Check your answers page', () => {
   it('should redirect to the start page when there is no session', async () => {
     const { cookie } = await signIn({ claims: citizenClaims })
@@ -133,14 +97,59 @@ describe('Check your answers page', () => {
     expect(response.headers.location).toBe(startPath)
   })
 
-  it('should redirect a signed-out visitor to sign in', async () => {
-    const response = await getAppServer().inject({
-      method: 'GET',
-      url: pagePath
+  // Sign-in comes first, whether or not a session from the retrieve quote
+  // email link has been started
+  it.each([
+    ['no session', undefined],
+    [
+      'a session from the retrieve quote email link',
+      reviewQuoteSession.requestToUse
+    ]
+  ])(
+    'should redirect a signed-out visitor to sign in with %s',
+    async (_, session) => {
+      seededSession = session
+
+      const response = await getResponse({
+        server: getAppServer(),
+        requestUrl: pagePath,
+        cookie: session
+          ? await withCompleteQuoteSession(getAppServer())
+          : undefined
+      })
+
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/auth/sign-in')
+    }
+  )
+
+  it('should return a signed-out visitor to the page without the change flag after signing in', async () => {
+    seededSession = checkYourAnswersSessions.individual
+    // Only the page's path is remembered across sign-in, so a back link's
+    // change flag is dropped
+    const challenge = await getResponse({
+      server: getAppServer(),
+      requestUrl: pageBackLinkPath,
+      cookie: await withCompleteQuoteSession(getAppServer())
     })
 
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/auth/sign-in')
+    expect(challenge.headers.location).toBe('/auth/sign-in')
+
+    const { response: returned, cookie } = await signIn({
+      claims: citizenClaims,
+      cookie: getYarCookie(challenge)
+    })
+
+    expect(returned.headers.location).toBe(pagePath)
+
+    const document = await loadPage({
+      requestUrl: pagePath,
+      server: getAppServer(),
+      cookie
+    })
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      pageHeading
+    )
   })
 
   it('should redirect a signed-out submit to sign in', async () => {
@@ -183,6 +192,37 @@ describe('Check your answers page', () => {
     )
   })
 
+  it('should load with no redirect when continued to from the details to read page', async () => {
+    const cookie = await signInWithAnswers({
+      claims: citizenClaims,
+      session: checkYourAnswersSessions.individual
+    })
+    const detailsToRead = await loadPage({
+      requestUrl: readThisPath,
+      server: getAppServer(),
+      cookie
+    })
+    const continueHref = getByRole(detailsToRead, 'button', {
+      name: 'Continue'
+    }).getAttribute('href')
+
+    const response = await getResponse({
+      server: getAppServer(),
+      requestUrl: continueHref,
+      cookie
+    })
+
+    expect(response.statusCode).toBe(200)
+    const document = await loadPage({
+      requestUrl: continueHref,
+      server: getAppServer(),
+      cookie
+    })
+    expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+      pageHeading
+    )
+  })
+
   it('should contain a CSRF token in the form', async () => {
     const document = await loadSignedInPage({
       claims: citizenClaims,
@@ -194,8 +234,8 @@ describe('Check your answers page', () => {
     ).toBeInTheDocument()
   })
 
-  it.each(incompleteSessions)(
-    'should show the incomplete answers page when $scenario',
+  it.each(incompleteCheckYourAnswersScenarios)(
+    'should redirect to the review and amend page when $scenario',
     async ({ claims, session }) => {
       const cookie = await signInWithAnswers({ claims, session })
 
@@ -204,10 +244,34 @@ describe('Check your answers page', () => {
         requestUrl: pagePath,
         cookie
       })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe(reviewQuoteDetailsPath)
+
+      const document = await loadPage({
+        requestUrl: reviewQuoteDetailsPath,
+        server: getAppServer(),
+        cookie
+      })
+      expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
+        /^Review and amend the quote details/
+      )
+    }
+  )
+
+  it.each(incompleteCheckYourAnswersScenarios)(
+    'should show the incomplete answers page when backing out of a change and $scenario',
+    async ({ claims, session }) => {
+      const cookie = await signInWithAnswers({ claims, session })
+
+      const response = await getResponse({
+        server: getAppServer(),
+        requestUrl: pageBackLinkPath,
+        cookie
+      })
       expect(response.statusCode).toBe(400)
 
       const document = await loadPage({
-        requestUrl: pagePath,
+        requestUrl: pageBackLinkPath,
         server: getAppServer(),
         cookie
       })
@@ -415,7 +479,7 @@ describe('Check your answers page', () => {
 
   it.each([
     { scenario: 'there is no session', claims: citizenClaims, session: null },
-    ...incompleteSessions
+    ...incompleteCheckYourAnswersScenarios
   ])(
     'should show the incomplete answers page without calling the backend on submit when $scenario',
     async ({ claims, session }) => {
@@ -496,14 +560,14 @@ describe('Check your answers page', () => {
     expect(response.statusCode).toBe(303)
     expect(response.headers.location).toBe(pagePath)
 
-    const errorPage = await loadPage({
-      requestUrl: pagePath,
+    // The redirect replaces the form that would have shown the error
+    const redirect = await getResponse({
       server: getAppServer(),
+      requestUrl: pagePath,
       cookie: submittedCookie
     })
-    expect(errorPage.title).toBe(
-      `${incompleteAnswersHeading} - Nature restoration levy - GOV.UK`
-    )
+    expect(redirect.statusCode).toBe(302)
+    expect(redirect.headers.location).toBe(reviewQuoteDetailsPath)
 
     const nextPage = await loadPage({
       requestUrl: acceptLevyPath,

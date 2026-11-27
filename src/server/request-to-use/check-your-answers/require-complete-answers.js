@@ -9,8 +9,10 @@ import { routePath as reviewQuoteDetailsPath } from '../review-quote-details/rou
 
 /**
  * Fails an incomplete request with the incomplete answers error page rather
- * than letting it reach the view or the submit controller. The shared error
- * handler renders `data.completeDetailsPath` as that page's link.
+ * than letting it reach the view or the submit controller. It runs on the
+ * submit and, through `redirectUnlessBackingOutOfChange`, on a load that
+ * backs out of a change page. The shared error handler renders
+ * `data.completeDetailsPath` as that page's link.
  * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export const requireCompleteAnswers = (request, h) => {

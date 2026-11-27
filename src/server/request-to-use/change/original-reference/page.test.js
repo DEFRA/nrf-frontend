@@ -12,6 +12,8 @@ import { setupChangePlanningPageTest } from '../../../../test-utils/setup-change
 
 const pagePath = '/request-to-use/change/original-reference'
 const checkYourAnswersPath = '/request-to-use/check-your-answers'
+const checkYourAnswersBackLink =
+  '/request-to-use/check-your-answers?change=true'
 const notMatchedPath = '/request-to-use/change/original-reference-not-matched'
 const boundaryNotMatchedPath =
   '/request-to-use/change/original-boundary-not-matched'
@@ -57,7 +59,7 @@ describe('Change the NRL reference for the original planning permission page', (
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      checkYourAnswersPath
+      checkYourAnswersBackLink
     )
   })
 
@@ -72,7 +74,7 @@ describe('Change the NRL reference for the original planning permission page', (
 
       expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
         'href',
-        checkYourAnswersPath
+        checkYourAnswersBackLink
       )
     }
   )
@@ -95,7 +97,7 @@ describe('Change the NRL reference for the original planning permission page', (
       cookie
     })
 
-    expect(backPath).toBe(checkYourAnswersPath)
+    expect(backPath).toBe(checkYourAnswersBackLink)
     expect(await rowText({ cookie, key: originalReferenceKey })).toBe(
       originalNrlReference
     )

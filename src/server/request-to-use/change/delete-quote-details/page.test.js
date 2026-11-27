@@ -20,7 +20,7 @@ describe('Change delete quote details page', () => {
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/check-your-answers'
+      '/request-to-use/check-your-answers?change=true'
     )
   })
 
@@ -29,7 +29,7 @@ describe('Change delete quote details page', () => {
 
     expect(getByRole(document, 'link', { name: /Cancel/ })).toHaveAttribute(
       'href',
-      '/request-to-use/check-your-answers'
+      '/request-to-use/check-your-answers?change=true'
     )
   })
 })

@@ -1,5 +1,5 @@
 import getQuoteDeleteQuoteViewModel from '../../../quote/delete-quote/get-view-model.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { checkYourAnswersBackLinkPath } from '../../helpers/change-answer/index.js'
 
 /**
  * The alias serves the quote delete quote page's own template, so the view
@@ -11,7 +11,7 @@ import { routePath as checkYourAnswersPath } from '../../check-your-answers/rout
 export default function getViewModel() {
   return {
     ...getQuoteDeleteQuoteViewModel(),
-    backLinkPath: checkYourAnswersPath,
-    cancelLinkPath: checkYourAnswersPath
+    backLinkPath: checkYourAnswersBackLinkPath,
+    cancelLinkPath: checkYourAnswersBackLinkPath
   }
 }

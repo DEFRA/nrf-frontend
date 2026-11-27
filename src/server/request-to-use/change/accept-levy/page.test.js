@@ -37,7 +37,7 @@ describe('Change whether the levy amount is accepted page', () => {
 
     expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
       'href',
-      '/request-to-use/check-your-answers'
+      '/request-to-use/check-your-answers?change=true'
     )
   })
 

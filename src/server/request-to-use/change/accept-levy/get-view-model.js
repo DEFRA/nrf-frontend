@@ -1,5 +1,5 @@
 import getAcceptLevyViewModel from '../../accept-levy/get-view-model.js'
-import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
+import { checkYourAnswersBackLinkPath } from '../../helpers/change-answer/index.js'
 
 /**
  * The change alias serves the accept levy page's own template, so the view
@@ -12,6 +12,6 @@ import { routePath as checkYourAnswersPath } from '../../check-your-answers/rout
 export default function getViewModel(input) {
   return {
     ...getAcceptLevyViewModel(input),
-    backLinkPath: checkYourAnswersPath
+    backLinkPath: checkYourAnswersBackLinkPath
   }
 }
