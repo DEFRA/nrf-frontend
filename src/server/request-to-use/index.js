@@ -6,6 +6,7 @@ import routesEmailConfirmation from './email-confirmation/routes.js'
 import routesEnterAddress from './enter-address/routes.js'
 import routesReviewDetails from './review-details/routes.js'
 import routesCheckYourAnswers from './check-your-answers/routes.js'
+import routesConfirmation from './confirmation/routes.js'
 import routesReadThis from './read-this/routes.js'
 import routesQuoteNotMatched from './quote-not-matched/routes.js'
 import routesReviewQuoteDetails from './review-quote-details/routes.js'
@@ -67,6 +68,7 @@ export const requestToUse = {
         ...routesEnterAddress,
         ...routesReviewDetails,
         ...routesCheckYourAnswers,
+        ...routesConfirmation,
         ...routesReadThis,
         ...routesQuoteNotMatched,
         ...routesReviewQuoteDetails,

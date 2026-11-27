@@ -1,0 +1,23 @@
+{% extends "layouts/page.njk" %}
+
+{% block pageTitle %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      {{ govukPanel({
+        titleText: pageHeading,
+        html: "NRL reference: <strong>" + nrlReference + "</strong>",
+        classes: 'govuk-!-margin-bottom-6'
+      }) }}
+
+      <h2 class="govuk-heading-m">What happens next</h2>
+      <p class="govuk-body">You will be sent an email with a commitment certificate that you can send to your local planning authority to include with your planning application. You should receive the email today, if you don't receive it, check your spam or junk folder.</p>
+
+      {% set contactIntroSuffix = " and give the NRL reference number" %}
+      {% include "partials/contact-details.njk" %}
+
+      <p class="govuk-body"><a href="{{ phaseBanner.feedbackUrl }}" class="govuk-link" target="_blank" rel="noopener noreferrer">What do you think of this service? (opens in new tab)</a> (takes 30 seconds)</p>
+    </div>
+</div>
+{% endblock %}
