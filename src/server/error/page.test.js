@@ -52,6 +52,11 @@ describe('Error pages', () => {
     expect(
       getByRole(window.document, 'heading', { level: 1 })
     ).toHaveTextContent('Your details are incomplete')
+    expect(
+      getByRole(window.document, 'link', {
+        name: 'Manage the nature restoration levy'
+      })
+    ).toHaveAttribute('href', '/')
   })
 
   it.each([

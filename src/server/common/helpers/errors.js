@@ -34,16 +34,18 @@ function statusCodeMessage(statusCode) {
  * @param {object} options - error page options
  * @param {number} options.statusCode - HTTP status of the Boom response
  * @param {string} options.errorMessage - human-readable message for the status
+ * @param {string} [options.completeDetailsPath] - where the incomplete details page links to, when the error names one; the page's own link applies otherwise
  * @param {object} options.h - Hapi response toolkit
  * @returns {object} Hapi view response
  */
-function renderErrorPage({ statusCode, errorMessage, h }) {
+function renderErrorPage({ statusCode, errorMessage, completeDetailsPath, h }) {
   const template = errorTemplates[statusCode] ?? 'error/index'
 
   return h.view(template, {
     pageTitle: getPageTitle(errorMessage),
     pageHeading: errorMessage,
-    statusCode
+    statusCode,
+    completeDetailsPath
   })
 }
 
@@ -61,5 +63,10 @@ export function catchAll(request, h) {
     request.logger.error(response, errorMessage)
   }
 
-  return renderErrorPage({ statusCode, errorMessage, h }).code(statusCode)
+  return renderErrorPage({
+    statusCode,
+    errorMessage,
+    completeDetailsPath: response.data?.completeDetailsPath,
+    h
+  }).code(statusCode)
 }

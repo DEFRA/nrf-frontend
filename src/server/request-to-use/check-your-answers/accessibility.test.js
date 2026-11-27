@@ -5,8 +5,7 @@ import {
   agentClaims,
   singleOrgEmployeeClaims
 } from '../../../test-utils/fixtures/defra-id-org-claims.js'
-import { reviewDetailsSessions } from '../../../test-utils/fixtures/review-details-personas.js'
-import { fullQuote } from '../../../test-utils/fixtures/quote.js'
+import { checkYourAnswersSessions } from '../../../test-utils/fixtures/check-your-answers-sessions.js'
 import { loadPage } from '../../../test-utils/load-page.js'
 import { submitForm } from '../../../test-utils/submit-form.js'
 import { runAxeChecks } from '../../../test-utils/axe-helper.js'
@@ -25,11 +24,7 @@ afterEach(() => {
 })
 
 const signInWithQuote = async ({ claims, session }) => {
-  seededSession = {
-    ...session,
-    nrlReference: fullQuote.reference,
-    acceptLevy: 'yes'
-  }
+  seededSession = session
   const quoteCookie = await withCompleteQuoteSession(getServer())
   return signIn({ claims, cookie: quoteCookie })
 }
@@ -39,12 +34,12 @@ describe('Check your answers page accessibility checks', () => {
     {
       scenario: 'for an agent',
       claims: agentClaims,
-      session: reviewDetailsSessions.agent
+      session: checkYourAnswersSessions.agent
     },
     {
       scenario: 'for an employee',
       claims: singleOrgEmployeeClaims,
-      session: reviewDetailsSessions.employee
+      session: checkYourAnswersSessions.employee
     }
   ])(
     'should have no HTML accessibility issues $scenario',
@@ -63,7 +58,7 @@ describe('Check your answers page accessibility checks', () => {
   it('should have no HTML accessibility issues in the error state', async () => {
     const { cookie } = await signInWithQuote({
       claims: singleOrgEmployeeClaims,
-      session: reviewDetailsSessions.employee
+      session: checkYourAnswersSessions.employee
     })
 
     await submitForm({

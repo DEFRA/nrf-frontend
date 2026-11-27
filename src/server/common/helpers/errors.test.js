@@ -35,13 +35,14 @@ describe('#catchAll', () => {
   const mockErrorLogger = vi.fn()
   const mockStack = 'Mock error stack'
   const errorPage = 'error/index'
-  const mockRequest = (statusCode) => ({
+  const mockRequest = (statusCode, data) => ({
     response: {
       isBoom: true,
       stack: mockStack,
       output: {
         statusCode
-      }
+      },
+      data
     },
     logger: { error: mockErrorLogger }
   })
@@ -104,6 +105,26 @@ describe('#catchAll', () => {
       statusCode: statusCodes.badRequest
     })
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badRequest)
+
+    const [, context] = mockToolkitView.mock.calls[0]
+    expect(context.completeDetailsPath).toBeUndefined()
+  })
+
+  it('Should link the incomplete details page to where the error says', () => {
+    catchAll(
+      mockRequest(400, {
+        completeDetailsPath: '/request-to-use/review-quote-details'
+      }),
+      mockToolkit
+    )
+
+    expect(mockToolkitView).toHaveBeenCalledWith('error/400', {
+      pageTitle:
+        'Your details are incomplete - Nature restoration levy - GOV.UK',
+      pageHeading: 'Your details are incomplete',
+      statusCode: 400,
+      completeDetailsPath: '/request-to-use/review-quote-details'
+    })
   })
 
   it('Should provide expected "Service unavailable" page and log error for serviceUnavailable', () => {

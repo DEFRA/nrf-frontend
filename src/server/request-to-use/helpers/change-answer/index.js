@@ -1,4 +1,5 @@
 import { isDropoutPage } from '../../../quote/helpers/change-mode/index.js'
+import { routePath as checkYourAnswersPath } from '../../check-your-answers/route-path.js'
 import { routePath as reviewQuoteDetailsPath } from '../../review-quote-details/route-path.js'
 import { routePath as applicationTypeNotAvailablePath } from '../../../quote/application-type-not-available/route-path.js'
 import { routePath as notHousingPath } from '../../../quote/not-housing/route-path.js'
@@ -10,19 +11,28 @@ import { routePath as changeNotInEdpPath } from '../../change/not-in-edp/route-p
 import { routePath as changeExcludedAreaPath } from '../../change/excluded-area/route-path.js'
 
 /**
- * Wraps a quote question page's view model for its change alias: the alias
- * serves the quote page's own template, so the view model spreads the quote
- * page's and swaps the back link — an edit from the review page returns
- * there, not to the quote journey's previous page.
+ * The check your answers page as a change page's back link, which every
+ * change page linking back to it uses. The change flag tells that page the
+ * user is backing out of an edit made from it: with an answer missing it then
+ * keeps the incomplete answers error page, where a direct load is sent back to
+ * the review and amend page.
+ */
+export const checkYourAnswersBackLinkPath = `${checkYourAnswersPath}?change=true`
+
+/**
+ * Wraps a question page's view model for its change alias: the alias serves
+ * the page's own template, so the view model spreads the page's and swaps the
+ * back link — an edit from the review or check your answers page returns
+ * there, not to the journey's previous page.
  * @param {object} params
  * @param {string} params.backLinkPath - where the change page's back link goes
- * @param {Function} params.getQuotePageViewModel - the quote page's view model
- * @returns {(quoteData: object, query: object) => object} the change page's view model
+ * @param {(...args: any[]) => object} params.getQuotePageViewModel - the page's view model
+ * @returns {(...args: any[]) => object} the change page's view model, taking the same arguments
  */
 export const withBackLink =
   ({ backLinkPath, getQuotePageViewModel }) =>
-  (quoteData, query) => ({
-    ...getQuotePageViewModel(quoteData, query),
+  (...args) => ({
+    ...getQuotePageViewModel(...args),
     backLinkPath
   })
 

@@ -1,5 +1,7 @@
 export const originalNrlReference = 'NRL-654321'
 
+export const malformedReference = 'not-a-reference'
+
 export const fullQuote = {
   reference: 'NRL-123456',
   boundary: {
